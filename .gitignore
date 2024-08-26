@@ -1,0 +1,10 @@
+.* 
+!.gitignore
+/var
+key.json
+dataset/
+
+tfplan
+__pycache__
+
+__debug*

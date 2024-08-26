@@ -1,0 +1,12 @@
+langchain-community
+langchain-google-vertexai
+langchainhub
+flask
+flask-session
+redis
+flask-cors
+langsmith
+psycopg
+psycopg-binary
+psycopg-pool
+langchain_google_cloud_sql_pg

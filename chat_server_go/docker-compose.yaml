@@ -1,0 +1,29 @@
+version: "3.7"
+services:
+  chat_http_service:
+    build: .
+    ports:
+      - "8082:8080"
+    environment:
+      - POSTGRES_DB_USER_PASSWORD=$POSTGRES_DB_USER_PASSWORD
+      - POSTGRES_HOST=$POSTGRES_HOST
+      - POSTGRES_DB_NAME=$POSTGRES_DB_NAME
+      - POSTGRES_DB_USER=$POSTGRES_DB_USER
+      - APP_VERSION=v1_go_localhost
+      - SECRET_KEY=$SECRET_KEY
+      - REDIS_HOST=cache
+      - REDIS_PASSWORD=my_redis_pwd
+      - REDIS_PORT=6379
+      - GOOGLE_APPLICATION_CREDENTIALS=/key.json
+      - PROJECT_ID=$PROJECT_ID
+      - GCLOUD_LOCATION=europe-west4
+    volumes:
+      - ../.key3.json:/key.json
+
+  cache:
+    image: redis:6.2-alpine
+    restart: always
+    ports:
+      - '6379:6379'
+    command: redis-server --save 20 1 --loglevel warning --requirepass my_redis_pwd
+

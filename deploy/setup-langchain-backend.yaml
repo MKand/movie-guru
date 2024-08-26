@@ -1,0 +1,66 @@
+# Copyright 2022 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+timeout: 7200s # 2hr
+tags:
+  - infra-create-gcs
+substitutions:
+  _PROJECT_ID: ${PROJECT_ID}
+  _REGION: europe-west4
+  _SHORT_SHA: ${SHORT_SHA}
+
+steps:
+- name: "gcr.io/cloud-builders/gcloud"
+  id: "infra-create-gcs"
+  entrypoint: bash
+  args:
+    - -c
+    - |
+      ([[ $(gsutil ls | grep "gs://${_PROJECT_ID}/") ]] || \
+      gsutil mb -p ${PROJECT_ID} gs://${_PROJECT_ID}) && \
+      ([[ $(gsutil versioning get gs://${_PROJECT_ID} | grep Enabled) ]] || \
+      gsutil versioning set on gs://${_PROJECT_ID})
+
+- name: "hashicorp/terraform:1.8.2"
+  id: "create-artifact-registry"
+  entrypoint: "sh"
+  dir: "deploy/terraform/artifact-registry"
+  args:
+    - "-xe"
+    - "-c"
+    - |
+      terraform init -backend-config="bucket=${_PROJECT_ID}"
+      terraform apply -var="project_id=${_PROJECT_ID}" --auto-approve
+
+- name: 'gcr.io/cloud-builders/docker'
+  dir: "./chat_server"
+  args: [ 'build', 
+  '-t', '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/chatserver:${_SHORT_SHA}', 
+  '-t', '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/chatserver:latest', 
+  '--cache-from', '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/chatserver',
+  '.', '-f', './Dockerfile' ]
+
+- name: 'gcr.io/cloud-builders/docker'
+  args: [ 'push', '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/chatserver:${_SHORT_SHA}']
+
+- name: "hashicorp/terraform:1.8.2"
+  id: "create-server-infra"
+  entrypoint: "sh"
+  dir: "deploy/terraform/langchain-server-infra"
+  args:
+    - "-xe"
+    - "-c"
+    - |
+      terraform init -backend-config="bucket=${_PROJECT_ID}"
+      terraform apply -var="project_id=${_PROJECT_ID}" -var="app_version=${_APP_VERSION}" -var="image_tag=${_SHORT_SHA}" -var="region=${_REGION}" -var="langsmith_api_key=${_LANGSMITH_API_KEY}" -var="langchain_tracing_v2=${_LANGCHAIN_TRACING_V2}" -var="langchain_tracing_project=${_LANGCHAIN_PROJECT}" --auto-approve
