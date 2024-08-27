@@ -17,7 +17,7 @@ The application follows a standard client-server model:
 * **Backend (Go/Node.js/Python):**
     * There are 3 options for the backend. All backends have nearly identical functionality and can be used interchangibly:
         * Go-Genkit
-        * JS-Genkit
+        * JS-Genkit (WIP)
         * Langchain
     * The backend hosts the AI component of the application and the webserver.
     * Provides an API for the frontend to interact with.
