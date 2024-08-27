@@ -463,6 +463,11 @@ func createChatHandler(deps *ChatDependencies) http.HandlerFunc {
 				http.Error(w, err.Error(), http.StatusBadRequest)
 				return
 			}
+			if len(chatRequest.Content) > metadata.MaxUserMessageLen {
+				log.Println(errLogPrefix, "Message too long")
+				http.Error(w, "Message too long", http.StatusBadRequest)
+				return
+			}
 			ch, err := getHistory(ctx, user)
 			if err != nil {
 				log.Println(errLogPrefix, err.Error())
