@@ -7,22 +7,9 @@ import (
 	"strings"
 
 	"github.com/firebase/genkit/go/ai"
-	"github.com/firebase/genkit/go/plugins/vertexai"
 	_ "github.com/lib/pq"
-	pgv "github.com/pgvector/pgvector-go"
+	_ "github.com/movie-guru/pkg/types"
 )
-
-type MovieContext struct {
-	Title          string   `json:"title"`
-	RuntimeMinutes int      `json:"runtime_minutes"`
-	Genres         []string `json:"genres"`
-	Rating         float32  `json:"rating"`
-	Plot           string   `json:"plot"`
-	Released       int      `json:"released"`
-	Director       string   `json:"director"`
-	Actors         []string `json:"actors"`
-	Poster         string   `json:"poster"`
-}
 
 func ParseMovieContexts(docs []*ai.Document) ([]*MovieContext, error) {
 	movies := make([]*MovieContext, 0, len(docs))
@@ -82,61 +69,4 @@ func (m *MovieRetriever) RetriveDocuments(ctx context.Context, query string) ([]
 		return nil, err
 	}
 	return ParseMovieContexts(rResp.Documents)
-}
-
-func GetEmbedder(embeddingModelName string) *ai.Embedder {
-	embedder := vertexai.Embedder(embeddingModelName)
-	return &embedder
-}
-
-func CreateMovieRetriever(embeddingModelName string, maxRetLength int, db *sql.DB) *MovieRetriever {
-	embedder := GetEmbedder(embeddingModelName)
-	ret := defineRetriever(maxRetLength, db, *embedder)
-	return &MovieRetriever{
-		DB:              db,
-		RetrieverLength: maxRetLength,
-		Retriever:       ret,
-	}
-}
-
-func defineRetriever(maxRetLength int, db *sql.DB, embedder ai.Embedder) ai.Retriever {
-	f := func(ctx context.Context, req *ai.RetrieverRequest) (*ai.RetrieverResponse, error) {
-		eres, err := ai.Embed(ctx, embedder, ai.WithEmbedDocs(req.Document))
-		if err != nil {
-			return nil, err
-		}
-
-		rows, err := db.QueryContext(ctx, `
-					SELECT title, poster, content
-					FROM fake_movies_table
-					ORDER BY embedding <-> $1
-					LIMIT $2`,
-			pgv.NewVector(eres.Embeddings[0].Embedding), maxRetLength)
-		if err != nil {
-			return nil, err
-		}
-		defer rows.Close()
-
-		res := &ai.RetrieverResponse{}
-		for rows.Next() {
-			var title, poster, content string
-			if err := rows.Scan(&title, &poster, &content); err != nil {
-				return nil, err
-			}
-			meta := map[string]any{
-				"title":  title,
-				"poster": poster,
-			}
-			doc := &ai.Document{
-				Content:  []*ai.Part{ai.NewTextPart(content)},
-				Metadata: meta,
-			}
-			res.Documents = append(res.Documents, doc)
-		}
-		if err := rows.Err(); err != nil {
-			return nil, err
-		}
-		return res, nil
-	}
-	return ai.DefineRetriever("pgvector", "movies", f)
 }

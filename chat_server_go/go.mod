@@ -1,6 +1,18 @@
-module movie-guru-server
+module github.com/movie-guru
 
 go 1.23
+
+require (
+	cloud.google.com/go/vertexai v0.12.1-0.20240711230438-265963bd5b91
+	github.com/firebase/genkit/go v0.1.0
+	github.com/golang-jwt/jwt/v5 v5.2.1
+	github.com/google/uuid v1.6.0
+	github.com/invopop/jsonschema v0.12.0
+	github.com/jackc/pgx/v5 v5.6.0
+	github.com/lib/pq v1.10.9
+	github.com/pgvector/pgvector-go v0.2.2
+	github.com/redis/go-redis/v9 v9.6.1
+)
 
 require (
 	cloud.google.com/go v0.115.0 // indirect
@@ -10,37 +22,23 @@ require (
 	cloud.google.com/go/compute/metadata v0.4.0 // indirect
 	cloud.google.com/go/iam v1.1.10 // indirect
 	cloud.google.com/go/longrunning v0.5.9 // indirect
-	cloud.google.com/go/vertexai v0.12.1-0.20240711230438-265963bd5b91 // indirect
 	github.com/aymerick/raymond v2.0.2+incompatible // indirect
 	github.com/bahlo/generic-list-go v0.2.0 // indirect
-	github.com/boj/redistore v0.0.0-20180917114910-cd5dcc76aeff // indirect
 	github.com/buger/jsonparser v1.1.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
-	github.com/firebase/genkit/go v0.1.0 // indirect
 	github.com/go-logr/logr v1.4.1 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
-	github.com/go-redis/redis/v8 v8.11.5 // indirect
-	github.com/golang-jwt/jwt/v5 v5.2.1 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
-	github.com/gomodule/redigo v2.0.0+incompatible // indirect
 	github.com/google/s2a-go v0.1.7 // indirect
-	github.com/google/uuid v1.6.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.2 // indirect
 	github.com/googleapis/gax-go/v2 v2.12.5 // indirect
-	github.com/gorilla/securecookie v1.1.2 // indirect
-	github.com/gorilla/sessions v1.4.0 // indirect
-	github.com/invopop/jsonschema v0.12.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
-	github.com/jackc/pgx/v5 v5.6.0 // indirect
 	github.com/jackc/puddle/v2 v2.2.1 // indirect
-	github.com/lib/pq v1.10.9 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
-	github.com/pgvector/pgvector-go v0.2.2 // indirect
-	github.com/redis/go-redis/v9 v9.6.1 // indirect
 	github.com/wk8/go-ordered-map/v2 v2.1.8 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20180127040702-4e3ac2762d5f // indirect
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect

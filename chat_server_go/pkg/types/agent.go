@@ -1,7 +1,6 @@
-package main
+package types
 
 import (
-	"database/sql"
 	"fmt"
 	"regexp"
 )
@@ -51,14 +50,6 @@ func NewErrorAgentResponse(errMessage string) *AgentResponse {
 	r.Result = ERROR
 	r.ErrorMessage = errMessage
 	return r
-}
-
-type ChatDependencies struct {
-	QueryTransformAgent *QueryTransformAgent
-	PrefAgent           *PreferencesAgent
-	MovieAgent          *MovieAgent
-	Retriever           *MovieRetriever
-	DB                  *sql.DB
 }
 
 func makeJsonMarshallable(input string) (string, error) {

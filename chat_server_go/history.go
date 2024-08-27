@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/firebase/genkit/go/ai"
+	_ "github.com/movie-guru/pkg/types"
 )
 
 type SimpleMessage struct {
@@ -38,10 +39,6 @@ func ParseRecentHistory(aiMessages []*ai.Message, maxLength int) ([]*SimpleMessa
 	}
 
 	return messages, nil
-}
-
-type ChatHistory struct {
-	History []*ai.Message
 }
 
 func (ch *ChatHistory) MarshalBinary() ([]byte, error) {

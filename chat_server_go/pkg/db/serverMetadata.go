@@ -1,4 +1,4 @@
-package main
+package db
 
 import (
 	"context"
@@ -20,7 +20,7 @@ type Metadata struct {
 }
 
 // getMetadata retrieves metadata from the database
-func getServerMetadata(appVersion string, db *sql.DB) (*Metadata, error) {
+func GetServerMetadata(appVersion string, db *sql.DB) (*Metadata, error) {
 	query := `SELECT * FROM app_metadata WHERE "app_version" = $1;`
 	metadata := &Metadata{}
 	rows := db.QueryRowContext(context.Background(), query, appVersion)

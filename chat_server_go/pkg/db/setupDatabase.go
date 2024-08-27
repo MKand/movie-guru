@@ -1,4 +1,4 @@
-package main
+package db
 
 import (
 	"database/sql"
@@ -10,7 +10,7 @@ import (
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
-func connectToDB() (*sql.DB, error) {
+func ConnectToDB() (*sql.DB, error) {
 	POSTGRES_DB_USER_PASSWORD := os.Getenv("POSTGRES_DB_USER_PASSWORD")
 	POSTGRES_HOST := os.Getenv("POSTGRES_HOST")
 	POSTGRES_DB_NAME := os.Getenv("POSTGRES_DB_NAME")

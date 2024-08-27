@@ -2,7 +2,16 @@ package main
 
 import (
 	"context"
+	"database/sql"
 )
+
+type ChatDependencies struct {
+	QueryTransformAgent *QueryTransformAgent
+	PrefAgent           *PreferencesAgent
+	MovieAgent          *MovieAgent
+	Retriever           *MovieRetriever
+	DB                  *sql.DB
+}
 
 func CreateFakeHistory(unsafe bool) *ChatHistory {
 	chatHistory := NewChatHistory()
