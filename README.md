@@ -6,7 +6,7 @@ Movie Guru is a website that helps users find movies to watch through an RAG pow
 The goal of this repo is to explore the best practices when building AI powered applications.
 
 This demo is *NOT* endorsed by Google or Google Cloud.  
-The repo is intended for educational/hobby use only.
+The repo is intended for educational/hobbyists use only.
 
 ## Overall Architecture
 
@@ -51,31 +51,7 @@ There are 3 tables:
 
 
 ## Getting Started
-
-### Prerequisites
-
-* Prerequisite 1
-* Prerequisite 2
-
-### Installation
-
-1. Step 1
-2. Step 2
-3. Step 3
-
-### Usage
-
-1. Step 1
-2. Step 2
-3. Step 3
-
-## Contributing
-
-1. Fork the repository
-2. Create your branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Create a new Pull Request
+WIP
 
 ## License
 
