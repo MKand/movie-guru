@@ -1,4 +1,4 @@
-#README# Movie Guru
+# Movie Guru
 
 ## Description
 
