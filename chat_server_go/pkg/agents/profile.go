@@ -2,7 +2,6 @@ package agents
 
 import (
 	"context"
-	"database/sql"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -92,54 +91,4 @@ func GetUserProfileFlow(ctx context.Context, model ai.Model) (*genkit.Flow[*type
 		return userPrefOutput, nil
 	})
 	return userPrefFlow, nil
-}
-
-func getCurrentProfile(ctx context.Context, user string, db *sql.DB) (*types.UserProfile, error) {
-	preferences := types.NewUserProfile()
-	rows := db.QueryRowContext(ctx, `
-	SELECT preferences FROM user_preferences 
-	WHERE "user" = $1;`,
-		user)
-	var jsonData string
-	err := rows.Scan(&jsonData)
-	if err != nil {
-		return preferences, err
-	}
-	err = json.Unmarshal([]byte(jsonData), &preferences)
-	if err != nil {
-		return preferences, err
-	}
-	return preferences, nil
-}
-
-func updatePreferences(ctx context.Context, newPref *types.UserProfile, user string, db *sql.DB) error {
-	newPreferencesStr, err := json.Marshal(newPref)
-	if err != nil {
-		return err
-	}
-	query := `
-        INSERT INTO user_preferences ("user", preferences)
-        VALUES ($1, $2)
-        ON CONFLICT ("user") DO UPDATE
-        SET preferences = EXCLUDED.preferences;
-    `
-
-	// Execute the query (replace with your actual execute_query function)
-	_, err = db.ExecContext(ctx, query, user, newPreferencesStr)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func deletePreferences(ctx context.Context, user string, db *sql.DB) error {
-	query := `
-		DELETE FROM user_preferences
-		WHERE "user" = %1;
-	`
-	_, err := db.ExecContext(ctx, query, user)
-	if err != nil {
-		return err
-	}
-	return nil
 }

@@ -59,7 +59,7 @@ type MovieRetriever struct {
 func CreateMovieRetriever(retrieverLength int, url string) *MovieRetriever {
 	return &MovieRetriever{
 		RetrieverLength: retrieverLength,
-		URL:             url + "/movieRetriever",
+		URL:             url + "/movieDocFlow",
 	}
 }
 
@@ -95,14 +95,16 @@ func (m *MovieRetriever) runFlow(retRequest ai.RetrieverRequest) ([]*ai.Document
 		fmt.Println("Error sending request:", err)
 		return nil, err
 	}
+	var result struct {
+		Result []*ai.Document `json:"result"`
+	}
 	defer resp.Body.Close()
 
-	var output []*ai.Document
-	err = json.NewDecoder(resp.Body).Decode(&output)
+	err = json.NewDecoder(resp.Body).Decode(&result)
 	if err != nil {
 		fmt.Println("Error decoding JSON response:", err)
 		return nil, err
 	}
 
-	return output, nil
+	return result.Result, nil
 }

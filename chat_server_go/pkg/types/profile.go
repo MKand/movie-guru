@@ -40,6 +40,17 @@ type UserProfileAgentOutput struct {
 	*ModelOutputMetadata
 }
 
+func NewUserProfileAgentOuput() *UserProfileAgentOutput {
+	return &UserProfileAgentOutput{
+		ProfileChangeRecommendations: make([]*ProfileChangeRecommendation, 5),
+		ChangesMade:                  false,
+		ModelOutputMetadata: &ModelOutputMetadata{
+			Justification: "",
+			SafetyIssue:   false,
+		},
+	}
+}
+
 type UserProfileOutput struct {
 	UserProfile *UserProfile `json:"userProfile"`
 	ChangesMade bool

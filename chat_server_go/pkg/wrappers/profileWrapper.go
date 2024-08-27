@@ -54,7 +54,7 @@ func (p *ProfileAgent) Run(ctx context.Context, history *types.ChatHistory, user
 	userProfileOutput.ModelOutputMetadata.Justification = resp.ModelOutputMetadata.Justification
 	userProfileOutput.ModelOutputMetadata.SafetyIssue = resp.ModelOutputMetadata.SafetyIssue
 
-	if resp.ChangesMade {
+	if len(resp.ProfileChangeRecommendations) > 0 {
 		updatedProfile, err := processProfileChanges(userProfile, resp.ProfileChangeRecommendations)
 		if err != nil {
 			return userProfileOutput, err
@@ -87,14 +87,17 @@ func (agent *ProfileAgent) runFlow(input *types.ProfileAgentInput) (*types.UserP
 		fmt.Println("Error sending request:", err)
 		return nil, err
 	}
+
+	var result struct {
+		Result *types.UserProfileAgentOutput `json:"result"`
+	}
 	defer resp.Body.Close()
 
-	var output *types.UserProfileAgentOutput
-	err = json.NewDecoder(resp.Body).Decode(&output)
+	err = json.NewDecoder(resp.Body).Decode(&result)
 	if err != nil {
 		fmt.Println("Error decoding JSON response:", err)
 		return nil, err
 	}
 
-	return output, nil
+	return result.Result, nil
 }

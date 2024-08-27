@@ -70,16 +70,18 @@ func (agent *MovieAgent) runFlow(input *types.MovieAgentInput) (*types.MovieAgen
 		fmt.Println("Error sending request:", err)
 		return nil, err
 	}
+	var result struct {
+		Result *types.MovieAgentOutput `json:"result"`
+	}
 	defer resp.Body.Close()
 
-	var output *types.MovieAgentOutput
-	err = json.NewDecoder(resp.Body).Decode(&output)
+	err = json.NewDecoder(resp.Body).Decode(&result)
 	if err != nil {
 		fmt.Println("Error decoding JSON response:", err)
 		return nil, err
 	}
 
-	return output, nil
+	return result.Result, nil
 }
 
 func filterRelevantContext(relevantMovies []string, fullContext []*types.MovieContext) []*types.MovieContext {

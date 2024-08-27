@@ -20,14 +20,15 @@ func main() {
 	}
 	defer movieAgentDB.DB.Close()
 
-	metadata, err := movieAgentDB.GetServerMetadata(os.Getenv("APP_VERSION"))
+	app_version := os.Getenv("APP_VERSION")
+	metadata, err := movieAgentDB.GetServerMetadata(app_version)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	GetDependencies(ctx, metadata, movieAgentDB.DB)
 
-	if err := genkit.Init(ctx, nil); err != nil {
+	if err := genkit.Init(ctx, &genkit.Options{FlowAddr: ":3401"}); err != nil {
 		log.Fatal(err)
 	}
 

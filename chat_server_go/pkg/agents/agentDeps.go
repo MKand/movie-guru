@@ -18,6 +18,7 @@ type AgentDependencies struct {
 	QueryTransformFlow *genkit.Flow[*types.QueryTransformInput, *types.QueryTransformOutput, struct{}]
 	PrefFlow           *genkit.Flow[*types.ProfileAgentInput, *types.UserProfileAgentOutput, struct{}]
 	MovieFlow          *genkit.Flow[*types.MovieAgentInput, *types.MovieAgentOutput, struct{}]
+	RetFlow            *genkit.Flow[*ai.RetrieverRequest, []*ai.Document, struct{}]
 	Retriever          ai.Retriever
 	DB                 *sql.DB
 }
@@ -48,7 +49,8 @@ func GetDependencies(ctx context.Context, metadata *db.Metadata, db *sql.DB) *Ag
 	if embedder == nil {
 		log.Fatal("Embedder not found")
 	}
-	ret := defineRetriever(metadata.RetrieverLength, db, embedder)
+	ret := DefineRetriever(metadata.RetrieverLength, db, embedder)
+	retFlow := DefineRetFlow(ctx, ret)
 
 	movieAgentFlow, err := GetMovieAgentFlow(ctx, model)
 	if err != nil {
@@ -60,6 +62,7 @@ func GetDependencies(ctx context.Context, metadata *db.Metadata, db *sql.DB) *Ag
 		PrefFlow:           userProfileFlow,
 		MovieFlow:          movieAgentFlow,
 		Retriever:          ret,
+		RetFlow:            retFlow,
 		DB:                 db,
 	}
 	return deps

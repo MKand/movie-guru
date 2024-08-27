@@ -4,9 +4,13 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"strings"
 
+	"cloud.google.com/go/vertexai/genai"
+
 	"github.com/firebase/genkit/go/ai"
+	"github.com/firebase/genkit/go/genkit"
 	"github.com/firebase/genkit/go/plugins/vertexai"
 	_ "github.com/lib/pq"
 	_ "github.com/movie-guru/pkg/types"
@@ -81,7 +85,7 @@ func GetEmbedder(embeddingModelName string) ai.Embedder {
 
 func CreateMovieRetriever(embeddingModelName string, maxRetLength int, db *sql.DB) *MovieRetriever {
 	embedder := GetEmbedder(embeddingModelName)
-	ret := defineRetriever(maxRetLength, db, embedder)
+	ret := DefineRetriever(maxRetLength, db, embedder)
 	return &MovieRetriever{
 		DB:              db,
 		RetrieverLength: maxRetLength,
@@ -89,7 +93,26 @@ func CreateMovieRetriever(embeddingModelName string, maxRetLength int, db *sql.D
 	}
 }
 
-func defineRetriever(maxRetLength int, db *sql.DB, embedder ai.Embedder) ai.Retriever {
+func DefineRetFlow(ctx context.Context, ret ai.Retriever) *genkit.Flow[*ai.RetrieverRequest, []*ai.Document, struct{}] {
+	retFlow := genkit.DefineFlow("movieDocFlow",
+		func(ctx context.Context, input *ai.RetrieverRequest) ([]*ai.Document, error) {
+			retOutput := make([]*ai.Document, 0, 10)
+			resp, err := ret.Retrieve(ctx, input)
+			if err != nil {
+				if blockedErr, ok := err.(*genai.BlockedError); ok {
+					fmt.Println("Request was blocked:", blockedErr)
+					return retOutput, nil
+				} else {
+					return nil, err
+				}
+			}
+			t := resp.Documents
+			return t, nil
+		})
+	return retFlow
+}
+
+func DefineRetriever(maxRetLength int, db *sql.DB, embedder ai.Embedder) ai.Retriever {
 	f := func(ctx context.Context, req *ai.RetrieverRequest) (*ai.RetrieverResponse, error) {
 		eres, err := ai.Embed(ctx, embedder, ai.WithEmbedDocs(req.Document))
 		if err != nil {

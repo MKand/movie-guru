@@ -50,14 +50,17 @@ func (agent *QueryTransformAgent) runFlow(input *types.QueryTransformInput) (*ty
 		fmt.Println("Error sending request:", err)
 		return nil, err
 	}
+
+	var result struct {
+		Result *types.QueryTransformOutput `json:"result"`
+	}
 	defer resp.Body.Close()
 
-	var output *types.QueryTransformOutput
-	err = json.NewDecoder(resp.Body).Decode(&output)
+	err = json.NewDecoder(resp.Body).Decode(&result)
 	if err != nil {
 		fmt.Println("Error decoding JSON response:", err)
 		return nil, err
 	}
 
-	return output, nil
+	return result.Result, nil
 }
