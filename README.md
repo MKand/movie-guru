@@ -31,7 +31,8 @@ The application follows a standard client-server model:
 * **Caching:** Memorystore for Redis is used as a cache to improve performance and reduce latency for frequently accessed data.
 
 ## Agents
-There are 3 agents used in this repo and are part of the backend. While they differ slightly in configuration from each backend type, they are mostly similar. 
+There are 3 agents used in this repo and are part of the backend. While they differ slightly in configuration from each backend type, they are mostly similar. All agents use a Gemini model through VertexAI APIs. 
+
 This describes how the Go-Genkit backend agents works.
 * **The User Profile / User Preferences Agent**: Used to analyse the user message and extract any long-lasting likes and dislikes from the conversation. 
 * **The Query Transform Agent**: Analyses the last (max 10) messages in the history to extract the context and understand the user's latest message. For example, if the if the agent mentions, that it knows of 3 horror movies (movies A, B, C) and the user then asks to know more about "the last one", the query transform agent analyses this and states that the user's query is to know more about "movie C". The output of this agent is passed onto the retriever to retrieve relevant documents.
@@ -48,10 +49,101 @@ There are 3 tables:
 * *fake-movies-table*: This contains the information about the fake movies and their embeddings. The data for the table is found in dataset/movies_with_posters.csv
 * *user-preferences-table*: This contains the user's long term preferences profile information. 
 * *app-metadata*: This is used to configure the backend and has information about the model version, cors setting etc.
+* *User logins*: Keeps track of users that have logged in.
+* *Invite codes*: Keeps track of valid invite codes.
 
 
 ## Getting Started
-WIP
+Set project ID
+```sh
+PROJECT_ID=<set project id>
+```
+If you are using Langchain, go to Langsmith, create an account and get an API key. Set the following environment variables. You can also choose to not use langsmith. 
+In case set LANGCHAIN_TRACING_V2 to false.
+You can skip this step if you are using GenKIT.
+Otherwise,
+
+```sh
+export LANGSMITH_API_KEY=<api key>
+export LANGCHAIN_TRACING_V2="true"
+export LANGCHAIN_PROJECT=<project name>
+export LANGCHAIN_ENDPOINT="https://api.smith.langchain.com" # Double check with your project.
+```
+
+Clone the project
+
+```sh
+git clone https://github.com/manasakandula/movie-guru.git
+cd movie-guru
+```
+
+Start the Deploy
+```sh
+./deploy/deploy.sh --backend genkit-go # or --backend langchain or --backend genkit-js (WIP)
+```
+Once deployed, the db will be up, but cloud Run will fail as it doesn't have the necessary tables. You can deploy the necessary tables and restart cloudrun. We will split these steps into two seperate steps in the future to prevent this.
+
+# Create the SQL tables. 
+Connect to the sql db through the cloud sql studio (the db is running on a private IP and hence cannot be reached directly without the use of cloudsql proxy). The [CloudSQL studio](https://cloud.google.com/sql/docs/mysql/manage-data-using-studio) is the is the easiest way to connect to it. Another option while testing locally is to set [Authorized Networks](https://cloud.google.com/sql/docs/mysql/authorize-networks) and allow list the IP address of the machine you are working on.
+
+
+```SQL
+CREATE TABLE IF NOT EXISTS vector_table_name (
+    id SERIAL PRIMARY KEY,
+    embedding VECTOR(768),
+    title VARCHAR,
+    runtime_mins INTEGER,
+    genres VARCHAR,
+    rating NUMERIC(3, 1),
+    released INTEGER,
+    actors VARCHAR,
+    director VARCHAR,
+    plot VARCHAR,
+    poster VARCHAR,
+    tconst VARCHAR
+);
+
+CREATE TABLE invite_codes (
+    code VARCHAR(255) PRIMARY KEY,   
+    valid BOOLEAN NOT NULL DEFAULT TRUE, 
+);
+
+CREATE TABLE user_logins (
+    email VARCHAR(255) PRIMARY KEY,
+    login_count INT NOT NULL DEFAULT 0,
+    special_login VARCHAR(255)  DEFAULT NULL; 
+);
+
+CREATE TABLE app_metadata (
+    app_version VARCHAR(255) PRIMARY KEY,
+    token_audience VARCHAR(255) NOT NULL,
+    history_length INT NOT NULL,
+    max_user_message_len INT NOT NULL,
+    cors_origin VARCHAR(255) NOT NULL, 
+    retriever_length INT NOT NULL,
+    google_chat_model_name VARCHAR(255) NOT NULL,
+    google_embedding_model_name VARCHAR(255) NOT NULL,
+    front_end_domain VARCHAR(255) NOT NULL
+);
+
+```
+
+Insert some data into the tables. Make changes and add the right values where required. You can play around with the values. 
+The **CORS origin** should be the allowed front end domains (comma seperated list) from which your backend recieves calls. 
+The **token audience** is the firebase project id from which the auth tokens are generated. 
+The **history length** is the number of the most recent messages that are stored in cache.
+The **max_user_message_len** is the max number of allowed characters in the user's message.
+The current setup uses the same model for the 3 agents and is passed along as **google_chat_model name**.
+
+```SQL
+INSERT INTO app_metadata (app_version, token_audience, history_length, max_user_message_len, cors_origin, retriever_length, google_chat_model_name, google_embedding_model_name, front_end_domain)
+VALUES ('v1', <project id> , 10, 1000, "https://<PROJECT ID>.web.app", 10, 'gemini-1.5-flash-001', 'text-embedding-004', "https://<project id>.web.app/");
+
+INSERT INTO invite_codes (code, valid)
+VALUES (<secret invite code>, TRUE);
+```
+
+
 
 ## License
 

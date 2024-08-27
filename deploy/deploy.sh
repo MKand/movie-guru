@@ -80,7 +80,8 @@ sqladmin.googleapis.com \
 storage-api.googleapis.com \
 sql-component.googleapis.com \
 run.googleapis.com \
-redis.googleapis.com
+redis.googleapis.com \
+firebase.googleapis.com   
 
 # Make cloudbiuld SA roles/owner for PROJECT_ID
 # TODO: Make these permissions more granular to precisely what is required by cloudbuild

@@ -34,8 +34,6 @@ resource "google_service_networking_connection" "private_vpc_connection" {
   reserved_peering_ranges = [google_compute_global_address.private_ip_address.name]
 }
 
-
-
 resource "google_sql_database_instance" "main" {
   name             = "${var.app_name}-db-instance"
   database_version = "POSTGRES_15"

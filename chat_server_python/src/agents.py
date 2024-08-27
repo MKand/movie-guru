@@ -13,6 +13,9 @@ from langchain_google_cloud_sql_pg import PostgresEngine, PostgresVectorStore
 import os
 import json
 
+
+# For Langsmith
+
 client = Client()
 os.environ["LANGCHAIN_TRACING_V2"]=os.getenv("LANGCHAIN_TRACING_V2")
 os.environ["LANGCHAIN_API_KEY"]=os.getenv("LANGSMITH_API_KEY")
@@ -26,7 +29,8 @@ POSTGRES_MOVIE_TABLE = os.getenv("POSTGRES_MOVIE_TABLE", "fake_movies_table")
 PROJECT_ID = os.getenv("PROJECT_ID")
 RETRIEVER_LENGTH= int(os.getenv("RETRIEVER_LENGTH", "10"))
 
-REGION = "europe-west4"
+REGION = os.getenv("REGION", "europe-west4")
+
 HISTORIES = {}
 
 
