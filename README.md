@@ -46,7 +46,8 @@ This describes how the Go-Genkit backend agents works.
 
 ## CloudSQL
 There are 3 tables:
-* *fake-movies-table*: This contains the information about the fake movies and their embeddings. The data for the table is found in dataset/movies_with_posters.csv
+* *fake-movies-table*: This contains the information about the fake movies and their embeddings. The data for the table is found in dataset/movies_with_posters.csv. If you choose to host your own posters, replace the links in this file.
+
 * *user-preferences-table*: This contains the user's long term preferences profile information. 
 * *app-metadata*: This is used to configure the backend and has information about the model version, cors setting etc.
 * *User logins*: Keeps track of users that have logged in.
@@ -81,9 +82,11 @@ Start the Deploy
 ```sh
 ./deploy/deploy.sh --backend genkit-go # or --backend langchain or --backend genkit-js (WIP)
 ```
-Once deployed, the db will be up, but cloud Run will fail as it doesn't have the necessary tables. You can deploy the necessary tables and restart cloudrun. We will split these steps into two seperate steps in the future to prevent this.
+**NOTE**: Once deployed, the db will be up, but cloud Run will fail as it doesn't have the necessary tables. You can deploy the necessary tables and restart cloudrun. We will split these steps into two seperate steps in the future to prevent this.
 
-# Create the SQL tables. 
+# Create and populate the database
+
+## Create tables
 Connect to the sql db through the cloud sql studio (the db is running on a private IP and hence cannot be reached directly without the use of cloudsql proxy). The [CloudSQL studio](https://cloud.google.com/sql/docs/mysql/manage-data-using-studio) is the is the easiest way to connect to it. Another option while testing locally is to set [Authorized Networks](https://cloud.google.com/sql/docs/mysql/authorize-networks) and allow list the IP address of the machine you are working on.
 
 
@@ -127,6 +130,7 @@ CREATE TABLE app_metadata (
 );
 
 ```
+## Insert data into the tables
 
 Insert some data into the tables. Make changes and add the right values where required. You can play around with the values. 
 The **CORS origin** should be the allowed front end domains (comma seperated list) from which your backend recieves calls. 
@@ -143,6 +147,9 @@ INSERT INTO invite_codes (code, valid)
 VALUES (<secret invite code>, TRUE);
 ```
 
+## Insert data into movies tables
+
+WIP
 
 
 ## License
