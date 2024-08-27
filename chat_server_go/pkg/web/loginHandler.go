@@ -1,15 +1,14 @@
-package main
+package web
 
 import (
-	"context"
-	"database/sql"
 	"strings"
 
 	"github.com/golang-jwt/jwt/v5"
 	_ "github.com/lib/pq"
+	"github.com/movie-guru/pkg/db"
+	utils "github.com/movie-guru/pkg/utils"
 )
 
-// AuthorizationError represents an authorization failure
 type AuthorizationError struct {
 	Message string
 }
@@ -19,8 +18,15 @@ func (e *AuthorizationError) Error() string {
 }
 
 type UserLoginHandler struct {
-	db            *sql.DB
+	db            *db.MovieAgentDB
 	tokenAudience string
+}
+
+func NewUserLoginHandler(tokenAudience string, db *db.MovieAgentDB) *UserLoginHandler {
+	return &UserLoginHandler{
+		db:            db,
+		tokenAudience: tokenAudience,
+	}
 }
 
 func (ulh *UserLoginHandler) handleLogin(authHeader, inviteCode string) (string, error) {
@@ -30,17 +36,17 @@ func (ulh *UserLoginHandler) handleLogin(authHeader, inviteCode string) (string,
 		return "", err
 	}
 
-	if ulh.checkUser(user) {
+	if ulh.db.CheckUser(user) {
 		return user, nil
 	}
 
-	inviteCodes, err := ulh.getInviteCodes()
+	inviteCodes, err := ulh.db.GetInviteCodes()
 	if err != nil {
 		return "", err
 	}
 
-	if contains(inviteCodes, inviteCode) {
-		if err := ulh.createUser(user); err != nil {
+	if utils.Contains(inviteCodes, inviteCode) {
+		if err := ulh.db.CreateUser(user); err != nil {
 			return "", err
 		}
 		return user, nil
@@ -86,48 +92,4 @@ func (ulh *UserLoginHandler) getToken(authHeader string) string {
 		return tokenParts[1]
 	}
 	return ""
-}
-
-// create_user creates a new user in the database
-func (ulh *UserLoginHandler) createUser(user string) error {
-	query := `
-        INSERT INTO user_logins (email) VALUES ($1)
-        ON CONFLICT (email) DO UPDATE
-        SET login_count = user_logins.login_count + 1;
-    `
-	_, err := ulh.db.ExecContext(context.Background(), query, user)
-	return err
-}
-
-// check_user checks if the user exists in the database
-func (ulh *UserLoginHandler) checkUser(user string) bool {
-	query := `SELECT email FROM user_logins WHERE "email" = $1;`
-	var email string
-	err := ulh.db.QueryRowContext(context.Background(), query, user).Scan(&email)
-	return err == nil && email == user
-}
-
-// get_invite_codes retrieves valid invite codes from the database
-func (ulh *UserLoginHandler) getInviteCodes() ([]string, error) {
-	query := `SELECT code FROM invite_codes WHERE valid = true`
-	rows, err := ulh.db.QueryContext(context.Background(), query)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var inviteCodes []string
-	for rows.Next() {
-		var code string
-		if err := rows.Scan(&code); err != nil {
-			return nil, err
-		}
-		inviteCodes = append(inviteCodes, code)
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-
-	return inviteCodes, nil
 }

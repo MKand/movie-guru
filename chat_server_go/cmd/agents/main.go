@@ -14,18 +14,18 @@ import (
 func main() {
 	ctx := context.Background()
 
-	dbase, err := db.ConnectToDB()
+	movieAgentDB, err := db.GetDB()
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer dbase.Close()
+	defer movieAgentDB.DB.Close()
 
-	metadata, err := db.GetServerMetadata(os.Getenv("APP_VERSION"), dbase)
+	metadata, err := movieAgentDB.GetServerMetadata(os.Getenv("APP_VERSION"))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	GetDependencies(ctx, metadata, dbase)
+	GetDependencies(ctx, metadata, movieAgentDB.DB)
 
 	if err := genkit.Init(ctx, nil); err != nil {
 		log.Fatal(err)

@@ -2,7 +2,6 @@ package db
 
 import (
 	"context"
-	"database/sql"
 	"log"
 )
 
@@ -20,10 +19,10 @@ type Metadata struct {
 }
 
 // getMetadata retrieves metadata from the database
-func GetServerMetadata(appVersion string, db *sql.DB) (*Metadata, error) {
+func (d *MovieAgentDB) GetServerMetadata(appVersion string) (*Metadata, error) {
 	query := `SELECT * FROM app_metadata WHERE "app_version" = $1;`
 	metadata := &Metadata{}
-	rows := db.QueryRowContext(context.Background(), query, appVersion)
+	rows := d.DB.QueryRowContext(context.Background(), query, appVersion)
 	err := rows.Scan(
 		&metadata.AppVersion,
 		&metadata.TokenAudience,

@@ -128,5 +128,5 @@ func defineRetriever(maxRetLength int, db *sql.DB, embedder ai.Embedder) ai.Retr
 		}
 		return res, nil
 	}
-	return ai.DefineRetriever("pgvector", "movies", f)
+	return ai.DefineRetriever("pgvector", "movieRetriever", f)
 }

@@ -1,8 +1,7 @@
-package main
+package web
 
 import (
 	"context"
-	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -13,38 +12,22 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
+	"github.com/movie-guru/pkg/db"
+	"github.com/movie-guru/pkg/types"
 	"github.com/redis/go-redis/v9"
 )
 
 var (
 	key        = os.Getenv("SECRET_KEY")
 	redisStore *redis.Client
-	metadata   *Metadata
+	metadata   *db.Metadata
 	appConfig  = map[string]string{
 		"CORS_HEADERS": "Content-Type",
 	}
 	corsOrigins []string
 )
 
-type SessionInfo struct {
-	ID            string
-	User          string
-	Authenticated bool
-}
-
-type LoginBody struct {
-	InviteCode string `json:"inviteCode" omitempty`
-}
-
-type PrefBody struct {
-	Content *UserProfile `json:"content"`
-}
-
-type ChatRequest struct {
-	Content string `json:"content"`
-}
-
-func startServer(ulh UserLoginHandler, m *Metadata, chatDeps *ChatDependencies) {
+func StartServer(ulh *UserLoginHandler, m *db.Metadata, deps *Dependencies) {
 	metadata = m
 	setupSessionStore()
 
@@ -52,10 +35,10 @@ func startServer(ulh UserLoginHandler, m *Metadata, chatDeps *ChatDependencies) 
 	for i := range corsOrigins {
 		corsOrigins[i] = strings.TrimSpace(corsOrigins[i])
 	}
-	http.HandleFunc("/chat", createChatHandler(chatDeps))
+	http.HandleFunc("/chat", createChatHandler(deps))
 	http.HandleFunc("/history", createHistoryHandler())
-	http.HandleFunc("/preferences", createPreferencesHandler(chatDeps.DB))
-	http.HandleFunc("/startup", createStartupHandler(chatDeps))
+	http.HandleFunc("/preferences", createPreferencesHandler(deps.DB))
+	http.HandleFunc("/startup", createStartupHandler(deps))
 	http.HandleFunc("/login", createLoginHandler(ulh))
 	http.HandleFunc("/logout", logoutHandler)
 	log.Fatalln(http.ListenAndServe(":8080", nil))
@@ -100,7 +83,7 @@ func addResponseHeaders(w http.ResponseWriter, origin string) {
 	w.Header().Set("Access-Control-Allow-Credentials", "true")
 }
 
-func createLoginHandler(ulh UserLoginHandler) http.HandlerFunc {
+func createLoginHandler(ulh *UserLoginHandler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		origin := r.Header.Get("Origin")
 		errLogPrefix := "Error: LoginHandler: "
@@ -188,9 +171,9 @@ func handleOptions(w http.ResponseWriter, origin string) {
 	log.Println(w.Header())
 }
 
-func getHistory(ctx context.Context, user string) (*ChatHistory, error) {
+func getHistory(ctx context.Context, user string) (*types.ChatHistory, error) {
 	historyJson, err := redisStore.Get(ctx, user).Result()
-	ch := NewChatHistory()
+	ch := types.NewChatHistory()
 	if err == redis.Nil {
 		return ch, nil
 	} else if err != nil {
@@ -203,7 +186,7 @@ func getHistory(ctx context.Context, user string) (*ChatHistory, error) {
 	return ch, nil
 }
 
-func saveHistory(ctx context.Context, history *ChatHistory, user string) error {
+func saveHistory(ctx context.Context, history *types.ChatHistory, user string) error {
 	history.Trim(metadata.HistoryLength)
 
 	err := redisStore.Set(ctx, user, history, 0).Err()
@@ -221,7 +204,7 @@ func deleteHistory(ctx context.Context, user string) error {
 	return nil
 }
 
-func createStartupHandler(deps *ChatDependencies) http.HandlerFunc {
+func createStartupHandler(deps *Dependencies) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		errLogPrefix := "Error: StartupHandler: "
 		var err error
@@ -250,17 +233,17 @@ func createStartupHandler(deps *ChatDependencies) http.HandlerFunc {
 		if r.Method == "GET" {
 			addResponseHeaders(w, origin)
 			user := sessionInfo.User
-			pref, err := getCurrentProfile(ctx, user, deps.DB)
+			pref, err := deps.DB.GetCurrentProfile(ctx, user)
 			if err != nil {
 				log.Println(errLogPrefix, "Cannot get preferences for user:", user, err.Error())
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
 			context, err := deps.Retriever.RetriveDocuments(ctx, randomisedFeaturedFilmsQuery())
-			agentResp := NewAgentResponse()
+			agentResp := types.NewAgentResponse()
 			agentResp.Context = context[0:5]
 			agentResp.Preferences = pref
-			agentResp.Result = SUCCESS
+			agentResp.Result = types.SUCCESS
 			if err != nil {
 				log.Println(errLogPrefix, err.Error())
 				http.Error(w, "Error marshaling JSON", http.StatusInternalServerError)
@@ -273,7 +256,7 @@ func createStartupHandler(deps *ChatDependencies) http.HandlerFunc {
 	}
 }
 
-func createPreferencesHandler(db *sql.DB) http.HandlerFunc {
+func createPreferencesHandler(movieAgentDB *db.MovieAgentDB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		errLogPrefix := "Error: PreferencesHandler: "
 		var err error
@@ -302,7 +285,7 @@ func createPreferencesHandler(db *sql.DB) http.HandlerFunc {
 		if r.Method == "GET" {
 			addResponseHeaders(w, origin)
 			user := sessionInfo.User
-			pref, err := getCurrentProfile(ctx, user, db)
+			pref, err := movieAgentDB.GetCurrentProfile(ctx, user)
 			if err != nil {
 				log.Println(errLogPrefix, "Cannot get preferences for user:", user, err.Error())
 				http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -313,7 +296,7 @@ func createPreferencesHandler(db *sql.DB) http.HandlerFunc {
 		}
 		if r.Method == "POST" {
 			pref := &PrefBody{
-				Content: NewUserProfile(),
+				Content: types.NewUserProfile(),
 			}
 			err := json.NewDecoder(r.Body).Decode(pref)
 			if err != nil {
@@ -321,7 +304,7 @@ func createPreferencesHandler(db *sql.DB) http.HandlerFunc {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
-			err = updatePreferences(ctx, pref.Content, sessionInfo.User, db)
+			err = movieAgentDB.UpdateProfile(ctx, pref.Content, sessionInfo.User)
 			if err != nil {
 				log.Println(errLogPrefix, err.Error())
 				http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -375,7 +358,7 @@ func createHistoryHandler() http.HandlerFunc {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
-			simpleHistory, err := ParseRecentHistory(ch.GetHistory(), metadata.HistoryLength)
+			simpleHistory, err := types.ParseRecentHistory(ch.GetHistory(), metadata.HistoryLength)
 			if err != nil {
 				log.Println(errLogPrefix, err.Error())
 				http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -425,7 +408,7 @@ func deleteSessionInfo(ctx context.Context, sessionID string) error {
 	return nil
 }
 
-func createChatHandler(deps *ChatDependencies) http.HandlerFunc {
+func createChatHandler(deps *Dependencies) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		errLogPrefix := "Error: ChatHandler: "
 		var err error
