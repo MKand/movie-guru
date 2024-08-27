@@ -15,7 +15,7 @@ import (
 func main() {
 	ctx := context.Background()
 
-	URL := os.Getenv("URL")
+	URL := os.Getenv("FLOWS_URL")
 
 	MovieAgentDB, err := db.GetDB()
 	if err != nil {
