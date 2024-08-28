@@ -29,7 +29,7 @@ func NewUserLoginHandler(tokenAudience string, db *db.MovieAgentDB) *UserLoginHa
 	}
 }
 
-func (ulh *UserLoginHandler) handleLogin(authHeader, inviteCode string) (string, error) {
+func (ulh *UserLoginHandler) HandleLogin(authHeader, inviteCode string) (string, error) {
 	token := ulh.getToken(authHeader)
 	user, err := ulh.verifyGoogleToken(token)
 	if err != nil {

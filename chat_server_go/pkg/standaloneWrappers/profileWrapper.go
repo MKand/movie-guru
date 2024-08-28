@@ -1,12 +1,12 @@
-package wrappers
+package standaloneWrappers
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
-	"fmt"
-	"net/http"
 
+	"github.com/firebase/genkit/go/ai"
+	"github.com/firebase/genkit/go/genkit"
+
+	agents "github.com/movie-guru/pkg/agents"
 	db "github.com/movie-guru/pkg/db"
 	types "github.com/movie-guru/pkg/types"
 	utils "github.com/movie-guru/pkg/utils"
@@ -14,13 +14,17 @@ import (
 
 type ProfileAgent struct {
 	MovieAgentDB *db.MovieAgentDB
-	URL          string
+	Flow         *genkit.Flow[*types.ProfileAgentInput, *types.UserProfileAgentOutput, struct{}]
 }
 
-func CreateProfileAgent(db *db.MovieAgentDB, URL string) (*ProfileAgent, error) {
+func CreateProfileAgent(ctx context.Context, model ai.Model, db *db.MovieAgentDB) (*ProfileAgent, error) {
+	flow, err := agents.GetUserProfileFlow(ctx, model)
+	if err != nil {
+		return nil, err
+	}
 	return &ProfileAgent{
 		MovieAgentDB: db,
-		URL:          URL + "/userPreferencesFlow",
+		Flow:         flow,
 	}, nil
 }
 
@@ -47,7 +51,7 @@ func (p *ProfileAgent) Run(ctx context.Context, history *types.ChatHistory, user
 	}
 
 	prefInput := types.ProfileAgentInput{Query: lastUserMessage, AgentMessage: agentMessage}
-	resp, err := p.runFlow(&prefInput)
+	resp, err := p.Flow.Run(ctx, &prefInput)
 	if err != nil {
 		return userProfileOutput, err
 	}
@@ -67,38 +71,4 @@ func (p *ProfileAgent) Run(ctx context.Context, history *types.ChatHistory, user
 		userProfileOutput.UserProfile = updatedProfile
 	}
 	return userProfileOutput, nil
-}
-
-func (agent *ProfileAgent) runFlow(input *types.ProfileAgentInput) (*types.UserProfileAgentOutput, error) {
-	// Marshal the input struct to JSON
-	inputJSON, err := json.Marshal(input)
-	if err != nil {
-		return nil, fmt.Errorf("error marshaling input to JSON: %w", err)
-	}
-	req, err := http.NewRequest("POST", agent.URL, bytes.NewBuffer(inputJSON))
-	if err != nil {
-		fmt.Println("Error creating request:", err)
-		return nil, err
-	}
-	req.Header.Set("Content-Type", "application/json")
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		fmt.Println("Error sending request:", err)
-		return nil, err
-	}
-
-	var result struct {
-		Result *types.UserProfileAgentOutput `json:"result"`
-	}
-	defer resp.Body.Close()
-
-	err = json.NewDecoder(resp.Body).Decode(&result)
-	if err != nil {
-		fmt.Println("Error decoding JSON response:", err)
-		return nil, err
-	}
-
-	return result.Result, nil
 }

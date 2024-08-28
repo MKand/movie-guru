@@ -1,4 +1,4 @@
-package web
+package standaloneWeb
 
 import (
 	"context"
@@ -15,6 +15,8 @@ import (
 	"github.com/movie-guru/pkg/db"
 	"github.com/movie-guru/pkg/types"
 	"github.com/redis/go-redis/v9"
+
+	web "github.com/movie-guru/pkg/web"
 )
 
 var (
@@ -27,7 +29,7 @@ var (
 	corsOrigins []string
 )
 
-func StartServer(ulh *UserLoginHandler, m *db.Metadata, deps *Dependencies) {
+func StartServer(ulh *web.UserLoginHandler, m *db.Metadata, deps *Dependencies) {
 	metadata = m
 	setupSessionStore()
 
@@ -83,7 +85,7 @@ func addResponseHeaders(w http.ResponseWriter, origin string) {
 	w.Header().Set("Access-Control-Allow-Credentials", "true")
 }
 
-func createLoginHandler(ulh *UserLoginHandler) http.HandlerFunc {
+func createLoginHandler(ulh *web.UserLoginHandler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		origin := r.Header.Get("Origin")
 		errLogPrefix := "Error: LoginHandler: "
@@ -94,7 +96,7 @@ func createLoginHandler(ulh *UserLoginHandler) http.HandlerFunc {
 				http.Error(w, "Unauthorized", http.StatusUnauthorized)
 				return
 			}
-			var loginBody LoginBody
+			var loginBody web.LoginBody
 			err := json.NewDecoder(r.Body).Decode(&loginBody)
 			if err != nil {
 				log.Println(errLogPrefix, "Bad Request at login", err.Error())
@@ -104,7 +106,7 @@ func createLoginHandler(ulh *UserLoginHandler) http.HandlerFunc {
 
 			user, err := ulh.HandleLogin(authHeader, loginBody.InviteCode)
 			if err != nil {
-				if _, ok := err.(*AuthorizationError); ok {
+				if _, ok := err.(*web.AuthorizationError); ok {
 					log.Println(errLogPrefix, "Unauthorized. ", err.Error())
 					http.Error(w, err.Error(), http.StatusUnauthorized)
 					return
@@ -115,7 +117,7 @@ func createLoginHandler(ulh *UserLoginHandler) http.HandlerFunc {
 			}
 
 			sessionID := uuid.New().String()
-			session := &SessionInfo{
+			session := &web.SessionInfo{
 				ID:            sessionID,
 				User:          user,
 				Authenticated: true,
@@ -211,11 +213,11 @@ func createStartupHandler(deps *Dependencies) http.HandlerFunc {
 		ctx := r.Context()
 		origin := r.Header.Get("Origin")
 		addResponseHeaders(w, origin)
-		sessionInfo := &SessionInfo{}
+		sessionInfo := &web.SessionInfo{}
 		if r.Method != "OPTIONS" {
 			sessionInfo, err = getSessionInfo(ctx, r)
 			if err != nil {
-				if err, ok := err.(*AuthorizationError); ok {
+				if err, ok := err.(*web.AuthorizationError); ok {
 					log.Println(errLogPrefix, "Unauthorized")
 					http.Error(w, err.Error(), http.StatusUnauthorized)
 					return
@@ -263,11 +265,11 @@ func createPreferencesHandler(movieAgentDB *db.MovieAgentDB) http.HandlerFunc {
 		ctx := r.Context()
 		origin := r.Header.Get("Origin")
 		addResponseHeaders(w, origin)
-		sessionInfo := &SessionInfo{}
+		sessionInfo := &web.SessionInfo{}
 		if r.Method != "OPTIONS" {
 			sessionInfo, err = getSessionInfo(ctx, r)
 			if err != nil {
-				if err, ok := err.(*AuthorizationError); ok {
+				if err, ok := err.(*web.AuthorizationError); ok {
 					log.Println(errLogPrefix, "Unauthorized")
 					http.Error(w, err.Error(), http.StatusUnauthorized)
 					return
@@ -295,7 +297,7 @@ func createPreferencesHandler(movieAgentDB *db.MovieAgentDB) http.HandlerFunc {
 			return
 		}
 		if r.Method == "POST" {
-			pref := &PrefBody{
+			pref := &web.PrefBody{
 				Content: types.NewUserProfile(),
 			}
 			err := json.NewDecoder(r.Body).Decode(pref)
@@ -330,11 +332,11 @@ func createHistoryHandler() http.HandlerFunc {
 		origin := r.Header.Get("Origin")
 		var err error
 		addResponseHeaders(w, origin)
-		sessionInfo := &SessionInfo{}
+		sessionInfo := &web.SessionInfo{}
 		if r.Method != "OPTIONS" {
 			sessionInfo, err = getSessionInfo(ctx, r)
 			if err != nil {
-				if err, ok := err.(*AuthorizationError); ok {
+				if err, ok := err.(*web.AuthorizationError); ok {
 					log.Println(errLogPrefix, "Unauthorized")
 					http.Error(w, err.Error(), http.StatusUnauthorized)
 					return
@@ -386,11 +388,11 @@ func createHistoryHandler() http.HandlerFunc {
 	}
 }
 
-func getSessionInfo(ctx context.Context, r *http.Request) (*SessionInfo, error) {
-	session := &SessionInfo{}
+func getSessionInfo(ctx context.Context, r *http.Request) (*web.SessionInfo, error) {
+	session := &web.SessionInfo{}
 	sessionID, err := getSessionID(r)
 	if err != nil {
-		return session, &AuthorizationError{err.Error()}
+		return session, &web.AuthorizationError{err.Error()}
 	}
 	s, err := redisStore.Get(ctx, sessionID).Result()
 	err = json.Unmarshal([]byte(s), session)
@@ -415,11 +417,11 @@ func createChatHandler(deps *Dependencies) http.HandlerFunc {
 		ctx := r.Context()
 		origin := r.Header.Get("Origin")
 		addResponseHeaders(w, origin)
-		sessionInfo := &SessionInfo{}
+		sessionInfo := &web.SessionInfo{}
 		if r.Method != "OPTIONS" {
 			sessionInfo, err = getSessionInfo(ctx, r)
 			if err != nil {
-				if err, ok := err.(*AuthorizationError); ok {
+				if err, ok := err.(*web.AuthorizationError); ok {
 					log.Println(errLogPrefix, "Unauthorized")
 					http.Error(w, err.Error(), http.StatusUnauthorized)
 					return
@@ -437,7 +439,7 @@ func createChatHandler(deps *Dependencies) http.HandlerFunc {
 		if r.Method == "POST" {
 			addResponseHeaders(w, origin)
 			user := sessionInfo.User
-			chatRequest := &ChatRequest{
+			chatRequest := &web.ChatRequest{
 				Content: "",
 			}
 			err := json.NewDecoder(r.Body).Decode(chatRequest)
@@ -478,11 +480,11 @@ func logoutHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	origin := r.Header.Get("Origin")
 	addResponseHeaders(w, origin)
-	sessionInfo := &SessionInfo{}
+	sessionInfo := &web.SessionInfo{}
 	if r.Method != "OPTIONS" {
 		sessionInfo, err = getSessionInfo(ctx, r)
 		if err != nil {
-			if err, ok := err.(*AuthorizationError); ok {
+			if err, ok := err.(*web.AuthorizationError); ok {
 				log.Println(errLogPrefix, "Unauthorized")
 				http.Error(w, err.Error(), http.StatusUnauthorized)
 				return

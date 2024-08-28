@@ -3,7 +3,7 @@ package web
 import (
 	"github.com/movie-guru/pkg/db"
 	"github.com/movie-guru/pkg/types"
-	"github.com/movie-guru/pkg/wrappers"
+	wrappers "github.com/movie-guru/pkg/wrappers"
 )
 
 type SessionInfo struct {

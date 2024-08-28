@@ -3,8 +3,10 @@ package agents
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"log"
 	"os"
+	"regexp"
 
 	"github.com/firebase/genkit/go/ai"
 	"github.com/firebase/genkit/go/genkit"
@@ -66,4 +68,17 @@ func GetDependencies(ctx context.Context, metadata *db.Metadata, db *sql.DB) *Ag
 		DB:                 db,
 	}
 	return deps
+}
+
+func makeJsonMarshallable(input string) (string, error) {
+	// Regex to extract JSON content from Markdown code block
+	re := regexp.MustCompile("```(json)?((\n|.)*?)```")
+	matches := re.FindStringSubmatch(input)
+
+	if len(matches) < 2 {
+		return input, fmt.Errorf("no JSON content found in the input")
+	}
+
+	jsonContent := matches[2]
+	return jsonContent, nil
 }

@@ -7,8 +7,8 @@ import (
 	"net/http"
 
 	db "github.com/movie-guru/pkg/db"
-	_ "github.com/movie-guru/pkg/types"
 	types "github.com/movie-guru/pkg/types"
+	utils "github.com/movie-guru/pkg/utils"
 )
 
 type MovieAgent struct {
@@ -43,7 +43,7 @@ func (m *MovieAgent) Run(movieDocs []*types.MovieContext, history []*types.Simpl
 	agentResponse := &types.AgentResponse{
 		Answer:         resp.Answer,
 		RelevantMovies: relevantMovies,
-		Context:        filterRelevantContext(relevantMovies, movieDocs),
+		Context:        utils.FilterRelevantContext(relevantMovies, movieDocs),
 		ErrorMessage:   "",
 		Result:         types.SUCCESS,
 		Preferences:    userPreferences,
@@ -82,22 +82,4 @@ func (agent *MovieAgent) runFlow(input *types.MovieAgentInput) (*types.MovieAgen
 	}
 
 	return result.Result, nil
-}
-
-func filterRelevantContext(relevantMovies []string, fullContext []*types.MovieContext) []*types.MovieContext {
-	relevantContext := make(
-		[]*types.MovieContext,
-		0,
-		len(relevantMovies),
-	)
-	for _, m := range fullContext {
-		for _, r := range relevantMovies {
-			if r == m.Title {
-				if m.Poster != "" {
-					relevantContext = append(relevantContext, m)
-				}
-			}
-		}
-	}
-	return relevantContext
 }
