@@ -12,20 +12,20 @@ import (
 	utils "github.com/movie-guru/pkg/utils"
 )
 
-type ProfileAgent struct {
-	MovieAgentDB *db.MovieAgentDB
-	URL          string
+type UserProfileFlowClient struct {
+	MovieDB *db.MovieDB
+	URL     string
 }
 
-func CreateProfileAgent(db *db.MovieAgentDB, URL string) (*ProfileAgent, error) {
-	return &ProfileAgent{
-		MovieAgentDB: db,
-		URL:          URL + "/userPreferencesFlow",
+func CreateUserProfileFlowClient(db *db.MovieDB, URL string) (*UserProfileFlowClient, error) {
+	return &UserProfileFlowClient{
+		MovieDB: db,
+		URL:     URL + "/userProfileFlow",
 	}, nil
 }
 
-func (p *ProfileAgent) Run(ctx context.Context, history *types.ChatHistory, user string) (*types.UserProfileOutput, error) {
-	userProfile, err := p.MovieAgentDB.GetCurrentProfile(ctx, user)
+func (flowClient *UserProfileFlowClient) Run(ctx context.Context, history *types.ChatHistory, user string) (*types.UserProfileOutput, error) {
+	userProfile, err := flowClient.MovieDB.GetCurrentProfile(ctx, user)
 	userProfileOutput := &types.UserProfileOutput{
 		UserProfile: userProfile,
 		ChangesMade: false,
@@ -47,7 +47,7 @@ func (p *ProfileAgent) Run(ctx context.Context, history *types.ChatHistory, user
 	}
 
 	prefInput := types.ProfileAgentInput{Query: lastUserMessage, AgentMessage: agentMessage}
-	resp, err := p.runFlow(&prefInput)
+	resp, err := flowClient.runFlow(&prefInput)
 	if err != nil {
 		return userProfileOutput, err
 	}
@@ -60,7 +60,7 @@ func (p *ProfileAgent) Run(ctx context.Context, history *types.ChatHistory, user
 		if err != nil {
 			return userProfileOutput, err
 		}
-		err = p.MovieAgentDB.UpdateProfile(ctx, updatedProfile, user)
+		err = flowClient.MovieDB.UpdateProfile(ctx, updatedProfile, user)
 		if err != nil {
 			return userProfileOutput, err
 		}
@@ -69,13 +69,13 @@ func (p *ProfileAgent) Run(ctx context.Context, history *types.ChatHistory, user
 	return userProfileOutput, nil
 }
 
-func (agent *ProfileAgent) runFlow(input *types.ProfileAgentInput) (*types.UserProfileAgentOutput, error) {
+func (flowClient *UserProfileFlowClient) runFlow(input *types.ProfileAgentInput) (*types.UserProfileAgentOutput, error) {
 	// Marshal the input struct to JSON
 	inputJSON, err := json.Marshal(input)
 	if err != nil {
 		return nil, fmt.Errorf("error marshaling input to JSON: %w", err)
 	}
-	req, err := http.NewRequest("POST", agent.URL, bytes.NewBuffer(inputJSON))
+	req, err := http.NewRequest("POST", flowClient.URL, bytes.NewBuffer(inputJSON))
 	if err != nil {
 		fmt.Println("Error creating request:", err)
 		return nil, err

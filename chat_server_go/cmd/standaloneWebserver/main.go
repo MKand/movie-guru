@@ -15,19 +15,19 @@ import (
 
 func main() {
 	ctx := context.Background()
-	MovieAgentDB, err := db.GetDB()
+	MovieDB, err := db.GetDB()
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer MovieAgentDB.DB.Close()
+	defer MovieDB.DB.Close()
 
-	metadata, err := MovieAgentDB.GetServerMetadata(os.Getenv("APP_VERSION"))
+	metadata, err := MovieDB.GetServerMetadata(os.Getenv("APP_VERSION"))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	ulh := web.NewUserLoginHandler(metadata.TokenAudience, MovieAgentDB)
-	deps := getDependencies(ctx, metadata, MovieAgentDB)
+	ulh := web.NewUserLoginHandler(metadata.TokenAudience, MovieDB)
+	deps := getDependencies(ctx, metadata, MovieDB)
 
 	standaloneWeb.StartServer(ulh, metadata, deps)
 
@@ -37,7 +37,7 @@ func main() {
 
 }
 
-func getDependencies(ctx context.Context, metadata *db.Metadata, db *db.MovieAgentDB) *standaloneWeb.Dependencies {
+func getDependencies(ctx context.Context, metadata *db.Metadata, db *db.MovieDB) *standaloneWeb.Dependencies {
 	err := vertexai.Init(ctx, &vertexai.Config{ProjectID: os.Getenv("PROJECT_ID"), Location: os.Getenv("GCLOUD_LOCATION")})
 
 	if err != nil {
@@ -48,28 +48,28 @@ func getDependencies(ctx context.Context, metadata *db.Metadata, db *db.MovieAge
 	if model == nil {
 		log.Fatal("Model not found")
 	}
-	queryTransformAgent, err := standaloneWrappers.CreateQueryTransformAgent(ctx, model, db)
+	queryTransformFlow, err := standaloneWrappers.CreateQueryTransformFlow(ctx, model, db)
 	if err != nil {
 		log.Fatal(err)
 	}
-	prefAgent, err := standaloneWrappers.CreateProfileAgent(ctx, model, db)
+	userProfileFlow, err := standaloneWrappers.CreateProfileFlow(ctx, model, db)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	ret := standaloneWrappers.CreateMovieRetriever(ctx, metadata.GoogleEmbeddingModelName, metadata.RetrieverLength, db)
+	ret := standaloneWrappers.CreateMovieRetrieverFlow(ctx, metadata.GoogleEmbeddingModelName, metadata.RetrieverLength, db)
 
-	movieAgent, err := standaloneWrappers.CreateMovieAgent(ctx, model, db)
+	movieFlow, err := standaloneWrappers.CreateMovieFlow(ctx, model, db)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	deps := &standaloneWeb.Dependencies{
-		QueryTransformAgent: queryTransformAgent,
-		PrefAgent:           prefAgent,
-		MovieAgent:          movieAgent,
-		Retriever:           ret,
-		DB:                  db,
+		QueryTransformFlow: queryTransformFlow,
+		UserProfileFlow:    userProfileFlow,
+		MovieFlow:          movieFlow,
+		MovieRetrieverFlow: ret,
+		DB:                 db,
 	}
 	return deps
 }

@@ -1,4 +1,4 @@
-package agents
+package flows
 
 import (
 	"context"
@@ -65,8 +65,8 @@ func GetQueryTransformFlow(ctx context.Context, model ai.Model) (*genkit.Flow[*t
 		return nil, err
 	}
 	// Define a simple flow that prompts an LLM to generate menu suggestions.
-	userPrefFlow := genkit.DefineFlow("queryTransformFlow", func(ctx context.Context, input *types.QueryTransformInput) (*types.QueryTransformOutput, error) {
-		transformedQuery := &types.QueryTransformOutput{
+	queryTransformFlow := genkit.DefineFlow("queryTransformFlow", func(ctx context.Context, input *types.QueryTransformInput) (*types.QueryTransformOutput, error) {
+		queryTransformFlowOutput := &types.QueryTransformOutput{
 			ModelOutputMetadata: &types.ModelOutputMetadata{
 				SafetyIssue:   false,
 				Justification: "",
@@ -84,13 +84,13 @@ func GetQueryTransformFlow(ctx context.Context, model ai.Model) (*genkit.Flow[*t
 		if err != nil {
 			if blockedErr, ok := err.(*genai.BlockedError); ok {
 				fmt.Println("Request was blocked:", blockedErr)
-				transformedQuery = &types.QueryTransformOutput{
+				queryTransformFlowOutput = &types.QueryTransformOutput{
 					ModelOutputMetadata: &types.ModelOutputMetadata{
 						SafetyIssue: true,
 					},
 					TransformedQuery: "",
 				}
-				return transformedQuery, nil
+				return queryTransformFlowOutput, nil
 
 			} else {
 				return nil, err
@@ -98,12 +98,12 @@ func GetQueryTransformFlow(ctx context.Context, model ai.Model) (*genkit.Flow[*t
 			}
 		}
 		t := resp.Text()
-		err = json.Unmarshal([]byte(t), &transformedQuery)
+		err = json.Unmarshal([]byte(t), &queryTransformFlowOutput)
 		if err != nil {
 			return nil, err
 		}
 
-		return transformedQuery, nil
+		return queryTransformFlowOutput, nil
 	})
-	return userPrefFlow, nil
+	return queryTransformFlow, nil
 }

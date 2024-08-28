@@ -19,7 +19,7 @@ type Metadata struct {
 }
 
 // getMetadata retrieves metadata from the database
-func (d *MovieAgentDB) GetServerMetadata(appVersion string) (*Metadata, error) {
+func (d *MovieDB) GetServerMetadata(appVersion string) (*Metadata, error) {
 	query := `SELECT * FROM app_metadata WHERE "app_version" = $1;`
 	metadata := &Metadata{}
 	rows := d.DB.QueryRowContext(context.Background(), query, appVersion)

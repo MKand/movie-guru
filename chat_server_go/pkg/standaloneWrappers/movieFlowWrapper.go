@@ -5,29 +5,29 @@ import (
 
 	"github.com/firebase/genkit/go/ai"
 	"github.com/firebase/genkit/go/genkit"
-	agents "github.com/movie-guru/pkg/agents"
 	db "github.com/movie-guru/pkg/db"
+	flows "github.com/movie-guru/pkg/flows"
 	types "github.com/movie-guru/pkg/types"
 	utils "github.com/movie-guru/pkg/utils"
 )
 
-type MovieAgent struct {
-	MovieAgentDB *db.MovieAgentDB
-	Flow         *genkit.Flow[*types.MovieAgentInput, *types.MovieAgentOutput, struct{}]
+type MovieFlow struct {
+	MovieDB *db.MovieDB
+	Flow    *genkit.Flow[*types.MovieAgentInput, *types.MovieAgentOutput, struct{}]
 }
 
-func CreateMovieAgent(ctx context.Context, model ai.Model, db *db.MovieAgentDB) (*MovieAgent, error) {
-	flow, err := agents.GetMovieAgentFlow(ctx, model)
+func CreateMovieFlow(ctx context.Context, model ai.Model, db *db.MovieDB) (*MovieFlow, error) {
+	flow, err := flows.GetMovieFlow(ctx, model)
 	if err != nil {
 		return nil, err
 	}
-	return &MovieAgent{
-		MovieAgentDB: db,
-		Flow:         flow,
+	return &MovieFlow{
+		MovieDB: db,
+		Flow:    flow,
 	}, nil
 }
 
-func (m *MovieAgent) Run(movieDocs []*types.MovieContext, history []*types.SimpleMessage, userPreferences *types.UserProfile) (*types.AgentResponse, error) {
+func (m *MovieFlow) Run(movieDocs []*types.MovieContext, history []*types.SimpleMessage, userPreferences *types.UserProfile) (*types.AgentResponse, error) {
 	input := &types.MovieAgentInput{
 		History:          history,
 		UserPreferences:  userPreferences,

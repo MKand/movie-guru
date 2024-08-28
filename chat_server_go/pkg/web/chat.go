@@ -14,25 +14,25 @@ func chat(ctx context.Context, deps *Dependencies, metadata *db.Metadata, h *typ
 		return agentResp
 	}
 
-	pResp, err := deps.PrefAgent.Run(ctx, h, user)
+	pResp, err := deps.UserProfileFlowClient.Run(ctx, h, user)
 	if agentResp, shouldReturn := processFlowOutput(pResp.ModelOutputMetadata, err, h); shouldReturn {
 		return agentResp
 	}
 
-	qResp, err := deps.QueryTransformAgent.Run(simpleHistory, pResp.UserProfile)
+	qResp, err := deps.QueryTransformFlowClient.Run(simpleHistory, pResp.UserProfile)
 	if agentResp, shouldReturn := processFlowOutput(qResp.ModelOutputMetadata, err, h); shouldReturn {
 		return agentResp
 	}
 
 	movieContext := []*types.MovieContext{}
 	if qResp.Intent == types.USERINTENT(types.REQUEST) || qResp.Intent == types.USERINTENT(types.RESPONSE) {
-		movieContext, err = deps.Retriever.RetriveDocuments(ctx, qResp.TransformedQuery)
+		movieContext, err = deps.MovieRetrieverFlowClient.RetriveDocuments(ctx, qResp.TransformedQuery)
 		if agentResp, shouldReturn := processFlowOutput(nil, err, h); shouldReturn {
 			return agentResp
 		}
 	}
 
-	mAgentResp, err := deps.MovieAgent.Run(movieContext, simpleHistory, pResp.UserProfile)
+	mAgentResp, err := deps.MovieFlowClient.Run(movieContext, simpleHistory, pResp.UserProfile)
 	if agentResp, shouldReturn := processFlowOutput(nil, err, h); shouldReturn {
 		return agentResp
 	}

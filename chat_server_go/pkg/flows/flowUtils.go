@@ -1,4 +1,4 @@
-package agents
+package flows
 
 import (
 	"context"
@@ -16,7 +16,7 @@ import (
 	types "github.com/movie-guru/pkg/types"
 )
 
-type AgentDependencies struct {
+type FlowDependencies struct {
 	QueryTransformFlow *genkit.Flow[*types.QueryTransformInput, *types.QueryTransformOutput, struct{}]
 	PrefFlow           *genkit.Flow[*types.ProfileAgentInput, *types.UserProfileAgentOutput, struct{}]
 	MovieFlow          *genkit.Flow[*types.MovieAgentInput, *types.MovieAgentOutput, struct{}]
@@ -25,7 +25,7 @@ type AgentDependencies struct {
 	DB                 *sql.DB
 }
 
-func GetDependencies(ctx context.Context, metadata *db.Metadata, db *sql.DB) *AgentDependencies {
+func GetDependencies(ctx context.Context, metadata *db.Metadata, db *sql.DB) *FlowDependencies {
 	err := vertexai.Init(ctx, &vertexai.Config{ProjectID: os.Getenv("PROJECT_ID"), Location: os.Getenv("GCLOUD_LOCATION")})
 
 	if err != nil {
@@ -52,14 +52,14 @@ func GetDependencies(ctx context.Context, metadata *db.Metadata, db *sql.DB) *Ag
 		log.Fatal("Embedder not found")
 	}
 	ret := DefineRetriever(metadata.RetrieverLength, db, embedder)
-	retFlow := DefineRetFlow(ctx, ret)
+	retFlow := GetRetrieverFlow(ctx, ret)
 
-	movieAgentFlow, err := GetMovieAgentFlow(ctx, model)
+	movieAgentFlow, err := GetMovieFlow(ctx, model)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	deps := &AgentDependencies{
+	deps := &FlowDependencies{
 		QueryTransformFlow: queryTransformFlow,
 		PrefFlow:           userProfileFlow,
 		MovieFlow:          movieAgentFlow,

@@ -7,8 +7,8 @@ import (
 
 	"github.com/firebase/genkit/go/genkit"
 
-	. "github.com/movie-guru/pkg/agents"
 	"github.com/movie-guru/pkg/db"
+	. "github.com/movie-guru/pkg/flows"
 )
 
 func main() {

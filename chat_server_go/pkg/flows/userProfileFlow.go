@@ -1,4 +1,4 @@
-package agents
+package flows
 
 import (
 	"context"
@@ -52,8 +52,8 @@ func GetUserProfileFlow(ctx context.Context, model ai.Model) (*genkit.Flow[*type
 		return nil, err
 	}
 	// Define a simple flow that prompts an LLM to generate menu suggestions.
-	userPrefFlow := genkit.DefineFlow("userPreferencesFlow", func(ctx context.Context, input *types.ProfileAgentInput) (*types.UserProfileAgentOutput, error) {
-		userPrefOutput := &types.UserProfileAgentOutput{
+	userProfileFlow := genkit.DefineFlow("userProfileFlow", func(ctx context.Context, input *types.ProfileAgentInput) (*types.UserProfileAgentOutput, error) {
+		userProfileFlowOutput := &types.UserProfileAgentOutput{
 			ModelOutputMetadata: &types.ModelOutputMetadata{
 				SafetyIssue: false,
 			},
@@ -70,12 +70,12 @@ func GetUserProfileFlow(ctx context.Context, model ai.Model) (*genkit.Flow[*type
 		if err != nil {
 			if blockedErr, ok := err.(*genai.BlockedError); ok {
 				fmt.Println("Request was blocked:", blockedErr)
-				userPrefOutput = &types.UserProfileAgentOutput{
+				userProfileFlowOutput = &types.UserProfileAgentOutput{
 					ModelOutputMetadata: &types.ModelOutputMetadata{
 						SafetyIssue: true,
 					},
 				}
-				return userPrefOutput, nil
+				return userProfileFlowOutput, nil
 
 			} else {
 				return nil, err
@@ -83,12 +83,12 @@ func GetUserProfileFlow(ctx context.Context, model ai.Model) (*genkit.Flow[*type
 			}
 		}
 		t := resp.Text()
-		err = json.Unmarshal([]byte(t), &userPrefOutput)
+		err = json.Unmarshal([]byte(t), &userProfileFlowOutput)
 		if err != nil {
 			return nil, err
 		}
-		log.Println(userPrefOutput)
-		return userPrefOutput, nil
+		log.Println(userProfileFlowOutput)
+		return userProfileFlowOutput, nil
 	})
-	return userPrefFlow, nil
+	return userProfileFlow, nil
 }

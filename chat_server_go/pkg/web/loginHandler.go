@@ -18,11 +18,11 @@ func (e *AuthorizationError) Error() string {
 }
 
 type UserLoginHandler struct {
-	db            *db.MovieAgentDB
+	db            *db.MovieDB
 	tokenAudience string
 }
 
-func NewUserLoginHandler(tokenAudience string, db *db.MovieAgentDB) *UserLoginHandler {
+func NewUserLoginHandler(tokenAudience string, db *db.MovieDB) *UserLoginHandler {
 	return &UserLoginHandler{
 		db:            db,
 		tokenAudience: tokenAudience,

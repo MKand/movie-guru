@@ -6,9 +6,9 @@ import (
 )
 
 type Dependencies struct {
-	QueryTransformAgent *standaloneWrappers.QueryTransformAgent
-	PrefAgent           *standaloneWrappers.ProfileAgent
-	MovieAgent          *standaloneWrappers.MovieAgent
-	Retriever           *standaloneWrappers.MovieRetriever
-	DB                  *db.MovieAgentDB
+	QueryTransformFlow *standaloneWrappers.QueryTransformFlow
+	UserProfileFlow    *standaloneWrappers.ProfileFlow
+	MovieFlow          *standaloneWrappers.MovieFlow
+	MovieRetrieverFlow *standaloneWrappers.MovieRetrieverFlow
+	DB                 *db.MovieDB
 }

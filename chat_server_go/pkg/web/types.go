@@ -25,9 +25,9 @@ type ChatRequest struct {
 }
 
 type Dependencies struct {
-	QueryTransformAgent *wrappers.QueryTransformAgent
-	PrefAgent           *wrappers.ProfileAgent
-	MovieAgent          *wrappers.MovieAgent
-	Retriever           *wrappers.MovieRetriever
-	DB                  *db.MovieAgentDB
+	QueryTransformFlowClient *wrappers.QueryTransformFlowClient
+	UserProfileFlowClient    *wrappers.UserProfileFlowClient
+	MovieFlowClient          *wrappers.MovieFlowClient
+	MovieRetrieverFlowClient *wrappers.MovieRetrieverFlowClient
+	DB                       *db.MovieDB
 }

@@ -7,7 +7,7 @@ import (
 )
 
 // create_user creates a new user in the database
-func (db *MovieAgentDB) CreateUser(user string) error {
+func (db *MovieDB) CreateUser(user string) error {
 	query := `
         INSERT INTO user_logins (email) VALUES ($1)
         ON CONFLICT (email) DO UPDATE
@@ -18,7 +18,7 @@ func (db *MovieAgentDB) CreateUser(user string) error {
 }
 
 // check_user checks if the user exists in the database
-func (db *MovieAgentDB) CheckUser(user string) bool {
+func (db *MovieDB) CheckUser(user string) bool {
 	query := `SELECT email FROM user_logins WHERE "email" = $1;`
 	var email string
 	err := db.DB.QueryRowContext(context.Background(), query, user).Scan(&email)
@@ -26,7 +26,7 @@ func (db *MovieAgentDB) CheckUser(user string) bool {
 }
 
 // get_invite_codes retrieves valid invite codes from the database
-func (db *MovieAgentDB) GetInviteCodes() ([]string, error) {
+func (db *MovieDB) GetInviteCodes() ([]string, error) {
 	query := `SELECT code FROM invite_codes WHERE valid = true`
 	rows, err := db.DB.QueryContext(context.Background(), query)
 	if err != nil {

@@ -239,7 +239,7 @@ func createStartupHandler(deps *Dependencies) http.HandlerFunc {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
-			context, err := deps.Retriever.RetriveDocuments(ctx, randomisedFeaturedFilmsQuery())
+			context, err := deps.MovieRetrieverFlowClient.RetriveDocuments(ctx, randomisedFeaturedFilmsQuery())
 			agentResp := types.NewAgentResponse()
 			agentResp.Context = context[0:5]
 			agentResp.Preferences = pref
@@ -256,7 +256,7 @@ func createStartupHandler(deps *Dependencies) http.HandlerFunc {
 	}
 }
 
-func createPreferencesHandler(movieAgentDB *db.MovieAgentDB) http.HandlerFunc {
+func createPreferencesHandler(MovieDB *db.MovieDB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		errLogPrefix := "Error: PreferencesHandler: "
 		var err error
@@ -285,7 +285,7 @@ func createPreferencesHandler(movieAgentDB *db.MovieAgentDB) http.HandlerFunc {
 		if r.Method == "GET" {
 			addResponseHeaders(w, origin)
 			user := sessionInfo.User
-			pref, err := movieAgentDB.GetCurrentProfile(ctx, user)
+			pref, err := MovieDB.GetCurrentProfile(ctx, user)
 			if err != nil {
 				log.Println(errLogPrefix, "Cannot get preferences for user:", user, err.Error())
 				http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -304,7 +304,7 @@ func createPreferencesHandler(movieAgentDB *db.MovieAgentDB) http.HandlerFunc {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
-			err = movieAgentDB.UpdateProfile(ctx, pref.Content, sessionInfo.User)
+			err = MovieDB.UpdateProfile(ctx, pref.Content, sessionInfo.User)
 			if err != nil {
 				log.Println(errLogPrefix, err.Error())
 				http.Error(w, err.Error(), http.StatusInternalServerError)

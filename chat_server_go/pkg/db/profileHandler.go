@@ -7,9 +7,9 @@ import (
 	types "github.com/movie-guru/pkg/types"
 )
 
-func (movieAgentDB *MovieAgentDB) GetCurrentProfile(ctx context.Context, user string) (*types.UserProfile, error) {
+func (MovieDB *MovieDB) GetCurrentProfile(ctx context.Context, user string) (*types.UserProfile, error) {
 	preferences := types.NewUserProfile()
-	rows := movieAgentDB.DB.QueryRowContext(ctx, `
+	rows := MovieDB.DB.QueryRowContext(ctx, `
 	SELECT preferences FROM user_preferences 
 	WHERE "user" = $1;`,
 		user)
@@ -25,7 +25,7 @@ func (movieAgentDB *MovieAgentDB) GetCurrentProfile(ctx context.Context, user st
 	return preferences, nil
 }
 
-func (movieAgentDB *MovieAgentDB) UpdateProfile(ctx context.Context, newPref *types.UserProfile, user string) error {
+func (MovieDB *MovieDB) UpdateProfile(ctx context.Context, newPref *types.UserProfile, user string) error {
 	newPreferencesStr, err := json.Marshal(newPref)
 	if err != nil {
 		return err
@@ -38,19 +38,19 @@ func (movieAgentDB *MovieAgentDB) UpdateProfile(ctx context.Context, newPref *ty
     `
 
 	// Execute the query (replace with your actual execute_query function)
-	_, err = movieAgentDB.DB.ExecContext(ctx, query, user, newPreferencesStr)
+	_, err = MovieDB.DB.ExecContext(ctx, query, user, newPreferencesStr)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (movieAgentDB *MovieAgentDB) DeleteProfile(ctx context.Context, user string) error {
+func (MovieDB *MovieDB) DeleteProfile(ctx context.Context, user string) error {
 	query := `
 		DELETE FROM user_preferences
 		WHERE "user" = %1;
 	`
-	_, err := movieAgentDB.DB.ExecContext(ctx, query, user)
+	_, err := MovieDB.DB.ExecContext(ctx, query, user)
 	if err != nil {
 		return err
 	}

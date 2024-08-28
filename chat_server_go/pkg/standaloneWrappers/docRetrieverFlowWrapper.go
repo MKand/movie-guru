@@ -8,8 +8,8 @@ import (
 	"github.com/firebase/genkit/go/ai"
 	"github.com/firebase/genkit/go/genkit"
 	_ "github.com/lib/pq"
-	agents "github.com/movie-guru/pkg/agents"
 	db "github.com/movie-guru/pkg/db"
+	flows "github.com/movie-guru/pkg/flows"
 	types "github.com/movie-guru/pkg/types"
 )
 
@@ -50,21 +50,21 @@ func parseMovieContexts(docs []*ai.Document) ([]*types.MovieContext, error) {
 	return movies, nil
 }
 
-type MovieRetriever struct {
+type MovieRetrieverFlow struct {
 	RetrieverLength int
 	Flow            *genkit.Flow[*ai.RetrieverRequest, []*ai.Document, struct{}]
 }
 
-func CreateMovieRetriever(ctx context.Context, embeddingModelName string, maxRetLength int, db *db.MovieAgentDB) *MovieRetriever {
-	ret := agents.CreateMovieRetriever(embeddingModelName, maxRetLength, db.DB)
-	flow := agents.DefineRetFlow(ctx, ret.Retriever)
-	return &MovieRetriever{
+func CreateMovieRetrieverFlow(ctx context.Context, embeddingModelName string, maxRetLength int, db *db.MovieDB) *MovieRetrieverFlow {
+	ret := flows.CreateMovieRetriever(embeddingModelName, maxRetLength, db.DB)
+	flow := flows.GetRetrieverFlow(ctx, ret.Retriever)
+	return &MovieRetrieverFlow{
 		RetrieverLength: maxRetLength,
 		Flow:            flow,
 	}
 }
 
-func (r *MovieRetriever) RetriveDocuments(ctx context.Context, query string) ([]*types.MovieContext, error) {
+func (r *MovieRetrieverFlow) RetriveDocuments(ctx context.Context, query string) ([]*types.MovieContext, error) {
 	doc := ai.DocumentFromText(query, nil)
 	retDoc := ai.RetrieverRequest{
 		Document: doc,

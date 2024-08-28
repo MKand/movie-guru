@@ -6,30 +6,30 @@ import (
 	"github.com/firebase/genkit/go/ai"
 	"github.com/firebase/genkit/go/genkit"
 
-	agents "github.com/movie-guru/pkg/agents"
 	db "github.com/movie-guru/pkg/db"
+	flows "github.com/movie-guru/pkg/flows"
 	types "github.com/movie-guru/pkg/types"
 	utils "github.com/movie-guru/pkg/utils"
 )
 
-type ProfileAgent struct {
-	MovieAgentDB *db.MovieAgentDB
-	Flow         *genkit.Flow[*types.ProfileAgentInput, *types.UserProfileAgentOutput, struct{}]
+type ProfileFlow struct {
+	MovieDB *db.MovieDB
+	Flow    *genkit.Flow[*types.ProfileAgentInput, *types.UserProfileAgentOutput, struct{}]
 }
 
-func CreateProfileAgent(ctx context.Context, model ai.Model, db *db.MovieAgentDB) (*ProfileAgent, error) {
-	flow, err := agents.GetUserProfileFlow(ctx, model)
+func CreateProfileFlow(ctx context.Context, model ai.Model, db *db.MovieDB) (*ProfileFlow, error) {
+	flow, err := flows.GetUserProfileFlow(ctx, model)
 	if err != nil {
 		return nil, err
 	}
-	return &ProfileAgent{
-		MovieAgentDB: db,
-		Flow:         flow,
+	return &ProfileFlow{
+		MovieDB: db,
+		Flow:    flow,
 	}, nil
 }
 
-func (p *ProfileAgent) Run(ctx context.Context, history *types.ChatHistory, user string) (*types.UserProfileOutput, error) {
-	userProfile, err := p.MovieAgentDB.GetCurrentProfile(ctx, user)
+func (p *ProfileFlow) Run(ctx context.Context, history *types.ChatHistory, user string) (*types.UserProfileOutput, error) {
+	userProfile, err := p.MovieDB.GetCurrentProfile(ctx, user)
 	userProfileOutput := &types.UserProfileOutput{
 		UserProfile: userProfile,
 		ChangesMade: false,
@@ -64,7 +64,7 @@ func (p *ProfileAgent) Run(ctx context.Context, history *types.ChatHistory, user
 		if err != nil {
 			return userProfileOutput, err
 		}
-		err = p.MovieAgentDB.UpdateProfile(ctx, updatedProfile, user)
+		err = p.MovieDB.UpdateProfile(ctx, updatedProfile, user)
 		if err != nil {
 			return userProfileOutput, err
 		}

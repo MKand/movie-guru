@@ -11,26 +11,26 @@ import (
 	utils "github.com/movie-guru/pkg/utils"
 )
 
-type MovieAgent struct {
-	MovieAgentDB *db.MovieAgentDB
-	URL          string
+type MovieFlowClient struct {
+	MovieDB *db.MovieDB
+	URL     string
 }
 
-func CreateMovieAgent(db *db.MovieAgentDB, URL string) (*MovieAgent, error) {
-	return &MovieAgent{
-		MovieAgentDB: db,
-		URL:          URL + "/movieQAFlow",
+func CreateMovieFlowClient(db *db.MovieDB, URL string) (*MovieFlowClient, error) {
+	return &MovieFlowClient{
+		MovieDB: db,
+		URL:     URL + "/movieQAFlow",
 	}, nil
 }
 
-func (m *MovieAgent) Run(movieDocs []*types.MovieContext, history []*types.SimpleMessage, userPreferences *types.UserProfile) (*types.AgentResponse, error) {
+func (flowClient *MovieFlowClient) Run(movieDocs []*types.MovieContext, history []*types.SimpleMessage, userPreferences *types.UserProfile) (*types.AgentResponse, error) {
 	input := &types.MovieAgentInput{
 		History:          history,
 		UserPreferences:  userPreferences,
 		ContextDocuments: movieDocs,
 		UserMessage:      history[len(history)-1].Content,
 	}
-	resp, err := m.runFlow(input)
+	resp, err := flowClient.runFlow(input)
 	if err != nil {
 		return nil, err
 	}
@@ -51,13 +51,13 @@ func (m *MovieAgent) Run(movieDocs []*types.MovieContext, history []*types.Simpl
 	return agentResponse, nil
 }
 
-func (agent *MovieAgent) runFlow(input *types.MovieAgentInput) (*types.MovieAgentOutput, error) {
+func (flowClient *MovieFlowClient) runFlow(input *types.MovieAgentInput) (*types.MovieAgentOutput, error) {
 	// Marshal the input struct to JSON
 	inputJSON, err := json.Marshal(input)
 	if err != nil {
 		return nil, fmt.Errorf("error marshaling input to JSON: %w", err)
 	}
-	req, err := http.NewRequest("POST", agent.URL, bytes.NewBuffer(inputJSON))
+	req, err := http.NewRequest("POST", flowClient.URL, bytes.NewBuffer(inputJSON))
 	if err != nil {
 		fmt.Println("Error creating request:", err)
 		return nil, err

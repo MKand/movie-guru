@@ -17,19 +17,19 @@ func main() {
 
 	URL := os.Getenv("FLOWS_URL")
 
-	MovieAgentDB, err := db.GetDB()
+	MovieDB, err := db.GetDB()
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer MovieAgentDB.DB.Close()
+	defer MovieDB.DB.Close()
 
-	metadata, err := MovieAgentDB.GetServerMetadata(os.Getenv("APP_VERSION"))
+	metadata, err := MovieDB.GetServerMetadata(os.Getenv("APP_VERSION"))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	ulh := web.NewUserLoginHandler(metadata.TokenAudience, MovieAgentDB)
-	deps := getDependencies(ctx, metadata, MovieAgentDB, URL)
+	ulh := web.NewUserLoginHandler(metadata.TokenAudience, MovieDB)
+	deps := getDependencies(ctx, metadata, MovieDB, URL)
 
 	web.StartServer(ulh, metadata, deps)
 
@@ -39,34 +39,34 @@ func main() {
 
 }
 
-func getDependencies(ctx context.Context, metadata *db.Metadata, db *db.MovieAgentDB, url string) *web.Dependencies {
+func getDependencies(ctx context.Context, metadata *db.Metadata, db *db.MovieDB, url string) *web.Dependencies {
 	model := vertexai.Model(metadata.GoogleChatModelName)
 
 	if model == nil {
 		log.Fatal("Model not found")
 	}
-	queryTransformAgent, err := wrappers.CreateQueryTransformAgent(db, url)
+	queryTransformFlowClient, err := wrappers.CreateQueryTransformFlowClient(db, url)
 	if err != nil {
 		log.Fatal(err)
 	}
-	prefAgent, err := wrappers.CreateProfileAgent(db, url)
+	userProfileFlowClient, err := wrappers.CreateUserProfileFlowClient(db, url)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	ret := wrappers.CreateMovieRetriever(metadata.RetrieverLength, url)
+	movieRetrieverFlowClient := wrappers.CreateMovieRetrieverFlowClient(metadata.RetrieverLength, url)
 
-	movieAgent, err := wrappers.CreateMovieAgent(db, url)
+	movieFlowClient, err := wrappers.CreateMovieFlowClient(db, url)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	deps := &web.Dependencies{
-		QueryTransformAgent: queryTransformAgent,
-		PrefAgent:           prefAgent,
-		MovieAgent:          movieAgent,
-		Retriever:           ret,
-		DB:                  db,
+		QueryTransformFlowClient: queryTransformFlowClient,
+		UserProfileFlowClient:    userProfileFlowClient,
+		MovieFlowClient:          movieFlowClient,
+		MovieRetrieverFlowClient: movieRetrieverFlowClient,
+		DB:                       db,
 	}
 	return deps
 }

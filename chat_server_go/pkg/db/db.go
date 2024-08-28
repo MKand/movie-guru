@@ -10,17 +10,17 @@ import (
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
-type MovieAgentDB struct {
+type MovieDB struct {
 	DB *sql.DB
 }
 
-func GetDB() (*MovieAgentDB, error) {
+func GetDB() (*MovieDB, error) {
 	db, err := connectToDB()
 	if err != nil {
 		return nil, err
 	}
 
-	return &MovieAgentDB{DB: db}, nil
+	return &MovieDB{DB: db}, nil
 }
 
 func connectToDB() (*sql.DB, error) {

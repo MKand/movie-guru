@@ -51,38 +51,38 @@ func parseMovieContexts(docs []*ai.Document) ([]*types.MovieContext, error) {
 	return movies, nil
 }
 
-type MovieRetriever struct {
+type MovieRetrieverFlowClient struct {
 	RetrieverLength int
 	URL             string
 }
 
-func CreateMovieRetriever(retrieverLength int, url string) *MovieRetriever {
-	return &MovieRetriever{
+func CreateMovieRetrieverFlowClient(retrieverLength int, url string) *MovieRetrieverFlowClient {
+	return &MovieRetrieverFlowClient{
 		RetrieverLength: retrieverLength,
 		URL:             url + "/movieDocFlow",
 	}
 }
 
-func (r *MovieRetriever) RetriveDocuments(ctx context.Context, query string) ([]*types.MovieContext, error) {
+func (flowClient *MovieRetrieverFlowClient) RetriveDocuments(ctx context.Context, query string) ([]*types.MovieContext, error) {
 	doc := ai.DocumentFromText(query, nil)
 	retDoc := ai.RetrieverRequest{
 		Document: doc,
-		Options:  r.RetrieverLength,
+		Options:  flowClient.RetrieverLength,
 	}
-	rResp, err := r.runFlow(retDoc)
+	rResp, err := flowClient.runFlow(retDoc)
 	if err != nil {
 		return nil, err
 	}
 	return parseMovieContexts(rResp)
 }
 
-func (m *MovieRetriever) runFlow(retRequest ai.RetrieverRequest) ([]*ai.Document, error) {
+func (flowClient *MovieRetrieverFlowClient) runFlow(retRequest ai.RetrieverRequest) ([]*ai.Document, error) {
 	// Marshal the input struct to JSON
 	inputJSON, err := json.Marshal(retRequest)
 	if err != nil {
 		return nil, fmt.Errorf("error marshaling input to JSON: %w", err)
 	}
-	req, err := http.NewRequest("POST", m.URL, bytes.NewBuffer(inputJSON))
+	req, err := http.NewRequest("POST", flowClient.URL, bytes.NewBuffer(inputJSON))
 	if err != nil {
 		fmt.Println("Error creating request:", err)
 		return nil, err

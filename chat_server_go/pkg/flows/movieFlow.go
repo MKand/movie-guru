@@ -1,4 +1,4 @@
-package agents
+package flows
 
 import (
 	"context"
@@ -15,7 +15,7 @@ import (
 	types "github.com/movie-guru/pkg/types"
 )
 
-func GetMovieAgentFlow(ctx context.Context, model ai.Model) (*genkit.Flow[*types.MovieAgentInput, *types.MovieAgentOutput, struct{}], error) {
+func GetMovieFlow(ctx context.Context, model ai.Model) (*genkit.Flow[*types.MovieAgentInput, *types.MovieAgentOutput, struct{}], error) {
 	movieAgentPrompt, err := dotprompt.Define("movieAgent",
 		`Your mission is to be a movie expert with knowledge about movies. Your mission is to answer the user's movie-related questions with useful information.
 		You also have to be friendly. If the user greets you, greet them back. If the user says or wants to end the conversation, say goodbye in a friendly way. 
@@ -64,10 +64,10 @@ func GetMovieAgentFlow(ctx context.Context, model ai.Model) (*genkit.Flow[*types
 		return nil, err
 	}
 
-	movieAgentFlow := genkit.DefineFlow(
+	movieFlow := genkit.DefineFlow(
 		"movieQAFlow",
 		func(ctx context.Context, input *types.MovieAgentInput) (*types.MovieAgentOutput, error) {
-			var movieAgentOutput *types.MovieAgentOutput
+			var movieFlowOutput *types.MovieAgentOutput
 			resp, err := movieAgentPrompt.Generate(ctx,
 				&dotprompt.PromptRequest{
 					Variables: input,
@@ -77,14 +77,14 @@ func GetMovieAgentFlow(ctx context.Context, model ai.Model) (*genkit.Flow[*types
 			if err != nil {
 				if blockedErr, ok := err.(*genai.BlockedError); ok {
 					fmt.Println("Request was blocked:", blockedErr)
-					movieAgentOutput = &types.MovieAgentOutput{
+					movieFlowOutput = &types.MovieAgentOutput{
 						ModelOutputMetadata: &types.ModelOutputMetadata{
 							SafetyIssue: true,
 						},
 						RelevantMoviesTitles: make([]*types.RelevantMovie, 0),
 						WrongQuery:           false,
 					}
-					return movieAgentOutput, nil
+					return movieFlowOutput, nil
 
 				} else {
 					return nil, err
@@ -98,14 +98,14 @@ func GetMovieAgentFlow(ctx context.Context, model ai.Model) (*genkit.Flow[*types
 					log.Printf("Didn't get json resp from movie agent. %s", t)
 				}
 			}
-			err = json.Unmarshal([]byte(parsedJson), &movieAgentOutput)
+			err = json.Unmarshal([]byte(parsedJson), &movieFlowOutput)
 			if err != nil {
 				return nil, err
 			}
-			return movieAgentOutput, nil
+			return movieFlowOutput, nil
 		},
 	)
-	return movieAgentFlow, nil
+	return movieFlow, nil
 }
 
 func extractText(jsonText string) string {

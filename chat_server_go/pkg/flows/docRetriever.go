@@ -1,4 +1,4 @@
-package agents
+package flows
 
 import (
 	"context"
@@ -93,7 +93,7 @@ func CreateMovieRetriever(embeddingModelName string, maxRetLength int, db *sql.D
 	}
 }
 
-func DefineRetFlow(ctx context.Context, ret ai.Retriever) *genkit.Flow[*ai.RetrieverRequest, []*ai.Document, struct{}] {
+func GetRetrieverFlow(ctx context.Context, ret ai.Retriever) *genkit.Flow[*ai.RetrieverRequest, []*ai.Document, struct{}] {
 	retFlow := genkit.DefineFlow("movieDocFlow",
 		func(ctx context.Context, input *ai.RetrieverRequest) ([]*ai.Document, error) {
 			retOutput := make([]*ai.Document, 0, 10)
@@ -130,7 +130,7 @@ func DefineRetriever(maxRetLength int, db *sql.DB, embedder ai.Embedder) ai.Retr
 		}
 		defer rows.Close()
 
-		res := &ai.RetrieverResponse{}
+		retrieverResponse := &ai.RetrieverResponse{}
 		for rows.Next() {
 			var title, poster, content string
 			if err := rows.Scan(&title, &poster, &content); err != nil {
@@ -144,12 +144,12 @@ func DefineRetriever(maxRetLength int, db *sql.DB, embedder ai.Embedder) ai.Retr
 				Content:  []*ai.Part{ai.NewTextPart(content)},
 				Metadata: meta,
 			}
-			res.Documents = append(res.Documents, doc)
+			retrieverResponse.Documents = append(retrieverResponse.Documents, doc)
 		}
 		if err := rows.Err(); err != nil {
 			return nil, err
 		}
-		return res, nil
+		return retrieverResponse, nil
 	}
 	return ai.DefineRetriever("pgvector", "movieRetriever", f)
 }
