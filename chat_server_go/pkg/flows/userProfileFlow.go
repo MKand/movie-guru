@@ -16,7 +16,7 @@ import (
 	types "github.com/movie-guru/pkg/types"
 )
 
-func GetUserProfileFlow(ctx context.Context, model ai.Model) (*genkit.Flow[*types.ProfileAgentInput, *types.UserProfileAgentOutput, struct{}], error) {
+func GetUserProfileFlow(ctx context.Context, model ai.Model) (*genkit.Flow[*types.UserProfileFlowInput, *types.UserProfileFlowOutput, struct{}], error) {
 
 	prefPrompt, err := dotprompt.Define("userPrefileAgent",
 		`You are a user's movie profiling expert focused on uncovering users' enduring likes and dislikes. Analyze the user message and extract ONLY strongly expressed, enduring likes and dislikes related to movies.
@@ -40,8 +40,8 @@ func GetUserProfileFlow(ctx context.Context, model ai.Model) (*genkit.Flow[*type
 
 		dotprompt.Config{
 			Model:        model,
-			InputSchema:  jsonschema.Reflect(types.ProfileAgentInput{}),
-			OutputSchema: jsonschema.Reflect(types.UserProfileAgentOutput{}),
+			InputSchema:  jsonschema.Reflect(types.UserProfileFlowInput{}),
+			OutputSchema: jsonschema.Reflect(types.UserProfileFlowOutput{}),
 			OutputFormat: ai.OutputFormatJSON,
 			GenerationConfig: &ai.GenerationCommonConfig{
 				Temperature: 0.5,
@@ -52,8 +52,8 @@ func GetUserProfileFlow(ctx context.Context, model ai.Model) (*genkit.Flow[*type
 		return nil, err
 	}
 	// Define a simple flow that prompts an LLM to generate menu suggestions.
-	userProfileFlow := genkit.DefineFlow("userProfileFlow", func(ctx context.Context, input *types.ProfileAgentInput) (*types.UserProfileAgentOutput, error) {
-		userProfileFlowOutput := &types.UserProfileAgentOutput{
+	userProfileFlow := genkit.DefineFlow("userProfileFlow", func(ctx context.Context, input *types.UserProfileFlowInput) (*types.UserProfileFlowOutput, error) {
+		userProfileFlowOutput := &types.UserProfileFlowOutput{
 			ModelOutputMetadata: &types.ModelOutputMetadata{
 				SafetyIssue: false,
 			},
@@ -70,7 +70,7 @@ func GetUserProfileFlow(ctx context.Context, model ai.Model) (*genkit.Flow[*type
 		if err != nil {
 			if blockedErr, ok := err.(*genai.BlockedError); ok {
 				fmt.Println("Request was blocked:", blockedErr)
-				userProfileFlowOutput = &types.UserProfileAgentOutput{
+				userProfileFlowOutput = &types.UserProfileFlowOutput{
 					ModelOutputMetadata: &types.ModelOutputMetadata{
 						SafetyIssue: true,
 					},

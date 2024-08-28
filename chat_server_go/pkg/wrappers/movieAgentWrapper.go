@@ -24,7 +24,7 @@ func CreateMovieFlowClient(db *db.MovieDB, URL string) (*MovieFlowClient, error)
 }
 
 func (flowClient *MovieFlowClient) Run(movieDocs []*types.MovieContext, history []*types.SimpleMessage, userPreferences *types.UserProfile) (*types.AgentResponse, error) {
-	input := &types.MovieAgentInput{
+	input := &types.MovieFlowInput{
 		History:          history,
 		UserPreferences:  userPreferences,
 		ContextDocuments: movieDocs,
@@ -51,7 +51,7 @@ func (flowClient *MovieFlowClient) Run(movieDocs []*types.MovieContext, history 
 	return agentResponse, nil
 }
 
-func (flowClient *MovieFlowClient) runFlow(input *types.MovieAgentInput) (*types.MovieAgentOutput, error) {
+func (flowClient *MovieFlowClient) runFlow(input *types.MovieFlowInput) (*types.MovieFlowOutput, error) {
 	// Marshal the input struct to JSON
 	inputJSON, err := json.Marshal(input)
 	if err != nil {
@@ -71,7 +71,7 @@ func (flowClient *MovieFlowClient) runFlow(input *types.MovieAgentInput) (*types
 		return nil, err
 	}
 	var result struct {
-		Result *types.MovieAgentOutput `json:"result"`
+		Result *types.MovieFlowOutput `json:"result"`
 	}
 	defer resp.Body.Close()
 

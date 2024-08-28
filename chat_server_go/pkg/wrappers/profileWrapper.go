@@ -46,8 +46,8 @@ func (flowClient *UserProfileFlowClient) Run(ctx context.Context, history *types
 		return nil, err
 	}
 
-	prefInput := types.ProfileAgentInput{Query: lastUserMessage, AgentMessage: agentMessage}
-	resp, err := flowClient.runFlow(&prefInput)
+	userProfileFlowInput := types.UserProfileFlowInput{Query: lastUserMessage, AgentMessage: agentMessage}
+	resp, err := flowClient.runFlow(&userProfileFlowInput)
 	if err != nil {
 		return userProfileOutput, err
 	}
@@ -69,7 +69,7 @@ func (flowClient *UserProfileFlowClient) Run(ctx context.Context, history *types
 	return userProfileOutput, nil
 }
 
-func (flowClient *UserProfileFlowClient) runFlow(input *types.ProfileAgentInput) (*types.UserProfileAgentOutput, error) {
+func (flowClient *UserProfileFlowClient) runFlow(input *types.UserProfileFlowInput) (*types.UserProfileFlowOutput, error) {
 	// Marshal the input struct to JSON
 	inputJSON, err := json.Marshal(input)
 	if err != nil {
@@ -90,7 +90,7 @@ func (flowClient *UserProfileFlowClient) runFlow(input *types.ProfileAgentInput)
 	}
 
 	var result struct {
-		Result *types.UserProfileAgentOutput `json:"result"`
+		Result *types.UserProfileFlowOutput `json:"result"`
 	}
 	defer resp.Body.Close()
 

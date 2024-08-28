@@ -14,7 +14,7 @@ import (
 
 type ProfileFlow struct {
 	MovieDB *db.MovieDB
-	Flow    *genkit.Flow[*types.ProfileAgentInput, *types.UserProfileAgentOutput, struct{}]
+	Flow    *genkit.Flow[*types.UserProfileFlowInput, *types.UserProfileFlowOutput, struct{}]
 }
 
 func CreateProfileFlow(ctx context.Context, model ai.Model, db *db.MovieDB) (*ProfileFlow, error) {
@@ -50,7 +50,7 @@ func (p *ProfileFlow) Run(ctx context.Context, history *types.ChatHistory, user 
 		return nil, err
 	}
 
-	prefInput := types.ProfileAgentInput{Query: lastUserMessage, AgentMessage: agentMessage}
+	prefInput := types.UserProfileFlowInput{Query: lastUserMessage, AgentMessage: agentMessage}
 	resp, err := p.Flow.Run(ctx, &prefInput)
 	if err != nil {
 		return userProfileOutput, err

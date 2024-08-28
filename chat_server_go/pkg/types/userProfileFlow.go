@@ -1,8 +1,31 @@
 package types
 
-type ProfileAgentInput struct {
+type UserProfileFlowInput struct {
 	Query        string `json:"query"`
 	AgentMessage string `json:"agentMessage"`
+}
+
+type UserProfileFlowOutput struct {
+	ProfileChangeRecommendations []*ProfileChangeRecommendation `json:"profileChangeRecommendations"`
+	ChangesMade                  bool                           `json:"changesMade,omitempty"`
+	*ModelOutputMetadata
+}
+
+type UserProfileOutput struct {
+	UserProfile *UserProfile `json:"userProfile"`
+	ChangesMade bool
+	*ModelOutputMetadata
+}
+
+func NewUserProfileFlowOuput() *UserProfileFlowOutput {
+	return &UserProfileFlowOutput{
+		ProfileChangeRecommendations: make([]*ProfileChangeRecommendation, 5),
+		ChangesMade:                  false,
+		ModelOutputMetadata: &ModelOutputMetadata{
+			Justification: "",
+			SafetyIssue:   false,
+		},
+	}
 }
 
 type MovieFeatureCategory string
@@ -32,29 +55,6 @@ type ProfileChangeRecommendation struct {
 	Reason   string               `json:"reason"`
 	Category MovieFeatureCategory `json:"category"`
 	Sentiment
-}
-
-type UserProfileAgentOutput struct {
-	ProfileChangeRecommendations []*ProfileChangeRecommendation `json:"profileChangeRecommendations"`
-	ChangesMade                  bool                           `json:"changesMade,omitempty"`
-	*ModelOutputMetadata
-}
-
-func NewUserProfileAgentOuput() *UserProfileAgentOutput {
-	return &UserProfileAgentOutput{
-		ProfileChangeRecommendations: make([]*ProfileChangeRecommendation, 5),
-		ChangesMade:                  false,
-		ModelOutputMetadata: &ModelOutputMetadata{
-			Justification: "",
-			SafetyIssue:   false,
-		},
-	}
-}
-
-type UserProfileOutput struct {
-	UserProfile *UserProfile `json:"userProfile"`
-	ChangesMade bool
-	*ModelOutputMetadata
 }
 
 type UserProfile struct {

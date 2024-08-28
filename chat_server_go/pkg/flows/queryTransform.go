@@ -15,7 +15,7 @@ import (
 	types "github.com/movie-guru/pkg/types"
 )
 
-func GetQueryTransformFlow(ctx context.Context, model ai.Model) (*genkit.Flow[*types.QueryTransformInput, *types.QueryTransformOutput, struct{}], error) {
+func GetQueryTransformFlow(ctx context.Context, model ai.Model) (*genkit.Flow[*types.QueryTransformFlowInput, *types.QueryTransformFlowOutput, struct{}], error) {
 
 	queryTransformPrompt, err := dotprompt.Define("queryTransform",
 		`You are a search query refinement expert. Your goal is NOT to answer the user's question directly, but to craft the most effective raw query for a vector search engine to retrieve information relevant to a user's current request, taking into account their conversation history and known preferences.
@@ -53,8 +53,8 @@ func GetQueryTransformFlow(ctx context.Context, model ai.Model) (*genkit.Flow[*t
 
 		dotprompt.Config{
 			Model:        model,
-			InputSchema:  jsonschema.Reflect(types.QueryTransformInput{}),
-			OutputSchema: jsonschema.Reflect(types.QueryTransformOutput{}),
+			InputSchema:  jsonschema.Reflect(types.QueryTransformFlowInput{}),
+			OutputSchema: jsonschema.Reflect(types.QueryTransformFlowOutput{}),
 			OutputFormat: ai.OutputFormatJSON,
 			GenerationConfig: &ai.GenerationCommonConfig{
 				Temperature: 0.5,
@@ -65,8 +65,8 @@ func GetQueryTransformFlow(ctx context.Context, model ai.Model) (*genkit.Flow[*t
 		return nil, err
 	}
 	// Define a simple flow that prompts an LLM to generate menu suggestions.
-	queryTransformFlow := genkit.DefineFlow("queryTransformFlow", func(ctx context.Context, input *types.QueryTransformInput) (*types.QueryTransformOutput, error) {
-		queryTransformFlowOutput := &types.QueryTransformOutput{
+	queryTransformFlow := genkit.DefineFlow("queryTransformFlow", func(ctx context.Context, input *types.QueryTransformFlowInput) (*types.QueryTransformFlowOutput, error) {
+		queryTransformFlowOutput := &types.QueryTransformFlowOutput{
 			ModelOutputMetadata: &types.ModelOutputMetadata{
 				SafetyIssue:   false,
 				Justification: "",
@@ -84,7 +84,7 @@ func GetQueryTransformFlow(ctx context.Context, model ai.Model) (*genkit.Flow[*t
 		if err != nil {
 			if blockedErr, ok := err.(*genai.BlockedError); ok {
 				fmt.Println("Request was blocked:", blockedErr)
-				queryTransformFlowOutput = &types.QueryTransformOutput{
+				queryTransformFlowOutput = &types.QueryTransformFlowOutput{
 					ModelOutputMetadata: &types.ModelOutputMetadata{
 						SafetyIssue: true,
 					},

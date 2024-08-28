@@ -15,7 +15,7 @@ import (
 	types "github.com/movie-guru/pkg/types"
 )
 
-func GetMovieFlow(ctx context.Context, model ai.Model) (*genkit.Flow[*types.MovieAgentInput, *types.MovieAgentOutput, struct{}], error) {
+func GetMovieFlow(ctx context.Context, model ai.Model) (*genkit.Flow[*types.MovieFlowInput, *types.MovieFlowOutput, struct{}], error) {
 	movieAgentPrompt, err := dotprompt.Define("movieAgent",
 		`Your mission is to be a movie expert with knowledge about movies. Your mission is to answer the user's movie-related questions with useful information.
 		You also have to be friendly. If the user greets you, greet them back. If the user says or wants to end the conversation, say goodbye in a friendly way. 
@@ -52,8 +52,8 @@ func GetMovieFlow(ctx context.Context, model ai.Model) (*genkit.Flow[*types.Movi
 
 		dotprompt.Config{
 			Model:        model,
-			InputSchema:  jsonschema.Reflect(types.MovieAgentInput{}),
-			OutputSchema: jsonschema.Reflect(types.MovieAgentOutput{}),
+			InputSchema:  jsonschema.Reflect(types.MovieFlowInput{}),
+			OutputSchema: jsonschema.Reflect(types.MovieFlowOutput{}),
 			OutputFormat: ai.OutputFormatText,
 			GenerationConfig: &ai.GenerationCommonConfig{
 				Temperature: 0.5,
@@ -66,8 +66,8 @@ func GetMovieFlow(ctx context.Context, model ai.Model) (*genkit.Flow[*types.Movi
 
 	movieFlow := genkit.DefineFlow(
 		"movieQAFlow",
-		func(ctx context.Context, input *types.MovieAgentInput) (*types.MovieAgentOutput, error) {
-			var movieFlowOutput *types.MovieAgentOutput
+		func(ctx context.Context, input *types.MovieFlowInput) (*types.MovieFlowOutput, error) {
+			var movieFlowOutput *types.MovieFlowOutput
 			resp, err := movieAgentPrompt.Generate(ctx,
 				&dotprompt.PromptRequest{
 					Variables: input,
@@ -77,7 +77,7 @@ func GetMovieFlow(ctx context.Context, model ai.Model) (*genkit.Flow[*types.Movi
 			if err != nil {
 				if blockedErr, ok := err.(*genai.BlockedError); ok {
 					fmt.Println("Request was blocked:", blockedErr)
-					movieFlowOutput = &types.MovieAgentOutput{
+					movieFlowOutput = &types.MovieFlowOutput{
 						ModelOutputMetadata: &types.ModelOutputMetadata{
 							SafetyIssue: true,
 						},

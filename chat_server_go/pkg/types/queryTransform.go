@@ -11,13 +11,13 @@ const (
 	ACKNOWLEDGE      RESULT = "ACKNOWLEDGE"
 )
 
-type QueryTransformOutput struct {
+type QueryTransformFlowOutput struct {
 	TransformedQuery string     `json:"transformedQuery, omitempty"`
 	Intent           USERINTENT `json:"userIntent, omitempty"`
 	*ModelOutputMetadata
 }
 
-type QueryTransformInput struct {
+type QueryTransformFlowInput struct {
 	History     []*SimpleMessage `json:"history"`
 	Profile     *UserProfile     `json:"userProfile"`
 	UserMessage string           `json:"userMessage"`

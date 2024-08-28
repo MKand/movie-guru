@@ -13,7 +13,7 @@ import (
 
 type MovieFlow struct {
 	MovieDB *db.MovieDB
-	Flow    *genkit.Flow[*types.MovieAgentInput, *types.MovieAgentOutput, struct{}]
+	Flow    *genkit.Flow[*types.MovieFlowInput, *types.MovieFlowOutput, struct{}]
 }
 
 func CreateMovieFlow(ctx context.Context, model ai.Model, db *db.MovieDB) (*MovieFlow, error) {
@@ -28,7 +28,7 @@ func CreateMovieFlow(ctx context.Context, model ai.Model, db *db.MovieDB) (*Movi
 }
 
 func (m *MovieFlow) Run(movieDocs []*types.MovieContext, history []*types.SimpleMessage, userPreferences *types.UserProfile) (*types.AgentResponse, error) {
-	input := &types.MovieAgentInput{
+	input := &types.MovieFlowInput{
 		History:          history,
 		UserPreferences:  userPreferences,
 		ContextDocuments: movieDocs,

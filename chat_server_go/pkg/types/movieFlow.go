@@ -1,6 +1,6 @@
 package types
 
-type MovieAgentOutput struct {
+type MovieFlowOutput struct {
 	Answer               string           `json:"answer"`
 	RelevantMoviesTitles []*RelevantMovie `json:"relevantMovies"`
 	WrongQuery           bool             `json:"wrongQuery,omitempty" `
@@ -10,7 +10,7 @@ type RelevantMovie struct {
 	Title  string `json:"title"`
 	Reason string `json:"reason"`
 }
-type MovieAgentInput struct {
+type MovieFlowInput struct {
 	History          []*SimpleMessage `json:"history"`
 	UserPreferences  *UserProfile     `json:"userPreferences"`
 	ContextDocuments []*MovieContext  `json:"contextDocuments"`

@@ -22,8 +22,8 @@ func CreateQueryTransformFlowClient(db *db.MovieDB, URL string) (*QueryTransform
 	}, nil
 }
 
-func (flowClient *QueryTransformFlowClient) Run(history []*types.SimpleMessage, preferences *types.UserProfile) (*types.QueryTransformOutput, error) {
-	queryTransformInput := types.QueryTransformInput{Profile: preferences, History: history, UserMessage: history[len(history)-1].Content}
+func (flowClient *QueryTransformFlowClient) Run(history []*types.SimpleMessage, preferences *types.UserProfile) (*types.QueryTransformFlowOutput, error) {
+	queryTransformInput := types.QueryTransformFlowInput{Profile: preferences, History: history, UserMessage: history[len(history)-1].Content}
 	resp, err := flowClient.runFlow(&queryTransformInput)
 	if err != nil {
 		return nil, err
@@ -31,7 +31,7 @@ func (flowClient *QueryTransformFlowClient) Run(history []*types.SimpleMessage, 
 	return resp, nil
 }
 
-func (flowClient *QueryTransformFlowClient) runFlow(input *types.QueryTransformInput) (*types.QueryTransformOutput, error) {
+func (flowClient *QueryTransformFlowClient) runFlow(input *types.QueryTransformFlowInput) (*types.QueryTransformFlowOutput, error) {
 	// Marshal the input struct to JSON
 	inputJSON, err := json.Marshal(input)
 	if err != nil {
@@ -52,7 +52,7 @@ func (flowClient *QueryTransformFlowClient) runFlow(input *types.QueryTransformI
 	}
 
 	var result struct {
-		Result *types.QueryTransformOutput `json:"result"`
+		Result *types.QueryTransformFlowOutput `json:"result"`
 	}
 	defer resp.Body.Close()
 
