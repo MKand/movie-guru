@@ -11,10 +11,10 @@ RUN go mod download
 
 # Copy the source code. Note the slash at the end, as explained in
 # https://docs.docker.com/reference/dockerfile/#copy
-COPY *.go ./
+COPY . .
 
 # Build
-RUN CGO_ENABLED=0 GOOS=linux go build -o /movie-guru-server
+RUN CGO_ENABLED=0 GOOS=linux go build -o /app/standaloneWebserver cmd/standaloneWebserver/main.go 
 
 # Optional:
 # To bind to a TCP port, runtime parameters must be supplied to the docker command.
@@ -24,4 +24,4 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o /movie-guru-server
 EXPOSE 8080
 
 # Run
-CMD ["/movie-guru-server"]
+CMD ["/app/standaloneWebserver"]
