@@ -43,3 +43,8 @@ variable "db_name" {
   description = "Database name. Defaults to fake-movies-db"
   default     = "fake-movies-db"
 }
+
+variable "deploy_app"{
+  description = "Deploy CloudRun services. Set to false by default"
+  default     = false
+}

@@ -32,39 +32,52 @@ usage()
    exit 1 # Exit script after printing help
 }
 
-terraform_destroy()
+skip_infra()
 {
-    echo -e "\e[95mSetting DESTROY var to 'true'...\e[0m"
-    DESTROY=true
+    echo -e "\e[95mSetting Skip Infra var to 'true'...\e[0m"
+    INFRA=false
 }
 
+skip_app()
+{
+    echo -e "\e[95mSetting Skip App var to 'true'...\e[0m"
+    APP=false
+}
+
+
 # Setting default value
-unset DESTROY
-unset KUBE_VERSION
+INFRA=true
+APP=true
 BACKEND=genkit-go
 APP_VERSION=v1_go
 
 # Define bash args
 while [ "$1" != "" ]; do
     case $1 in
-        --destroy | -d )      shift
-                                terraform_destroy
-                                ;;
         --backend | -b )      shift
                                 BACKEND=$1
+                                ;;
+        --skipinfra  | -i )      shift
+                                skip_infra
+                                ;;
+        --skipapp  | -a )      shift
+                                skip_app
                                 ;;
         --help | -h )           usage
                                 exit
                                 ;;
+
         
     esac
     shift
 done
 
+
 # Set project to PROJECT_ID or exit
 [[ ! "${PROJECT_ID}" ]] && echo -e "Please export PROJECT_ID variable (\e[95mexport PROJECT_ID=<YOUR PROJECT ID>\e[0m)\nExiting." && exit 0
 echo -e "\e[95mPROJECT_ID is set to ${PROJECT_ID}\e[0m"
 gcloud config set core/project ${PROJECT_ID}
+echo -e "\e[95mBACKEND is set to ${BACKEND}\e[0m"
 
 # Enable Cloudbuild API
 echo -e "\e[95mEnabling Cloudbuild API in ${PROJECT_ID}\e[0m"
@@ -98,16 +111,19 @@ done
 echo -e "\e[95mSHORT_SHA is set to ${SHORT_SHA}\e[0m"
 
 # Start main build
-[[ "${DESTROY}" != "true" ]] &&  echo -e "\e[95mStarting Cloudbuild to CREATE infrastructure using terraform...\e[0m"
-[[ "${DESTROY}" == "true" ]] &&  echo -e "\e[95mStarting Cloudbuild to DELETE infrastructure using terraform...\e[0m"
+echo -e "\e[95mStarting Cloudbuild to CREATE infrastructure using terraform...\e[0m"
 
-[[ "${DESTROY}" != "true"  && "${BACKEND}" == "genkit-go"]] && gcloud builds submit --config=deploy/setup-go-backend.yaml --async --ignore-file=.gcloudignore --substitutions=_PROJECT_ID=${PROJECT_ID},\
+[[ ${BACKEND} == "genkit-go" ]] && gcloud builds submit --config=deploy/setup-go-backend.yaml --async --ignore-file=.gcloudignore --substitutions=_PROJECT_ID=${PROJECT_ID},\
 _SHORT_SHA=${SHORT_SHA},\
-_APP_VERSION=v1_go
+_APP_VERSION=v1_go,\
+_INFRA=${INFRA},\
+_APP=${APP}
 
-[[ "${DESTROY}" != "true"  && "${BACKEND}" == "langchain"]] && gcloud builds submit --config=deploy/setup-langchain-backend.yaml --async --ignore-file=.gcloudignore --substitutions=_PROJECT_ID=${PROJECT_ID},\
+[[ ${BACKEND} == "langchain" ]] && gcloud builds submit --config=deploy/setup-langchain-backend.yaml --async --ignore-file=.gcloudignore --substitutions=_PROJECT_ID=${PROJECT_ID},\
 _SHORT_SHA=${SHORT_SHA},\
 _LANGSMITH_API_KEY=${LANGSMITH_API_KEY},\
 _LANGCHAIN_TRACING_V2=${LANGCHAIN_TRACING_V2},\
 _LANGCHAIN_PROJECT=${LANGCHAIN_PROJECT},\
-_APP_VERSION=v1
+_APP_VERSION=v1,\
+_INFRA=${INFRA},\
+_APP=${APP}

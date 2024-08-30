@@ -27,6 +27,7 @@ steps:
   args:
     - -c
     - |
+      [[ "${_INFRA}" == "false" ]] && exit 0
       ([[ $(gsutil ls | grep "gs://${_PROJECT_ID}/") ]] || \
       gsutil mb -p ${PROJECT_ID} gs://${_PROJECT_ID}) && \
       ([[ $(gsutil versioning get gs://${_PROJECT_ID} | grep Enabled) ]] || \
@@ -40,19 +41,30 @@ steps:
     - "-xe"
     - "-c"
     - |
+      [[ "${_INFRA}" == "false" ]] && exit 0
       terraform init -backend-config="bucket=${_PROJECT_ID}"
       terraform apply -var="project_id=${_PROJECT_ID}" --auto-approve
 
 - name: 'gcr.io/cloud-builders/docker'
-  dir: "./chat_server"
-  args: [ 'build', 
-  '-t', '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/chatserver:${_SHORT_SHA}', 
-  '-t', '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/chatserver:latest', 
-  '--cache-from', '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/chatserver',
-  '.', '-f', './Dockerfile' ]
+  dir: "./chat_server_python"
+  args: 
+    - 'sh'
+    - '-c'
+    - |
+      [[ "${_APP}" == "false"]] && exit 0
+      docker build \
+        -t '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/chatserver:${_SHORT_SHA}' \
+        -t '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/chatserver:latest' \
+        --cache-from '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/chatserver' \
+        . -f './Dockerfile'
 
 - name: 'gcr.io/cloud-builders/docker'
-  args: [ 'push', '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/chatserver:${_SHORT_SHA}']
+  args:
+    - 'sh'
+    - '-c'
+    - |
+      [[ "${_APP}" == "true" ]] && exit 0
+      docker push '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/chatserver:${_SHORT_SHA}'
 
 - name: "hashicorp/terraform:1.8.2"
   id: "create-server-infra"
@@ -63,4 +75,4 @@ steps:
     - "-c"
     - |
       terraform init -backend-config="bucket=${_PROJECT_ID}"
-      terraform apply -var="project_id=${_PROJECT_ID}" -var="app_version=${_APP_VERSION}" -var="image_tag=${_SHORT_SHA}" -var="region=${_REGION}" -var="langsmith_api_key=${_LANGSMITH_API_KEY}" -var="langchain_tracing_v2=${_LANGCHAIN_TRACING_V2}" -var="langchain_tracing_project=${_LANGCHAIN_PROJECT}" --auto-approve
+      terraform apply -var=deploy_app=${_APP} -var="project_id=${_PROJECT_ID}" -var="app_version=${_APP_VERSION}" -var="image_tag=${_SHORT_SHA}" -var="region=${_REGION}" -var="langsmith_api_key=${_LANGSMITH_API_KEY}" -var="langchain_tracing_v2=${_LANGCHAIN_TRACING_V2}" -var="langchain_tracing_project=${_LANGCHAIN_PROJECT}" --auto-approve

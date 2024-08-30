@@ -5,8 +5,11 @@
 Movie Guru is a website that helps users find movies to watch through an RAG powered chatbot. The movies are all fictional and are generated using GenAI. 
 The goal of this repo is to explore the best practices when building AI powered applications.
 
+[![Movie Guru](https://i9.ytimg.com/vi_webp/l_KhN3RJ8qA/mq2.webp?sqp=CMjgxbYG-oaymwEmCMACELQB8quKqQMa8AEB-AH-CYAC0AWKAgwIABABGDIgXyhlMA8=&rs=AOn4CLDEDWAsu5apTpSQ2rGtbD3er0gkwQ)](https://www.youtube.com/watch?v=l_KhN3RJ8qA)
+
 This demo is *NOT* endorsed by Google or Google Cloud.  
 The repo is intended for educational/hobbyists use only.
+
 
 ## Overall Architecture
 
@@ -80,9 +83,8 @@ cd movie-guru
 
 Start the Deploy
 ```sh
-./deploy/deploy.sh --backend genkit-go # or --backend langchain or --backend genkit-js (WIP)
+./deploy/deploy.sh --skipapp --backend genkit-go  # or --backend langchain or --backend genkit-js (WIP)
 ```
-**NOTE**: Once deployed, the db will be up, but cloud Run will fail as it doesn't have the necessary tables. You can deploy the necessary tables and restart cloudrun. We will split these steps into two seperate steps in the future to prevent this.
 
 # Create and populate the database
 
@@ -151,6 +153,11 @@ VALUES (<secret invite code>, TRUE);
 
 WIP
 
+## Build and deploy the app
+
+```sh
+./deploy/deploy.sh --skipinfra --backend genkit-go  # or --backend langchain or --backend genkit-js (WIP)
+```
 
 ## License
 

@@ -43,6 +43,7 @@ resource "random_password" "api_secret" {
 }
 
 resource "google_cloud_run_v2_service" "server-go" {
+  count = var.deploy_app ? 1 : 0
   name     = "movie-guru-chat-server-go"
   location = var.region
   project  = var.project_id
@@ -127,8 +128,9 @@ resource "google_cloud_run_v2_service" "server-go" {
 }
 
 resource "google_cloud_run_service_iam_binding" "go-server-binding" {
-  location = google_cloud_run_v2_service.server-go.location
-  service  = google_cloud_run_v2_service.server-go.name
+  count = var.deploy_app ? 1 : 0
+  location = google_cloud_run_v2_service.server-go[0].location
+  service  = google_cloud_run_v2_service.server-go[0].name
   project  = var.project_id
   role     = "roles/run.invoker"
   members = [
