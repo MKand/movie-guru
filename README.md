@@ -1,5 +1,7 @@
 # Movie Guru
 
+**NOTE**: the repo is still in development and may contain some bugs
+
 ## Description
 
 Movie Guru is a website that helps users find movies to watch through an RAG powered chatbot. The movies are all fictional and are generated using GenAI. 
@@ -85,6 +87,7 @@ Start the Deploy
 ```sh
 ./deploy/deploy.sh --skipapp --backend genkit-go  # or --backend langchain or --backend genkit-js (WIP)
 ```
+We add --skipapp to make sure we wait for the db and the data are created before we deploy the application. 
 
 # Create and populate the database
 
