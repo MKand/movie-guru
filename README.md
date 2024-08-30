@@ -1,13 +1,14 @@
 # Movie Guru
 
+
+[![Movie Guru](https://i9.ytimg.com/vi_webp/l_KhN3RJ8qA/mq2.webp?sqp=CMjgxbYG-oaymwEmCMACELQB8quKqQMa8AEB-AH-CYAC0AWKAgwIABABGDIgXyhlMA8=&rs=AOn4CLDEDWAsu5apTpSQ2rGtbD3er0gkwQ)](https://www.youtube.com/watch?v=l_KhN3RJ8qA)
+
 **NOTE**: the repo is still in development.
 
 ## Description
 
 Movie Guru is a website that helps users find movies to watch through an RAG powered chatbot. The movies are all fictional and are generated using GenAI. 
 The goal of this repo is to explore the best practices when building AI powered applications.
-
-[![Movie Guru](https://i9.ytimg.com/vi_webp/l_KhN3RJ8qA/mq2.webp?sqp=CMjgxbYG-oaymwEmCMACELQB8quKqQMa8AEB-AH-CYAC0AWKAgwIABABGDIgXyhlMA8=&rs=AOn4CLDEDWAsu5apTpSQ2rGtbD3er0gkwQ)](https://www.youtube.com/watch?v=l_KhN3RJ8qA)
 
 This demo is *NOT* endorsed by Google or Google Cloud.  
 The repo is intended for educational/hobbyists use only.
@@ -58,7 +59,6 @@ There are 3 tables:
 * *User logins*: Keeps track of users that have logged in.
 * *Invite codes*: Keeps track of valid invite codes.
 
-
 ## Getting Started
 Set project ID
 ```sh
@@ -96,8 +96,8 @@ Connect to the sql db through the cloud sql studio (the db is running on a priva
 
 
 ```SQL
-CREATE TABLE IF NOT EXISTS vector_table_name (
-    id SERIAL PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS fake_movies_table2 (
+    tconst VARCHAR PRIMARY KEY,
     embedding VECTOR(768),
     title VARCHAR,
     runtime_mins INTEGER,
@@ -108,7 +108,7 @@ CREATE TABLE IF NOT EXISTS vector_table_name (
     director VARCHAR,
     plot VARCHAR,
     poster VARCHAR,
-    tconst VARCHAR
+    context VARCHAR
 );
 
 CREATE TABLE invite_codes (

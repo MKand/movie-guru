@@ -23,15 +23,12 @@ func ParseMovieContexts(docs []*ai.Document) ([]*types.MovieContext, error) {
 
 	for _, doc := range docs {
 		var intermediate struct {
-			Title       string  `json:"title"`
-			RuntimeMins int     `json:"runtime_mins"`
-			Genres      string  `json:"genres"`
-			Rating      float32 `json:"rating"`
-			Released    float64 `json:"released"`
-			Actors      string  `json:"actors"`
-			Director    string  `json:"director"`
-			Plot        string  `json:"plot"`
-			Poster      string  `json:"poster"`
+			Title    string `json:"title"`
+			Genres   string `json:"genres"`
+			Actors   string `json:"actors"`
+			Director string `json:"director"`
+			Plot     string `json:"plot"`
+			Poster   string `json:"poster, omitempty`
 		}
 
 		err := json.Unmarshal([]byte(doc.Content[0].Text), &intermediate)
@@ -39,16 +36,20 @@ func ParseMovieContexts(docs []*ai.Document) ([]*types.MovieContext, error) {
 			return nil, err
 		}
 
+		rating, _ := doc.Metadata["rating"].(float32)
+		runTimeMins, _ := doc.Metadata["runtime_minutes"].(int)
+		released, _ := doc.Metadata["releases"].(int)
+		poster := doc.Metadata["poster"].(string)
 		movies = append(movies, &types.MovieContext{
 			Title:          intermediate.Title,
-			RuntimeMinutes: intermediate.RuntimeMins,
+			RuntimeMinutes: runTimeMins,
 			Genres:         strings.Split(intermediate.Genres, ", "),
-			Rating:         intermediate.Rating,
+			Rating:         rating,
 			Plot:           intermediate.Plot,
-			Released:       int(intermediate.Released),
+			Released:       released,
 			Director:       intermediate.Director,
 			Actors:         strings.Split(intermediate.Actors, ", "),
-			Poster:         intermediate.Poster,
+			Poster:         poster,
 		})
 	}
 
@@ -120,8 +121,8 @@ func DefineRetriever(maxRetLength int, db *sql.DB, embedder ai.Embedder) ai.Retr
 		}
 
 		rows, err := db.QueryContext(ctx, `
-					SELECT title, poster, content
-					FROM fake_movies_table
+					SELECT title, poster, content, released, runtime_mins, rating
+					FROM movies
 					ORDER BY embedding <-> $1
 					LIMIT $2`,
 			pgv.NewVector(eres.Embeddings[0].Embedding), maxRetLength)
@@ -133,12 +134,17 @@ func DefineRetriever(maxRetLength int, db *sql.DB, embedder ai.Embedder) ai.Retr
 		retrieverResponse := &ai.RetrieverResponse{}
 		for rows.Next() {
 			var title, poster, content string
-			if err := rows.Scan(&title, &poster, &content); err != nil {
+			var released, runtime_mins int
+			var rating float32
+			if err := rows.Scan(&title, &poster, &content, &released, &runtime_mins, &rating); err != nil {
 				return nil, err
 			}
 			meta := map[string]any{
-				"title":  title,
-				"poster": poster,
+				"title":        title,
+				"poster":       poster,
+				"released":     released,
+				"rating":       rating,
+				"runtime_mins": runtime_mins,
 			}
 			doc := &ai.Document{
 				Content:  []*ai.Part{ai.NewTextPart(content)},
