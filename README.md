@@ -96,7 +96,7 @@ Connect to the sql db through the cloud sql studio (the db is running on a priva
 
 
 ```SQL
-CREATE TABLE IF NOT EXISTS fake_movies_table2 (
+CREATE TABLE IF NOT EXISTS movies (
     tconst VARCHAR PRIMARY KEY,
     embedding VECTOR(768),
     title VARCHAR,

@@ -87,5 +87,4 @@ func main() {
 	if err := genkit.Init(ctx, &genkit.Options{FlowAddr: ":3402"}); err != nil {
 		log.Fatal(err)
 	}
-
 }
