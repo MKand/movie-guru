@@ -1,6 +1,6 @@
 # Movie Guru
 
-**NOTE**: the repo is still in development and may contain some bugs
+**NOTE**: the repo is still in development.
 
 ## Description
 
@@ -21,7 +21,7 @@ The application follows a standard client-server model:
     * Handles user interactions, displays movie suggestions, and manages the chat interface.
 * **Backend (Go/Node.js/Python):**
     * There are 3 options for the backend. All backends have nearly identical functionality and can be used interchangibly:
-        * Go-Genkit
+        * Go-Genkit 
         * JS-Genkit (WIP)
         * Langchain
     * The backend hosts the AI component of the application and the webserver.
