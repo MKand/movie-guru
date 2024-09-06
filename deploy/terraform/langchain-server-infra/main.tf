@@ -3,6 +3,13 @@ provider "google" {
   region  = var.region
 }
 
+resource "google_compute_network" "this" {
+  name                            = "default"
+  delete_default_routes_on_create = false
+  auto_create_subnetworks         = true
+  routing_mode                    = "REGIONAL"
+}
+
 resource "google_redis_instance" "cache" {
   name           = var.app_name
   project        = var.project_id
@@ -43,7 +50,7 @@ resource "random_password" "flask_secret" {
 }
 
 resource "google_cloud_run_v2_service" "default" {
-  count = var.deploy_app ? 1 : 0
+  count    = var.deploy_app ? 1 : 0
   name     = "movie-guru-chat-server-v1"
   location = var.region
   project  = var.project_id
@@ -141,7 +148,7 @@ resource "google_cloud_run_v2_service" "default" {
 
 
 resource "google_cloud_run_service_iam_binding" "default" {
-  count = var.deploy_app ? 1 : 0
+  count    = var.deploy_app ? 1 : 0
   location = google_cloud_run_v2_service.server-go[0].location
   service  = google_cloud_run_v2_service.server-go[0].name
   project  = var.project_id

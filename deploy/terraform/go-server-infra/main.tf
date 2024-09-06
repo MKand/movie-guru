@@ -3,6 +3,13 @@ provider "google" {
   region  = var.region
 }
 
+resource "google_compute_network" "default" {
+  name                            = "default"
+  delete_default_routes_on_create = false
+  auto_create_subnetworks         = true
+  routing_mode                    = "REGIONAL"
+}
+
 resource "google_redis_instance" "cache" {
   name           = var.app_name
   project        = var.project_id
@@ -10,7 +17,7 @@ resource "google_redis_instance" "cache" {
   memory_size_gb = 1
 
   region             = var.region
-  authorized_network = "default"
+  authorized_network = google_compute_network.default.self_link
   connect_mode       = "DIRECT_PEERING"
 
   display_name = var.app_name
@@ -43,7 +50,7 @@ resource "random_password" "api_secret" {
 }
 
 resource "google_cloud_run_v2_service" "server-go" {
-  count = var.deploy_app ? 1 : 0
+  count    = var.deploy_app ? 1 : 0
   name     = "movie-guru-chat-server-go"
   location = var.region
   project  = var.project_id
@@ -60,7 +67,7 @@ resource "google_cloud_run_v2_service" "server-go" {
     vpc_access {
       egress = "ALL_TRAFFIC"
       network_interfaces {
-        network    = "default"
+        network    = google_compute_network.default.self_link
         subnetwork = "default"
       }
     }
@@ -128,7 +135,7 @@ resource "google_cloud_run_v2_service" "server-go" {
 }
 
 resource "google_cloud_run_service_iam_binding" "go-server-binding" {
-  count = var.deploy_app ? 1 : 0
+  count    = var.deploy_app ? 1 : 0
   location = google_cloud_run_v2_service.server-go[0].location
   service  = google_cloud_run_v2_service.server-go[0].name
   project  = var.project_id
@@ -140,7 +147,7 @@ resource "google_cloud_run_service_iam_binding" "go-server-binding" {
 
 resource "google_compute_router" "router" {
   name    = "cloud-run-router"
-  network = "default"
+  network = google_compute_network.default.self_link
 }
 
 resource "google_compute_router_nat" "nat" {
