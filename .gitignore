@@ -2,8 +2,8 @@
 !.gitignore
 /var
 key.json
-dataset/
 
+posters/
 tfplan
 __pycache__
 
