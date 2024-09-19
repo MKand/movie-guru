@@ -12,24 +12,6 @@ variable "region" {
   default     = "europe-west4"
 }
 
-variable "langsmith_api_key" {
-  description = "value of LANGSMITH_API_KEY."
-}
-
-variable "langchain_tracing_v2" {
-  description = "whether to use tracing  or not. Defaults to false"
-  default     = "false"
-}
-
-variable "langchain_tracing_project" {
-  description = "Langchain tracing project"
-}
-
-variable "langchain_endpoint" {
-  description = "Langchain trace endpoint. Defaults to https://api.smith.langchain.com"
-  default     = "https://api.smith.langchain.com"
-}
-
 variable "image_tag" {
   description = "tag of the image used"
 }

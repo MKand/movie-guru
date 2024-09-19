@@ -50,6 +50,7 @@ func GetIndexerFlow(maxRetLength int, movieDB *db.MovieDB, embedder ai.Embedder)
 }
 
 func createText(movie *types.MovieContext) string {
+	fmt.Println(movie)
 	dataDict := map[string]interface{}{
 		"title":        movie.Title,
 		"runtime_mins": movie.RuntimeMinutes,

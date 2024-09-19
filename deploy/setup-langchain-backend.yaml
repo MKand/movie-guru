@@ -47,11 +47,11 @@ steps:
 
 - name: 'gcr.io/cloud-builders/docker'
   dir: "./chat_server_python"
+  entrypoint: "sh"  
   args: 
-    - 'sh'
-    - '-c'
+    - -xe
+    - -c
     - |
-      [[ "${_APP}" == "false"]] && exit 0
       docker build \
         -t '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/chatserver:${_SHORT_SHA}' \
         -t '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/chatserver:latest' \
@@ -59,11 +59,11 @@ steps:
         . -f './Dockerfile'
 
 - name: 'gcr.io/cloud-builders/docker'
-  args:
-    - 'sh'
-    - '-c'
+  entrypoint: "sh"  
+  args: 
+    - -xe
+    - -c
     - |
-      [[ "${_APP}" == "true" ]] && exit 0
       docker push '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/chatserver:${_SHORT_SHA}'
 
 - name: "hashicorp/terraform:1.8.2"
@@ -71,8 +71,8 @@ steps:
   entrypoint: "sh"
   dir: "deploy/terraform/langchain-server-infra"
   args:
-    - "-xe"
-    - "-c"
+    - -xe
+    - -c
     - |
       terraform init -backend-config="bucket=${_PROJECT_ID}"
       terraform apply -var=deploy_app=${_APP} -var="project_id=${_PROJECT_ID}" -var="app_version=${_APP_VERSION}" -var="image_tag=${_SHORT_SHA}" -var="region=${_REGION}" -var="langsmith_api_key=${_LANGSMITH_API_KEY}" -var="langchain_tracing_v2=${_LANGCHAIN_TRACING_V2}" -var="langchain_tracing_project=${_LANGCHAIN_PROJECT}" --auto-approve

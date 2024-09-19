@@ -54,8 +54,10 @@ APP_VERSION=v1_go
 # Define bash args
 while [ "$1" != "" ]; do
     case $1 in
-        --backend | -b )      shift
+        --backend | -b )        shift
                                 BACKEND=$1
+                                shift
+                                
                                 ;;
         --skipinfra  | -i )      shift
                                 skip_infra
@@ -88,13 +90,14 @@ serviceusage.googleapis.com \
 cloudresourcemanager.googleapis.com \
 aiplatform.googleapis.com \
 artifactregistry.googleapis.com \
-cloudresourcemanager.googleapis.com
+cloudresourcemanager.googleapis.com \
 sqladmin.googleapis.com \
 storage-api.googleapis.com \
 sql-component.googleapis.com \
 run.googleapis.com \
 redis.googleapis.com \
-firebase.googleapis.com   
+firebase.googleapis.com  \
+secretmanager.googleapis.com 
 
 # Make cloudbiuld SA roles/owner for PROJECT_ID
 # TODO: Make these permissions more granular to precisely what is required by cloudbuild

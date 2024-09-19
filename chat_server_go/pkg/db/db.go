@@ -41,5 +41,6 @@ func connectToDB() (*sql.DB, error) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	fmt.Println("DB opened successfully")
 	return db, nil
 }

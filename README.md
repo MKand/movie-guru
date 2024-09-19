@@ -60,8 +60,7 @@ There are 3 tables:
 * *Invite codes*: Keeps track of valid invite codes.
 
 ## Getting Started
-
-### 
+ 
 Set project ID
 ```sh
 export PROJECT_ID=<set project id>
@@ -85,6 +84,7 @@ git clone https://github.com/manasakandula/movie-guru.git
 cd movie-guru
 ```
 
+### Steps for the backend infra
 Start the Deploy
 ```sh
 ./deploy/deploy.sh --skipapp --backend genkit-go  # or --backend langchain or --backend genkit-js (WIP)
@@ -94,10 +94,15 @@ We add --skipapp to make sure we wait for the db and the data are created before
 # Create and populate the database
 
 ## Create tables
-Connect to the sql db through the cloud sql studio (the db is running on a private IP and hence cannot be reached directly without the use of cloudsql proxy). The [CloudSQL studio](https://cloud.google.com/sql/docs/mysql/manage-data-using-studio) is the is the easiest way to connect to it. Another option while testing locally is to set [Authorized Networks](https://cloud.google.com/sql/docs/mysql/authorize-networks) and allow list the IP address of the machine you are working on.
+Connect to the sql db through the cloud sql studio (the db is running on a private IP and hence cannot be reached directly without the use of cloudsql proxy). The [CloudSQL studio](https://cloud.google.com/sql/docs/mysql/manage-data-using-studio) is the is the easiest way to connect to it. Another option while testing locally is to set [Authorized Networks](https://cloud.google.com/sql/docs/mysql/authorize-networks) and allow list the IP address of the machine you are working on. 
+For ease of use, the terraform script when creating the db allows all IPs to access the db. **Make sure** you delete that setting after you finish inserting data.
+
+The DB password for user **main** is stored in the secret manager in the project under the name **postgres-main-user-secret**.
 
 
 ```SQL
+CREATE EXTENSION IF NOT EXISTS vector;
+
 CREATE TABLE IF NOT EXISTS movies (
     tconst VARCHAR PRIMARY KEY,
     embedding VECTOR(768),
@@ -110,21 +115,22 @@ CREATE TABLE IF NOT EXISTS movies (
     director VARCHAR,
     plot VARCHAR,
     poster VARCHAR,
-    context VARCHAR
+    content VARCHAR
 );
 
-CREATE TABLE invite_codes (
-    code VARCHAR(255) PRIMARY KEY,   
-    valid BOOLEAN NOT NULL DEFAULT TRUE, 
+CREATE TABLE IF NOT EXISTS invite_codes (
+    code VARCHAR(255) PRIMARY KEY,
+    valid BOOLEAN NOT NULL DEFAULT TRUE
 );
 
-CREATE TABLE user_logins (
+CREATE TABLE IF NOT EXISTS user_logins (
     email VARCHAR(255) PRIMARY KEY,
     login_count INT NOT NULL DEFAULT 0,
-    special_login VARCHAR(255)  DEFAULT NULL; 
+    special_login VARCHAR(255) DEFAULT NULL
 );
 
-CREATE TABLE app_metadata (
+
+CREATE TABLE IF NOT EXISTS app_metadata (
     app_version VARCHAR(255) PRIMARY KEY,
     token_audience VARCHAR(255) NOT NULL,
     history_length INT NOT NULL,
@@ -148,21 +154,80 @@ The current setup uses the same model for the 3 agents and is passed along as **
 
 ```SQL
 INSERT INTO app_metadata (app_version, token_audience, history_length, max_user_message_len, cors_origin, retriever_length, google_chat_model_name, google_embedding_model_name, front_end_domain)
-VALUES ('v1', <project id> , 10, 1000, "https://<PROJECT ID>.web.app", 10, 'gemini-1.5-flash-001', 'text-embedding-004', "https://<project id>.web.app/");
+VALUES ('v1', '<project id>' , 10, 1000, 'https://<PROJECT ID>.web.app', 10, 'gemini-1.5-flash-001', 'text-embedding-004', 'https://<project id>.web.app/');
 
 INSERT INTO invite_codes (code, valid)
-VALUES (<secret invite code>, TRUE);
+VALUES ('<secret invite code>', TRUE);
 ```
 
 ## Insert data into movies tables
+### GENKIT GO ###
+If using genkit-go do the following:
 
+From this folder, run the command 
+```sh
+cd chat_server_go/cmd/indexer
+
+export PROJECT_ID=<project id>
+export POSTGRES_DB_USER_PASSWORD=<password>
+export POSTGRES_HOST=<db public ip>
+export GCLOUD_PROJECT=<project id>
+
+export GCLOUD_LOCATION="europe-west4" # or another region
+export POSTGRES_DB_INSTANCE="movie-guru-db-instance"
+export POSTGRES_DB_USER="main"
+export TABLE_NAME="movies"
+export APP_VERSION="v1"
+export POSTGRES_DB_NAME="fake-movies-db"
+
+go run main.go
+```
+### GENKIT JS ###
 WIP
+### LANGCHAIN ###
+WIP
+
+
+**IMPORTANT**: The terraform script allows the postgres DB access from all IPs 0.0.0.0/0. This is bad practice in production. So, after inserting the data, make sure you remove the aurthorized networks portion in the definition of the postgresdb (deploy/terraform/go-server-infra/postgres.tf or deploy/terraform/langchain-server-infra/postgres.tf). Remove the section below and rerun the deploy pipeline. Or you can also remove this setting from the DB from google cloud console.
+```tf
+authorized_networks {
+        name            = "All Networks"
+        value           = "0.0.0.0/0"
+        expiration_time = "3021-11-15T16:19:00.094Z"
+      }
+
+```
 
 ## Build and deploy the app
 
 ```sh
 ./deploy/deploy.sh --skipinfra --backend genkit-go  # or --backend langchain or --backend genkit-js (WIP)
 ```
+
+### Steps for the frontend hosted on firebase
+Create a firebase project. And create a webapp. Navigate to the project settings and find the firebase configuration variables. You should see something that looks like this:
+```sh
+  apiKey: "abcdefghijklmnkopqrstuvwxyz12345890",
+  authDomain: "<firebase project name>.firebaseapp.com",
+  projectId: "<firebase project name>",
+  storageBucket: "<firebase project name>.appspot.com",
+  messagingSenderId: "1234567890",
+  appId: "1:234567890:web:1234567890"
+```
+Navigate to **chat_client_vue/movie-agent** and create a **.env** file.
+Create the following env variables to the file.
+
+```.env
+VITE_FIREBASE_API_KEY=<apiKey>
+VITE_FIREBASE_AUTH_DOMAIN=<authDomain>
+VITE_GCP_PROJECT_ID=<projectId>
+VITE_FIREBASE_STORAGE_BUCKET=<storageBucket>
+VITE_FIREBASE_MESSAGING_SENDERID=<messagingSenderId>
+VITE_FIREBASE_APPID=<appId>
+VITE_CHAT_SERVER_URL=<address
+
+```
+
 
 ## License
 

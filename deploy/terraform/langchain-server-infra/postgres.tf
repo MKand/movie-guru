@@ -45,9 +45,14 @@ resource "google_sql_database_instance" "main" {
   settings {
     tier = "db-f1-micro"
     ip_configuration {
-      ipv4_enabled                                  = "true"
+      ipv4_enabled                                  = true
       private_network                               = data.google_compute_network.network.self_link
       enable_private_path_for_google_cloud_services = true
+            authorized_networks {
+        name            = "All Networks"
+        value           = "0.0.0.0/0"
+        expiration_time = "3021-11-15T16:19:00.094Z"
+      }
     }
     deletion_protection_enabled = true
   }
@@ -68,4 +73,16 @@ resource "google_sql_user" "users" {
   name     = "main"
   instance = google_sql_database_instance.main.name
   password = random_password.postgres_user_password.result
+}
+
+module "secret-manager" {
+  source  = "GoogleCloudPlatform/secret-manager/google"
+  version = "~> 0.4"
+  project_id = var.project_id
+  secrets = [
+    {
+      name                     = "postgres-main-user-secret"
+      secret_data              = random_password.postgres_user_password.result
+    },
+  ]
 }

@@ -38,31 +38,32 @@ steps:
   entrypoint: "sh"
   dir: "deploy/terraform/artifact-registry"
   args:
-    - "-xe"
-    - "-c"
+    - -c
     - |
       [[ "${_INFRA}" == "false" ]] && exit 0
       terraform init -backend-config="bucket=${_PROJECT_ID}"
       terraform apply -var="project_id=${_PROJECT_ID}" --auto-approve
+    - -xe
 
 - name: 'gcr.io/cloud-builders/docker'
-  dir: "./chat_server_go"
-  args: 
-    - 'sh'
-    - '-c'
-    - |
-      [[ "${_APP}" == "false"]] && exit 0
-      docker build \
-        -t '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru-golang/chatserver:${_SHORT_SHA}' \
-        -t '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru-golang/chatserver:latest' \
-        --cache-from '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru-golang/chatserver' \
-        . -f './Dockerfile'
-- name: 'gcr.io/cloud-builders/docker'
+  dir: './chat_server_go'
+  entrypoint: "sh"
   args:
-    - 'sh'
-    - '-c'
+    - -xe 
+    - -c
     - |
-      [[ "${_APP}" == "true" ]] && exit 0
+      docker build \
+         -t "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru-golang/chatserver:${_SHORT_SHA}" \
+         -t "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru-golang/chatserver:latest" \
+         --cache-from "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru-golang/chatserver:latest" \
+         .
+
+- name: 'gcr.io/cloud-builders/docker'
+  entrypoint: "sh"
+  args:
+    - -xe 
+    - -c
+    - |
       docker push '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru-golang/chatserver:${_SHORT_SHA}'
 
 - name: "hashicorp/terraform:1.8.2"
@@ -70,8 +71,8 @@ steps:
   entrypoint: "sh"
   dir: "deploy/terraform/go-server-infra"
   args:
-    - "-xe"
-    - "-c"
+    - -xe
+    - -c
     - |
       terraform init -backend-config="bucket=${_PROJECT_ID}"
       terraform apply -var=deploy_app=${_APP} -var="project_id=${_PROJECT_ID}" -var="app_version=${_APP_VERSION}" -var="image_tag=${_SHORT_SHA}" -var="region=${_REGION}" --auto-approve
