@@ -182,6 +182,15 @@ export POSTGRES_DB_NAME="fake-movies-db"
 
 go run main.go
 ```
+This takes a about 20 minutes to run, so be patient. The embedding creation process is slowed down intentionally to ensure we stay under the rate limit.
+
+You can run the command below to ensure there are **652** entries in the db.
+
+```sql
+SELECT COUNT(*)
+FROM "movies";
+```
+
 ### GENKIT JS ###
 WIP
 ### LANGCHAIN ###
