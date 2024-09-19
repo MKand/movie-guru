@@ -1,7 +1,8 @@
 # Movie Guru
 
 
-[![Movie Guru](https://i9.ytimg.com/vi_webp/l_KhN3RJ8qA/mq2.webp?sqp=CMjgxbYG-oaymwEmCMACELQB8quKqQMa8AEB-AH-CYAC0AWKAgwIABABGDIgXyhlMA8=&rs=AOn4CLDEDWAsu5apTpSQ2rGtbD3er0gkwQ)](https://www.youtube.com/watch?v=l_KhN3RJ8qA)
+[![Movie Guru](https://img.youtube.com/vi/l_KhN3RJ8qA/0.jpg)](https://youtu.be/YOUR_VIDEO_ID)
+
 
 **NOTE**: the repo is still in development.
 
