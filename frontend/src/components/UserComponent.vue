@@ -60,7 +60,6 @@
         this.enableAdd = !this.enableAdd;
       },
      handleSignOut() { 
-      getAuth().signOut().then(() => {
             LoginClientService.logout().then(() =>{
               store.commit('user/logOut')
               console.log("signed out")
@@ -69,7 +68,6 @@
             }).catch((reason) =>{
               console.error('Failed logout', reason)
             })
-        })
       },
       deletePref(type, key, value){
         this.enableAdd = false;
