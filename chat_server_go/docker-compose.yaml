@@ -12,10 +12,10 @@ services:
     ports:
       - "3401:3401"
     environment:
-      - POSTGRES_HOST=34.147.105.1
-      - PROJECT_ID=movie-guru-436117
-      - POSTGRES_DB_USER=minimal-user
-      - POSTGRES_DB_USER_PASSWORD=letmeusethedb
+      - POSTGRES_HOST=$POSTGRES_HOST
+      - PROJECT_ID=$PROJECT_ID
+      - POSTGRES_DB_USER=$POSTGRES_DB_USER
+      - POSTGRES_DB_USER_PASSWORD=$POSTGRES_DB_USER_PASSWORD
       - TABLE_NAME=movies
       - POSTGRES_DB_NAME=fake-movies-db
       - APP_VERSION=v1
@@ -30,10 +30,10 @@ services:
     ports:
       - "8081:8080"
     environment:
-      - POSTGRES_HOST=34.147.105.1
-      - PROJECT_ID=movie-guru-436117
-      - POSTGRES_DB_USER=minimal-user
-      - POSTGRES_DB_USER_PASSWORD=letmeusethedb
+     - POSTGRES_HOST=$POSTGRES_HOST
+      - PROJECT_ID=$PROJECT_ID
+      - POSTGRES_DB_USER=$POSTGRES_DB_USER
+      - POSTGRES_DB_USER_PASSWORD=$POSTGRES_DB_USER_PASSWORD
       - TABLE_NAME=movies
       - POSTGRES_DB_NAME=fake-movies-db
       - APP_VERSION=v1
