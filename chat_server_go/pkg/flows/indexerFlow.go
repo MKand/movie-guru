@@ -23,7 +23,7 @@ var (
 func GetIndexerFlow(maxRetLength int, movieDB *db.MovieDB, embedder ai.Embedder) *genkit.Flow[*types.MovieContext, *ai.Document, struct{}] {
 	indexerFlow := genkit.DefineFlow("movieDocFlow",
 		func(ctx context.Context, doc *types.MovieContext) (*ai.Document, error) {
-			time.Sleep(1 * time.Second) // reduce rate
+			time.Sleep(1 / 3 * time.Second) // reduce rate
 			content := createText(doc)
 			aiDoc := ai.DocumentFromText(content, nil)
 			eres, err := ai.Embed(ctx, embedder, ai.WithEmbedDocs(aiDoc))
