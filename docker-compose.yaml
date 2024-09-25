@@ -7,7 +7,7 @@ services:
       - '6379:6379'
     command: redis-server --save 20 1 --loglevel warning --requirepass my_redis_pwd
   flows:
-    build: .
+    build: ./chat_server_go
     command: /app/flows
     ports:
       - "3401:3401"
@@ -25,7 +25,7 @@ services:
     volumes:
       - ./.key.json:/key.json
   server:
-    build: .
+    build: ./chat_server_go
     command: /app/webserver
     ports:
       - "8081:8080"
@@ -46,27 +46,13 @@ services:
       - REDIS_PASSWORD=my_redis_pwd
     depends_on:
       - cache 
-  standaloneserver:
-    build: .
-    command: /app/standaloneWebserver
+  frontend:
+    build: ./frontend
     ports:
-      - "8082:8080"
+      -  5173:5173
     environment:
-      - POSTGRES_HOST=$POSTGRES_HOST
-      - PROJECT_ID=$PROJECT_ID
-      - POSTGRES_DB_USER=$POSTGRES_DB_USER
-      - POSTGRES_DB_USER_PASSWORD=$POSTGRES_DB_USER_PASSWORD
-      - TABLE_NAME=movies
-      - POSTGRES_DB_NAME=fake-movies-db
-      - APP_VERSION=v1
-      - GOOGLE_APPLICATION_CREDENTIALS=/key.json
-      - LOCATION=europe-west4
-      - LOCAL=true
-      - FLOWS_URL=http://flows:3401
-      - REDIS_HOST=cache
-      - REDIS_PORT=6379
-      - REDIS_PASSWORD=my_redis_pwd
-    volumes:
-      - ./.key.json:/key.json
-    depends_on:
-      - cache 
+      - VITE_CHAT_SERVER_URL=http://localhost:8081
+
+
+  
+  
