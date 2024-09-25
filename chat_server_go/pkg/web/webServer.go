@@ -18,7 +18,6 @@ import (
 )
 
 var (
-	key        = os.Getenv("SECRET_KEY")
 	redisStore *redis.Client
 	metadata   *db.Metadata
 	appConfig  = map[string]string{
@@ -35,6 +34,7 @@ func StartServer(ulh *UserLoginHandler, m *db.Metadata, deps *Dependencies) {
 	for i := range corsOrigins {
 		corsOrigins[i] = strings.TrimSpace(corsOrigins[i])
 	}
+	http.HandleFunc("/", createHealthCheckHandler(deps))
 	http.HandleFunc("/chat", createChatHandler(deps))
 	http.HandleFunc("/history", createHistoryHandler())
 	http.HandleFunc("/preferences", createPreferencesHandler(deps.DB))
@@ -68,7 +68,7 @@ func randomisedFeaturedFilmsQuery() string {
 }
 
 func addResponseHeaders(w http.ResponseWriter, origin string) {
-	isAllowed := false
+	isAllowed := true
 	for _, allowedOrigin := range corsOrigins {
 		if origin == allowedOrigin {
 			isAllowed = true
@@ -83,26 +83,31 @@ func addResponseHeaders(w http.ResponseWriter, origin string) {
 	w.Header().Set("Access-Control-Allow-Credentials", "true")
 }
 
+func createHealthCheckHandler(deps *Dependencies) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		origin := r.Header.Get("Origin")
+		addResponseHeaders(w, origin)
+		if r.Method == "GET" {
+			json.NewEncoder(w).Encode("OK")
+			return
+
+		}
+	}
+}
+
 func createLoginHandler(ulh *UserLoginHandler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		origin := r.Header.Get("Origin")
 		errLogPrefix := "Error: LoginHandler: "
 		if r.Method == "POST" {
-			authHeader := r.Header.Get("Authorization")
-			if authHeader == "" {
+			user := r.Header.Get("user")
+			if user == "" {
 				log.Println(errLogPrefix, "No auth header")
 				http.Error(w, "Unauthorized", http.StatusUnauthorized)
 				return
 			}
-			var loginBody LoginBody
-			err := json.NewDecoder(r.Body).Decode(&loginBody)
-			if err != nil {
-				log.Println(errLogPrefix, "Bad Request at login", err.Error())
-				http.Error(w, err.Error(), http.StatusBadRequest)
-				return
-			}
 
-			user, err := ulh.HandleLogin(authHeader, loginBody.InviteCode)
+			user, err := ulh.HandleLogin(user)
 			if err != nil {
 				if _, ok := err.(*AuthorizationError); ok {
 					log.Println(errLogPrefix, "Unauthorized. ", err.Error())
@@ -131,7 +136,12 @@ func createLoginHandler(ulh *UserLoginHandler) http.HandlerFunc {
 				log.Println(errLogPrefix, "error setting context in redis", err)
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 			}
-			setCookieHeader := fmt.Sprintf("session=%s; HttpOnly; Secure; SameSite=None; Path=/; Domain=%s; Max-Age=86400", sessionID, metadata.FrontEndDomain)
+			setCookieHeader := ""
+			if os.Getenv("LOCAL") == "true" {
+				setCookieHeader = fmt.Sprintf("session=%s; HttpOnly; SameSite=Lax; Path=/; Domain=localhost; Max-Age=86400", sessionID)
+			} else {
+				setCookieHeader = fmt.Sprintf("session=%s; HttpOnly; Secure; SameSite=None; Path=/; Domain=%s; Max-Age=86400", sessionID, metadata.FrontEndDomain)
+			}
 			w.Header().Set("Set-Cookie", setCookieHeader)
 			w.Header().Set("Vary", "Cookie, Origin")
 			addResponseHeaders(w, origin)
@@ -240,15 +250,16 @@ func createStartupHandler(deps *Dependencies) http.HandlerFunc {
 				return
 			}
 			context, err := deps.MovieRetrieverFlowClient.RetriveDocuments(ctx, randomisedFeaturedFilmsQuery())
+			if err != nil {
+				log.Println(errLogPrefix, err.Error())
+				http.Error(w, "Error get movie recommendations", http.StatusInternalServerError)
+				return
+			}
 			agentResp := types.NewAgentResponse()
 			agentResp.Context = context[0:5]
 			agentResp.Preferences = pref
 			agentResp.Result = types.SUCCESS
-			if err != nil {
-				log.Println(errLogPrefix, err.Error())
-				http.Error(w, "Error marshaling JSON", http.StatusInternalServerError)
-				return
-			}
+
 			json.NewEncoder(w).Encode(agentResp)
 			return
 

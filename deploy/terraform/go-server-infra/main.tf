@@ -30,7 +30,11 @@ resource "google_project_iam_member" "vertex-user" {
   role    = "roles/aiplatform.user"
   member  = "serviceAccount:${google_service_account.sa.email}"
 }
-
+resource "google_project_iam_member" "redis-user" {
+  project = var.project_id
+  role    = "roles/roles/redis.editor"
+  member  = "serviceAccount:${google_service_account.sa.email}"
+}
 resource "google_project_iam_member" "sql-user" {
   project = var.project_id
   role    = "roles/cloudsql.client"

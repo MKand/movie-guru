@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/firebase/genkit/go/ai"
@@ -19,15 +20,14 @@ func parseMovieContexts(docs []*ai.Document) ([]*types.MovieContext, error) {
 
 	for _, doc := range docs {
 		var intermediate struct {
-			Title       string  `json:"title"`
-			RuntimeMins int     `json:"runtime_mins"`
-			Genres      string  `json:"genres"`
-			Rating      float32 `json:"rating"`
-			Released    float64 `json:"released"`
-			Actors      string  `json:"actors"`
-			Director    string  `json:"director"`
-			Plot        string  `json:"plot"`
-			Poster      string  `json:"poster"`
+			Title       string `json:"title"`
+			RuntimeMins int    `json:"runtime_mins"`
+			Genres      string `json:"genres"`
+			Rating      string `json:"rating"`
+			Released    int    `json:"released"`
+			Actors      string `json:"actors"`
+			Director    string `json:"director"`
+			Plot        string `json:"plot"`
 		}
 
 		err := json.Unmarshal([]byte(doc.Content[0].Text), &intermediate)
@@ -35,16 +35,21 @@ func parseMovieContexts(docs []*ai.Document) ([]*types.MovieContext, error) {
 			return nil, err
 		}
 
+		rating, err := strconv.ParseFloat(intermediate.Rating, 32)
+		if err != nil {
+			rating = 0
+		}
+
 		movies = append(movies, &types.MovieContext{
 			Title:          intermediate.Title,
 			RuntimeMinutes: intermediate.RuntimeMins,
 			Genres:         strings.Split(intermediate.Genres, ", "),
-			Rating:         intermediate.Rating,
+			Rating:         float32(rating),
 			Plot:           intermediate.Plot,
-			Released:       int(intermediate.Released),
+			Released:       intermediate.Released,
 			Director:       intermediate.Director,
 			Actors:         strings.Split(intermediate.Actors, ", "),
-			Poster:         intermediate.Poster,
+			Poster:         doc.Metadata["poster"].(string),
 		})
 	}
 

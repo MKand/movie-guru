@@ -16,7 +16,7 @@ func (MovieDB *MovieDB) GetCurrentProfile(ctx context.Context, user string) (*ty
 	var jsonData string
 	err := rows.Scan(&jsonData)
 	if err != nil {
-		return preferences, err
+		return preferences, nil
 	}
 	err = json.Unmarshal([]byte(jsonData), &preferences)
 	if err != nil {

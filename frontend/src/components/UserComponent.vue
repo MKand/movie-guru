@@ -1,6 +1,6 @@
 <template>
       <div class="flex flex-col justify-center items-center md:m-5 rounded-lg bg-gradient-to-b  from-start via-accent to-secondary  scrollbar-thin scrollbar-thumb-primary scrollbar-track-accent">
-        <h1 class="text-gurusilver text-lg p-2 font-bold mt-2 m-1"> {{ store.state.user.userName }} </h1>
+        <h1 class="text-gurusilver text-lg p-2 font-bold mt-2 m-1"> {{ store.state.user.email }} </h1>
                 <h2 class="text-text text-lg pt-2 m-1 text-center"> The Movie Guru tries to learn your movie preferences.    </h2>
                 <h2 class="text-text text-lg pb-2 m-1 text-center">You can instruct it to take your likes and dislikes into account.</h2> 
         <div class="flex flex-row flex-wrap justify-center overflow-y-auto m-5 scrollbar-thin scrollbar-thumb-primary scrollbar-track-accent">

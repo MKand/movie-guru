@@ -5,36 +5,25 @@ export const store = {
   namespaced: true,
   state: {
     loggedIn: false,
-    userName: null,
     email: null,
     accessToken: null
   },
   mutations: {
-    logIn(state, result){
-        state.userName = result.displayName
-        state.email = result.email
+    logIn(state, email){
+        state.email = email
         state.loggedIn = true
-        state.accessToken = result.accessToken
     },
     logOut(state){
-        state.userName = null
         state.email = null
         state.loggedIn = false
-        state.accessToken = null
     }
   },
   getters: {
     loginStatus (state) {
       return state.loggedIn
     },
-    userName (state) {
-      return state.userName
-    },
     email (state) {
       return state.email
-    },
-    accessToken (state) {
-      return state.accessToken
     },
   },
 }

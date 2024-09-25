@@ -20,8 +20,7 @@ func main() {
 	}
 	defer movieAgentDB.DB.Close()
 
-	app_version := os.Getenv("APP_VERSION")
-	metadata, err := movieAgentDB.GetServerMetadata(app_version)
+	metadata, err := movieAgentDB.GetMetadata(os.Getenv("APP_VERSION"))
 	if err != nil {
 		log.Fatal(err)
 	}

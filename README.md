@@ -143,6 +143,12 @@ CREATE TABLE IF NOT EXISTS app_metadata (
     front_end_domain VARCHAR(255) NOT NULL
 );
 
+CREATE TABLE user_preferences (
+  "user" VARCHAR(255) NOT NULL, 
+  preferences JSON NOT NULL,
+  PRIMARY KEY ("user")
+);
+
 ```
 ## Insert data into the tables
 
@@ -159,6 +165,9 @@ VALUES ('v1', '<project id>' , 10, 1000, 'https://<PROJECT ID>.web.app', 10, 'ge
 
 INSERT INTO invite_codes (code, valid)
 VALUES ('<secret invite code>', TRUE);
+
+GRANT SELECT ON movies TO "minimal-user";
+GRANT SELECT, INSERT, UPDATE, DELETE ON user_preferences TO "minimal-user";
 ```
 
 ## Insert data into movies tables

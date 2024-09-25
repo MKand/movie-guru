@@ -23,7 +23,7 @@ func main() {
 	}
 	defer MovieDB.DB.Close()
 
-	metadata, err := MovieDB.GetServerMetadata(os.Getenv("APP_VERSION"))
+	metadata, err := MovieDB.GetMetadata(os.Getenv("APP_VERSION"))
 	if err != nil {
 		log.Fatal(err)
 	}

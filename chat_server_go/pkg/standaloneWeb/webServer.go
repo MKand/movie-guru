@@ -90,21 +90,14 @@ func createLoginHandler(ulh *web.UserLoginHandler) http.HandlerFunc {
 		origin := r.Header.Get("Origin")
 		errLogPrefix := "Error: LoginHandler: "
 		if r.Method == "POST" {
-			authHeader := r.Header.Get("Authorization")
-			if authHeader == "" {
+			user := r.Header.Get("user")
+			if user == "" {
 				log.Println(errLogPrefix, "No auth header")
 				http.Error(w, "Unauthorized", http.StatusUnauthorized)
 				return
 			}
-			var loginBody web.LoginBody
-			err := json.NewDecoder(r.Body).Decode(&loginBody)
-			if err != nil {
-				log.Println(errLogPrefix, "Bad Request at login", err.Error())
-				http.Error(w, err.Error(), http.StatusBadRequest)
-				return
-			}
 
-			user, err := ulh.HandleLogin(authHeader, loginBody.InviteCode)
+			user, err := ulh.HandleLogin(user)
 			if err != nil {
 				if _, ok := err.(*web.AuthorizationError); ok {
 					log.Println(errLogPrefix, "Unauthorized. ", err.Error())
@@ -133,7 +126,12 @@ func createLoginHandler(ulh *web.UserLoginHandler) http.HandlerFunc {
 				log.Println(errLogPrefix, "error setting context in redis", err)
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 			}
-			setCookieHeader := fmt.Sprintf("session=%s; HttpOnly; Secure; SameSite=None; Path=/; Domain=%s; Max-Age=86400", sessionID, metadata.FrontEndDomain)
+			setCookieHeader := ""
+			if os.Getenv("LOCAL") == "true" {
+				setCookieHeader = fmt.Sprintf("session=%s; HttpOnly; SameSite=Lax; Path=/; Domain=localhost; Max-Age=86400", sessionID)
+			} else {
+				setCookieHeader = fmt.Sprintf("session=%s; HttpOnly; Secure; SameSite=None; Path=/; Domain=%s; Max-Age=86400", sessionID, metadata.FrontEndDomain)
+			}
 			w.Header().Set("Set-Cookie", setCookieHeader)
 			w.Header().Set("Vary", "Cookie, Origin")
 			addResponseHeaders(w, origin)
