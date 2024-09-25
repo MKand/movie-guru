@@ -51,15 +51,13 @@ func (d *MovieDB) getServerMetadata(appVersion string) (*Metadata, error) {
 
 func getMetadataLocal() (*Metadata, error) {
 	metadata := &Metadata{
-		AppVersion:               "v1_local",
-		TokenAudience:            "",
+		AppVersion:               "local",
 		HistoryLength:            10,
 		MaxUserMessageLen:        1000,
 		CorsOrigin:               "http://localhost:5173",
 		RetrieverLength:          10,
-		GoogleChatModelName:      "gemini-1.5-flash-001",
+		GoogleChatModelName:      "gemini-1.5-flash",
 		GoogleEmbeddingModelName: "text-embedding-004",
-		FrontEndDomain:           "",
 	}
 	log.Println(metadata)
 	return metadata, nil
