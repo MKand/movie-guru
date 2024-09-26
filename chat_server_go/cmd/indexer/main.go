@@ -38,7 +38,7 @@ func main() {
 	embedder := flows.GetEmbedder(metadata.GoogleEmbeddingModelName)
 	indexerFlow := flows.GetIndexerFlow(metadata.RetrieverLength, movieAgentDB, embedder)
 	fmt.Println(os.Getwd())
-	file, err := os.Open("../../../dataset/movies_with_posters.csv")
+	file, err := os.Open("/dataset/movies_with_posters.csv")
 	if err != nil {
 		fmt.Println("Error opening file:", err)
 		return
