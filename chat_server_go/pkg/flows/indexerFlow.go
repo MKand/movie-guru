@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"strings"
 	"time"
 
@@ -13,44 +12,29 @@ import (
 	"github.com/movie-guru/pkg/db"
 
 	types "github.com/movie-guru/pkg/types"
-	pgv "github.com/pgvector/pgvector-go"
-)
-
-var (
-	tableName string = "fake_movies_table2"
 )
 
 func GetIndexerFlow(maxRetLength int, movieDB *db.MovieDB, embedder ai.Embedder) *genkit.Flow[*types.MovieContext, *ai.Document, struct{}] {
 	indexerFlow := genkit.DefineFlow("movieDocFlow",
+		// Uploading one entry (document) at a time
 		func(ctx context.Context, doc *types.MovieContext) (*ai.Document, error) {
-			time.Sleep(1 / 3 * time.Second) // reduce rate
-			content := createText(doc)
-			aiDoc := ai.DocumentFromText(content, nil)
-			eres, err := ai.Embed(ctx, embedder, ai.WithEmbedDocs(aiDoc))
-			if err != nil {
-				log.Println(err)
-				return nil, err
-			}
+			time.Sleep(1 / 3 * time.Second)            // reduce rate at which operation is performed to avoid hitting VertexAI rate limits
+			content := createText(doc)                 // creates a JSON string representation of the important fields in a MovieContext object.
+			aiDoc := ai.DocumentFromText(content, nil) // create an object of type AIDocument from  the content
 
-			genres := strings.Join(doc.Genres, ", ")
-			actors := strings.Join(doc.Actors, ", ")
-			query := `INSERT INTO movies (embedding, title, runtime_mins, genres, rating, released, actors, director, plot, poster, tconst, content)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
-		ON CONFLICT (tconst) DO UPDATE
-		SET embedding = EXCLUDED.embedding
-		`
-			_, err = movieDB.DB.ExecContext(ctx, query,
-				pgv.NewVector(eres.Embeddings[0].Embedding), doc.Title, doc.RuntimeMinutes, genres, doc.Rating, doc.Released, actors, doc.Director, doc.Plot, doc.Poster, doc.Tconst, content)
-			if err != nil {
-				return nil, err
-			}
+			// Write code that generates an embedding
+			// - Step 1: Create an embedding from the aiDoc
+			// - Step 2: Write a SQL statement to insert the embedding along with the other fields in the table.
+			// - HINT: Look at the schema for the table to understand what fields are required.
+			// - Take inspiration from the indexer here: https://github.com/firebase/genkit/blob/main/go/samples/pgvector/main.go
 			return aiDoc, nil
 		})
 	return indexerFlow
 }
 
+// createText creates a JSON string representation of the important fields in a MovieContext object.
+// This string is used as the content for the AI document that is used for embedding.
 func createText(movie *types.MovieContext) string {
-	fmt.Println(movie)
 	dataDict := map[string]interface{}{
 		"title":        movie.Title,
 		"runtime_mins": movie.RuntimeMinutes,
