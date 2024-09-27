@@ -60,7 +60,7 @@ func main() {
 	for {
 		record, err := reader.Read()
 		if err != nil {
-			// End of file or error
+			log.Fatal(err)
 			break
 		}
 		// Process the record (row)
@@ -79,7 +79,10 @@ func main() {
 			Poster:         record[9],
 			Tconst:         strconv.Itoa(index),
 		}
-		indexerFlow.Run(ctx, movieContext)
+		_, err = indexerFlow.Run(ctx, movieContext)
+		if err != nil {
+			log.Println("Error loading movie: ", record[0], err)
+		}
 		index += 1
 	}
 

@@ -3,7 +3,6 @@ package flows
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"strings"
 	"time"
 
@@ -22,55 +21,30 @@ func GetIndexerFlow(maxRetLength int, movieDB *db.MovieDB, embedder ai.Embedder)
 			content := createText(doc)                 // creates a JSON string representation of the important fields in a MovieContext object.
 			aiDoc := ai.DocumentFromText(content, nil) // create an object of type AIDocument from  the content
 
-			// Write code that generates an embedding
+			// INSTRUCTIONS: Write code that generates an embedding
 			// - Step 1: Create an embedding from the aiDoc
 			// - Step 2: Write a SQL statement to insert the embedding along with the other fields in the table.
 			// - HINT: Look at the schema for the table to understand what fields are required.
 			// - Take inspiration from the indexer here: https://github.com/firebase/genkit/blob/main/go/samples/pgvector/main.go
+
 			return aiDoc, nil
 		})
 	return indexerFlow
 }
 
-// createText creates a JSON string representation of the important fields in a MovieContext object.
-// This string is used as the content for the AI document that is used for embedding.
+// createText creates a JSON string representation of the relevant fields in a MovieContext object.
+// This string is used as the content for the AI document from which the vector embedding is created.
 func createText(movie *types.MovieContext) string {
 	dataDict := map[string]interface{}{
-		"title":        movie.Title,
-		"runtime_mins": movie.RuntimeMinutes,
+		// INSTRUCTIONS: Write code that populates dataDict with relevant fields from raw data.
+		// 1. Which other fields from the raw data should the dict contain?
+		// 1. Are there any fields in the orginal data that need to be reformatted?
+
+		// Here are two freebies to help you get started.
+		"title": movie.Title,
 		"genres": func() string {
 			if len(movie.Genres) > 0 {
 				return strings.Join(movie.Genres, ", ") // Assuming you want to join genres with commas
-			}
-			return ""
-		}(),
-		"rating": func() interface{} {
-			if movie.Rating > 0 {
-				return fmt.Sprintf("%.1f", movie.Rating)
-			}
-			return ""
-		}(),
-		"released": func() interface{} {
-			if movie.Released > 0 {
-				return movie.Released
-			}
-			return ""
-		}(),
-		"actors": func() string {
-			if len(movie.Actors) > 0 {
-				return strings.Join(movie.Actors, ", ") // Assuming you want to join actors with commas
-			}
-			return ""
-		}(),
-		"director": func() string {
-			if movie.Director != "" {
-				return movie.Director
-			}
-			return ""
-		}(),
-		"plot": func() string {
-			if movie.Plot != "" {
-				return strings.ReplaceAll(movie.Plot, "\n", "")
 			}
 			return ""
 		}(),
