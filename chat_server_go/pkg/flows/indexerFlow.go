@@ -15,7 +15,6 @@ import (
 
 func GetIndexerFlow(maxRetLength int, movieDB *db.MovieDB, embedder ai.Embedder) *genkit.Flow[*types.MovieContext, *ai.Document, struct{}] {
 	indexerFlow := genkit.DefineFlow("movieDocFlow",
-		// Uploading one entry (document) at a time
 		func(ctx context.Context, doc *types.MovieContext) (*ai.Document, error) {
 			time.Sleep(1 / 3 * time.Second)            // reduce rate at which operation is performed to avoid hitting VertexAI rate limits
 			content := createText(doc)                 // creates a JSON string representation of the important fields in a MovieContext object.
@@ -24,9 +23,11 @@ func GetIndexerFlow(maxRetLength int, movieDB *db.MovieDB, embedder ai.Embedder)
 			// INSTRUCTIONS: Write code that generates an embedding
 			// - Step 1: Create an embedding from the aiDoc
 			// - Step 2: Write a SQL statement to insert the embedding along with the other fields in the table.
-			// - HINT: Look at the schema for the table to understand what fields are required.
 			// - Take inspiration from the indexer here: https://github.com/firebase/genkit/blob/main/go/samples/pgvector/main.go
 
+			// HINTS:
+			//- Look at the schema for the table to understand what fields are required.
+			// - Make sure the required (internal and external) GO modules are imported.
 			return aiDoc, nil
 		})
 	return indexerFlow
@@ -34,12 +35,12 @@ func GetIndexerFlow(maxRetLength int, movieDB *db.MovieDB, embedder ai.Embedder)
 
 // createText creates a JSON string representation of the relevant fields in a MovieContext object.
 // This string is used as the content for the AI document from which the vector embedding is created.
+// This string is also uploaded into the context column of the table.
 func createText(movie *types.MovieContext) string {
 	dataDict := map[string]interface{}{
 		// INSTRUCTIONS: Write code that populates dataDict with relevant fields from raw data.
 		// 1. Which other fields from the raw data should the dict contain?
 		// 1. Are there any fields in the orginal data that need to be reformatted?
-
 		// Here are two freebies to help you get started.
 		"title": movie.Title,
 		"genres": func() string {
