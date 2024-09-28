@@ -10,7 +10,7 @@ services:
     build: ./chat_server_go
     command: /app/flows
     ports:
-      - "3401:3401"
+      - "3402:3401"
     environment:
       - POSTGRES_HOST=$POSTGRES_HOST
       - PROJECT_ID=$PROJECT_ID

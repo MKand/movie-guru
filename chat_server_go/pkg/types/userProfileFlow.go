@@ -7,20 +7,24 @@ type UserProfileFlowInput struct {
 
 type UserProfileFlowOutput struct {
 	ProfileChangeRecommendations []*ProfileChangeRecommendation `json:"profileChangeRecommendations"`
-	ChangesMade                  bool                           `json:"changesMade,omitempty"`
 	*ModelOutputMetadata
+}
+
+type ProfileChangeRecommendation struct {
+	Item     string               `json:"item"`
+	Reason   string               `json:"reason"`
+	Category MovieFeatureCategory `json:"category"`
+	Sentiment
 }
 
 type UserProfileOutput struct {
 	UserProfile *UserProfile `json:"userProfile"`
-	ChangesMade bool
 	*ModelOutputMetadata
 }
 
 func NewUserProfileFlowOuput() *UserProfileFlowOutput {
 	return &UserProfileFlowOutput{
 		ProfileChangeRecommendations: make([]*ProfileChangeRecommendation, 5),
-		ChangesMade:                  false,
 		ModelOutputMetadata: &ModelOutputMetadata{
 			Justification: "",
 			SafetyIssue:   false,
@@ -49,13 +53,6 @@ const (
 	POSITIVE Sentiment = "POSITIVE"
 	NEGATIVE Sentiment = "NEGATIVE"
 )
-
-type ProfileChangeRecommendation struct {
-	Item     string               `json:"item"`
-	Reason   string               `json:"reason"`
-	Category MovieFeatureCategory `json:"category"`
-	Sentiment
-}
 
 type UserProfile struct {
 	Likes    ProfileCategories `json:"likes, omitempty"`

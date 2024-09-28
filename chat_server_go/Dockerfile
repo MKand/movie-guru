@@ -14,7 +14,6 @@ RUN go mod download
 COPY . .
 
 # Build
-RUN CGO_ENABLED=0 GOOS=linux go build -o /app/standaloneWebserver cmd/standaloneWebserver/main.go 
 RUN CGO_ENABLED=0 GOOS=linux go build -o /app/webserver cmd/webserver/main.go 
 RUN CGO_ENABLED=0 GOOS=linux go build -o /app/flows cmd/flows/main.go 
 RUN CGO_ENABLED=0 GOOS=linux go build -o /app/indexer cmd/indexer/main.go 

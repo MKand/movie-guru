@@ -28,7 +28,6 @@ func (flowClient *UserProfileFlowClient) Run(ctx context.Context, history *types
 	userProfile, err := flowClient.MovieDB.GetCurrentProfile(ctx, user)
 	userProfileOutput := &types.UserProfileOutput{
 		UserProfile: userProfile,
-		ChangesMade: false,
 		ModelOutputMetadata: &types.ModelOutputMetadata{
 			SafetyIssue:   false,
 			Justification: "",
@@ -51,7 +50,6 @@ func (flowClient *UserProfileFlowClient) Run(ctx context.Context, history *types
 	if err != nil {
 		return userProfileOutput, err
 	}
-	userProfileOutput.ChangesMade = resp.ChangesMade
 	userProfileOutput.ModelOutputMetadata.Justification = resp.ModelOutputMetadata.Justification
 	userProfileOutput.ModelOutputMetadata.SafetyIssue = resp.ModelOutputMetadata.SafetyIssue
 

@@ -25,7 +25,13 @@ type FlowDependencies struct {
 	DB                 *sql.DB
 }
 
-func GetDependencies(ctx context.Context, metadata *db.Metadata, db *sql.DB) *FlowDependencies {
+type Prompts struct {
+	UserPrefPrompt       string
+	MovieFlowPrompt      string
+	QueryTransformPrompt string
+}
+
+func GetDependencies(ctx context.Context, metadata *db.Metadata, db *sql.DB, prompts *Prompts) *FlowDependencies {
 	err := vertexai.Init(ctx, &vertexai.Config{ProjectID: os.Getenv("PROJECT_ID"), Location: os.Getenv("LOCATION")})
 
 	if err != nil {
@@ -38,15 +44,14 @@ func GetDependencies(ctx context.Context, metadata *db.Metadata, db *sql.DB) *Fl
 		log.Fatal("Model not found")
 	}
 
-	queryTransformFlow, err := GetQueryTransformFlow(ctx, model)
+	userProfileFlow, err := GetUserProfileFlow(ctx, model, prompts.UserPrefPrompt)
 	if err != nil {
 		log.Fatal(err)
 	}
-	userProfileFlow, err := GetUserProfileFlow(ctx, model)
+	queryTransformFlow, err := GetQueryTransformFlow(ctx, model, prompts.QueryTransformPrompt)
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	embedder := GetEmbedder(metadata.GoogleEmbeddingModelName)
 	if embedder == nil {
 		log.Fatal("Embedder not found")
@@ -54,7 +59,7 @@ func GetDependencies(ctx context.Context, metadata *db.Metadata, db *sql.DB) *Fl
 	ret := DefineRetriever(metadata.RetrieverLength, db, embedder)
 	retFlow := GetRetrieverFlow(ctx, ret)
 
-	movieAgentFlow, err := GetMovieFlow(ctx, model)
+	movieAgentFlow, err := GetMovieFlow(ctx, model, prompts.MovieFlowPrompt)
 	if err != nil {
 		log.Fatal(err)
 	}
