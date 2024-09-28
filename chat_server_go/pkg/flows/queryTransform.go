@@ -17,7 +17,7 @@ import (
 
 func GetQueryTransformFlow(ctx context.Context, model ai.Model, prompt string) (*genkit.Flow[*types.QueryTransformFlowInput, *types.QueryTransformFlowOutput, struct{}], error) {
 
-	queryTransformPrompt, err := dotprompt.Define("queryTransform",
+	queryTransformPrompt, err := dotprompt.Define("queryTransformFlow",
 		prompt,
 
 		dotprompt.Config{

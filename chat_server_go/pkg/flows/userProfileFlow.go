@@ -17,7 +17,7 @@ import (
 
 func GetUserProfileFlow(ctx context.Context, model ai.Model, prompt string) (*genkit.Flow[*types.UserProfileFlowInput, *types.UserProfileFlowOutput, struct{}], error) {
 
-	prefPrompt, err := dotprompt.Define("userProfileAgent",
+	prefPrompt, err := dotprompt.Define("userProfileFlow",
 		prompt,
 
 		dotprompt.Config{

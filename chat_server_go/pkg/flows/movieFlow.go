@@ -16,7 +16,7 @@ import (
 )
 
 func GetMovieFlow(ctx context.Context, model ai.Model, prompt string) (*genkit.Flow[*types.MovieFlowInput, *types.MovieFlowOutput, struct{}], error) {
-	movieAgentPrompt, err := dotprompt.Define("movieAgent",
+	movieAgentPrompt, err := dotprompt.Define("movieFlow",
 		prompt,
 
 		dotprompt.Config{
