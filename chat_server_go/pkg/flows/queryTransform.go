@@ -3,7 +3,7 @@ package flows
 import (
 	"context"
 	"encoding/json"
-	"fmt"
+	"log"
 
 	"cloud.google.com/go/vertexai/genai"
 	"github.com/firebase/genkit/go/ai"
@@ -35,6 +35,7 @@ func GetQueryTransformFlow(ctx context.Context, model ai.Model, prompt string) (
 	}
 	// Define a simple flow that prompts an LLM to generate menu suggestions.
 	queryTransformFlow := genkit.DefineFlow("queryTransformFlow", func(ctx context.Context, input *types.QueryTransformFlowInput) (*types.QueryTransformFlowOutput, error) {
+		// Default output
 		queryTransformFlowOutput := &types.QueryTransformFlowOutput{
 			ModelOutputMetadata: &types.ModelOutputMetadata{
 				SafetyIssue:   false,
@@ -44,6 +45,11 @@ func GetQueryTransformFlow(ctx context.Context, model ai.Model, prompt string) (
 			Intent:           types.USERINTENT(types.UNCLEAR),
 		}
 
+		// INSTRUCTIONS:
+		// 1. Call this prompt with the necessary input and get the output.
+		// 2. The output should then be tranformed into the type  QueryTransformFlowOutput and stored in the variable queryTransformFlowOutput
+		// 3. Handle any errors that may arise.
+
 		resp, err := queryTransformPrompt.Generate(ctx,
 			&dotprompt.PromptRequest{
 				Variables: input,
@@ -52,7 +58,7 @@ func GetQueryTransformFlow(ctx context.Context, model ai.Model, prompt string) (
 		)
 		if err != nil {
 			if blockedErr, ok := err.(*genai.BlockedError); ok {
-				fmt.Println("Request was blocked:", blockedErr)
+				log.Println("Request was blocked:", blockedErr)
 				queryTransformFlowOutput = &types.QueryTransformFlowOutput{
 					ModelOutputMetadata: &types.ModelOutputMetadata{
 						SafetyIssue: true,

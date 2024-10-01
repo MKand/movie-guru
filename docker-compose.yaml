@@ -55,6 +55,7 @@ services:
     build: ./genkit
     ports: 
       - "4001:4000"
+      - "3403:3401"
     environment:
       - POSTGRES_HOST=$POSTGRES_HOST
       - PROJECT_ID=$PROJECT_ID
