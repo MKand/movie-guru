@@ -1,4 +1,4 @@
-package flows
+package main
 
 import (
 	"context"
@@ -17,15 +17,21 @@ import (
 )
 
 type FlowDependencies struct {
-	QueryTransformFlow *genkit.Flow[*types.QueryTransformFlowInput, *types.QueryTransformFlowOutput, struct{}]
-	PrefFlow           *genkit.Flow[*types.UserProfileFlowInput, *types.UserProfileFlowOutput, struct{}]
+	QueryTransformFlow *genkit.Flow[*QueryTransformFlowInput, *QueryTransformFlowOutput, struct{}]
+	PrefFlow           *genkit.Flow[*UserProfileFlowInput, *UserProfileFlowOutput, struct{}]
 	MovieFlow          *genkit.Flow[*types.MovieFlowInput, *types.MovieFlowOutput, struct{}]
-	RetFlow            *genkit.Flow[*ai.RetrieverRequest, []*ai.Document, struct{}]
+	RetFlow            *genkit.Flow[string, []*ai.Document, struct{}]
 	Retriever          ai.Retriever
 	DB                 *sql.DB
 }
 
-func GetDependencies(ctx context.Context, metadata *db.Metadata, db *sql.DB) *FlowDependencies {
+type Prompts struct {
+	UserPrefPrompt       string
+	MovieFlowPrompt      string
+	QueryTransformPrompt string
+}
+
+func GetDependencies(ctx context.Context, metadata *db.Metadata, db *sql.DB, prompts *Prompts) *FlowDependencies {
 	err := vertexai.Init(ctx, &vertexai.Config{ProjectID: os.Getenv("PROJECT_ID"), Location: os.Getenv("LOCATION")})
 
 	if err != nil {
@@ -38,11 +44,11 @@ func GetDependencies(ctx context.Context, metadata *db.Metadata, db *sql.DB) *Fl
 		log.Fatal("Model not found")
 	}
 
-	userProfileFlow, err := GetUserProfileFlow(ctx, model)
+	userProfileFlow, err := GetUserProfileFlow(ctx, model, prompts.UserPrefPrompt)
 	if err != nil {
 		log.Fatal(err)
 	}
-	queryTransformFlow, err := GetQueryTransformFlow(ctx, model)
+	queryTransformFlow, err := GetQueryTransformFlow(ctx, model, prompts.QueryTransformPrompt)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -53,7 +59,7 @@ func GetDependencies(ctx context.Context, metadata *db.Metadata, db *sql.DB) *Fl
 	ret := DefineRetriever(metadata.RetrieverLength, db, embedder)
 	retFlow := GetRetrieverFlow(ctx, ret)
 
-	movieAgentFlow, err := GetMovieFlow(ctx, model)
+	movieAgentFlow, err := GetMovieFlow(ctx, model, prompts.MovieFlowPrompt)
 	if err != nil {
 		log.Fatal(err)
 	}

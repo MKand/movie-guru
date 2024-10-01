@@ -1,23 +1,61 @@
-package flows
+package main
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
 	"log"
+	"os"
 
-	"cloud.google.com/go/vertexai/genai"
-	"github.com/firebase/genkit/go/ai"
 	"github.com/firebase/genkit/go/genkit"
-	"github.com/firebase/genkit/go/plugins/dotprompt"
-	"github.com/invopop/jsonschema"
-
-	types "github.com/movie-guru/pkg/types"
+	"github.com/movie-guru/pkg/db"
 )
 
-func GetMovieFlow(ctx context.Context, model ai.Model) (*genkit.Flow[*types.MovieFlowInput, *types.MovieFlowOutput, struct{}], error) {
-	movieAgentPrompt, err := dotprompt.Define("movieFlow",
-		`Your mission is to be a movie expert with knowledge about movies. Your mission is to answer the user's movie-related questions with useful information.
+func main() {
+	ctx := context.Background()
+
+	movieAgentDB, err := db.GetDB()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer movieAgentDB.DB.Close()
+
+	metadata, err := movieAgentDB.GetMetadata(os.Getenv("APP_VERSION"))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	prompts := getPrompts()
+
+	GetDependencies(ctx, metadata, movieAgentDB.DB, prompts)
+
+	if err := genkit.Init(ctx, &genkit.Options{FlowAddr: ":3401"}); err != nil {
+		log.Fatal(err)
+	}
+
+}
+
+func getPrompts() *Prompts {
+
+	userProfilePrompt :=
+		`
+			Optional Message 0 from agent: {{agentMessage}}
+			Required Message 1 from user: {{query}}
+		 	Just say hi in a language you know.
+		`
+
+	queryTransformPrompt :=
+		`
+			
+		Here are the inputs:
+		* Conversation History (this may be empty):
+			{{history}}
+		* UserProfile (this may be empty):
+			{{userProfile}}
+		* User Message:
+			{{userMessage}})
+			Translate the user's message into a different language of your choice.
+		`
+
+	movieFlowPrompt := `Your mission is to be a movie expert with knowledge about movies. Your mission is to answer the user's movie-related questions with useful information.
 		You also have to be friendly. If the user greets you, greet them back. If the user says or wants to end the conversation, say goodbye in a friendly way. 
 		If the user doesn't have a clear question or task for you, ask follow up questions and prompt the user.
 
@@ -48,66 +86,12 @@ func GetMovieFlow(ctx context.Context, model ai.Model) (*genkit.Flow[*types.Movi
 		
         Remember that before you answer a question, you must check to see if it complies with your mission.
         If not, you can say, Sorry I can't answer that question.
-    	`,
+    	`
 
-		dotprompt.Config{
-			Model:        model,
-			InputSchema:  jsonschema.Reflect(types.MovieFlowInput{}),
-			OutputSchema: jsonschema.Reflect(types.MovieFlowOutput{}),
-			OutputFormat: ai.OutputFormatText,
-			GenerationConfig: &ai.GenerationCommonConfig{
-				Temperature: 0.5,
-			},
-		},
-	)
-	if err != nil {
-		return nil, err
+	prompts := &Prompts{
+		UserPrefPrompt:       userProfilePrompt,
+		MovieFlowPrompt:      movieFlowPrompt,
+		QueryTransformPrompt: queryTransformPrompt,
 	}
-
-	movieFlow := genkit.DefineFlow(
-		"movieQAFlow",
-		func(ctx context.Context, input *types.MovieFlowInput) (*types.MovieFlowOutput, error) {
-			var movieFlowOutput *types.MovieFlowOutput
-			resp, err := movieAgentPrompt.Generate(ctx,
-				&dotprompt.PromptRequest{
-					Variables: input,
-				},
-				nil,
-			)
-			if err != nil {
-				if blockedErr, ok := err.(*genai.BlockedError); ok {
-					fmt.Println("Request was blocked:", blockedErr)
-					movieFlowOutput = &types.MovieFlowOutput{
-						ModelOutputMetadata: &types.ModelOutputMetadata{
-							SafetyIssue: true,
-						},
-						RelevantMoviesTitles: make([]*types.RelevantMovie, 0),
-						WrongQuery:           false,
-					}
-					return movieFlowOutput, nil
-
-				} else {
-					return nil, err
-
-				}
-			}
-			t := resp.Text()
-			parsedJson, err := makeJsonMarshallable(t)
-			if err != nil {
-				if len(parsedJson) > 0 {
-					log.Printf("Didn't get json resp from movie agent. %s", t)
-				}
-			}
-			err = json.Unmarshal([]byte(parsedJson), &movieFlowOutput)
-			if err != nil {
-				return nil, err
-			}
-			return movieFlowOutput, nil
-		},
-	)
-	return movieFlow, nil
-}
-
-func extractText(jsonText string) string {
-	return ""
+	return prompts
 }

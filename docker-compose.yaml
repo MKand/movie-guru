@@ -68,7 +68,7 @@ services:
     volumes:
       - ./chat_server_go:/app
       - ./.key.json:/key.json
-    working_dir: /app/cmd/flows
+    working_dir: /app/cmd/standaloneFlows
 
 
   

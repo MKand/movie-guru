@@ -15,10 +15,41 @@ import (
 	types "github.com/movie-guru/pkg/types"
 )
 
-func GetQueryTransformFlow(ctx context.Context, model ai.Model, prompt string) (*genkit.Flow[*types.QueryTransformFlowInput, *types.QueryTransformFlowOutput, struct{}], error) {
+func GetQueryTransformFlow(ctx context.Context, model ai.Model) (*genkit.Flow[*types.QueryTransformFlowInput, *types.QueryTransformFlowOutput, struct{}], error) {
 
 	queryTransformPrompt, err := dotprompt.Define("queryTransformFlow",
-		prompt,
+		`
+		You are a search query refinement expert regarding movies and movie related information.  Your goal is to analyse the user's intent and create a short query for a vector search engine specialised in movie related information.
+		If the user's intent doesn't require a search in the database then return an empty transformedQuery. For example: if the user is greeting you, or ending the conversation.
+		You should NOT attempt to answer's the user's query.
+		Instructions:
+
+		1. Analyze the conversation history to understand the context and main topics. Focus on the user's most recent request. The history may be empty.
+		2.  Use the user profile when relevant:
+			*   Include strong likes if they align with the query.
+			*   Include strong dislikes only if they conflict with or narrow the request.
+			*   Ignore irrelevant likes or dislikes.
+			*  The user may have no strong likes or dislikes
+		3. Prioritize the user's current request as the core of the search query.
+		4. Keep the transformed query concise and specific.
+		5. Only use the information in the conversation history, the user's preferences and the current request to respond. Do not use other sources of information.
+		6. If the user is talking about topics unrelated to movies, return an empty transformed query and state the intent as UNCLEAR.
+		7. You have absolutely no knowledge of movies.
+
+		Here are the inputs:
+		* Conversation History (this may be empty):
+			{{history}}
+		* UserProfile (this may be empty):
+			{{userProfile}}
+		* User Message:
+			{{userMessage}}
+
+		Respond with the following:
+
+		*   a *justification* about why you created the query this way.
+		*   the *transformedQuery* which is the resulting refined search query.
+		*   a *userIntent*, which is one of GREET, END_CONVERSATION, REQUEST, RESPONSE, ACKNOWLEDGE, UNCLEAR
+		`,
 
 		dotprompt.Config{
 			Model:        model,
@@ -44,12 +75,6 @@ func GetQueryTransformFlow(ctx context.Context, model ai.Model, prompt string) (
 			TransformedQuery: "",
 			Intent:           types.USERINTENT(types.UNCLEAR),
 		}
-
-		// INSTRUCTIONS:
-		// 1. Call this prompt with the necessary input and get the output.
-		// 2. The output should then be tranformed into the type  QueryTransformFlowOutput and stored in the variable queryTransformFlowOutput
-		// 3. Handle any errors that may arise.
-
 		resp, err := queryTransformPrompt.Generate(ctx,
 			&dotprompt.PromptRequest{
 				Variables: input,
