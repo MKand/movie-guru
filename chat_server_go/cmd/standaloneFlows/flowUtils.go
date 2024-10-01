@@ -20,7 +20,7 @@ type FlowDependencies struct {
 	QueryTransformFlow *genkit.Flow[*QueryTransformFlowInput, *QueryTransformFlowOutput, struct{}]
 	PrefFlow           *genkit.Flow[*UserProfileFlowInput, *UserProfileFlowOutput, struct{}]
 	MovieFlow          *genkit.Flow[*types.MovieFlowInput, *types.MovieFlowOutput, struct{}]
-	RetFlow            *genkit.Flow[string, []*ai.Document, struct{}]
+	RetFlow            *genkit.Flow[*RetrieverFlowInput, *RetrieverFlowOutput, struct{}]
 	Retriever          ai.Retriever
 	DB                 *sql.DB
 }

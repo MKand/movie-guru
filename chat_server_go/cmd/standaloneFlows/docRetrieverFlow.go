@@ -14,12 +14,31 @@ import (
 	"github.com/firebase/genkit/go/plugins/vertexai"
 	_ "github.com/lib/pq"
 	_ "github.com/movie-guru/pkg/types"
-	types "github.com/movie-guru/pkg/types"
 	pgv "github.com/pgvector/pgvector-go"
 )
 
-func ParseMovieContexts(docs []*ai.Document) ([]*types.MovieContext, error) {
-	movies := make([]*types.MovieContext, 0, len(docs))
+type MovieContext struct {
+	Title          string   `json:"title"`
+	RuntimeMinutes int      `json:"runtime_minutes"`
+	Genres         []string `json:"genres"`
+	Rating         float32  `json:"rating"`
+	Plot           string   `json:"plot"`
+	Released       int      `json:"released"`
+	Director       string   `json:"director"`
+	Actors         []string `json:"actors"`
+	Poster         string   `json:"poster"`
+	Tconst         string   `json:"tconst"`
+}
+
+type RetrieverFlowInput struct {
+	Query string `json:"query"`
+}
+type RetrieverFlowOutput struct {
+	Documents []*ai.Document `json:"documents"`
+}
+
+func ParseMovieContexts(docs []*ai.Document) ([]*MovieContext, error) {
+	movies := make([]*MovieContext, 0, len(docs))
 
 	for _, doc := range docs {
 		var intermediate struct {
@@ -40,7 +59,7 @@ func ParseMovieContexts(docs []*ai.Document) ([]*types.MovieContext, error) {
 		runTimeMins, _ := doc.Metadata["runtime_minutes"].(int)
 		released, _ := doc.Metadata["releases"].(int)
 		poster := doc.Metadata["poster"].(string)
-		movies = append(movies, &types.MovieContext{
+		movies = append(movies, &MovieContext{
 			Title:          intermediate.Title,
 			RuntimeMinutes: runTimeMins,
 			Genres:         strings.Split(intermediate.Genres, ", "),
@@ -57,7 +76,7 @@ func ParseMovieContexts(docs []*ai.Document) ([]*types.MovieContext, error) {
 }
 
 type MovieContextList struct {
-	Movies []*types.MovieContext `json:"movies"`
+	Movies []*MovieContext `json:"movies"`
 }
 
 type MovieRetriever struct {
@@ -66,7 +85,7 @@ type MovieRetriever struct {
 	Retriever       ai.Retriever
 }
 
-func (m *MovieRetriever) RetriveDocuments(ctx context.Context, query string) ([]*types.MovieContext, error) {
+func (m *MovieRetriever) RetriveDocuments(ctx context.Context, query string) ([]*MovieContext, error) {
 	doc := ai.DocumentFromText(query, nil)
 	retDoc := ai.RetrieverRequest{
 		Document: doc,
@@ -94,26 +113,30 @@ func CreateMovieRetriever(embeddingModelName string, maxRetLength int, db *sql.D
 	}
 }
 
-func GetRetrieverFlow(ctx context.Context, ret ai.Retriever) *genkit.Flow[string, []*ai.Document, struct{}] {
+func GetRetrieverFlow(ctx context.Context, ret ai.Retriever) *genkit.Flow[*RetrieverFlowInput, *RetrieverFlowOutput, struct{}] {
 	retFlow := genkit.DefineFlow("movieDocFlow",
-		func(ctx context.Context, query string) ([]*ai.Document, error) {
-			doc := ai.DocumentFromText(query, nil)
-			input := &ai.RetrieverRequest{
+		func(ctx context.Context, input *RetrieverFlowInput) (*RetrieverFlowOutput, error) {
+			doc := ai.DocumentFromText(input.Query, nil)
+			query := &ai.RetrieverRequest{
 				Document: doc,
 				Options:  10,
 			}
 			retOutput := make([]*ai.Document, 0, 10)
-			resp, err := ret.Retrieve(ctx, input)
+			retFlowOutput := &RetrieverFlowOutput{
+				Documents: retOutput,
+			}
+			resp, err := ret.Retrieve(ctx, query)
 			if err != nil {
 				if blockedErr, ok := err.(*genai.BlockedError); ok {
 					fmt.Println("Request was blocked:", blockedErr)
-					return retOutput, nil
+					return retFlowOutput, nil
 				} else {
 					return nil, err
 				}
 			}
 			t := resp.Documents
-			return t, nil
+			retFlowOutput.Documents = t
+			return retFlowOutput, nil
 		})
 	return retFlow
 }
