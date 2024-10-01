@@ -15,14 +15,28 @@ import (
 	types "github.com/movie-guru/pkg/types"
 )
 
-func GetMovieFlow(ctx context.Context, model ai.Model, prompt string) (*genkit.Flow[*types.MovieFlowInput, *types.MovieFlowOutput, struct{}], error) {
+type MovieFlowInput struct {
+	History          []*types.SimpleMessage `json:"history"`
+	UserPreferences  *types.UserProfile     `json:"userPreferences"`
+	ContextDocuments []*types.MovieContext  `json:"contextDocuments"`
+	UserMessage      string                 `json:"userMessage"`
+}
+
+type MovieFlowOutput struct {
+	Answer               string                 `json:"answer"`
+	RelevantMoviesTitles []*types.RelevantMovie `json:"relevantMovies"`
+	WrongQuery           bool                   `json:"wrongQuery,omitempty" `
+	*types.ModelOutputMetadata
+}
+
+func GetMovieFlow(ctx context.Context, model ai.Model, prompt string) (*genkit.Flow[*MovieFlowInput, *MovieFlowOutput, struct{}], error) {
 	movieAgentPrompt, err := dotprompt.Define("movieFlow",
 		prompt,
 
 		dotprompt.Config{
 			Model:        model,
-			InputSchema:  jsonschema.Reflect(types.MovieFlowInput{}),
-			OutputSchema: jsonschema.Reflect(types.MovieFlowOutput{}),
+			InputSchema:  jsonschema.Reflect(MovieFlowInput{}),
+			OutputSchema: jsonschema.Reflect(MovieFlowOutput{}),
 			OutputFormat: ai.OutputFormatText,
 			GenerationConfig: &ai.GenerationCommonConfig{
 				Temperature: 0.5,
@@ -35,8 +49,8 @@ func GetMovieFlow(ctx context.Context, model ai.Model, prompt string) (*genkit.F
 
 	movieFlow := genkit.DefineFlow(
 		"movieQAFlow",
-		func(ctx context.Context, input *types.MovieFlowInput) (*types.MovieFlowOutput, error) {
-			var movieFlowOutput *types.MovieFlowOutput
+		func(ctx context.Context, input *MovieFlowInput) (*MovieFlowOutput, error) {
+			var movieFlowOutput *MovieFlowOutput
 			resp, err := movieAgentPrompt.Generate(ctx,
 				&dotprompt.PromptRequest{
 					Variables: input,
@@ -46,7 +60,7 @@ func GetMovieFlow(ctx context.Context, model ai.Model, prompt string) (*genkit.F
 			if err != nil {
 				if blockedErr, ok := err.(*genai.BlockedError); ok {
 					fmt.Println("Request was blocked:", blockedErr)
-					movieFlowOutput = &types.MovieFlowOutput{
+					movieFlowOutput = &MovieFlowOutput{
 						ModelOutputMetadata: &types.ModelOutputMetadata{
 							SafetyIssue: true,
 						},

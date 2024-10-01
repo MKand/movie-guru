@@ -13,13 +13,12 @@ import (
 	"github.com/firebase/genkit/go/plugins/vertexai"
 
 	"github.com/movie-guru/pkg/db"
-	types "github.com/movie-guru/pkg/types"
 )
 
 type FlowDependencies struct {
 	QueryTransformFlow *genkit.Flow[*QueryTransformFlowInput, *QueryTransformFlowOutput, struct{}]
 	PrefFlow           *genkit.Flow[*UserProfileFlowInput, *UserProfileFlowOutput, struct{}]
-	MovieFlow          *genkit.Flow[*types.MovieFlowInput, *types.MovieFlowOutput, struct{}]
+	MovieFlow          *genkit.Flow[*MovieFlowInput, *MovieFlowOutput, struct{}]
 	RetFlow            *genkit.Flow[*RetrieverFlowInput, *RetrieverFlowOutput, struct{}]
 	Retriever          ai.Retriever
 	DB                 *sql.DB
