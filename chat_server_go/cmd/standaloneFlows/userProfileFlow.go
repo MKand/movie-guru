@@ -22,16 +22,12 @@ type UserProfileFlowInput struct {
 
 type UserProfileFlowOutput struct {
 	ProfileChangeRecommendations []*types.ProfileChangeRecommendation `json:"profileChangeRecommendations"`
-	*types.ModelOutputMetadata
+	Justification                string                               `json:"justification,omitempty"`
 }
 
 func NewUserProfileFlowOuput() *UserProfileFlowOutput {
 	return &UserProfileFlowOutput{
 		ProfileChangeRecommendations: make([]*types.ProfileChangeRecommendation, 5),
-		ModelOutputMetadata: &types.ModelOutputMetadata{
-			Justification: "",
-			SafetyIssue:   false,
-		},
 	}
 }
 
@@ -56,9 +52,6 @@ func GetUserProfileFlow(ctx context.Context, model ai.Model, prompt string) (*ge
 	// Define a simple flow that prompts an LLM to generate menu suggestions.
 	userProfileFlow := genkit.DefineFlow("userProfileFlow", func(ctx context.Context, input *UserProfileFlowInput) (*UserProfileFlowOutput, error) {
 		userProfileFlowOutput := &UserProfileFlowOutput{
-			ModelOutputMetadata: &types.ModelOutputMetadata{
-				SafetyIssue: false,
-			},
 			ProfileChangeRecommendations: make([]*types.ProfileChangeRecommendation, 0),
 		}
 
@@ -71,11 +64,7 @@ func GetUserProfileFlow(ctx context.Context, model ai.Model, prompt string) (*ge
 		if err != nil {
 			if blockedErr, ok := err.(*genai.BlockedError); ok {
 				fmt.Println("Request was blocked:", blockedErr)
-				userProfileFlowOutput = &UserProfileFlowOutput{
-					ModelOutputMetadata: &types.ModelOutputMetadata{
-						SafetyIssue: true,
-					},
-				}
+				userProfileFlowOutput = &UserProfileFlowOutput{}
 				return userProfileFlowOutput, nil
 
 			} else {

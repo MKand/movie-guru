@@ -150,7 +150,6 @@ func DefineRetriever(maxRetLength int, db *sql.DB, embedder ai.Embedder) ai.Retr
 		// 2. Search for the relevant documents in the vector db based on the embedding
 		// 3. Convert the model output to type RetrieverFlowOutput
 		// HINT: https://github.com/firebase/genkit/blob/main/go/samples/pgvector/main.go
-
 		return retrieverResponse, nil
 	}
 	return ai.DefineRetriever("pgvector", "movieRetriever", f)

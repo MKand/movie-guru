@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 
 	"cloud.google.com/go/vertexai/genai"
 	"github.com/firebase/genkit/go/ai"
@@ -25,8 +24,8 @@ type MovieFlowInput struct {
 type MovieFlowOutput struct {
 	Answer               string                 `json:"answer"`
 	RelevantMoviesTitles []*types.RelevantMovie `json:"relevantMovies"`
-	WrongQuery           bool                   `json:"wrongQuery,omitempty" `
-	*types.ModelOutputMetadata
+	WrongQuery           bool                   `json:"wrongQuery,omitempty"`
+	Justification        string                 `json:"justification,omitempty"`
 }
 
 func GetMovieFlow(ctx context.Context, model ai.Model, prompt string) (*genkit.Flow[*MovieFlowInput, *MovieFlowOutput, struct{}], error) {
@@ -37,7 +36,7 @@ func GetMovieFlow(ctx context.Context, model ai.Model, prompt string) (*genkit.F
 			Model:        model,
 			InputSchema:  jsonschema.Reflect(MovieFlowInput{}),
 			OutputSchema: jsonschema.Reflect(MovieFlowOutput{}),
-			OutputFormat: ai.OutputFormatText,
+			OutputFormat: ai.OutputFormatJSON,
 			GenerationConfig: &ai.GenerationCommonConfig{
 				Temperature: 0.5,
 			},
@@ -61,9 +60,6 @@ func GetMovieFlow(ctx context.Context, model ai.Model, prompt string) (*genkit.F
 				if blockedErr, ok := err.(*genai.BlockedError); ok {
 					fmt.Println("Request was blocked:", blockedErr)
 					movieFlowOutput = &MovieFlowOutput{
-						ModelOutputMetadata: &types.ModelOutputMetadata{
-							SafetyIssue: true,
-						},
 						RelevantMoviesTitles: make([]*types.RelevantMovie, 0),
 						WrongQuery:           false,
 					}
@@ -75,13 +71,7 @@ func GetMovieFlow(ctx context.Context, model ai.Model, prompt string) (*genkit.F
 				}
 			}
 			t := resp.Text()
-			parsedJson, err := makeJsonMarshallable(t)
-			if err != nil {
-				if len(parsedJson) > 0 {
-					log.Printf("Didn't get json resp from movie agent. %s", t)
-				}
-			}
-			err = json.Unmarshal([]byte(parsedJson), &movieFlowOutput)
+			err = json.Unmarshal([]byte(t), &movieFlowOutput)
 			if err != nil {
 				return nil, err
 			}

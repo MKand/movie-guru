@@ -16,7 +16,7 @@ import (
 type QueryTransformFlowOutput struct {
 	TransformedQuery string           `json:"transformedQuery, omitempty"`
 	Intent           types.USERINTENT `json:"userIntent, omitempty"`
-	*types.ModelOutputMetadata
+	Justification    string           `json:"justification,omitempty"`
 }
 
 type QueryTransformFlowInput struct {
@@ -49,10 +49,6 @@ func GetQueryTransformFlow(ctx context.Context, model ai.Model, prompt string) (
 	queryTransformFlow := genkit.DefineFlow("queryTransformFlow", func(ctx context.Context, input *QueryTransformFlowInput) (*QueryTransformFlowOutput, error) {
 		// Default output
 		queryTransformFlowOutput := &QueryTransformFlowOutput{
-			ModelOutputMetadata: &types.ModelOutputMetadata{
-				SafetyIssue:   false,
-				Justification: "",
-			},
 			TransformedQuery: "",
 			Intent:           types.USERINTENT(types.UNCLEAR),
 		}

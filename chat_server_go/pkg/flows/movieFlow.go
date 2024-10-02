@@ -33,6 +33,9 @@ func GetMovieFlow(ctx context.Context, model ai.Model) (*genkit.Flow[*types.Movi
 		This is the history of the conversation with the user so far to understand the context of the conversation. Do not use history to find information to answer the user's question:
 		{{history}} 
 
+		This is the user's strong likes and dislikes. You can use this to shape your response
+		{{userPreferences}} 
+
 		This is the last message the user sent. Use this to inform your response and understand the user's intent:
 		{{userMessage}}
 
@@ -92,6 +95,7 @@ func GetMovieFlow(ctx context.Context, model ai.Model) (*genkit.Flow[*types.Movi
 				}
 			}
 			t := resp.Text()
+			log.Println(t)
 			parsedJson, err := makeJsonMarshallable(t)
 			if err != nil {
 				if len(parsedJson) > 0 {
