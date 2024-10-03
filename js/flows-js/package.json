@@ -4,7 +4,8 @@
     "start": "node lib/index.js",
     "build": "tsc",
     "build:watch": "tsc --watch",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "tsc && node lib/index.js"
   },
   "name": "flow",
   "version": "1.0.0",

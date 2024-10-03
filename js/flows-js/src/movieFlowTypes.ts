@@ -1,6 +1,5 @@
 import { z } from 'zod';
 
-// Assuming you have these schemas defined elsewhere (from previous conversions)
 import { SimpleMessageSchema, UserProfileSchema } from './queryTransformTypes'; 
 
 export type MovieContext = z.infer<typeof MovieContextSchema>;

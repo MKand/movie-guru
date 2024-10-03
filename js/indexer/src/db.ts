@@ -7,13 +7,12 @@ export async function OpenDB(): Promise<postgres.Sql<{}> |null> {
     return sql; // Return existing connection if already opened
   }
 
-  const POSTGRES_DB_USER_PASSWORD = process.env.POSTGRES_DB_MAIN_USER_PASSWORD;
+  const POSTGRES_DB_USER_PASSWORD = process.env.POSTGRES_DB_USER_PASSWORD;
   const POSTGRES_HOST = process.env.POSTGRES_HOST;
   const POSTGRES_DB_NAME = process.env.POSTGRES_DB_NAME;
-  const POSTGRES_DB_USER = "main";
+  const POSTGRES_DB_USER = process.env.POSTGRES_DB_USER;
 
-
-  if (!POSTGRES_DB_USER_PASSWORD || !POSTGRES_HOST || !POSTGRES_DB_NAME) {
+  if (!POSTGRES_DB_USER_PASSWORD || !POSTGRES_HOST || !POSTGRES_DB_NAME ||!POSTGRES_DB_USER) {
     console.error('Missing environment variables for database connection');
     return null;
   }
@@ -34,6 +33,6 @@ export async function OpenDB(): Promise<postgres.Sql<{}> |null> {
     return sql;
   } catch (err) {
     console.error(err);
-    return null;
+    throw err;
   }
 }

@@ -5,10 +5,14 @@ import { vertexAI } from '@genkit-ai/vertexai';
 import { firebase } from '@genkit-ai/firebase';
 import { ProcessMovies } from './addData';
 
+let location = process.env.LOCATION;
+if (!location) {
+  location = 'europe-west4';
+}
 configureGenkit({
   plugins: [
   
-    vertexAI({ projectId: process.env.PROJECT_ID, location: 'europe-west4' }),
+    vertexAI({ projectId: process.env.PROJECT_ID, location: location }),
     firebase()
   ],
   // Log debug output to tbe console.

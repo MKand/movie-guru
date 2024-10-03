@@ -3,6 +3,7 @@ import { parse } from 'csv-parse';
 import { runFlow } from '@genkit-ai/flow';
 import { IndexerFlow } from './indexerFlow'; 
 import { MovieContext } from './types'; 
+import { OpenDB } from './db';
 
 export async function ProcessMovies() { 
   try {
@@ -29,6 +30,7 @@ export async function ProcessMovies() {
     });
 
     let index = 0;
+    const db = await OpenDB();
     for (const record of records) {
       const year = parseFloat(record[1]);
       const rating = parseFloat(record[5]);
@@ -46,16 +48,15 @@ export async function ProcessMovies() {
         poster: record[9],
         tconst: index.toString(),
       };
-
-      console.log(movieContext)
       try {
         const response = await runFlow(IndexerFlow, movieContext);
+        console.log("processed ", record[0])
       } catch (err) {
         console.error('Error loading movie: ', record[0], err);
       }
-    
       index++;
-    }
+    
+  }
   } catch (err) {
     console.error('Error opening or processing file:', err);
   }

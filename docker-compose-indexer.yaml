@@ -1,5 +1,5 @@
 services:
-  flows:
+  indexer-go:
     build: ./chat_server_go
     command: /app/indexer
     environment:
@@ -16,6 +16,21 @@ services:
     volumes:
       - ./.key.json:/key.json
       - ./dataset/:/dataset
-
+  indexer-js:
+    build: ./js/indexer
+    environment:
+      - POSTGRES_HOST=$POSTGRES_HOST
+      - PROJECT_ID=$PROJECT_ID
+      - POSTGRES_DB_USER_PASSWORD=$POSTGRES_DB_MAIN_USER_PASSWORD
+      - POSTGRES_DB_USER=main
+      - TABLE_NAME=movies
+      - POSTGRES_DB_NAME=fake-movies-db
+      - APP_VERSION=v1
+      - GOOGLE_APPLICATION_CREDENTIALS=/key.json
+      - LOCATION=europe-west4
+      - LOCAL=true
+    volumes:
+      - ./.key.json:/key.json
+      - ./dataset/:/dataset
   
   
