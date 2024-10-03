@@ -24,6 +24,7 @@ configureGenkit({
 
 export {UserProfileFlowPrompt, UserProfileFlow} from './userProfileFlow'
 export {QueryTransformPrompt, QueryTransformFlow} from './queryTransformFlow'
+export {MovieFlowPrompt, MovieFlow} from './movieFlow'
 
 
 // Start a flow server, which exposes your flows as HTTP endpoints. This call

@@ -19,13 +19,13 @@ const ProfileCategoriesSchema = z.object({
 });
 
 // UserProfile schema
-const UserProfileSchema = z.object({
+export const UserProfileSchema = z.object({
   likes: ProfileCategoriesSchema,
   dislikes: ProfileCategoriesSchema,
 });
 
 // SimpleMessage schema
-const SimpleMessageSchema = z.object({
+export const SimpleMessageSchema = z.object({
   role: z.string(), // Changed 'sender' to 'role' to match the type definition
   content: z.string(),
 });
