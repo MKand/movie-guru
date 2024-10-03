@@ -8,3 +8,10 @@ tfplan
 __pycache__
 
 __debug*
+
+node_modules
+lib
+dist
+.vscode
+.DS_Store
+package-lock.json
