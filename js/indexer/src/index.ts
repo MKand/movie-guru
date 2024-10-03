@@ -3,7 +3,7 @@ import { configureGenkit } from '@genkit-ai/core';
 import { startFlowsServer } from '@genkit-ai/flow';
 import { vertexAI } from '@genkit-ai/vertexai';
 import { firebase } from '@genkit-ai/firebase';
-
+import { ProcessMovies } from './addData';
 
 configureGenkit({
   plugins: [
@@ -21,14 +21,5 @@ configureGenkit({
     }
 });
 
+ProcessMovies()
 
-export {UserProfileFlowPrompt, UserProfileFlow} from './userProfileFlow'
-export {QueryTransformPrompt, QueryTransformFlow} from './queryTransformFlow'
-export {MovieFlowPrompt, MovieFlow} from './movieFlow'
-
-
-// Start a flow server, which exposes your flows as HTTP endpoints. This call
-// must come last, after all of your plug-in configuration and flow definitions.
-// You can optionally specify a subset of flows to serve, and configure some
-// HTTP server options, but by default, the flow server serves all defined flows.
-startFlowsServer();
