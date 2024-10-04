@@ -1,7 +1,8 @@
 # Movie Guru
 
 
-[Movie Guru](https://www.youtube.com/watch?v=l_KhN3RJ8qA)
+[![Movie Guru](https://img.youtube.com/vi/l_KhN3RJ8qA/0.jpg)](https://youtu.be/l_KhN3RJ8qA)
+
 
 **NOTE**: the repo is still in development.
 
@@ -89,7 +90,7 @@ git clone https://github.com/manasakandula/movie-guru.git
 cd movie-guru
 ```
 
-### Start the Deploy
+### Deploy infrastructure
 ```sh
 ./deploy/deploy.sh --skipapp --backend genkit-go  # or --backend langchain or --backend genkit-js (WIP)
 ```
@@ -99,9 +100,13 @@ We add --skipapp to make sure we wait for the db and the data are created before
 
 #### Create tables
 Connect to the sql db through the cloud sql studio (the db is running on a private IP and hence cannot be reached directly without the use of cloudsql proxy). The [CloudSQL studio](https://cloud.google.com/sql/docs/mysql/manage-data-using-studio) is the is the easiest way to connect to it. Another option while testing locally is to set [Authorized Networks](https://cloud.google.com/sql/docs/mysql/authorize-networks) and allow list the IP address of the machine you are working on.
+For ease of use, the terraform script when creating the db allows all IPs to access the db. **Make sure** you delete that setting after you finish inserting data.
 
+The DB password for user **main** is stored in the secret manager in the project under the name **postgres-main-user-secret**.
 
 ```SQL
+CREATE EXTENSION IF NOT EXISTS vector;
+
 CREATE TABLE IF NOT EXISTS movies (
     tconst VARCHAR PRIMARY KEY,
     embedding VECTOR(768),
@@ -114,21 +119,21 @@ CREATE TABLE IF NOT EXISTS movies (
     director VARCHAR,
     plot VARCHAR,
     poster VARCHAR,
-    context VARCHAR
+    content VARCHAR
 );
 
-CREATE TABLE invite_codes (
-    code VARCHAR(255) PRIMARY KEY,   
-    valid BOOLEAN NOT NULL DEFAULT TRUE, 
+CREATE TABLE IF NOT EXISTS invite_codes (
+    code VARCHAR(255) PRIMARY KEY,
+    valid BOOLEAN NOT NULL DEFAULT TRUE
 );
 
-CREATE TABLE user_logins (
+CREATE TABLE IF NOT EXISTS user_logins (
     email VARCHAR(255) PRIMARY KEY,
     login_count INT NOT NULL DEFAULT 0,
-    special_login VARCHAR(255)  DEFAULT NULL; 
+    special_login VARCHAR(255) DEFAULT NULL
 );
 
-CREATE TABLE app_metadata (
+CREATE TABLE IF NOT EXISTS app_metadata (
     app_version VARCHAR(255) PRIMARY KEY,
     token_audience VARCHAR(255) NOT NULL,
     history_length INT NOT NULL,
@@ -139,10 +144,9 @@ CREATE TABLE app_metadata (
     google_embedding_model_name VARCHAR(255) NOT NULL,
     front_end_domain VARCHAR(255) NOT NULL
 );
-
 ```
-#### Insert data into the tables
 
+#### Insert data into the tables
 Insert some data into the tables. Make changes and add the right values where required. You can play around with the values. 
 The **CORS origin** should be the allowed front end domains (comma seperated list) from which your backend recieves calls. 
 The **token audience** is the firebase project id from which the auth tokens are generated. 
@@ -152,24 +156,88 @@ The current setup uses the same model for the 3 agents and is passed along as **
 
 ```SQL
 INSERT INTO app_metadata (app_version, token_audience, history_length, max_user_message_len, cors_origin, retriever_length, google_chat_model_name, google_embedding_model_name, front_end_domain)
-VALUES ('v1', <project id> , 10, 1000, "https://<PROJECT ID>.web.app", 10, 'gemini-1.5-flash-001', 'text-embedding-004', "https://<project id>.web.app/");
+VALUES ('v1', '<project id>' , 10, 1000, 'https://<PROJECT ID>.web.app', 10, 'gemini-1.5-flash-001', 'text-embedding-004', 'https://<project id>.web.app/');
 
 INSERT INTO invite_codes (code, valid)
-VALUES (<secret invite code>, TRUE);
+VALUES ('<secret invite code>', TRUE);
 ```
 
 #### Insert data into movies tables
+##### GENKIT GO ###
+If using genkit-go do the following:
 
+From this folder, run the command 
+```sh
+cd chat_server_go/cmd/indexer
+
+export PROJECT_ID=<project id>
+export POSTGRES_DB_USER_PASSWORD=<password>
+export POSTGRES_HOST=<db public ip>
+export GCLOUD_PROJECT=<project id>
+
+export GCLOUD_LOCATION="europe-west4" # or another region
+export POSTGRES_DB_INSTANCE="movie-guru-db-instance"
+export POSTGRES_DB_USER="main"
+export TABLE_NAME="movies"
+export APP_VERSION="v1"
+export POSTGRES_DB_NAME="fake-movies-db"
+
+go run main.go
+```
+This takes a about 20 minutes to run, so be patient. The embedding creation process is slowed down intentionally to ensure we stay under the rate limit.
+
+You can run the command below to ensure there are **652** entries in the db.
+
+```sql
+SELECT COUNT(*)
+FROM "movies";
+```
+
+##### GENKIT JS ###
 WIP
 
-### Build and deploy the app
+##### LANGCHAIN ###
+WIP
 
+**IMPORTANT**: The terraform script allows the postgres DB access from all IPs 0.0.0.0/0. This is bad practice in production. So, after inserting the data, make sure you remove the aurthorized networks portion in the definition of the postgresdb (deploy/terraform/go-server-infra/postgres.tf or deploy/terraform/langchain-server-infra/postgres.tf). Remove the section below and rerun the deploy pipeline. Or you can also remove this setting from the DB from google cloud console.
+```tf
+authorized_networks {
+        name            = "All Networks"
+        value           = "0.0.0.0/0"
+        expiration_time = "3021-11-15T16:19:00.094Z"
+      }
+
+```
+
+### Build and deploy the app
 ```sh
 ./deploy/deploy.sh --skipinfra --backend genkit-go  # or --backend langchain or --backend genkit-js (WIP)
+```
+
+#### Steps for the frontend hosted on firebase
+Create a firebase project. And create a webapp. Navigate to the project settings and find the firebase configuration variables. You should see something that looks like this:
+```sh
+  apiKey: "abcdefghijklmnkopqrstuvwxyz12345890",
+  authDomain: "<firebase project name>.firebaseapp.com",
+  projectId: "<firebase project name>",
+  storageBucket: "<firebase project name>.appspot.com",
+  messagingSenderId: "1234567890",
+  appId: "1:234567890:web:1234567890"
+```
+Navigate to **chat_client_vue/movie-agent** and create a **.env** file.
+Create the following env variables to the file.
+
+```.env
+VITE_FIREBASE_API_KEY=<apiKey>
+VITE_FIREBASE_AUTH_DOMAIN=<authDomain>
+VITE_GCP_PROJECT_ID=<projectId>
+VITE_FIREBASE_STORAGE_BUCKET=<storageBucket>
+VITE_FIREBASE_MESSAGING_SENDERID=<messagingSenderId>
+VITE_FIREBASE_APPID=<appId>
+VITE_CHAT_SERVER_URL=<address
 ```
 
 ## License
 
 This code of the repo is licensed under the Apache 2.0 License. To view a copy of this license, visit https://opensource.org/licenses/Apache-2.0 
 This AI generated movie data and posters in the repo are licensed under the Creative Commons Attribution 4.0 International License. To view a copy of this license, visit http://creativecommons.org/licenses/by/4.0/   
-
