@@ -51,24 +51,6 @@ services:
       -  5173:5173
     environment:
       - VITE_CHAT_SERVER_URL=http://localhost:8081
-  genkit-go:
-    build: ./genkit
-    ports: 
-      - "4001:4000"
-      - "3403:3401"
-    environment:
-      - POSTGRES_HOST=$POSTGRES_HOST
-      - PROJECT_ID=$PROJECT_ID
-      - POSTGRES_DB_USER_PASSWORD=$POSTGRES_DB_USER_PASSWORD
-      - POSTGRES_DB_USER=minimal-user
-      - POSTGRES_DB_NAME=fake-movies-db      
-      - LOCATION=europe-west4
-      - GOOGLE_APPLICATION_CREDENTIALS=/key.json
-      - LOCAL=true
-    volumes:
-      - ./chat_server_go:/app
-      - ./.key.json:/key.json
-    working_dir: /app/cmd/standaloneFlows
 
 
   

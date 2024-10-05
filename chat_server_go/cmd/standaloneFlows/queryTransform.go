@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"log"
+	"encoding/json"
 
 	"github.com/firebase/genkit/go/ai"
 	"github.com/firebase/genkit/go/genkit"
@@ -40,8 +40,6 @@ func GetQueryTransformFlow(ctx context.Context, model ai.Model, prompt string) (
 			},
 		},
 	)
-	// Printed here to make sure the prompt variable is used, or the Golang compiler will complain.
-	log.Println(queryTransformPrompt)
 	if err != nil {
 		return nil, err
 	}
@@ -53,10 +51,23 @@ func GetQueryTransformFlow(ctx context.Context, model ai.Model, prompt string) (
 			Intent:           types.USERINTENT(types.UNCLEAR),
 		}
 
-		// INSTRUCTIONS:
-		// 1. Call this prompt with the necessary input and get the output.
-		// 2. The output should then be tranformed into the type  QueryTransformFlowOutput and stored in the variable queryTransformFlowOutput
-		// 3. Handle any errors that may arise.
+		// Generate model output
+		resp, err := queryTransformPrompt.Generate(ctx,
+			&dotprompt.PromptRequest{
+				Variables: input,
+			},
+			nil,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		// Transform the model's output into the required format.
+		t := resp.Text()
+		err = json.Unmarshal([]byte(t), &queryTransformFlowOutput)
+		if err != nil {
+			return nil, err
+		}
 
 		return queryTransformFlowOutput, nil
 	})

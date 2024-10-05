@@ -142,14 +142,49 @@ func GetRetrieverFlow(ctx context.Context, ret ai.Retriever) *genkit.Flow[*Retri
 
 func DefineRetriever(maxRetLength int, db *sql.DB, embedder ai.Embedder) ai.Retriever {
 	f := func(ctx context.Context, req *ai.RetrieverRequest) (*ai.RetrieverResponse, error) {
-		retrieverResponse := &ai.RetrieverResponse{
-			Documents: make([]*ai.Document, 0, maxRetLength),
+
+		// Get the embedding for the query
+		eres, err := ai.Embed(ctx, embedder, ai.WithEmbedDocs(req.Document))
+		if err != nil {
+			return nil, err
 		}
-		// INSTRUCTIONS:
-		// 1. Generate an embedding from the query.
-		// 2. Search for the relevant documents in the vector db based on the embedding
-		// 3. Convert the model output to type RetrieverFlowOutput
-		// HINT: https://github.com/firebase/genkit/blob/main/go/samples/pgvector/main.go
+		// Query the db for the relevant rows
+		rows, err := db.QueryContext(ctx, `
+					SELECT title, poster, content, released, runtime_mins, rating, plot
+					FROM movies
+					ORDER BY embedding <-> $1
+					LIMIT $2`,
+			pgv.NewVector(eres.Embeddings[0].Embedding), maxRetLength)
+		if err != nil {
+			return nil, err
+		}
+		defer rows.Close()
+
+		retrieverResponse := &ai.RetrieverResponse{}
+		for rows.Next() {
+			var title, poster, content, plot string
+			var released, runtime_mins int
+			var rating float32
+			if err := rows.Scan(&title, &poster, &content, &released, &runtime_mins, &rating, &plot); err != nil {
+				return nil, err
+			}
+			meta := map[string]any{
+				"title":        title,
+				"poster":       poster,
+				"released":     released,
+				"rating":       rating,
+				"runtime_mins": runtime_mins,
+				"plot":         plot,
+			}
+			doc := &ai.Document{
+				Content:  []*ai.Part{ai.NewTextPart(content)},
+				Metadata: meta,
+			}
+			retrieverResponse.Documents = append(retrieverResponse.Documents, doc)
+		}
+		if err := rows.Err(); err != nil {
+			return nil, err
+		}
 		return retrieverResponse, nil
 	}
 	return ai.DefineRetriever("pgvector", "movieRetriever", f)
