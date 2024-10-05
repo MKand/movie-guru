@@ -29,17 +29,8 @@ export const IndexerFlow = defineFlow(
 
 			// HINTS:
 			//- Look at the schema for the table to understand what fields are required.
-      const eres = await embed({
-        embedder: textEmbedding004,
-        content: contentString,
-      });
+     
       try {
-        await db`
-        INSERT INTO movies (embedding, title, runtime_mins, genres, rating, released, actors, director, plot, poster, tconst, content)
-        VALUES (${toSql(eres)}, ${doc.title}, ${doc.runtimeMinutes}, ${doc.genres.join(', ')}, ${doc.rating}, ${doc.released}, ${doc.actors.join(', ')}, ${doc.director}, ${doc.plot}, ${doc.poster}, ${doc.tconst}, ${contentString})
-        ON CONFLICT (tconst) DO UPDATE
-        SET embedding = EXCLUDED.embedding
-      `;
         return contentString; 
       } catch (error) {
         console.error('Error inserting or updating movie:', error);
@@ -59,14 +50,9 @@ function createText(movie: MovieContext): string {
 		// 1. Are there any fields in the orginal data that need to be reformatted?
 		// Here are two freebies to help you get started.
   const dataDict = {
-    title: movie.title,
-    runtime_mins: movie.runtimeMinutes,
+
     genres: movie.genres.length > 0 ? movie.genres.join(', ') : '',
     rating: movie.rating > 0 ? movie.rating.toFixed(1) : '',
-    released: movie.released > 0 ? movie.released : '',
-    actors: movie.actors.length > 0 ? movie.actors.join(', ') : '',
-    director: movie.director !== '' ? movie.director : '',
-    plot: movie.plot !== '' ? movie.plot.replace(/\n/g, '') : '',
   };
 
   const jsonData = JSON.stringify(dataDict);
