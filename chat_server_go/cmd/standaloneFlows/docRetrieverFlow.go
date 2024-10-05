@@ -14,6 +14,7 @@ import (
 	"github.com/firebase/genkit/go/plugins/vertexai"
 	_ "github.com/lib/pq"
 	_ "github.com/movie-guru/pkg/types"
+	pgv "github.com/pgvector/pgvector-go"
 )
 
 type MovieContext struct {
