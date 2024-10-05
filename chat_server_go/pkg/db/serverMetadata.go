@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"os"
+	"time"
 )
 
 // Metadata stores application metadata
@@ -19,18 +20,20 @@ type Metadata struct {
 	FrontEndDomain           string `json:"front_end_domain"`
 }
 
-func (d *MovieDB) GetMetadata(appVersion string) (*Metadata, error) {
+func (d *MovieDB) GetMetadata(ctx context.Context, appVersion string) (*Metadata, error) {
 	if os.Getenv("LOCAL") == "true" {
 		return getMetadataLocal()
 	}
-	return d.getServerMetadata(appVersion)
+	return d.getServerMetadata(ctx, appVersion)
 }
 
 // getMetadata retrieves metadata from the database
-func (d *MovieDB) getServerMetadata(appVersion string) (*Metadata, error) {
+func (d *MovieDB) getServerMetadata(ctx context.Context, appVersion string) (*Metadata, error) {
+	dbCtx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	defer cancel()
 	query := `SELECT * FROM app_metadata WHERE "app_version" = $1;`
 	metadata := &Metadata{}
-	rows := d.DB.QueryRowContext(context.Background(), query, appVersion)
+	rows := d.DB.QueryRowContext(dbCtx, query, appVersion)
 	err := rows.Scan(
 		&metadata.AppVersion,
 		&metadata.TokenAudience,

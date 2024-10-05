@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/movie-guru/pkg/db"
@@ -97,6 +98,7 @@ func createHealthCheckHandler(deps *Dependencies) http.HandlerFunc {
 
 func createLoginHandler(ulh *UserLoginHandler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
 		origin := r.Header.Get("Origin")
 		errLogPrefix := "Error: LoginHandler: "
 		if r.Method == "POST" {
@@ -107,7 +109,7 @@ func createLoginHandler(ulh *UserLoginHandler) http.HandlerFunc {
 				return
 			}
 
-			user, err := ulh.HandleLogin(user)
+			user, err := ulh.HandleLogin(ctx, user)
 			if err != nil {
 				if _, ok := err.(*AuthorizationError); ok {
 					log.Println(errLogPrefix, "Unauthorized. ", err.Error())
@@ -182,7 +184,9 @@ func handleOptions(w http.ResponseWriter, origin string) {
 }
 
 func getHistory(ctx context.Context, user string) (*types.ChatHistory, error) {
-	historyJson, err := redisStore.Get(ctx, user).Result()
+	redisContext, cancel := context.WithTimeout(ctx, 3*time.Second)
+	defer cancel()
+	historyJson, err := redisStore.Get(redisContext, user).Result()
 	ch := types.NewChatHistory()
 	if err == redis.Nil {
 		return ch, nil
@@ -198,8 +202,9 @@ func getHistory(ctx context.Context, user string) (*types.ChatHistory, error) {
 
 func saveHistory(ctx context.Context, history *types.ChatHistory, user string) error {
 	history.Trim(metadata.HistoryLength)
-
-	err := redisStore.Set(ctx, user, history, 0).Err()
+	redisContext, cancel := context.WithTimeout(ctx, 3*time.Second)
+	defer cancel()
+	err := redisStore.Set(redisContext, user, history, 0).Err()
 	if err != nil {
 		return err
 	}
@@ -207,7 +212,9 @@ func saveHistory(ctx context.Context, history *types.ChatHistory, user string) e
 }
 
 func deleteHistory(ctx context.Context, user string) error {
-	_, err := redisStore.Del(ctx, user).Result()
+	redisContext, cancel := context.WithTimeout(ctx, 3*time.Second)
+	defer cancel()
+	_, err := redisStore.Del(redisContext, user).Result()
 	if err != nil {
 		return err
 	}

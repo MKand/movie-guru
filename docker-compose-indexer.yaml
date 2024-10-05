@@ -11,7 +11,7 @@ services:
       - POSTGRES_DB_NAME=fake-movies-db
       - APP_VERSION=v1
       - GOOGLE_APPLICATION_CREDENTIALS=/key.json
-      - LOCATION=europe-west4
+      - LOCATION=us-central1
       - LOCAL=true
     volumes:
       - ./.key.json:/key.json
@@ -27,7 +27,7 @@ services:
       - POSTGRES_DB_NAME=fake-movies-db
       - APP_VERSION=v1
       - GOOGLE_APPLICATION_CREDENTIALS=/key.json
-      - LOCATION=europe-west4
+      - LOCATION=us-central1
       - LOCAL=true
     volumes:
       - ./.key.json:/key.json

@@ -31,7 +31,9 @@ func connectToDB() (*sql.DB, error) {
 	dbURI := fmt.Sprintf("host=%s user=%s password=%s port=%s database=%s",
 		POSTGRES_HOST, POSTGRES_DB_USER, POSTGRES_DB_USER_PASSWORD, "5432", POSTGRES_DB_NAME)
 	log.Println(dbURI)
+
 	db, err := sql.Open("pgx", dbURI)
+
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -16,7 +16,6 @@ RUN npm install -g serve
 # Bundle app source
 COPY . ./
 
-RUN chown -R node:node /app/node_modules
 
 # Start the production server (adjust the command if necessary)
 CMD [ "npm", "run", "dev", "--", "--host",  "0.0.0.0" ]
