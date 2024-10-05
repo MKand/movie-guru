@@ -17,19 +17,19 @@ func main() {
 
 	URL := os.Getenv("FLOWS_URL")
 
-	MovieDB, err := db.GetDB()
+	movieAgentDB, err := db.GetDB()
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer MovieDB.DB.Close()
+	defer movieAgentDB.DB.Close()
 
-	metadata, err := MovieDB.GetMetadata(os.Getenv("APP_VERSION"))
+	metadata, err := movieAgentDB.GetMetadata(ctx, os.Getenv("APP_VERSION"))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	ulh := web.NewUserLoginHandler(metadata.TokenAudience, MovieDB)
-	deps := getDependencies(ctx, metadata, MovieDB, URL)
+	ulh := web.NewUserLoginHandler(metadata.TokenAudience, movieAgentDB)
+	deps := getDependencies(ctx, metadata, movieAgentDB, URL)
 
 	web.StartServer(ulh, metadata, deps)
 

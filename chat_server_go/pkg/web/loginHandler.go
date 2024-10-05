@@ -1,6 +1,8 @@
 package web
 
 import (
+	"context"
+
 	_ "github.com/lib/pq"
 	"github.com/movie-guru/pkg/db"
 )
@@ -25,7 +27,7 @@ func NewUserLoginHandler(tokenAudience string, db *db.MovieDB) *UserLoginHandler
 	}
 }
 
-func (ulh *UserLoginHandler) HandleLogin(user string) (string, error) {
+func (ulh *UserLoginHandler) HandleLogin(ctx context.Context, user string) (string, error) {
 	// Minimal login logic for simplicity. Accepts any email and just returns it.
 	return user, nil
 }
