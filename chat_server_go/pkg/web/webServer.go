@@ -16,6 +16,8 @@ import (
 	"github.com/movie-guru/pkg/db"
 	"github.com/movie-guru/pkg/types"
 	"github.com/redis/go-redis/v9"
+
+	"github.com/movie-guru/pkg/metrics"
 )
 
 var (
@@ -27,7 +29,7 @@ var (
 	corsOrigins []string
 )
 
-func StartServer(ulh *UserLoginHandler, m *db.Metadata, deps *Dependencies) {
+func StartServer(ulh *UserLoginHandler, m *db.Metadata, deps *Dependencies) error {
 	metadata = m
 	setupSessionStore()
 
@@ -35,14 +37,17 @@ func StartServer(ulh *UserLoginHandler, m *db.Metadata, deps *Dependencies) {
 	for i := range corsOrigins {
 		corsOrigins[i] = strings.TrimSpace(corsOrigins[i])
 	}
-	http.HandleFunc("/", createHealthCheckHandler(deps))
+
+	loginMeters := metrics.NewLoginMeters()
+	hcMeters := metrics.NewHCMeters()
+	http.HandleFunc("/", createHealthCheckHandler(deps, hcMeters))
 	http.HandleFunc("/chat", createChatHandler(deps))
 	http.HandleFunc("/history", createHistoryHandler())
 	http.HandleFunc("/preferences", createPreferencesHandler(deps.DB))
 	http.HandleFunc("/startup", createStartupHandler(deps))
-	http.HandleFunc("/login", createLoginHandler(ulh))
+	http.HandleFunc("/login", createLoginHandler(ulh, loginMeters))
 	http.HandleFunc("/logout", logoutHandler)
-	log.Fatalln(http.ListenAndServe(":8080", nil))
+	return http.ListenAndServe(":8080", nil)
 }
 
 func setupSessionStore() {
@@ -84,11 +89,13 @@ func addResponseHeaders(w http.ResponseWriter, origin string) {
 	w.Header().Set("Access-Control-Allow-Credentials", "true")
 }
 
-func createHealthCheckHandler(deps *Dependencies) http.HandlerFunc {
+func createHealthCheckHandler(deps *Dependencies, meters *metrics.HCMeters) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+
 		origin := r.Header.Get("Origin")
 		addResponseHeaders(w, origin)
 		if r.Method == "GET" {
+			meters.HCCounter.Add(r.Context(), 1)
 			json.NewEncoder(w).Encode("OK")
 			return
 
@@ -96,12 +103,20 @@ func createHealthCheckHandler(deps *Dependencies) http.HandlerFunc {
 	}
 }
 
-func createLoginHandler(ulh *UserLoginHandler) http.HandlerFunc {
+func createLoginHandler(ulh *UserLoginHandler, meters *metrics.LoginMeters) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+
 		ctx := r.Context()
 		origin := r.Header.Get("Origin")
 		errLogPrefix := "Error: LoginHandler: "
 		if r.Method == "POST" {
+			startTime := time.Now()
+			defer func() {
+				meters.LoginLatencyHistogram.Record(ctx, int64(time.Since(startTime).Milliseconds()))
+			}()
+
+			meters.LoginCounter.Add(ctx, 1)
+
 			user := r.Header.Get("user")
 			if user == "" {
 				log.Println(errLogPrefix, "No auth header")
@@ -118,9 +133,10 @@ func createLoginHandler(ulh *UserLoginHandler) http.HandlerFunc {
 				}
 				log.Println(errLogPrefix, "Cannot get user from db", err)
 				http.Error(w, err.Error(), http.StatusInternalServerError)
+				meters.LoginErrorCounter.Add(ctx, 1)
 				return
 			}
-
+			meters.LoginSuccessCounter.Add(ctx, 1)
 			sessionID := uuid.New().String()
 			session := &SessionInfo{
 				ID:            sessionID,
