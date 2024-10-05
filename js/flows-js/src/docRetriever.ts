@@ -15,6 +15,7 @@ const QueryOptionsSchema = z.object({
   k: z.number().optional(),
 });
 
+
 const sqlRetriever = defineRetriever(
   {
     name: 'movies',
@@ -25,21 +26,13 @@ const sqlRetriever = defineRetriever(
     if (!db) {
       throw new Error('Database connection failed');
     }
-    const embedding = await embed({
-      embedder: textEmbedding004,
-      content: input,
-    });
-    const results = await db`
-      SELECT title, poster, content, released, runtime_mins, rating, genres, director, actors, plot
-	    FROM movies
-        ORDER BY embedding <#> ${toSql(embedding)}
-        LIMIT ${options.k ?? 10}
-      `;
+    // INSTRUCTIONS:
+    // 1. Generate an embedding from the query.
+    // 2. Search for the relevant documents in the vector db based on the embedding
+    // 3. Convert the model output to type RetrieverFlowOutput
+    // HINT: https://firebase.google.com/docs/genkit/templates/pgvector
     return {
-      documents: results.map((row) => {
-        const { content, ...metadata } = row;
-        return Document.fromText(content, metadata);
-      }),
+      documents: [],
     };
   }
 );

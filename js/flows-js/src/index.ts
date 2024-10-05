@@ -22,7 +22,7 @@ configureGenkit({
 
 
 export {UserProfileFlowPrompt, UserProfileFlow} from './userProfileFlow'
-export {QueryTransformPrompt, QueryTransformFlow} from './queryTransformFlow'
+export {QueryTransformPrompt} from './queryTransformFlow'
 export {MovieFlowPrompt, MovieFlow} from './movieFlow'
 export {movieDocFlow} from './docRetriever'
 
