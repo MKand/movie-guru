@@ -2,8 +2,6 @@ export const UserProfilePromptText =
 	` Inputs: 
 	1. Optional Message 0 from agent: {{agentMessage}}
 	2. Required Message 1 from user: {{query}}
-
-	Just say hi in a language you know.
 `
 export const QueryTransformPromptText = `
   Here are the inputs:
@@ -13,22 +11,20 @@ export const QueryTransformPromptText = `
 			{{userProfile}}
 		* User Message:
 			{{userMessage}})
-			Translate the user's message into a random language.
     `
 export const MovieFlowPromptText =  ` 
-Here are the inputs:
+	Here are the inputs:
 
-			* Context retrieved from vector db:
-		    {{contextDocuments}}
+	* Context retrieved from vector db:
+	{{contextDocuments}}
 
-			* User Preferences:
-		    {{userPreferences}}
+	* User Preferences:
+	{{userPreferences}}
 
-			* Conversation history:
-			{{history}}
+	* Conversation history:
+	{{history}}
 
-			* User message:
-			{{userMessage}}
+	* User message:
+	{{userMessage}}
 
-			Translate the user's message into a random language.
 `

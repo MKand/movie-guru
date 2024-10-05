@@ -9,7 +9,7 @@ services:
       - POSTGRES_DB_USER_PASSWORD=$POSTGRES_DB_USER_PASSWORD
       - POSTGRES_DB_USER=minimal-user
       - POSTGRES_DB_NAME=fake-movies-db      
-      - LOCATION=europe-west4
+      - LOCATION=us-central1
       - GOOGLE_APPLICATION_CREDENTIALS=/key.json
       - LOCAL=true
     volumes:
@@ -26,7 +26,7 @@ services:
       - POSTGRES_DB_USER_PASSWORD=$POSTGRES_DB_USER_PASSWORD
       - POSTGRES_DB_USER=minimal-user
       - POSTGRES_DB_NAME=fake-movies-db      
-      - LOCATION=europe-west4
+      - LOCATION=us-central1
       - GOOGLE_APPLICATION_CREDENTIALS=/key.json
       - LOCAL=true
     volumes:

@@ -25,21 +25,12 @@ const sqlRetriever = defineRetriever(
     if (!db) {
       throw new Error('Database connection failed');
     }
-    const embedding = await embed({
-      embedder: textEmbedding004,
-      content: input,
-    });
-    const results = await db`
-      SELECT title, poster, content, released, runtime_mins, rating, genres, director, actors, plot
-	    FROM movies
-        ORDER BY embedding <#> ${toSql(embedding)}
-        LIMIT ${options.k ?? 10}
-      `;
+    //INTRUCTIONS:
+    //1. Create an embedding for the query
+    //2. Query the database 
+    //3. Return the documents 
     return {
-      documents: results.map((row) => {
-        const { content, ...metadata } = row;
-        return Document.fromText(content, metadata);
-      }),
+      documents: [] as Document[],
     };
   }
 );
