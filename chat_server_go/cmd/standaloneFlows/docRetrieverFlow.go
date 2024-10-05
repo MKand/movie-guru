@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"time"
 
 	"cloud.google.com/go/vertexai/genai"
 
@@ -149,8 +150,10 @@ func DefineRetriever(maxRetLength int, db *sql.DB, embedder ai.Embedder) ai.Retr
 		if err != nil {
 			return nil, err
 		}
+		dbCtx, cancel := context.WithTimeout(ctx, 3*time.Second)
+		defer cancel()
 		// Query the db for the relevant rows
-		rows, err := db.QueryContext(ctx, `
+		rows, err := db.QueryContext(dbCtx, `
 					SELECT title, poster, content, released, runtime_mins, rating, plot
 					FROM movies
 					ORDER BY embedding <-> $1

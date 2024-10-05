@@ -18,10 +18,25 @@ export const QueryTransformPrompt = defineDotprompt(
     }, 
    QueryTransformPromptText
 )
-
-        // INSTRUCTIONS:
-        // 1. Create a flow called QueryTransform flow
-        // 2. Call this prompt with the necessary input and get the output.
-        // 3. The output should returned as type  QueryTransformFlowOutput
-
+  export const QueryTransformFlow = defineFlow(
+    {
+      name: 'queryTransformFlow',
+      inputSchema: QueryTransformFlowInputSchema,
+      outputSchema: QueryTransformFlowOutputSchema
+    },
+    async (input) => {
+      try {
+        const response = await QueryTransformPrompt.generate({ input: input });
+        console.log(response.output(0))
+        return response.output(0);
+      } catch (error) {
+        console.error("Error generating response:", error);
+        return { 
+          transformedQuery: "",
+          userIntent: 'UNCLEAR',
+          justification: ""
+         }; 
+      }
+    }
+  );
   
