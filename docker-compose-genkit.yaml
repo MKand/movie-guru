@@ -32,7 +32,7 @@ services:
       - GOOGLE_APPLICATION_CREDENTIALS=/key.json
       - LOCAL=true
     volumes:
-      - ./js/flow-js:/app
+      - ./js/flows-js:/app
       - ./.key.json:/key.json
     working_dir: /app
 

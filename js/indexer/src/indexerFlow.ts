@@ -1,5 +1,5 @@
 import { embed } from '@genkit-ai/ai/embedder';
-import { textEmbeddingGecko } from '@genkit-ai/vertexai';
+import { textEmbedding004 } from '@genkit-ai/vertexai';
 import { defineFlow } from '@genkit-ai/flow';
 import { toSql } from 'pgvector';
 import { z } from 'zod';
@@ -19,11 +19,18 @@ export const IndexerFlow = defineFlow(
       throw new Error('Database connection failed');
     }
     try {
-      // sleep for 300 ms
+      // reduce rate at which operation is performed to avoid hitting VertexAI rate limits
       await new Promise((resolve) => setTimeout(resolve, 300));
       const contentString = createText(doc);
+      // INSTRUCTIONS: Write code that generates an embedding
+			// - Step 1: Create an embedding from the aiDoc
+			// - Step 2: Write a SQL statement to insert the embedding along with the other fields in the table.
+			// - Take inspiration from the indexer here: https://firebase.google.com/docs/genkit/templates/pgvector
+
+			// HINTS:
+			//- Look at the schema for the table to understand what fields are required.
       const eres = await embed({
-        embedder: textEmbeddingGecko,
+        embedder: textEmbedding004,
         content: contentString,
       });
       try {
@@ -47,6 +54,10 @@ export const IndexerFlow = defineFlow(
 
 
 function createText(movie: MovieContext): string {
+    // INSTRUCTIONS: Write code that populates dataDict with relevant fields from raw data.
+		// 1. Which other fields from the raw data should the dict contain?
+		// 1. Are there any fields in the orginal data that need to be reformatted?
+		// Here are two freebies to help you get started.
   const dataDict = {
     title: movie.title,
     runtime_mins: movie.runtimeMinutes,
