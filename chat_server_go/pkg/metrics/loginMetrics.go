@@ -17,15 +17,15 @@ type LoginMeters struct {
 func NewLoginMeters() *LoginMeters {
 	meter := otel.Meter("login-handler")
 
-	loginCounter, err := meter.Int64Counter("login.attempts_total", metric.WithDescription("Total number of login attempts"))
+	loginCounter, err := meter.Int64Counter("login_attempts_total", metric.WithDescription("Total number of login attempts"))
 	if err != nil {
 		log.Printf("Error creating login counter: %v", err)
 	}
-	loginSuccessCounter, err := meter.Int64Counter("login.success_total", metric.WithDescription("Total number of successful logins"))
+	loginSuccessCounter, err := meter.Int64Counter("login_success_total", metric.WithDescription("Total number of successful logins"))
 	if err != nil {
 		log.Printf("Error creating login success counter: %v", err)
 	}
-	loginErrorCounter, err := meter.Int64Counter("login.errors_total", metric.WithDescription("Total number of login errors"))
+	loginErrorCounter, err := meter.Int64Counter("login_errors_total", metric.WithDescription("Total number of login errors"))
 	if err != nil {
 		log.Printf("Error creating login error counter: %v", err)
 	}

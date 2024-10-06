@@ -91,7 +91,6 @@ func addResponseHeaders(w http.ResponseWriter, origin string) {
 
 func createHealthCheckHandler(deps *Dependencies, meters *metrics.HCMeters) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-
 		origin := r.Header.Get("Origin")
 		addResponseHeaders(w, origin)
 		if r.Method == "GET" {
