@@ -17,12 +17,13 @@ import (
 )
 
 type FlowDependencies struct {
-	QueryTransformFlow *genkit.Flow[*types.QueryTransformFlowInput, *types.QueryTransformFlowOutput, struct{}]
-	PrefFlow           *genkit.Flow[*types.UserProfileFlowInput, *types.UserProfileFlowOutput, struct{}]
-	MovieFlow          *genkit.Flow[*types.MovieFlowInput, *types.MovieFlowOutput, struct{}]
-	RetFlow            *genkit.Flow[*ai.RetrieverRequest, []*ai.Document, struct{}]
-	Retriever          ai.Retriever
-	DB                 *sql.DB
+	QueryTransformFlow  *genkit.Flow[*types.QueryTransformFlowInput, *types.QueryTransformFlowOutput, struct{}]
+	PrefFlow            *genkit.Flow[*types.UserProfileFlowInput, *types.UserProfileFlowOutput, struct{}]
+	MovieFlow           *genkit.Flow[*types.MovieFlowInput, *types.MovieFlowOutput, struct{}]
+	ResponseQualityFlow *genkit.Flow[*types.ResponseQualityFlowInput, *types.ResponseQualityFlowOutput, struct{}]
+	RetFlow             *genkit.Flow[*ai.RetrieverRequest, []*ai.Document, struct{}]
+	Retriever           ai.Retriever
+	DB                  *sql.DB
 }
 
 func GetDependencies(ctx context.Context, metadata *db.Metadata, db *sql.DB) *FlowDependencies {
@@ -58,13 +59,19 @@ func GetDependencies(ctx context.Context, metadata *db.Metadata, db *sql.DB) *Fl
 		log.Fatal(err)
 	}
 
+	responseQualityFlow, err := GetResponseQualityAnalysisFlow(ctx, model)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	deps := &FlowDependencies{
-		QueryTransformFlow: queryTransformFlow,
-		PrefFlow:           userProfileFlow,
-		MovieFlow:          movieAgentFlow,
-		Retriever:          ret,
-		RetFlow:            retFlow,
-		DB:                 db,
+		QueryTransformFlow:  queryTransformFlow,
+		PrefFlow:            userProfileFlow,
+		MovieFlow:           movieAgentFlow,
+		ResponseQualityFlow: responseQualityFlow,
+		Retriever:           ret,
+		RetFlow:             retFlow,
+		DB:                  db,
 	}
 	return deps
 }
