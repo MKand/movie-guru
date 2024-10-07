@@ -20,8 +20,8 @@ func CreateResponseQualityFlowClient(URL string) (*ResponseQualityFlowClient, er
 	}, nil
 }
 
-func (flowClient *ResponseQualityFlowClient) Run(ctx context.Context, history *types.ChatHistory, user string) (*types.ResponseQualityOutput, error) {
-	responseQualityFlowInput := types.ResponseQualityFlowInput{MessageHistory: history.History}
+func (flowClient *ResponseQualityFlowClient) Run(ctx context.Context, history []*types.SimpleMessage, user string) (*types.ResponseQualityOutput, error) {
+	responseQualityFlowInput := types.ResponseQualityFlowInput{MessageHistory: history}
 	resp, err := flowClient.runFlow(&responseQualityFlowInput)
 	if err != nil {
 		return nil, err
@@ -29,7 +29,7 @@ func (flowClient *ResponseQualityFlowClient) Run(ctx context.Context, history *t
 	return resp, nil
 }
 
-func (flowClient *ResponseQualityFlowClient) runFlow(input *types.ResponseQualityFlowInput) (*types.ResponseQualityFlowOutput, error) {
+func (flowClient *ResponseQualityFlowClient) runFlow(input *types.ResponseQualityFlowInput) (*types.ResponseQualityOutput, error) {
 	// Marshal the input struct to JSON
 	inputJSON, err := json.Marshal(input)
 	if err != nil {
@@ -50,7 +50,7 @@ func (flowClient *ResponseQualityFlowClient) runFlow(input *types.ResponseQualit
 	}
 
 	var result struct {
-		Result *types.ResponseQualityFlowOutput `json:"result"`
+		Result *types.ResponseQualityOutput `json:"result"`
 	}
 	defer resp.Body.Close()
 

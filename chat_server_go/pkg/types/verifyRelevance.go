@@ -26,6 +26,9 @@ const (
 
 	// OutcomeOther indicates an outcome that doesn't fit the other categories.
 	OutcomeOther ConversationTurnOutcome = "OTHER"
+
+	// OutcomeUnknown indicates an outcome wasn't able to be processed due to an error.
+	OutcomeUnknown ConversationTurnOutcome = "UNKNOWN"
 )
 
 // UserSentiment represents the sentiment expressed in the user's message.
@@ -43,11 +46,14 @@ const (
 
 	// SentimentAmbiguous indicates the sentiment in the user's message is ambiguous.
 	SentimentAmbiguous UserSentiment = "AMBIGUOUS"
+
+	// SentimentUnknown indicates the sentiment in the user's message is unknown due to an error.
+	SentimentUnknown UserSentiment = "UNKNOWN"
 )
 
 // ResponseQualityFlowInput represents the input to the response quality analysis flow.
 type ResponseQualityFlowInput struct {
-	MessageHistory []*types.SimpleMessage `json:"messageHistory"`
+	MessageHistory []*SimpleMessage `json:"messageHistory"`
 }
 
 // ResponseQualityFlowOutput represents the output of the response quality analysis flow.

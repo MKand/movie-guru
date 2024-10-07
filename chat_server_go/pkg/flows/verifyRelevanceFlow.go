@@ -1,4 +1,4 @@
-package main
+package flows
 
 import (
 	"context"
@@ -10,6 +10,7 @@ import (
 	"github.com/firebase/genkit/go/genkit"
 	"github.com/firebase/genkit/go/plugins/dotprompt"
 	"github.com/invopop/jsonschema"
+	types "github.com/movie-guru/pkg/types"
 )
 
 // GetResponseQualityAnalysisFlow creates a GenKit flow for analyzing response quality.
@@ -92,7 +93,7 @@ func GetResponseQualityAnalysisFlow(ctx context.Context, model ai.Model) (*genki
 	}
 
 	// Define the GenKit flow
-	responseQualityFlow := genkit.DefineFlow("responseQualityFlow", func(ctx context.Context, input *ResponseQualityFlowInput) (*ResponseQualityFlowOutput, error) {
+	responseQualityFlow := genkit.DefineFlow("responseQualityFlow", func(ctx context.Context, input *types.ResponseQualityFlowInput) (*types.ResponseQualityFlowOutput, error) {
 		output := types.NewResponseQualityFlowOutput() // More concise variable name
 
 		resp, err := responseQualityPrompt.Generate(ctx,

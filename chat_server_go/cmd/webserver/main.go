@@ -73,12 +73,18 @@ func getDependencies(ctx context.Context, metadata *db.Metadata, db *db.MovieDB,
 		log.Fatal(err)
 	}
 
+	responseQualityFlowClient, err := wrappers.CreateResponseQualityFlowClient(url)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	deps := &web.Dependencies{
-		QueryTransformFlowClient: queryTransformFlowClient,
-		UserProfileFlowClient:    userProfileFlowClient,
-		MovieFlowClient:          movieFlowClient,
-		MovieRetrieverFlowClient: movieRetrieverFlowClient,
-		DB:                       db,
+		QueryTransformFlowClient:  queryTransformFlowClient,
+		UserProfileFlowClient:     userProfileFlowClient,
+		MovieFlowClient:           movieFlowClient,
+		MovieRetrieverFlowClient:  movieRetrieverFlowClient,
+		ResponseQualityFlowClient: responseQualityFlowClient,
+		DB:                        db,
 	}
 	return deps
 }
