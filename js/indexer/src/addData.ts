@@ -3,9 +3,9 @@ import { parse } from 'csv-parse';
 import { runFlow } from '@genkit-ai/flow';
 import { IndexerFlow } from './indexerFlow'; 
 import { MovieContext } from './types'; 
-import { OpenDB } from './db';
+import { openDB } from './db';
 
-export async function ProcessMovies() { 
+export async function processMovies() { 
   try {
     const fileContent = await fs.readFile('/dataset/movies_with_posters.csv', 'utf8');
 
@@ -30,7 +30,7 @@ export async function ProcessMovies() {
     });
 
     let index = 0;
-    const db = await OpenDB();
+    const db = await openDB();
     for (const record of records) {
       const year = parseFloat(record[1]);
       const rating = parseFloat(record[5]);

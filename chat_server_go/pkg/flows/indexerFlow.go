@@ -16,14 +16,14 @@ import (
 func GetIndexerFlow(maxRetLength int, movieDB *db.MovieDB, embedder ai.Embedder) *genkit.Flow[*types.MovieContext, *ai.Document, struct{}] {
 	indexerFlow := genkit.DefineFlow("movieDocFlow",
 		func(ctx context.Context, doc *types.MovieContext) (*ai.Document, error) {
-			time.Sleep(1 / 3 * time.Second)            // reduce rate at which operation is performed to avoid hitting VertexAI rate limits
-			content := createText(doc)                 // creates a JSON string representation of the important fields in a MovieContext object.
-			aiDoc := ai.DocumentFromText(content, nil) // create an object of type AIDocument from  the content
+			time.Sleep(1 / 3 * time.Second)                    // reduce rate at which operation is performed to avoid hitting VertexAI rate limits
+			filteredContent := createText(doc)                 // creates a JSON string representation of the important fields in a MovieContext object.
+			aiDoc := ai.DocumentFromText(filteredContent, nil) // create an object of type ai.Document which is fed into the embedder (to be implemented)
 
 			// INSTRUCTIONS: Write code that generates an embedding
-			// - Step 1: Create an embedding from the aiDoc
+			// - Step 1: Create an embedding from the filteredContent.
 			// - Step 2: Write a SQL statement to insert the embedding along with the other fields in the table.
-			// - Take inspiration from the indexer here: https://github.com/firebase/genkit/blob/main/go/samples/pgvector/main.go
+			// - Take inspiration from the indexer implementation here: https://github.com/firebase/genkit/blob/main/go/samples/pgvector/main.go
 
 			// HINTS:
 			//- Look at the schema for the table to understand what fields are required.

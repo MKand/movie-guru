@@ -6,7 +6,7 @@ import { toSql } from 'pgvector';
 import postgres from 'postgres';
 import { z } from 'zod';
 import { MovieContextSchema, MovieContext } from './movieFlowTypes';
-import { OpenDB } from './db';
+import { openDB } from './db';
 
 const sql = postgres({ ssl: false, database: 'recaps' });
 
@@ -21,7 +21,7 @@ const sqlRetriever = defineRetriever(
     configSchema: QueryOptionsSchema,
   },
   async (input, options) => {
-    const db = await OpenDB();
+    const db = await openDB();
     if (!db) {
       throw new Error('Database connection failed');
     }
