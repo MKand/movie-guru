@@ -14,8 +14,11 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/movie-guru/pkg/db"
-	"github.com/movie-guru/pkg/types"
+	metrics "github.com/movie-guru/pkg/metrics"
+	types "github.com/movie-guru/pkg/types"
 	"github.com/redis/go-redis/v9"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/metric"
 )
 
 var (
@@ -27,7 +30,7 @@ var (
 	corsOrigins []string
 )
 
-func StartServer(ulh *UserLoginHandler, m *db.Metadata, deps *Dependencies) {
+func StartServer(ulh *UserLoginHandler, m *db.Metadata, deps *Dependencies) error {
 	metadata = m
 	setupSessionStore()
 
@@ -35,14 +38,19 @@ func StartServer(ulh *UserLoginHandler, m *db.Metadata, deps *Dependencies) {
 	for i := range corsOrigins {
 		corsOrigins[i] = strings.TrimSpace(corsOrigins[i])
 	}
-	http.HandleFunc("/", createHealthCheckHandler(deps))
-	http.HandleFunc("/chat", createChatHandler(deps))
+
+	loginMeters := metrics.NewLoginMeters()
+	hcMeters := metrics.NewHCMeters()
+	chatMeters := metrics.NewChatMeters()
+
+	http.HandleFunc("/", createHealthCheckHandler(deps, hcMeters))
+	http.HandleFunc("/chat", createChatHandler(deps, chatMeters))
 	http.HandleFunc("/history", createHistoryHandler())
 	http.HandleFunc("/preferences", createPreferencesHandler(deps.DB))
 	http.HandleFunc("/startup", createStartupHandler(deps))
-	http.HandleFunc("/login", createLoginHandler(ulh))
+	http.HandleFunc("/login", createLoginHandler(ulh, loginMeters))
 	http.HandleFunc("/logout", logoutHandler)
-	log.Fatalln(http.ListenAndServe(":8080", nil))
+	return http.ListenAndServe(":8080", nil)
 }
 
 func setupSessionStore() {
@@ -84,11 +92,18 @@ func addResponseHeaders(w http.ResponseWriter, origin string) {
 	w.Header().Set("Access-Control-Allow-Credentials", "true")
 }
 
-func createHealthCheckHandler(deps *Dependencies) http.HandlerFunc {
+func createHealthCheckHandler(deps *Dependencies, meters *metrics.HCMeters) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
 		origin := r.Header.Get("Origin")
 		addResponseHeaders(w, origin)
 		if r.Method == "GET" {
+			startTime := time.Now()
+			defer func() {
+				meters.HCLatency.Record(ctx, int64(time.Since(startTime).Milliseconds()))
+			}()
+
+			meters.HCCounter.Add(r.Context(), 1)
 			json.NewEncoder(w).Encode("OK")
 			return
 
@@ -96,12 +111,19 @@ func createHealthCheckHandler(deps *Dependencies) http.HandlerFunc {
 	}
 }
 
-func createLoginHandler(ulh *UserLoginHandler) http.HandlerFunc {
+func createLoginHandler(ulh *UserLoginHandler, meters *metrics.LoginMeters) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		origin := r.Header.Get("Origin")
 		errLogPrefix := "Error: LoginHandler: "
 		if r.Method == "POST" {
+			startTime := time.Now()
+			defer func() {
+				meters.LoginLatencyHistogram.Record(ctx, int64(time.Since(startTime).Milliseconds()))
+			}()
+
+			meters.LoginCounter.Add(ctx, 1)
+
 			user := r.Header.Get("user")
 			if user == "" {
 				log.Println(errLogPrefix, "No auth header")
@@ -120,7 +142,6 @@ func createLoginHandler(ulh *UserLoginHandler) http.HandlerFunc {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
-
 			sessionID := uuid.New().String()
 			session := &SessionInfo{
 				ID:            sessionID,
@@ -138,6 +159,7 @@ func createLoginHandler(ulh *UserLoginHandler) http.HandlerFunc {
 				log.Println(errLogPrefix, "error setting context in redis", err)
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 			}
+			meters.LoginSuccessCounter.Add(ctx, 1)
 			setCookieHeader := ""
 			if os.Getenv("LOCAL") == "true" {
 				setCookieHeader = fmt.Sprintf("session=%s; HttpOnly; SameSite=Lax; Path=/; Domain=localhost; Max-Age=86400", sessionID)
@@ -426,7 +448,7 @@ func deleteSessionInfo(ctx context.Context, sessionID string) error {
 	return nil
 }
 
-func createChatHandler(deps *Dependencies) http.HandlerFunc {
+func createChatHandler(deps *Dependencies, meters *metrics.ChatMeters) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		errLogPrefix := "Error: ChatHandler: "
 		var err error
@@ -453,6 +475,11 @@ func createChatHandler(deps *Dependencies) http.HandlerFunc {
 			}
 		}
 		if r.Method == "POST" {
+			meters.CCounter.Add(ctx, 1)
+			startTime := time.Now()
+			defer func() {
+				meters.CLatencyHistogram.Record(ctx, int64(time.Since(startTime).Milliseconds()))
+			}()
 			addResponseHeaders(w, origin)
 			user := sessionInfo.User
 			chatRequest := &ChatRequest{
@@ -475,7 +502,9 @@ func createChatHandler(deps *Dependencies) http.HandlerFunc {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
-			agentResp := chat(ctx, deps, metadata, ch, user, chatRequest.Content)
+			agentResp, respQuality := chat(ctx, deps, metadata, ch, user, chatRequest.Content)
+			updateChatMeters(ctx, agentResp, meters, respQuality)
+
 			saveHistory(ctx, ch, user)
 			w.WriteHeader(http.StatusOK)
 			json.NewEncoder(w).Encode(agentResp)
@@ -487,6 +516,44 @@ func createChatHandler(deps *Dependencies) http.HandlerFunc {
 			handleOptions(w, origin)
 			return
 		}
+	}
+}
+
+func updateChatMeters(ctx context.Context, agentResp *types.AgentResponse, meters *metrics.ChatMeters, respQuality *types.ResponseQualityOutput) {
+	if agentResp.Result == types.UNSAFE {
+		meters.CSafetyIssueCounter.Add(ctx, 1)
+	}
+	if agentResp.Result == types.SUCCESS {
+		meters.CSuccessCounter.Add(ctx, 1)
+	}
+	switch respQuality.UserSentiment {
+	case types.SentimentPositive:
+		meters.CSentimentCounter.Add(ctx, 1, metric.WithAttributes(attribute.String("Sentiment", "POSITIVE")))
+	case types.SentimentNegative:
+		meters.CSentimentCounter.Add(ctx, 1, metric.WithAttributes(attribute.String("Sentiment", "NEGATIVE")))
+	case types.SentimentNeutral:
+		meters.CSentimentCounter.Add(ctx, 1, metric.WithAttributes(attribute.String("Sentiment", "NEUTRAL")))
+	case types.SentimentAmbiguous:
+		meters.CSentimentCounter.Add(ctx, 1, metric.WithAttributes(attribute.String("Sentiment", "AMBIGUOUS")))
+	case types.SentimentUnknown:
+		meters.CSentimentCounter.Add(ctx, 1, metric.WithAttributes(attribute.String("Sentiment", "UNKNOWN")))
+	}
+
+	switch respQuality.Outcome {
+	case types.OutcomeAcknowledged:
+		meters.COutcomeCounter.Add(ctx, 1, metric.WithAttributes(attribute.String("ResponseQuality", "ACKNOWLEDGED")))
+	case types.OutcomeEngaged:
+		meters.COutcomeCounter.Add(ctx, 1, metric.WithAttributes(attribute.String("ResponseQuality", "ENGAGED")))
+	case types.OutcomeIrrelevant:
+		meters.COutcomeCounter.Add(ctx, 1, metric.WithAttributes(attribute.String("ResponseQuality", "IRRELEVANT")))
+	case types.OutcomeRejected:
+		meters.COutcomeCounter.Add(ctx, 1, metric.WithAttributes(attribute.String("ResponseQuality", "REJECTED")))
+	case types.OutcomeTopicChange:
+		meters.COutcomeCounter.Add(ctx, 1, metric.WithAttributes(attribute.String("ResponseQuality", "TOPIC_CHANGE")))
+	case types.OutcomeOther:
+		meters.COutcomeCounter.Add(ctx, 1, metric.WithAttributes(attribute.String("ResponseQuality", "OTHER")))
+	case types.OutcomeUnknown:
+		meters.COutcomeCounter.Add(ctx, 1, metric.WithAttributes(attribute.String("ResponseQuality", "UNKNOWN")))
 	}
 }
 

@@ -16,12 +16,13 @@ import (
 )
 
 type FlowDependencies struct {
-	QueryTransformFlow *genkit.Flow[*QueryTransformFlowInput, *QueryTransformFlowOutput, struct{}]
-	PrefFlow           *genkit.Flow[*UserProfileFlowInput, *UserProfileFlowOutput, struct{}]
-	MovieFlow          *genkit.Flow[*MovieFlowInput, *MovieFlowOutput, struct{}]
-	RetFlow            *genkit.Flow[*RetrieverFlowInput, *RetrieverFlowOutput, struct{}]
-	Retriever          ai.Retriever
-	DB                 *sql.DB
+	QueryTransformFlow  *genkit.Flow[*QueryTransformFlowInput, *QueryTransformFlowOutput, struct{}]
+	PrefFlow            *genkit.Flow[*UserProfileFlowInput, *UserProfileFlowOutput, struct{}]
+	MovieFlow           *genkit.Flow[*MovieFlowInput, *MovieFlowOutput, struct{}]
+	RetFlow             *genkit.Flow[*RetrieverFlowInput, *RetrieverFlowOutput, struct{}]
+	ResponseQualityFlow *genkit.Flow[*ResponseQualityFlowInput, *ResponseQualityFlowOutput, struct{}]
+	Retriever           ai.Retriever
+	DB                  *sql.DB
 }
 
 type Prompts struct {
@@ -63,13 +64,19 @@ func GetDependencies(ctx context.Context, metadata *db.Metadata, db *sql.DB, pro
 		log.Fatal(err)
 	}
 
+	responseQualityFlow, err := GetResponseQualityAnalysisFlow(ctx, model, "")
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	deps := &FlowDependencies{
-		QueryTransformFlow: queryTransformFlow,
-		PrefFlow:           userProfileFlow,
-		MovieFlow:          movieAgentFlow,
-		Retriever:          ret,
-		RetFlow:            retFlow,
-		DB:                 db,
+		QueryTransformFlow:  queryTransformFlow,
+		PrefFlow:            userProfileFlow,
+		MovieFlow:           movieAgentFlow,
+		ResponseQualityFlow: responseQualityFlow,
+		Retriever:           ret,
+		RetFlow:             retFlow,
+		DB:                  db,
 	}
 	return deps
 }

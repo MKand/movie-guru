@@ -60,9 +60,9 @@ type UserProfile struct {
 }
 type ProfileCategories struct {
 	Actors    []string `json:"actors, omitempty"`
-	Directors []string `json:"director, omitempty"`
+	Directors []string `json:"directors, omitempty"`
 	Genres    []string `json:"genres, omitempty"`
-	Others    []string `json:"other, omitempty"`
+	Others    []string `json:"others, omitempty"`
 }
 
 func NewUserProfile() *UserProfile {
