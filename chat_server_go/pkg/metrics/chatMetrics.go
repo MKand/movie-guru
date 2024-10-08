@@ -8,20 +8,12 @@ import (
 )
 
 type ChatMeters struct {
-	CCounter                      metric.Int64Counter
-	CSuccessCounter               metric.Int64Counter
-	CSentimentPositiveCounter     metric.Int64Counter
-	CSentimentNegativeCounter     metric.Int64Counter
-	CSentimentNeutralCounter      metric.Int64Counter
-	CSentimentUnclassifiedCounter metric.Int64Counter
-	COutcomeAcknowledgedCounter   metric.Int64Counter
-	COutcomeEngagedCounter        metric.Int64Counter
-	COutcomeIrrelevantCounter     metric.Int64Counter
-	COutcomeRejectedCounter       metric.Int64Counter
-	COutcomeUnclassifiedCounter   metric.Int64Counter
-	COutcomeCounter               metric.Int64Counter
-	CSafetyIssueCounter           metric.Int64Counter
-	CLatencyHistogram             metric.Int64Histogram
+	CCounter            metric.Int64Counter
+	CSuccessCounter     metric.Int64Counter
+	CSentimentCounter   metric.Int64Counter
+	COutcomeCounter     metric.Int64Counter
+	CSafetyIssueCounter metric.Int64Counter
+	CLatencyHistogram   metric.Int64Histogram
 }
 
 func NewChatMeters() *ChatMeters {
@@ -35,40 +27,12 @@ func NewChatMeters() *ChatMeters {
 	if err != nil {
 		log.Printf("Error creating chat calls success counter: %v", err)
 	}
-	cSentimentCounterPositive, err := meter.Int64Counter("movieguru_chat_sentimentpositive_counter", metric.WithDescription("Positive Sentiment counter"))
-	if err != nil {
-		log.Printf("Error creating bucketed sentiment counter: %v", err)
-	}
-	cSentimentCounterNegative, err := meter.Int64Counter("movieguru_chat_sentimentnegative_counter", metric.WithDescription("Negative Sentiment counter"))
-	if err != nil {
-		log.Printf("Error creating bucketed sentiment counter: %v", err)
-	}
-	cSentimentCounterNeutral, err := meter.Int64Counter("movieguru_chat_sentimentneutral_counter", metric.WithDescription("Neutral Sentiment counter"))
-	if err != nil {
-		log.Printf("Error creating bucketed sentiment counter: %v", err)
-	}
-	cSentimentCounterUnclassified, err := meter.Int64Counter("movieguru_chat_sentimentunclassified_counter", metric.WithDescription("Unclassified Sentiment counter"))
+	cSentimentCounter, err := meter.Int64Counter("movieguru_chat_sentiment_counter", metric.WithDescription("Bucketed Sentiment counter"))
 	if err != nil {
 		log.Printf("Error creating bucketed sentiment counter: %v", err)
 	}
 
-	cOutcomeAcknowledgedCounter, err := meter.Int64Counter("movieguru_chat_outcomeAck_counter", metric.WithDescription("Acknowledged Outcome counter"))
-	if err != nil {
-		log.Printf("Error creating bucketed outcome counter: %v", err)
-	}
-	cOutcomeEngagedCounter, err := meter.Int64Counter("movieguru_chat_outcomeEngaged_counter", metric.WithDescription("Engaged Outcome counter"))
-	if err != nil {
-		log.Printf("Error creating bucketed outcome counter: %v", err)
-	}
-	cOutcomeIrrelevantCounter, err := meter.Int64Counter("movieguru_chat_outcomeIrrelevant_counter", metric.WithDescription("Irrelevant Outcome counter"))
-	if err != nil {
-		log.Printf("Error creating bucketed outcome counter: %v", err)
-	}
-	cOutcomeRejectedCounter, err := meter.Int64Counter("movieguru_chat_outcomeRejected_counter", metric.WithDescription("Rejected Outcome counter"))
-	if err != nil {
-		log.Printf("Error creating bucketed outcome counter: %v", err)
-	}
-	cOutcomeUnclassfiedCounter, err := meter.Int64Counter("movieguru_chat_outcomeUnclassified_counter", metric.WithDescription("Unclassified Outcome counter"))
+	cOutcomeCounter, err := meter.Int64Counter("movieguru_chat_outcome_counter", metric.WithDescription("Bucketed Outcome counter"))
 	if err != nil {
 		log.Printf("Error creating bucketed outcome counter: %v", err)
 	}
@@ -82,18 +46,11 @@ func NewChatMeters() *ChatMeters {
 		log.Printf("Error creating login latency histogram: %v", err)
 	}
 	return &ChatMeters{
-		CCounter:                      cCounter,
-		CLatencyHistogram:             cLatencyHistogram,
-		CSuccessCounter:               cSuccessCounter,
-		CSafetyIssueCounter:           cSafetyIssueCounter,
-		CSentimentPositiveCounter:     cSentimentCounterPositive,
-		CSentimentNegativeCounter:     cSentimentCounterNegative,
-		CSentimentNeutralCounter:      cSentimentCounterNeutral,
-		CSentimentUnclassifiedCounter: cSentimentCounterUnclassified,
-		COutcomeAcknowledgedCounter:   cOutcomeAcknowledgedCounter,
-		COutcomeEngagedCounter:        cOutcomeEngagedCounter,
-		COutcomeIrrelevantCounter:     cOutcomeIrrelevantCounter,
-		COutcomeRejectedCounter:       cOutcomeRejectedCounter,
-		COutcomeUnclassifiedCounter:   cOutcomeUnclassfiedCounter,
+		CCounter:            cCounter,
+		CLatencyHistogram:   cLatencyHistogram,
+		CSuccessCounter:     cSuccessCounter,
+		CSafetyIssueCounter: cSafetyIssueCounter,
+		CSentimentCounter:   cSentimentCounter,
+		COutcomeCounter:     cOutcomeCounter,
 	}
 }

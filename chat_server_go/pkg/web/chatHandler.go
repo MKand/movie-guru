@@ -3,7 +3,6 @@ package web
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -11,6 +10,8 @@ import (
 
 	metrics "github.com/movie-guru/pkg/metrics"
 	"github.com/movie-guru/pkg/types"
+	"go.opentelemetry.io/otel/attribute"
+	metric "go.opentelemetry.io/otel/metric"
 )
 
 func createChatHandler(deps *Dependencies, meters *metrics.ChatMeters) http.HandlerFunc {
@@ -93,26 +94,24 @@ func updateChatMeters(ctx context.Context, agentResp *types.AgentResponse, meter
 	}
 	switch strings.ToUpper(string(respQuality.UserSentiment)) {
 	case strings.ToUpper(string(types.SentimentPositive)):
-		meters.CSentimentPositiveCounter.Add(ctx, 1)
+		meters.CSentimentCounter.Add(ctx, 1, metric.WithAttributes(attribute.String("Sentiment", "Positive")))
 	case strings.ToUpper(string(types.SentimentNegative)):
-		meters.CSentimentNegativeCounter.Add(ctx, 1)
+		meters.CSentimentCounter.Add(ctx, 1, metric.WithAttributes(attribute.String("Sentiment", "Negative")))
 	case strings.ToUpper(string(types.SentimentNeutral)):
-		meters.CSentimentNeutralCounter.Add(ctx, 1)
+		meters.CSentimentCounter.Add(ctx, 1, metric.WithAttributes(attribute.String("Sentiment", "Neutral")))
 	default:
-		meters.CSentimentUnclassifiedCounter.Add(ctx, 1)
-		fmt.Println("unclassified sentiment added")
+		meters.CSentimentCounter.Add(ctx, 1, metric.WithAttributes(attribute.String("Sentiment", "Unclassified")))
 	}
 	switch strings.ToUpper(string(respQuality.Outcome)) {
 	case strings.ToUpper(string(types.OutcomeAcknowledged)):
-		meters.COutcomeAcknowledgedCounter.Add(ctx, 1)
+		meters.COutcomeCounter.Add(ctx, 1, metric.WithAttributes(attribute.String("Outcome", "Acknowledged")))
 	case strings.ToUpper(string(types.OutcomeEngaged)):
-		meters.COutcomeEngagedCounter.Add(ctx, 1)
+		meters.COutcomeCounter.Add(ctx, 1, metric.WithAttributes(attribute.String("Outcome", "Engaged")))
 	case strings.ToUpper(string(types.OutcomeIrrelevant)):
-		meters.COutcomeIrrelevantCounter.Add(ctx, 1)
+		meters.COutcomeCounter.Add(ctx, 1, metric.WithAttributes(attribute.String("Outcome", "Irrelevant")))
 	case strings.ToUpper(string(types.OutcomeRejected)):
-		meters.COutcomeRejectedCounter.Add(ctx, 1)
+		meters.COutcomeCounter.Add(ctx, 1, metric.WithAttributes(attribute.String("Outcome", "Rejected")))
 	default:
-		meters.COutcomeUnclassifiedCounter.Add(ctx, 1)
-		fmt.Println("unclassified outcome added")
+		meters.COutcomeCounter.Add(ctx, 1, metric.WithAttributes(attribute.String("Outcome", "Unclassified")))
 	}
 }
