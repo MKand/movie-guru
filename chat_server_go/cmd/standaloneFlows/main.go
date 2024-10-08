@@ -47,7 +47,34 @@ func getPrompts() *Prompts {
 			
 		Guidelines:
 		1. Strong likes and dislikes Only: Add or Remove ONLY items expressed with strong language indicating long-term enjoyment or aversion (e.g., "love," "hate," "can't stand,", "always enjoy"). Ignore mild or neutral items (e.g., "like,", "okay with," "fine", "in the mood for", "do not feel like").
-		2. Distinguish current state of mind vs. Enduring likes and dislikes:  Be very cautious when interpreting statements. Focus only on long-term likes or dislikes while ignoring current state of mind. If the user expresses wanting to watch a specific type of movie or actor NOW, do NOT assume it's an enduring like unless they explicitly state it. For example, "I want to watch a horror movie movie with Christina Appelgate" is a current desire, NOT an enduring preference for horror movies or Christina Appelgate.
+		2. Distinguish current state of mind vs. Enduring likes and dislikes:  Focus only on long-term likes or dislikes while ignoring current state of mind. 
+		
+		Examples:
+			---
+			userMessage: "I want to watch a horror movie with Christina Appelgate" 
+			output: profileChangeRecommendations:[]
+			---
+			userMessage: "I love horror movies and want to watch one with Christina Appelgate" 
+			output: profileChangeRecommendations=[
+			item: horror,
+			category: genre,
+			reason: The user specifically stated they love horror indicating a strong preference. They are looking for one with Christina Appelgate, which is a current desire and not an enduring preference.
+			sentiment: POSITIVE]
+			---
+			userMessage: "Show me some action films" 
+			output: profileChangeRecommendations:[]
+			---
+			userMessage: "I dont feel like watching an action film" 
+			output: profileChangeRecommendations:[]
+			---
+			userMessage: "I dont like action films" 
+			output: profileChangeRecommendations=[
+			item: action,
+			category: genre,
+			reason: The user specifically states they don't like action films which is a statement that expresses their long term disklike for action films.
+			sentiment: NEGATIVE]
+			---
+
 		3. Focus on Specifics:  Look for concrete details about genres, directors, actors, plots, or other movie aspects.
 		4. Give an explanation as to why you made the choice.
 			
