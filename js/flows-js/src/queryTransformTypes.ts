@@ -12,28 +12,28 @@ const USERINTENT = z.enum([
 
 // ProfileCategories schema
 const ProfileCategoriesSchema = z.object({
-  actors: z.array(z.string()),
-  directors: z.array(z.string()),
-  genres: z.array(z.string()),
-  others: z.array(z.string()),
+  actors: z.array(z.string()).optional(),
+  directors: z.array(z.string()).optional(),
+  genres: z.array(z.string()).optional(),
+  others: z.array(z.string()).optional(),
 });
 
 // UserProfile schema
 export const UserProfileSchema = z.object({
-  likes: ProfileCategoriesSchema,
-  dislikes: ProfileCategoriesSchema,
+  likes: ProfileCategoriesSchema.optional(),
+  dislikes: ProfileCategoriesSchema.optional(),
 });
 
 // SimpleMessage schema
 export const SimpleMessageSchema = z.object({
-  role: z.string(), // Changed 'sender' to 'role' to match the type definition
-  content: z.string(),
+  sender: z.string(), 
+  message: z.string(),
 });
 
 // QueryTransformFlowInput schema
 export const QueryTransformFlowInputSchema = z.object({
   history: z.array(SimpleMessageSchema),
-  userProfile: UserProfileSchema,
+  userProfile: UserProfileSchema.optional(),
   userMessage: z.string(),
 });
 
@@ -42,5 +42,4 @@ export const QueryTransformFlowOutputSchema = z.object({
   transformedQuery: z.string().optional(),
   userIntent: USERINTENT.optional(),
   justification: z.string().optional(),
-
 });
