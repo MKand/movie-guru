@@ -61,10 +61,10 @@ func GetResponseQualityAnalysisFlow(ctx context.Context, model ai.Model) (*genki
 		Provide a brief explanation for your classification based solely on the user's following turn.
 
 		Guidelines for classification of the user sentiment:
-		* Positive: If the user expresses excitement, joy etc. Simply rejecting an agent's suggestion is not negative.
-		* Negative: If the user expresses frustration, irritation, anger etc. Simply rejecting an agent's suggestion is not negative.
-		* Neutral: If the user expresses no specific emotion
-		* Ambiguous: If the user sentiment is not clear.
+		* SentimentPositive: If the user expresses excitement, joy etc. Simply rejecting an agent's suggestion is not negative.
+		* SentimentNegative: If the user expresses frustration, irritation, anger etc. Simply rejecting an agent's suggestion is not negative.
+		* SentimentNeutral: If the user expresses no specific emotion
+		* SentimentAmbiguous: If the user sentiment is not clear.
 
 
 		Remember:

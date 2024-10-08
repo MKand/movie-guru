@@ -12,13 +12,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/movie-guru/pkg/db"
 	metrics "github.com/movie-guru/pkg/metrics"
 	types "github.com/movie-guru/pkg/types"
 	"github.com/redis/go-redis/v9"
-	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/metric"
 )
 
 var (
@@ -90,92 +87,6 @@ func addResponseHeaders(w http.ResponseWriter, origin string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Headers", "user, Origin, Cookie, Accept, Content-Type, Content-Length, Accept-Encoding,Authorization")
 	w.Header().Set("Access-Control-Allow-Credentials", "true")
-}
-
-func createHealthCheckHandler(deps *Dependencies, meters *metrics.HCMeters) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
-		origin := r.Header.Get("Origin")
-		addResponseHeaders(w, origin)
-		if r.Method == "GET" {
-			startTime := time.Now()
-			defer func() {
-				meters.HCLatency.Record(ctx, int64(time.Since(startTime).Milliseconds()))
-			}()
-
-			meters.HCCounter.Add(r.Context(), 1)
-			json.NewEncoder(w).Encode("OK")
-			return
-
-		}
-	}
-}
-
-func createLoginHandler(ulh *UserLoginHandler, meters *metrics.LoginMeters) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
-		origin := r.Header.Get("Origin")
-		errLogPrefix := "Error: LoginHandler: "
-		if r.Method == "POST" {
-			startTime := time.Now()
-			defer func() {
-				meters.LoginLatencyHistogram.Record(ctx, int64(time.Since(startTime).Milliseconds()))
-			}()
-
-			meters.LoginCounter.Add(ctx, 1)
-
-			user := r.Header.Get("user")
-			if user == "" {
-				log.Println(errLogPrefix, "No auth header")
-				http.Error(w, "Unauthorized", http.StatusUnauthorized)
-				return
-			}
-
-			user, err := ulh.HandleLogin(ctx, user)
-			if err != nil {
-				if _, ok := err.(*AuthorizationError); ok {
-					log.Println(errLogPrefix, "Unauthorized. ", err.Error())
-					http.Error(w, err.Error(), http.StatusUnauthorized)
-					return
-				}
-				log.Println(errLogPrefix, "Cannot get user from db", err)
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-			sessionID := uuid.New().String()
-			session := &SessionInfo{
-				ID:            sessionID,
-				User:          user,
-				Authenticated: true,
-			}
-			sessionJSON, err := json.Marshal(session)
-			if err != nil {
-				log.Println(errLogPrefix, "error decoding session to json", err)
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-			}
-
-			err = redisStore.Set(r.Context(), sessionID, sessionJSON, 0).Err()
-			if err != nil {
-				log.Println(errLogPrefix, "error setting context in redis", err)
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-			}
-			meters.LoginSuccessCounter.Add(ctx, 1)
-			setCookieHeader := ""
-			if os.Getenv("LOCAL") == "true" {
-				setCookieHeader = fmt.Sprintf("session=%s; HttpOnly; SameSite=Lax; Path=/; Domain=localhost; Max-Age=86400", sessionID)
-			} else {
-				setCookieHeader = fmt.Sprintf("session=%s; HttpOnly; Secure; SameSite=None; Path=/; Domain=%s; Max-Age=86400", sessionID, metadata.FrontEndDomain)
-			}
-			w.Header().Set("Set-Cookie", setCookieHeader)
-			w.Header().Set("Vary", "Cookie, Origin")
-			addResponseHeaders(w, origin)
-			json.NewEncoder(w).Encode(map[string]string{"login": "success"})
-		}
-		if r.Method == "OPTIONS" {
-			handleOptions(w, origin)
-			return
-		}
-	}
 }
 
 func getSessionID(r *http.Request) (string, error) {
@@ -446,115 +357,6 @@ func deleteSessionInfo(ctx context.Context, sessionID string) error {
 		return err
 	}
 	return nil
-}
-
-func createChatHandler(deps *Dependencies, meters *metrics.ChatMeters) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		errLogPrefix := "Error: ChatHandler: "
-		var err error
-		ctx := r.Context()
-		origin := r.Header.Get("Origin")
-		addResponseHeaders(w, origin)
-		sessionInfo := &SessionInfo{}
-		if r.Method != "OPTIONS" {
-			sessionInfo, err = getSessionInfo(ctx, r)
-			if err != nil {
-				if err, ok := err.(*AuthorizationError); ok {
-					log.Println(errLogPrefix, "Unauthorized")
-					http.Error(w, err.Error(), http.StatusUnauthorized)
-					return
-				}
-				log.Println(errLogPrefix, err.Error())
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-			if !sessionInfo.Authenticated {
-				log.Println(errLogPrefix, "Unauthenticated")
-				http.Error(w, "Forbidden", http.StatusForbidden)
-				return
-			}
-		}
-		if r.Method == "POST" {
-			meters.CCounter.Add(ctx, 1)
-			startTime := time.Now()
-			defer func() {
-				meters.CLatencyHistogram.Record(ctx, int64(time.Since(startTime).Milliseconds()))
-			}()
-			addResponseHeaders(w, origin)
-			user := sessionInfo.User
-			chatRequest := &ChatRequest{
-				Content: "",
-			}
-			err := json.NewDecoder(r.Body).Decode(chatRequest)
-			if err != nil {
-				log.Println(errLogPrefix, err.Error())
-				http.Error(w, err.Error(), http.StatusBadRequest)
-				return
-			}
-			if len(chatRequest.Content) > metadata.MaxUserMessageLen {
-				log.Println(errLogPrefix, "Message too long")
-				http.Error(w, "Message too long", http.StatusBadRequest)
-				return
-			}
-			ch, err := getHistory(ctx, user)
-			if err != nil {
-				log.Println(errLogPrefix, err.Error())
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-			agentResp, respQuality := chat(ctx, deps, metadata, ch, user, chatRequest.Content)
-			updateChatMeters(ctx, agentResp, meters, respQuality)
-
-			saveHistory(ctx, ch, user)
-			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(agentResp)
-			return
-
-		}
-		if r.Method == "OPTIONS" {
-			addResponseHeaders(w, origin)
-			handleOptions(w, origin)
-			return
-		}
-	}
-}
-
-func updateChatMeters(ctx context.Context, agentResp *types.AgentResponse, meters *metrics.ChatMeters, respQuality *types.ResponseQualityOutput) {
-	if agentResp.Result == types.UNSAFE {
-		meters.CSafetyIssueCounter.Add(ctx, 1)
-	}
-	if agentResp.Result == types.SUCCESS {
-		meters.CSuccessCounter.Add(ctx, 1)
-	}
-	switch respQuality.UserSentiment {
-	case types.SentimentPositive:
-		meters.CSentimentCounter.Add(ctx, 1, metric.WithAttributes(attribute.String("Sentiment", "POSITIVE")))
-	case types.SentimentNegative:
-		meters.CSentimentCounter.Add(ctx, 1, metric.WithAttributes(attribute.String("Sentiment", "NEGATIVE")))
-	case types.SentimentNeutral:
-		meters.CSentimentCounter.Add(ctx, 1, metric.WithAttributes(attribute.String("Sentiment", "NEUTRAL")))
-	case types.SentimentAmbiguous:
-		meters.CSentimentCounter.Add(ctx, 1, metric.WithAttributes(attribute.String("Sentiment", "AMBIGUOUS")))
-	case types.SentimentUnknown:
-		meters.CSentimentCounter.Add(ctx, 1, metric.WithAttributes(attribute.String("Sentiment", "UNKNOWN")))
-	}
-
-	switch respQuality.Outcome {
-	case types.OutcomeAcknowledged:
-		meters.COutcomeCounter.Add(ctx, 1, metric.WithAttributes(attribute.String("ResponseQuality", "ACKNOWLEDGED")))
-	case types.OutcomeEngaged:
-		meters.COutcomeCounter.Add(ctx, 1, metric.WithAttributes(attribute.String("ResponseQuality", "ENGAGED")))
-	case types.OutcomeIrrelevant:
-		meters.COutcomeCounter.Add(ctx, 1, metric.WithAttributes(attribute.String("ResponseQuality", "IRRELEVANT")))
-	case types.OutcomeRejected:
-		meters.COutcomeCounter.Add(ctx, 1, metric.WithAttributes(attribute.String("ResponseQuality", "REJECTED")))
-	case types.OutcomeTopicChange:
-		meters.COutcomeCounter.Add(ctx, 1, metric.WithAttributes(attribute.String("ResponseQuality", "TOPIC_CHANGE")))
-	case types.OutcomeOther:
-		meters.COutcomeCounter.Add(ctx, 1, metric.WithAttributes(attribute.String("ResponseQuality", "OTHER")))
-	case types.OutcomeUnknown:
-		meters.COutcomeCounter.Add(ctx, 1, metric.WithAttributes(attribute.String("ResponseQuality", "UNKNOWN")))
-	}
 }
 
 func logoutHandler(w http.ResponseWriter, r *http.Request) {

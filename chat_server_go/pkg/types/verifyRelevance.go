@@ -5,30 +5,30 @@ type ConversationTurnOutcome string
 
 const (
 	// OutcomeIrrelevant indicates the agent's response was not relevant to the user's previous turn.
-	OutcomeIrrelevant ConversationTurnOutcome = "IRRELEVANT"
+	OutcomeIrrelevant ConversationTurnOutcome = "OUTCOMEIRRELEVANT"
 
 	// OutcomeAcknowledged indicates the user acknowledged the agent's response,
 	// but it's unclear if they found it helpful or relevant.
-	OutcomeAcknowledged ConversationTurnOutcome = "ACKNOWLEDGED"
+	OutcomeAcknowledged ConversationTurnOutcome = "OUTCOMEACKNOWLEDGED"
 
 	// OutcomeEngaged indicates the user is engaged and wants to continue the conversation
 	// on the same topic (e.g., asking follow-up questions, requesting more information).
-	OutcomeEngaged ConversationTurnOutcome = "ENGAGED"
+	OutcomeEngaged ConversationTurnOutcome = "OUTCOMEENGAGED"
 
 	// OutcomeTopicChange indicates the user changed the topic of the conversation.
-	OutcomeTopicChange ConversationTurnOutcome = "TOPIC_CHANGE"
+	OutcomeTopicChange ConversationTurnOutcome = "OUTCOMETOPICCHANGE"
 
 	// OutcomeAmbiguous indicates the user's response is ambiguous and the outcome cannot be clearly determined.
-	OutcomeAmbiguous ConversationTurnOutcome = "AMBIGUOUS"
+	OutcomeAmbiguous ConversationTurnOutcome = "OUTCOMEAMBIGUOUS"
 
 	// OutcomeRejected indicates the user explicitly rejected the agent's response.
-	OutcomeRejected ConversationTurnOutcome = "REJECTED"
+	OutcomeRejected ConversationTurnOutcome = "OUTCOMEREJECTED"
 
 	// OutcomeOther indicates an outcome that doesn't fit the other categories.
-	OutcomeOther ConversationTurnOutcome = "OTHER"
+	OutcomeOther ConversationTurnOutcome = "OUTCOMEOTHER"
 
 	// OutcomeUnknown indicates an outcome wasn't able to be processed due to an error.
-	OutcomeUnknown ConversationTurnOutcome = "UNKNOWN"
+	OutcomeUnknown ConversationTurnOutcome = "OUTCOMEUNKNOWN"
 )
 
 // UserSentiment represents the sentiment expressed in the user's message.
@@ -36,19 +36,19 @@ type UserSentiment string
 
 const (
 	// SentimentPositive indicates a positive sentiment expressed by the user.
-	SentimentPositive UserSentiment = "POSITIVE"
+	SentimentPositive UserSentiment = "SENTIMENTPOSITIVE"
 
 	// SentimentNegative indicates a negative sentiment expressed by the user.
-	SentimentNegative UserSentiment = "NEGATIVE"
+	SentimentNegative UserSentiment = "SENTIMENTEGATIVE"
 
 	// SentimentNeutral indicates a neutral sentiment expressed by the user.
-	SentimentNeutral UserSentiment = "NEUTRAL"
+	SentimentNeutral UserSentiment = "SENTIMENTNEUTRAL"
 
 	// SentimentAmbiguous indicates the sentiment in the user's message is ambiguous.
-	SentimentAmbiguous UserSentiment = "AMBIGUOUS"
+	SentimentAmbiguous UserSentiment = "SENTIMENTAMBIGUOUS"
 
 	// SentimentUnknown indicates the sentiment in the user's message is unknown due to an error.
-	SentimentUnknown UserSentiment = "UNKNOWN"
+	SentimentUnknown UserSentiment = "SENTIMENTUNKNOWN"
 )
 
 // ResponseQualityFlowInput represents the input to the response quality analysis flow.
