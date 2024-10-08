@@ -89,8 +89,8 @@
         });    }    
           for (const message of response) { 
           store.commit('chat/add', {
-              message: message.message, 
-              sender: message.sender 
+              message: message.content, 
+              sender: message.role 
           });
     }
     }).catch(error => {
