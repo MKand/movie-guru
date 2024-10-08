@@ -3,40 +3,28 @@ package web
 import (
 	"context"
 	"encoding/json"
-	"log"
 	"net/http"
 	"strings"
 	"time"
 
-	metrics "github.com/movie-guru/pkg/metrics"
+	m "github.com/movie-guru/pkg/metrics"
 	"github.com/movie-guru/pkg/types"
 	"go.opentelemetry.io/otel/attribute"
 	metric "go.opentelemetry.io/otel/metric"
+	"golang.org/x/exp/slog"
 )
 
-func createChatHandler(deps *Dependencies, meters *metrics.ChatMeters) http.HandlerFunc {
+func createChatHandler(deps *Dependencies, meters *m.ChatMeters) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		errLogPrefix := "Error: ChatHandler: "
 		var err error
 		ctx := r.Context()
 		origin := r.Header.Get("Origin")
 		addResponseHeaders(w, origin)
 		sessionInfo := &SessionInfo{}
 		if r.Method != "OPTIONS" {
-			sessionInfo, err = getSessionInfo(ctx, r)
-			if err != nil {
-				if err, ok := err.(*AuthorizationError); ok {
-					log.Println(errLogPrefix, "Unauthorized")
-					http.Error(w, err.Error(), http.StatusUnauthorized)
-					return
-				}
-				log.Println(errLogPrefix, err.Error())
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-			if !sessionInfo.Authenticated {
-				log.Println(errLogPrefix, "Unauthenticated")
-				http.Error(w, "Forbidden", http.StatusForbidden)
+			var shouldReturn bool
+			sessionInfo, shouldReturn = authenticateAndGetSessionInfo(ctx, sessionInfo, err, r, w)
+			if shouldReturn {
 				return
 			}
 		}
@@ -53,18 +41,18 @@ func createChatHandler(deps *Dependencies, meters *metrics.ChatMeters) http.Hand
 			}
 			err := json.NewDecoder(r.Body).Decode(chatRequest)
 			if err != nil {
-				log.Println(errLogPrefix, err.Error())
+				slog.InfoContext(ctx, "Error while decoding request", slog.Any("error", err.Error()))
 				http.Error(w, err.Error(), http.StatusBadRequest)
 				return
 			}
 			if len(chatRequest.Content) > metadata.MaxUserMessageLen {
-				log.Println(errLogPrefix, "Message too long")
+				slog.InfoContext(ctx, "Input message too long", slog.String("user", user), slog.Any("error", err.Error()))
 				http.Error(w, "Message too long", http.StatusBadRequest)
 				return
 			}
 			ch, err := getHistory(ctx, user)
 			if err != nil {
-				log.Println(errLogPrefix, err.Error())
+				slog.ErrorContext(ctx, "Error while fetching history", slog.String("user", user), slog.Any("error", err.Error()))
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
@@ -85,7 +73,7 @@ func createChatHandler(deps *Dependencies, meters *metrics.ChatMeters) http.Hand
 	}
 }
 
-func updateChatMeters(ctx context.Context, agentResp *types.AgentResponse, meters *metrics.ChatMeters, respQuality *types.ResponseQualityOutput) {
+func updateChatMeters(ctx context.Context, agentResp *types.AgentResponse, meters *m.ChatMeters, respQuality *types.ResponseQualityOutput) {
 	if agentResp.Result == types.UNSAFE {
 		meters.CSafetyIssueCounter.Add(ctx, 1)
 	}

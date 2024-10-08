@@ -2,7 +2,7 @@ package web
 
 import (
 	"context"
-	"fmt"
+	"log/slog"
 
 	"github.com/movie-guru/pkg/db"
 	"github.com/movie-guru/pkg/types"
@@ -54,10 +54,9 @@ func chat(ctx context.Context, deps *Dependencies, metadata *db.Metadata, h *typ
 
 	select {
 	case respQuality = <-respQualityChan:
-		fmt.Println("Response Quality: ", respQuality)
-
+		slog.InfoContext(ctx, "Output response quality flow", slog.Any("responseQuality", respQuality))
 	case err := <-errChan:
-		fmt.Println("Response Quality Error:", err)
+		slog.ErrorContext(ctx, "Error while executing response quality flow", slog.Any("error", err.Error()))
 	}
 
 	return mAgentResp, respQuality

@@ -22,7 +22,6 @@ func createHealthCheckHandler(deps *Dependencies, meters *metrics.HCMeters) http
 			meters.HCCounter.Add(r.Context(), 1)
 			json.NewEncoder(w).Encode("OK")
 			return
-
 		}
 	}
 }

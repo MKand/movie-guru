@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
+	"log/slog"
 	"math/rand"
 	"net/http"
 	"os"
@@ -27,9 +27,9 @@ var (
 	corsOrigins []string
 )
 
-func StartServer(ulh *UserLoginHandler, m *db.Metadata, deps *Dependencies) error {
+func StartServer(ctx context.Context, ulh *UserLoginHandler, m *db.Metadata, deps *Dependencies) error {
 	metadata = m
-	setupSessionStore()
+	setupSessionStore(ctx)
 
 	corsOrigins = strings.Split(metadata.CorsOrigin, ",")
 	for i := range corsOrigins {
@@ -50,7 +50,7 @@ func StartServer(ulh *UserLoginHandler, m *db.Metadata, deps *Dependencies) erro
 	return http.ListenAndServe(":8080", nil)
 }
 
-func setupSessionStore() {
+func setupSessionStore(ctx context.Context) {
 	REDIS_HOST := os.Getenv("REDIS_HOST")
 	REDIS_PASSWORD := os.Getenv("REDIS_PASSWORD")
 	REDIS_PORT := os.Getenv("REDIS_PORT")
@@ -60,8 +60,8 @@ func setupSessionStore() {
 		Password: REDIS_PASSWORD,
 		DB:       0,
 	})
-	if err := redisStore.Ping(context.Background()).Err(); err != nil {
-		log.Fatal(err)
+	if err := redisStore.Ping(ctx).Err(); err != nil {
+		slog.ErrorContext(ctx, "error connecting to redis", slog.Any("error", err))
 	}
 }
 
@@ -113,7 +113,6 @@ func handleOptions(w http.ResponseWriter, origin string) {
 	w.Header().Set("Access-Control-Allow-Credentials", "true")
 
 	w.WriteHeader(http.StatusOK)
-	log.Println(w.Header())
 }
 
 func getHistory(ctx context.Context, user string) (*types.ChatHistory, error) {
@@ -156,27 +155,15 @@ func deleteHistory(ctx context.Context, user string) error {
 
 func createStartupHandler(deps *Dependencies) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		errLogPrefix := "Error: StartupHandler: "
 		var err error
 		ctx := r.Context()
 		origin := r.Header.Get("Origin")
 		addResponseHeaders(w, origin)
 		sessionInfo := &SessionInfo{}
 		if r.Method != "OPTIONS" {
-			sessionInfo, err = getSessionInfo(ctx, r)
-			if err != nil {
-				if err, ok := err.(*AuthorizationError); ok {
-					log.Println(errLogPrefix, "Unauthorized")
-					http.Error(w, err.Error(), http.StatusUnauthorized)
-					return
-				}
-				log.Println(errLogPrefix, "Cannot get session info ", err)
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-			if !sessionInfo.Authenticated {
-				log.Println(errLogPrefix, "Unauthenticated")
-				http.Error(w, "Forbidden", http.StatusForbidden)
+			var shouldReturn bool
+			sessionInfo, shouldReturn = authenticateAndGetSessionInfo(ctx, sessionInfo, err, r, w)
+			if shouldReturn {
 				return
 			}
 		}
@@ -185,13 +172,13 @@ func createStartupHandler(deps *Dependencies) http.HandlerFunc {
 			user := sessionInfo.User
 			pref, err := deps.DB.GetCurrentProfile(ctx, user)
 			if err != nil {
-				log.Println(errLogPrefix, "Cannot get preferences for user:", user, err.Error())
+				slog.ErrorContext(ctx, "Cannot get preferences", slog.String("user", user), slog.Any("error", err.Error()))
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
 			context, err := deps.MovieRetrieverFlowClient.RetriveDocuments(ctx, randomisedFeaturedFilmsQuery())
 			if err != nil {
-				log.Println(errLogPrefix, err.Error())
+				slog.ErrorContext(ctx, "Error getting movie recommendations", slog.Any("error", err.Error()))
 				http.Error(w, "Error get movie recommendations", http.StatusInternalServerError)
 				return
 			}
@@ -207,38 +194,46 @@ func createStartupHandler(deps *Dependencies) http.HandlerFunc {
 	}
 }
 
+func authenticateAndGetSessionInfo(ctx context.Context, sessionInfo *SessionInfo, err error, r *http.Request, w http.ResponseWriter) (*SessionInfo, bool) {
+	sessionInfo, err = getSessionInfo(ctx, r)
+	if err != nil {
+		if err, ok := err.(*AuthorizationError); ok {
+			slog.InfoContext(ctx, "Unauthorized", slog.Any("error", err.Error()))
+			http.Error(w, err.Error(), http.StatusUnauthorized)
+			return nil, true
+		}
+		slog.ErrorContext(ctx, "Error while getting session info", slog.Any("error", err.Error()))
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return nil, true
+	}
+	if !sessionInfo.Authenticated {
+		slog.InfoContext(ctx, "Forbidden")
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return nil, true
+	}
+	return sessionInfo, false
+}
+
 func createPreferencesHandler(MovieDB *db.MovieDB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		errLogPrefix := "Error: PreferencesHandler: "
 		var err error
 		ctx := r.Context()
 		origin := r.Header.Get("Origin")
 		addResponseHeaders(w, origin)
 		sessionInfo := &SessionInfo{}
 		if r.Method != "OPTIONS" {
-			sessionInfo, err = getSessionInfo(ctx, r)
-			if err != nil {
-				if err, ok := err.(*AuthorizationError); ok {
-					log.Println(errLogPrefix, "Unauthorized")
-					http.Error(w, err.Error(), http.StatusUnauthorized)
-					return
-				}
-				log.Println(errLogPrefix, err.Error())
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-			if !sessionInfo.Authenticated {
-				log.Println(errLogPrefix, "Unauthenticated")
-				http.Error(w, "Forbidden", http.StatusForbidden)
+			var shouldReturn bool
+			sessionInfo, shouldReturn = authenticateAndGetSessionInfo(ctx, sessionInfo, err, r, w)
+			if shouldReturn {
 				return
 			}
 		}
+		user := sessionInfo.User
 		if r.Method == "GET" {
 			addResponseHeaders(w, origin)
-			user := sessionInfo.User
 			pref, err := MovieDB.GetCurrentProfile(ctx, user)
 			if err != nil {
-				log.Println(errLogPrefix, "Cannot get preferences for user:", user, err.Error())
+				slog.ErrorContext(ctx, "Cannot get preferences", slog.String("user", user), slog.Any("error", err.Error()))
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
@@ -251,13 +246,13 @@ func createPreferencesHandler(MovieDB *db.MovieDB) http.HandlerFunc {
 			}
 			err := json.NewDecoder(r.Body).Decode(pref)
 			if err != nil {
-				log.Println(errLogPrefix, err.Error())
+				slog.InfoContext(ctx, "Error while decoding request", slog.Any("error", err.Error()))
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
 			err = MovieDB.UpdateProfile(ctx, pref.Content, sessionInfo.User)
 			if err != nil {
-				log.Println(errLogPrefix, err.Error())
+				slog.ErrorContext(ctx, "Error while fetching preferences", slog.String("user", user), slog.Any("error", err.Error()))
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
@@ -276,42 +271,30 @@ func createPreferencesHandler(MovieDB *db.MovieDB) http.HandlerFunc {
 
 func createHistoryHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		errLogPrefix := "Error: HistoryHandler: "
 		ctx := r.Context()
 		origin := r.Header.Get("Origin")
 		var err error
 		addResponseHeaders(w, origin)
 		sessionInfo := &SessionInfo{}
 		if r.Method != "OPTIONS" {
-			sessionInfo, err = getSessionInfo(ctx, r)
-			if err != nil {
-				if err, ok := err.(*AuthorizationError); ok {
-					log.Println(errLogPrefix, "Unauthorized")
-					http.Error(w, err.Error(), http.StatusUnauthorized)
-					return
-				}
-				log.Println(errLogPrefix, err.Error())
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-			if !sessionInfo.Authenticated {
-				log.Println(errLogPrefix, "Unauthenticated")
-				http.Error(w, "Forbidden", http.StatusForbidden)
+			var shouldReturn bool
+			sessionInfo, shouldReturn = authenticateAndGetSessionInfo(ctx, sessionInfo, err, r, w)
+			if shouldReturn {
 				return
 			}
 		}
+		user := sessionInfo.User
 		if r.Method == "GET" {
 			addResponseHeaders(w, origin)
-			user := sessionInfo.User
 			ch, err := getHistory(ctx, user)
 			if err != nil {
-				log.Println(errLogPrefix, err.Error())
+				slog.ErrorContext(ctx, "Error while fetching history", slog.String("user", user), slog.Any("error", err.Error()))
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
 			simpleHistory, err := types.ParseRecentHistory(ch.GetHistory(), metadata.HistoryLength)
 			if err != nil {
-				log.Println(errLogPrefix, err.Error())
+				slog.ErrorContext(ctx, "Error while parsing history", slog.String("user", user), slog.Any("error", err.Error()))
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
@@ -322,7 +305,7 @@ func createHistoryHandler() http.HandlerFunc {
 			addResponseHeaders(w, origin)
 			err := deleteHistory(ctx, sessionInfo.User)
 			if err != nil {
-				log.Println(errLogPrefix, err.Error())
+				slog.ErrorContext(ctx, "Error while deleting history", slog.String("user", user), slog.Any("error", err.Error()))
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
@@ -360,35 +343,24 @@ func deleteSessionInfo(ctx context.Context, sessionID string) error {
 }
 
 func logoutHandler(w http.ResponseWriter, r *http.Request) {
-	errLogPrefix := "Error: LogoutHandler: "
 	var err error
 	ctx := r.Context()
 	origin := r.Header.Get("Origin")
 	addResponseHeaders(w, origin)
 	sessionInfo := &SessionInfo{}
 	if r.Method != "OPTIONS" {
-		sessionInfo, err = getSessionInfo(ctx, r)
-		if err != nil {
-			if err, ok := err.(*AuthorizationError); ok {
-				log.Println(errLogPrefix, "Unauthorized")
-				http.Error(w, err.Error(), http.StatusUnauthorized)
-				return
-			}
-			log.Println(errLogPrefix, err.Error())
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		if !sessionInfo.Authenticated {
-			log.Println(errLogPrefix, "Unauthenticated")
-			http.Error(w, "Forbidden", http.StatusForbidden)
+		var shouldReturn bool
+		sessionInfo, shouldReturn = authenticateAndGetSessionInfo(ctx, sessionInfo, err, r, w)
+		if shouldReturn {
 			return
 		}
 	}
+	user := sessionInfo.User
 	if r.Method == "GET" {
 		addResponseHeaders(w, origin)
 		err := deleteSessionInfo(ctx, sessionInfo.ID)
 		if err != nil {
-			log.Println(errLogPrefix, err.Error())
+			slog.ErrorContext(ctx, "Error while deleting session info", slog.String("user", user), slog.Any("error", err.Error()))
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}

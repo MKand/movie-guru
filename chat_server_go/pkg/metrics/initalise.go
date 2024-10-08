@@ -3,6 +3,8 @@ package metrics
 import (
 	"context"
 	"errors"
+	"log/slog"
+	"os"
 
 	"go.opentelemetry.io/contrib/exporters/autoexport"
 	"go.opentelemetry.io/contrib/propagators/autoprop"
@@ -53,4 +55,41 @@ func SetupOpenTelemetry(ctx context.Context) (shutdown func(context.Context) err
 	otel.SetMeterProvider(mp)
 
 	return shutdown, nil
+}
+
+func setupLogging() {
+	// Use json as our base logging format.
+	jsonHandler := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{ReplaceAttr: replacer})
+	// Add span context attributes when Context is passed to logging calls.
+	instrumentedHandler := handlerWithSpanContext(jsonHandler)
+	// Set this handler as the global slog handler.
+	slog.SetDefault(slog.New(instrumentedHandler))
+}
+
+func handlerWithSpanContext(handler slog.Handler) *spanContextLogHandler {
+	return &spanContextLogHandler{Handler: handler}
+}
+
+// spanContextLogHandler is an slog.Handler which adds attributes from the
+// span context.
+type spanContextLogHandler struct {
+	slog.Handler
+}
+
+func replacer(groups []string, a slog.Attr) slog.Attr {
+	// Rename attribute keys to match Cloud Logging structured log format
+	switch a.Key {
+	case slog.LevelKey:
+		a.Key = "severity"
+		// Map slog.Level string values to Cloud Logging LogSeverity
+		// https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#LogSeverity
+		if level := a.Value.Any().(slog.Level); level == slog.LevelWarn {
+			a.Value = slog.StringValue("WARNING")
+		}
+	case slog.TimeKey:
+		a.Key = "timestamp"
+	case slog.MessageKey:
+		a.Key = "message"
+	}
+	return a
 }

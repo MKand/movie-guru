@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"time"
@@ -12,7 +11,8 @@ import (
 	"github.com/google/uuid"
 	_ "github.com/lib/pq"
 	"github.com/movie-guru/pkg/db"
-	metrics "github.com/movie-guru/pkg/metrics"
+	m "github.com/movie-guru/pkg/metrics"
+	"golang.org/x/exp/slog"
 )
 
 type AuthorizationError struct {
@@ -40,11 +40,10 @@ func (ulh *UserLoginHandler) HandleLogin(ctx context.Context, user string) (stri
 	return user, nil
 }
 
-func createLoginHandler(ulh *UserLoginHandler, meters *metrics.LoginMeters) http.HandlerFunc {
+func createLoginHandler(ulh *UserLoginHandler, meters *m.LoginMeters) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		origin := r.Header.Get("Origin")
-		errLogPrefix := "Error: LoginHandler: "
 		if r.Method == "POST" {
 			startTime := time.Now()
 			defer func() {
@@ -55,7 +54,7 @@ func createLoginHandler(ulh *UserLoginHandler, meters *metrics.LoginMeters) http
 
 			user := r.Header.Get("user")
 			if user == "" {
-				log.Println(errLogPrefix, "No auth header")
+				slog.InfoContext(ctx, "No user header")
 				http.Error(w, "Unauthorized", http.StatusUnauthorized)
 				return
 			}
@@ -63,11 +62,11 @@ func createLoginHandler(ulh *UserLoginHandler, meters *metrics.LoginMeters) http
 			user, err := ulh.HandleLogin(ctx, user)
 			if err != nil {
 				if _, ok := err.(*AuthorizationError); ok {
-					log.Println(errLogPrefix, "Unauthorized. ", err.Error())
+					slog.InfoContext(ctx, "Unauthorized")
 					http.Error(w, err.Error(), http.StatusUnauthorized)
 					return
 				}
-				log.Println(errLogPrefix, "Cannot get user from db", err)
+				slog.ErrorContext(ctx, "Error while getting user from db", slog.Any("error", err.Error()))
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
@@ -79,13 +78,13 @@ func createLoginHandler(ulh *UserLoginHandler, meters *metrics.LoginMeters) http
 			}
 			sessionJSON, err := json.Marshal(session)
 			if err != nil {
-				log.Println(errLogPrefix, "error decoding session to json", err)
+				slog.ErrorContext(ctx, "Error while decoding session info", slog.Any("error", err.Error()))
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 			}
 
 			err = redisStore.Set(r.Context(), sessionID, sessionJSON, 0).Err()
 			if err != nil {
-				log.Println(errLogPrefix, "error setting context in redis", err)
+				slog.ErrorContext(ctx, "Error while setting context in redis", slog.Any("error", err.Error()))
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 			}
 			meters.LoginSuccessCounter.Add(ctx, 1)
