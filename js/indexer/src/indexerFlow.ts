@@ -4,7 +4,7 @@ import { defineFlow } from '@genkit-ai/flow';
 import { toSql } from 'pgvector';
 import { z } from 'zod';
 import { MovieContextSchema, MovieContext } from './types';
-import { OpenDB } from './db';
+import { openDB } from './db';
 
 export const IndexerFlow = defineFlow(
   {
@@ -13,7 +13,7 @@ export const IndexerFlow = defineFlow(
       outputSchema: z.string(),
   },
     async (doc) => {
-      const db = await OpenDB();
+      const db = await openDB();
       if (!db) {
         throw new Error('Database connection failed');
       }

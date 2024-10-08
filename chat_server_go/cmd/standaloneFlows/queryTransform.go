@@ -43,7 +43,6 @@ func GetQueryTransformFlow(ctx context.Context, model ai.Model, prompt string) (
 	if err != nil {
 		return nil, err
 	}
-	// Define a simple flow that prompts an LLM to generate menu suggestions.
 	queryTransformFlow := genkit.DefineFlow("queryTransformFlow", func(ctx context.Context, input *QueryTransformFlowInput) (*QueryTransformFlowOutput, error) {
 		// Default output
 		queryTransformFlowOutput := &QueryTransformFlowOutput{

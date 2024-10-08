@@ -2,7 +2,7 @@ import postgres from 'postgres';
 
 let sql: postgres.Sql<{}> | null = null; // Initialize sql as null
 
-export async function OpenDB(): Promise<postgres.Sql<{}> |null> {
+export async function openDB(): Promise<postgres.Sql<{}> |null> {
   if (sql) {
     return sql; // Return existing connection if already opened
   }

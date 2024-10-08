@@ -8,8 +8,8 @@ import (
 )
 
 type SimpleMessage struct {
-	Role    string `json:"sender"`
-	Content string `json:"message"`
+	Role    string `json:"role"`
+	Content string `json:"content"`
 }
 
 type ChatHistory struct {

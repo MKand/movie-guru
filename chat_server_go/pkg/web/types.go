@@ -25,9 +25,10 @@ type ChatRequest struct {
 }
 
 type Dependencies struct {
-	QueryTransformFlowClient *wrappers.QueryTransformFlowClient
-	UserProfileFlowClient    *wrappers.UserProfileFlowClient
-	MovieFlowClient          *wrappers.MovieFlowClient
-	MovieRetrieverFlowClient *wrappers.MovieRetrieverFlowClient
-	DB                       *db.MovieDB
+	QueryTransformFlowClient  *wrappers.QueryTransformFlowClient
+	UserProfileFlowClient     *wrappers.UserProfileFlowClient
+	MovieFlowClient           *wrappers.MovieFlowClient
+	MovieRetrieverFlowClient  *wrappers.MovieRetrieverFlowClient
+	ResponseQualityFlowClient *wrappers.ResponseQualityFlowClient
+	DB                        *db.MovieDB
 }
