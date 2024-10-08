@@ -9,7 +9,7 @@ import { openDB } from './db';
 
 const QueryOptionsSchema = z.object({
   query: z.string(),
-  k: z.number().optional(),
+  k: z.number().optional().default(10),
 });
 
 const sqlRetriever = defineRetriever(
