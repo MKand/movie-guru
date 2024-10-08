@@ -3,12 +3,10 @@ import { Document, defineRetriever, retrieve } from '@genkit-ai/ai/retriever';
 import { defineFlow } from '@genkit-ai/flow';
 import { textEmbedding004 } from '@genkit-ai/vertexai';
 import { toSql } from 'pgvector';
-import postgres from 'postgres';
 import { z } from 'zod';
 import { MovieContextSchema, MovieContext } from './movieFlowTypes';
 import { openDB } from './db';
 
-const sql = postgres({ ssl: false, database: 'recaps' });
 
 const QueryOptionsSchema = z.object({
   query: z.string(),
