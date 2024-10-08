@@ -10,8 +10,9 @@ RUN wget https://go.dev/dl/go1.22.7.linux-amd64.tar.gz && \
 
 # Add Go to the PATH
 ENV PATH="/usr/local/go/bin:$PATH"
-# Install Genkit
-RUN npm i -g genkit
+# Install Genkit and typescript
+RUN npm install -g genkit
+RUN npm install -g typescript
 
 # Create a project directory
 RUN mkdir /app
