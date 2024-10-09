@@ -3,7 +3,7 @@ import { parse } from 'csv-parse';
 import { runFlow } from '@genkit-ai/flow';
 import { IndexerFlow } from './indexerFlow'; 
 import { MovieContext } from './types'; 
-import { openDB as openDB } from './db';
+import { openDB } from './db';
 
 export async function processMovies() { 
   try {
