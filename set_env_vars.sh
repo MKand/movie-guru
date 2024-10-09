@@ -1,7 +1,7 @@
 export PROJECT_ID="<enter project id>"
 export POSTGRES_DB_USER_PASSWORD="minimalpassword"
 export POSTGRES_DB_MAIN_USER_PASSWORD="mainpassword"
-export POSTGRES_HOST="localhost:5432"
+export POSTGRES_HOST="db"
 export POSTGRES_DB_USER="minimal-user"
 export LOCATION="europe-west4"
 export TABLE_NAME="movies"

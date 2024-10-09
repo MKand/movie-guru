@@ -5,6 +5,8 @@ services:
     ports:
       - '6379:6379'
     command: redis-server --save 20 1 --loglevel warning --requirepass my_redis_pwd
+    networks:
+      - db-shared-network
   flows:
     build: ./chat_server_go
     command: /app/flows
@@ -23,6 +25,8 @@ services:
       - LOCAL=true
     volumes:
       - ./.key.json:/key.json
+    networks:
+      - db-shared-network
   server:
     build: ./chat_server_go
     command: /app/webserver
@@ -45,12 +49,20 @@ services:
       - REDIS_PASSWORD=my_redis_pwd
     depends_on:
       - cache 
+    networks:
+      - movie-guru
+      - db-shared-network
   frontend:
     build: ./frontend
     ports:
       -  5173:5173
     environment:
       - VITE_CHAT_SERVER_URL=http://localhost:8081
-
-
+    networks:
+      - movie-guru
+networks:
+  db-shared-network:
+    external: true
+  movie-guru:  
+    driver: bridge
   

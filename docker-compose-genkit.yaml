@@ -16,6 +16,8 @@ services:
       - ./chat_server_go:/app
       - ./.key.json:/key.json
     working_dir: /app/cmd/standaloneFlows
+    networks:
+      - db-shared-network
   genkit-js:
     build: ./genkit
     ports: 
@@ -33,6 +35,9 @@ services:
       - ./js/flows-js:/app
       - ./.key.json:/key.json
     working_dir: /app
-
-
+    networks:
+      - db-shared-network
+networks:
+  db-shared-network:
+    external: true
   
