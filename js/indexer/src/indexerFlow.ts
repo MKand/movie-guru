@@ -22,15 +22,24 @@ export const IndexerFlow = defineFlow(
       // reduce rate at which operation is performed to avoid hitting VertexAI rate limits
       await new Promise((resolve) => setTimeout(resolve, 300));
       const filteredContent = createText(doc);
+      
       // INSTRUCTIONS: Write code that generates an embedding
 			// - Step 1: Create an embedding from the filteredContent. 
 			// - Step 2: Write a SQL statement to insert the embedding along with the other fields in the table.
 			// - Take inspiration from the retriever implementation here: https://firebase.google.com/docs/genkit/templates/pgvector
-
-			// HINTS:
+      // HINTS:
 			//- Look at the schema for the table to understand what fields are required.
-     
+
+      // FIX THIS: This is NOT a valid embedding. You DO NOT generate embeddings this way.
+      const embedding = ""
+			
       try {
+			  // FIX THIS: Partially implemented db query.
+        await db`
+          INSERT INTO movies (embedding, tconst)
+          VALUES (${toSql(embedding)}, ${doc.tconst})
+		      ON CONFLICT (tconst) DO NOTHING;
+        `;
         return filteredContent; 
       } catch (error) {
         console.error('Error inserting or updating movie:', error);

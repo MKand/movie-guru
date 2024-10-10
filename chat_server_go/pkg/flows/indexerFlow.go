@@ -9,6 +9,7 @@ import (
 	"github.com/firebase/genkit/go/ai"
 	"github.com/firebase/genkit/go/genkit"
 	"github.com/movie-guru/pkg/db"
+	pgv "github.com/pgvector/pgvector-go"
 
 	types "github.com/movie-guru/pkg/types"
 )
@@ -24,10 +25,27 @@ func GetIndexerFlow(maxRetLength int, movieDB *db.MovieDB, embedder ai.Embedder)
 			// - Step 1: Create an embedding from the filteredContent.
 			// - Step 2: Write a SQL statement to insert the embedding along with the other fields in the table.
 			// - Take inspiration from the indexer implementation here: https://github.com/firebase/genkit/blob/main/go/samples/pgvector/main.go
-
 			// HINTS:
 			//- Look at the schema for the table to understand what fields are required.
-			// - Make sure the required (internal and external) GO modules are imported.
+			//- Make sure the required (internal and external) GO modules are imported.
+
+			// FIX THIS: This is NOT a useful embedding. You DO NOT generate embeddings this way.
+			embedding := []float32{}
+
+			//FIX THIS: Partially implemented db query.
+			query := `INSERT INTO movies (embedding,  tconst) 
+			VALUES ($1, $2)
+			ON CONFLICT (tconst) DO NOTHING;
+			`
+			dbCtx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+			defer cancel()
+
+			_, err := movieDB.DB.ExecContext(dbCtx, query,
+				pgv.NewVector(embedding), doc.Tconst)
+			if err != nil {
+				return nil, err
+			}
+
 			return aiDoc, nil
 		})
 	return indexerFlow
