@@ -39,7 +39,7 @@ const sqlRetriever = defineRetriever(
 		// In document dbs, all the informational content is contained in the content of the document and not its metadata.
 		// But in a relational db, the information may be spread across different columns.
 
-		// In our application (using Genkit), we have the flexibility to pass a custom 'MovieContext' object 
+		// In our application (using Genkit), we have the flexibility to pass a custom 'MovieContext' object into the RAG flow (next challenge) 
     // (and not restricted to document.content).
 		// However, when interacting with other frameworks, especially those relying on a 'Document' structure,
 		// it's crucial to be mindful of how metadata is utilized or if adjustments are needed to ensure all essential information is included.
