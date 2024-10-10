@@ -45,7 +45,7 @@ func ParseMovieContexts(docs []*ai.Document) ([]*MovieContext, error) {
 			Actors   string `json:"actors"`
 			Director string `json:"director"`
 			Plot     string `json:"plot"`
-			Poster   string `json:"poster, omitempty`
+			Poster   string `json:"poster"`
 		}
 
 		err := json.Unmarshal([]byte(doc.Content[0].Text), &intermediate)
@@ -147,8 +147,27 @@ func DefineRetriever(maxRetLength int, db *sql.DB, embedder ai.Embedder) ai.Retr
 		// 1. Get the embedding for the query which is in req.Document
 		// 2. Query the db for the relevant rows based on the embedding
 		// 3. Iterate through the rows and create a list of type ai.Document
-		// 4. Store the list as documents in the retrieverResponse
+		// 4. Return the content field from the row as content in the document and the remaining fields as metadata
+		// 5. Store the list as documents in the retrieverResponse
+		//
 		// HINT: https://github.com/firebase/genkit/blob/main/go/samples/pgvector/main.go
+
+		// Why content and metadata?
+		// We separate movie data into 'content' and 'metadata' to accommodate varying approaches to data handling in GenAI frameworks.
+		// Some frameworks, particularly those focused on RAG and utilizing a 'Document' object,
+		// primarily use the 'content' field during RAG, potentially ignoring 'metadata'.
+
+		// This separation is partly rooted in the historical context of these frameworks, which were often initially designed
+		// to work with document-style databases rather than relational databases.
+		// In document dbs, all the informational content is contained in the content of the document and not its metadata.
+		// But in a relational db, the information may be spread across different columns.
+
+		// In our application (using Genkit), we have the flexibility to pass a custom 'MovieContext' object into the RAG flow (next challenge)
+		// (and not restricted to document.content)
+		// However, when interacting with other frameworks, especially those relying on a 'Document' structure,
+		// it's crucial to be mindful of how metadata is utilized or if adjustments are needed to ensure all essential information is included.
+
+		// Actually if you look at RetriveDocuments and ParseMovieContexts, we even throw away the content and only process the data in the metadata fields while constructing the MovieContext.
 		return retrieverResponse, nil
 	}
 	return ai.DefineRetriever("pgvector", "movieRetriever", f)
