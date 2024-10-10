@@ -7,27 +7,32 @@ import { z } from 'zod';
 import { MovieContextSchema, MovieContext } from './movieFlowTypes';
 import { openDB } from './db';
 
-const QueryOptionsSchema = z.object({
-  query: z.string(),
+const RetrieverOptionsSchema = z.object({
   k: z.number().optional().default(10),
+});
+
+const QuerySchema = z.object({
+  text: z.string(),
 });
 
 const sqlRetriever = defineRetriever(
   {
     name: 'movies',
-    configSchema: QueryOptionsSchema,
+    configSchema: RetrieverOptionsSchema,
   },
-  async (input, options) => {
+
+  async (query, options) => {
     const db = await openDB();
     if (!db) {
       throw new Error('Database connection failed');
     }
+
     //INTRUCTIONS:
-    //1. Create an embedding for the query
-    //2. Query the database 
-    //3. Create a document for each row (of type Document) 
-    //4. Return the content field from the row as content in the document and the remaining fields as metadata
-    //5. Return a list of documents.
+    // 1. Create an embedding for the query
+    // 2. Query the database 
+    // 3. Create a document for each row (of type Document) 
+    // 4. Return the content field from the row as content in the document and the remaining fields as metadata
+    // 5. Return a list of documents.
 
 		// Why content and metadata?
 		// We separate movie data into 'content' and 'metadata' to accommodate varying approaches to data handling in GenAI frameworks.
@@ -55,23 +60,19 @@ const sqlRetriever = defineRetriever(
 export const movieDocFlow = defineFlow(
   {
     name: 'movieDocFlow',
-    inputSchema: QueryOptionsSchema,
+    inputSchema: QuerySchema,
     outputSchema: z.array(MovieContextSchema), // Array of MovieContextSchema
   },
-  async (inputQuestion) => {
+  async (query) => {
     const docs = await retrieve({
       retriever: sqlRetriever,
       query: {
-        content: [{ text: inputQuestion.query }],
+        content: [{ text: query.text }],
       },
       options: {
-        k: inputQuestion.k ?? 10,
-        query: inputQuestion.query,
+        k: 10,
       },
     });
-
-    console.log(docs);
-
     const movieContexts: MovieContext[] = [];
 
     for (const doc of docs) {
