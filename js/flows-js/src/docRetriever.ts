@@ -12,7 +12,7 @@ const RetrieverOptionsSchema = z.object({
 });
 
 const QuerySchema = z.object({
-  text: z.string(),
+  query: z.string(),
 });
 
 const sqlRetriever = defineRetriever(
@@ -26,7 +26,6 @@ const sqlRetriever = defineRetriever(
     if (!db) {
       throw new Error('Database connection failed');
     }
-
     //INTRUCTIONS:
     // 1. Create an embedding for the query
     // 2. Query the database 
@@ -63,11 +62,11 @@ export const movieDocFlow = defineFlow(
     inputSchema: QuerySchema,
     outputSchema: z.array(MovieContextSchema), // Array of MovieContextSchema
   },
-  async (query) => {
+  async (input) => {
     const docs = await retrieve({
       retriever: sqlRetriever,
       query: {
-        content: [{ text: query.text }],
+        content: [{ text: input.query }],
       },
       options: {
         k: 10,
