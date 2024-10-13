@@ -20,7 +20,7 @@ Here are the inputs:
         * others: {{#each userProfile.dislikes.others}}{{this}}, {{~/each}}
 * userMessage: {{userMessage}}
 * history: (May be empty)
-    {{#each history}}{{this.sender}}: {{this.message}}{{~/each}}
+    {{#each history}}{{this.role}}: {{this.content}}{{~/each}}
 `
 export const MovieFlowPromptText = 
 ` 
