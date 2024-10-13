@@ -32,7 +32,7 @@ export const SimpleMessageSchema = z.object({
 
 // QueryTransformFlowInput schema
 export const QueryTransformFlowInputSchema = z.object({
-  history: z.array(SimpleMessageSchema),
+  history:  z.array(SimpleMessageSchema),
   userProfile: UserProfileSchema,
   userMessage: z.string(),
 });
@@ -42,5 +42,4 @@ export const QueryTransformFlowOutputSchema = z.object({
   transformedQuery: z.string().optional(),
   userIntent: USERINTENT.optional(),
   justification: z.string().optional(),
-
 });

@@ -27,7 +27,7 @@ export const MovieContextSchema = z.object({
 // MovieFlowInput schema
 export const MovieFlowInputSchema = z.object({
   history: z.array(SimpleMessageSchema),
-  userPreferences: UserProfileSchema,
+  userProfile: UserProfileSchema,
   contextDocuments: z.array(MovieContextSchema),
   userMessage: z.string(),
 });

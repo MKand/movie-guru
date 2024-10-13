@@ -3,6 +3,7 @@ import { configureGenkit } from '@genkit-ai/core';
 import { startFlowsServer } from '@genkit-ai/flow';
 import { vertexAI } from '@genkit-ai/vertexai';
 import { firebase } from '@genkit-ai/firebase';
+import { dotprompt, promptRef } from '@genkit-ai/dotprompt';
 
 const LOCATION = process.env.LOCATION|| 'us-central1';
 const PROJECT_ID = process.env.PROJECT_ID;
@@ -11,7 +12,8 @@ configureGenkit({
   plugins: [
   
     vertexAI({ projectId: PROJECT_ID, location: LOCATION }),
-    firebase()
+    firebase(),
+    dotprompt()
   ],
   logLevel: 'debug',
   enableTracingAndMetrics: true,
