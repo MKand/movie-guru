@@ -13,7 +13,7 @@ export const RelevantMovieSchema = z.object({
 // MovieContext schema
 export const MovieContextSchema = z.object({
   title: z.string(),
-  runtimeMinutes: z.number(),
+  runtime_minutes: z.number(),
   genres: z.array(z.string()),
   rating: z.number(),
   plot: z.string(),
