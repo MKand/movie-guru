@@ -83,7 +83,7 @@ func GetUserProfileFlow(ctx context.Context, model ai.Model) (*genkit.Flow[*type
 	if err != nil {
 		return nil, err
 	}
-	// Define a simple flow that prompts an LLM to generate menu suggestions.
+
 	userProfileFlow := genkit.DefineFlow("userProfileFlow", func(ctx context.Context, input *types.UserProfileFlowInput) (*types.UserProfileFlowOutput, error) {
 		userProfileFlowOutput := &types.UserProfileFlowOutput{
 			ModelOutputMetadata: &types.ModelOutputMetadata{
