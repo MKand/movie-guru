@@ -142,6 +142,7 @@ func GetRetrieverFlow(ctx context.Context, ret ai.Retriever) *genkit.Flow[*Retri
 func DefineRetriever(maxRetLength int, db *sql.DB, embedder ai.Embedder) ai.Retriever {
 	f := func(ctx context.Context, req *ai.RetrieverRequest) (*ai.RetrieverResponse, error) {
 		retrieverResponse := &ai.RetrieverResponse{}
+		retrieverResponse.Documents = make([]*ai.Document, 0, maxRetLength)
 
 		// Steps
 		// 1. Get the embedding for the query which is in req.Document
