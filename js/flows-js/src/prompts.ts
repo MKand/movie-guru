@@ -49,7 +49,7 @@ Inputs:
         * genres: {{#each userProfile.dislikes.genres}}{{this}}, {{~/each}}
         * others: {{#each userProfile.dislikes.others}}{{this}}, {{~/each}}
 * history: (May be empty)
-    {{#each history}}{{this.sender}}: {{this.message}}{{~/each}}
+    {{#each history}}{{this.role}}: {{this.content}}{{~/each}}
 * userMessage: {{userMessage}}
 
 Respond with:
@@ -84,7 +84,7 @@ Here are the inputs:
         * others: {{#each userProfile.dislikes.others}}{{this}}, {{~/each}}
 * userMessage: {{userMessage}}
 * history: (May be empty)
-    {{#each history}}{{this.sender}}: {{this.message}}{{~/each}}
+    {{#each history}}{{this.role}}: {{this.content}}{{~/each}}
 * Context retrieved from vector db (May be empty):
 {{#each contextDocuments}} 
 Movie: 
