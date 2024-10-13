@@ -78,7 +78,7 @@ export const movieDocFlow = defineFlow(
       if (doc.metadata) {
         const movieContext: MovieContext = {
           title: doc.metadata.title,
-          runtimeMinutes: doc.metadata.runtimeMinutes,
+          runtime_minutes: doc.metadata.runtimeMinutes,
           genres: doc.metadata.genres,
           rating: doc.metadata.rating,
           plot: doc.metadata.plot,
