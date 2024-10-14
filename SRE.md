@@ -8,6 +8,7 @@ SLI:
 - Information Accuracy (percentage of correct information provided, GenAI metric)
 - Example SLO: 99% of movie information queries should succeed within 500ms and have 98% accurate information.
 
+
 ## Receiving Movie Recommendations:
 
 SLI:

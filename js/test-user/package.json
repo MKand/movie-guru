@@ -1,0 +1,32 @@
+{
+  "main": "lib/index.js",
+  "scripts": {
+    "start": "node lib/index.js",
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "tsc && node lib/index.js"
+  },
+  "name": "flow",
+  "version": "1.0.0",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@genkit-ai/ai": "^0.5.14",
+    "@genkit-ai/core": "^0.5.14",
+    "@genkit-ai/dotprompt": "^0.5.14",
+    "@genkit-ai/firebase": "^0.5.14",
+    "@genkit-ai/flow": "^0.5.14",
+    "@genkit-ai/vertexai": "^0.5.14",
+    "csv-parse": "^5.5.6",
+    "express": "^4.21.0",
+    "pgvector": "^0.2.0",
+    "postgres": "^3.4.4",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3"
+  }
+}

@@ -33,9 +33,9 @@ services:
     ports:
       - 8081:8080
     environment:
-      - POSTGRES_HOST=db
+      - POSTGRES_HOST=$POSTGRES_HOST
       - PROJECT_ID=$PROJECT_ID
-      - POSTGRES_DB_USER_PASSWORD=minimalpassword
+      - POSTGRES_DB_USER_PASSWORD=$POSTGRES_DB_USER_PASSWORD
       - POSTGRES_DB_USER=minimal-user
       - POSTGRES_DB_NAME=fake-movies-db
       - TABLE_NAME=movies
@@ -56,19 +56,14 @@ services:
     networks:
       - movie-guru
       - db-shared-network
-  test-user-js:
-    build: ./js/test-user
+  frontend:
+    build: ./frontend
     ports:
-      - "3404:3400"
+      -  5173:5173
     environment:
-      - GOOGLE_APPLICATION_CREDENTIALS=/key.json
-      - LOCATION=us-central1
-      - LOCAL=true
-    volumes:
-      - ./.key.json:/key.json
+      - VITE_CHAT_SERVER_URL=http://localhost:8081
     networks:
       - movie-guru
-
   otelcol:
     image: otel/opentelemetry-collector-contrib:0.105.0
     ports:
@@ -77,6 +72,9 @@ services:
     volumes:
       - ./metrics/otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml:ro
       - ./.key.json:/key.json
+    environment:
+      - PROJECT_ID=$PROJECT_ID
+      - GOOGLE_APPLICATION_CREDENTIALS=/key.json
     networks:
       - movie-guru
 
