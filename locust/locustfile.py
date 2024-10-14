@@ -1,7 +1,7 @@
 from locust import HttpUser, task, between
 import os
 import random
-import re
+import re, requests
 
 CHAT_SERVER = os.getenv("CHAT_SERVER")
 MOCK_USER_SERVER = os.getenv("MOCK_USER_SERVER")
@@ -13,22 +13,22 @@ class MyUser(HttpUser):
     @task(3)
     def conversation(self):
         user_name = "chat_user"
-        headers = self.login(user_name)
-        self.client.delete(f"{CHAT_SERVER}/history", headers=headers) 
+        headers = self.do_login(user_name)
+        self.client.delete(f"/history", headers=headers) 
         mock_user_message = get_random_user_starting_message()
         stop_conversation = False
         print("mock_user:", mock_user_message)
 
         while(not stop_conversation):
             try:
-                agent_response = self.client.post(f"{CHAT_SERVER}/chat", headers=headers, json={"content": mock_user_message})
+                agent_response = self.client.post(f"/chat", headers=headers, json={"content": mock_user_message})
                 agent_message = sanitize_response(agent_response.json()['answer'])  
                 print("agent:", agent_message)
             except Exception as e:
                 agent_response = "can you repeat that?"
             try:
                 response_mood, response_type = get_random_response()
-                mock_user_response = self.client.post(f"{MOCK_USER_SERVER}/dummyUserFlow", json={"data": {"expert_answer": agent_message, "response_mood": response_mood, "response_type": response_type}})
+                mock_user_response = requests.post(f"{MOCK_USER_SERVER}/dummyUserFlow", json={"data": {"expert_answer": agent_message, "response_mood": response_mood, "response_type": response_type}})
                 mock_user_message = sanitize_response(mock_user_response.json()['answer'])
                 print("mock_user:", mock_user_message)
                 if response_type == 'END_CONVERSATION':
@@ -36,22 +36,24 @@ class MyUser(HttpUser):
             except Exception as e:
                 mock_user_message = "can you repeat that?"
         
-        self.client.delete(f"{CHAT_SERVER}/history", headers=headers) 
-        self.client.post(f"{CHAT_SERVER}/logout", headers=headers) 
+        self.client.delete(f"/history", headers=headers) 
+        self.client.post(f"/logout", headers=headers) 
 
-    def login(self, user_name):
-        response = self.client.post(f"{CHAT_SERVER}/login", headers={"user": user_name}) 
-        cookies = response.cookies.get_dict() 
-        session_cookie = cookies.get("session_id")
-        headers={"user": user_name, "Cookie": f"session={session_cookie}"}
-        return headers
+    def do_login(self, user_name):
+        with requests.session() as session:
+            session.post(f"{CHAT_SERVER}/login", headers={"user": user_name}) 
+            cookies = session.cookies.get_dict() 
+            print("cookies", cookies)
+            session_cookie = cookies.get("session")
+            headers={"user": user_name, "Cookie": f"session=session_{user_name}"}
+            return headers
 
     @task(1)
     def login(self):
         user_name = "login_user"
-        headers = self.login(user_name) 
-        self.client.delete(f"{CHAT_SERVER}/history", headers=headers) 
-        self.client.post(f"{CHAT_SERVER}/logout", headers=headers) 
+        headers = self.do_login(user_name) 
+        self.client.delete(f"/history", headers=headers) 
+        self.client.post(f"/logout", headers=headers) 
 
 
 

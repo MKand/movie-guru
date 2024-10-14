@@ -8,7 +8,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/google/uuid"
 	_ "github.com/lib/pq"
 	"github.com/movie-guru/pkg/db"
 	m "github.com/movie-guru/pkg/metrics"
@@ -70,7 +69,7 @@ func createLoginHandler(ulh *UserLoginHandler, meters *m.LoginMeters) http.Handl
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
-			sessionID := uuid.New().String()
+			sessionID := fmt.Sprintf("session_%s", user)
 			session := &SessionInfo{
 				ID:            sessionID,
 				User:          user,
