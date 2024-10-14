@@ -59,7 +59,7 @@ services:
   test-user-js:
     build: ./js/test-user
     ports:
-      - "3404:3400"
+      - "3404:3401"
     environment:
       - GOOGLE_APPLICATION_CREDENTIALS=/key.json
       - LOCATION=us-central1
@@ -79,7 +79,18 @@ services:
       - ./.key.json:/key.json
     networks:
       - movie-guru
-
+  locust:
+    image: locustio/locust
+    ports:
+     - "8089:8089"
+    volumes:
+      - ./locust:/mnt/locust
+    environment:
+      - CHAT_SERVER="http://server:8080"
+      - MOCK_USER_SERVER="http://test-user-js:3401" 
+    command: -f /mnt/locust/locustfile.py 
+    networks:
+      - movie-guru
 networks:
   db-shared-network:
     external: true

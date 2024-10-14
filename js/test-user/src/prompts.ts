@@ -21,4 +21,6 @@ Engage in a natural conversation with the expert, reacting to their insights and
 If {{ response_mood }} is "POSITIVE" and {{ response_type }} is "DIVE_DEEP", your response might be:
 
 "Wow, that's fascinating! I've never thought about it that way. Can you tell me more about [specific aspect of the expert's answer]?" 
+
+Don't use any special characters in your response. Keep it to text and basic punctuation like . , ! ? etc.
 `
