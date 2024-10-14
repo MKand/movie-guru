@@ -85,7 +85,7 @@ func createText(movie *types.MovieContext) string {
 		}(),
 		"plot": func() string {
 			if movie.Plot != "" {
-				return strings.ReplaceAll(movie.Plot, "\n", "")
+				return movie.Plot
 			}
 			return ""
 		}(),

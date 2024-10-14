@@ -28,7 +28,7 @@ export const IndexerFlow = defineFlow(
         try {
           await db`
           INSERT INTO movies (embedding, title, runtime_mins, genres, rating, released, actors, director, plot, poster, tconst, content)
-          VALUES (${toSql(eres)}, ${doc.title}, ${doc.runtimeMinutes}, ${doc.genres.join(', ')}, ${doc.rating}, ${doc.released}, ${doc.actors.join(', ')}, ${doc.director}, ${doc.plot}, ${doc.poster}, ${doc.tconst}, ${contentString})
+          VALUES (${toSql(eres)}, ${doc.title}, ${doc.runtimeMinutes}, ${doc.genres}, ${doc.rating}, ${doc.released}, ${doc.actors}, ${doc.director}, ${doc.plot}, ${doc.poster}, ${doc.tconst}, ${contentString})
           ON CONFLICT (tconst) DO UPDATE
           SET embedding = EXCLUDED.embedding
         `;
@@ -54,7 +54,7 @@ export const IndexerFlow = defineFlow(
       released: movie.released > 0 ? movie.released : '',
       actors: movie.actors.length > 0 ? movie.actors.join(', ') : '',
       director: movie.director !== '' ? movie.director : '',
-      plot: movie.plot !== '' ? movie.plot.replace(/\n/g, '') : '',
+      plot: movie.plot !== '' ? movie.plot : '',
     };
   
     const jsonData = JSON.stringify(dataDict);

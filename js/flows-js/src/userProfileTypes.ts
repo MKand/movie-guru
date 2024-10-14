@@ -4,7 +4,6 @@ import * as z from 'zod';
 const MovieFeatureCategory = z.enum(['OTHER', 'ACTOR', 'DIRECTOR', 'GENRE']);
 const Sentiment = z.enum(['POSITIVE', 'NEGATIVE']);
 
-
 // ProfileChangeRecommendation schema
 const ProfileChangeRecommendationSchema = z.object({
   item: z.string(),

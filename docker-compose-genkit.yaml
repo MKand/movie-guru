@@ -3,33 +3,32 @@ services:
     build: ./genkit
     ports: 
       - "4002:4000"
-      - "3402:3401"
     environment:
       - POSTGRES_HOST=$POSTGRES_HOST
       - PROJECT_ID=$PROJECT_ID
       - POSTGRES_DB_USER_PASSWORD=$POSTGRES_DB_USER_PASSWORD
       - POSTGRES_DB_USER=minimal-user
       - POSTGRES_DB_NAME=fake-movies-db      
-      - LOCATION=europe-west4
+      - LOCATION=us-central1
       - GOOGLE_APPLICATION_CREDENTIALS=/key.json
       - LOCAL=true
     volumes:
       - ./chat_server_go:/app
       - ./.key.json:/key.json
-      - ./evaluators:/eval
     working_dir: /app/cmd/standaloneFlows
+    networks:
+      - db-shared-network
   genkit-js:
     build: ./genkit
     ports: 
       - "4003:4000"
-      - "3403:3401"
     environment:
       - POSTGRES_HOST=$POSTGRES_HOST
       - PROJECT_ID=$PROJECT_ID
       - POSTGRES_DB_USER_PASSWORD=$POSTGRES_DB_USER_PASSWORD
       - POSTGRES_DB_USER=minimal-user
       - POSTGRES_DB_NAME=fake-movies-db      
-      - LOCATION=europe-west4
+      - LOCATION=us-central1
       - GOOGLE_APPLICATION_CREDENTIALS=/key.json
       - LOCAL=true
     volumes:
@@ -37,6 +36,9 @@ services:
       - ./.key.json:/key.json
       - ./evaluators:/eval
     working_dir: /app
-
-
+    networks:
+      - db-shared-network
+networks:
+  db-shared-network:
+    external: true
   

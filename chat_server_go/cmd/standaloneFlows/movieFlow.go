@@ -80,7 +80,3 @@ func GetMovieFlow(ctx context.Context, model ai.Model, prompt string) (*genkit.F
 	)
 	return movieFlow, nil
 }
-
-func extractText(jsonText string) string {
-	return ""
-}
