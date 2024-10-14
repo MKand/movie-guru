@@ -58,10 +58,10 @@ func getPrompts() *Prompts {
 		`
 		Here are the inputs:
 
-			* Context retrieved from vector db:
+			* Context retrieved from vector db (this may be empty):
 		    {{contextDocuments}}
 
-			* User Preferences:
+			* User Preferences (this may be empty):
 		    {{userPreferences}}
 
 			* Conversation history:

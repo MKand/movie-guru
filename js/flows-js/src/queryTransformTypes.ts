@@ -26,8 +26,8 @@ export const UserProfileSchema = z.object({
 
 // SimpleMessage schema
 export const SimpleMessageSchema = z.object({
-  sender: z.string(), 
-  message: z.string(),
+  role: z.string(), 
+  content: z.string(),
 });
 
 // QueryTransformFlowInput schema

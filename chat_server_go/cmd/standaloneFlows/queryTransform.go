@@ -13,6 +13,11 @@ import (
 	types "github.com/movie-guru/pkg/types"
 )
 
+type SimpleMessage struct {
+	Role    string `json:"role"`
+	Content string `json:"content"`
+}
+
 type QueryTransformFlowOutput struct {
 	TransformedQuery string           `json:"transformedQuery, omitempty"`
 	Intent           types.USERINTENT `json:"userIntent, omitempty"`
@@ -20,9 +25,9 @@ type QueryTransformFlowOutput struct {
 }
 
 type QueryTransformFlowInput struct {
-	History     []*types.SimpleMessage `json:"history"`
-	Profile     *types.UserProfile     `json:"userProfile"`
-	UserMessage string                 `json:"userMessage"`
+	History     []*SimpleMessage   `json:"history"`
+	Profile     *types.UserProfile `json:"userProfile"`
+	UserMessage string             `json:"userMessage"`
 }
 
 func GetQueryTransformFlow(ctx context.Context, model ai.Model, prompt string) (*genkit.Flow[*QueryTransformFlowInput, *QueryTransformFlowOutput, struct{}], error) {

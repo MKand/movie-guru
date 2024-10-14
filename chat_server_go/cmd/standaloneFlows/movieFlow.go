@@ -15,15 +15,15 @@ import (
 )
 
 type MovieFlowInput struct {
-	History          []*types.SimpleMessage `json:"history"`
-	UserPreferences  *types.UserProfile     `json:"userPreferences"`
-	ContextDocuments []*types.MovieContext  `json:"contextDocuments"`
-	UserMessage      string                 `json:"userMessage"`
+	History          []*SimpleMessage      `json:"history"`
+	UserPreferences  *types.UserProfile    `json:"userPreferences,omitempty"`
+	ContextDocuments []*types.MovieContext `json:"contextDocuments,omitempty"`
+	UserMessage      string                `json:"userMessage"`
 }
 
 type MovieFlowOutput struct {
 	Answer               string                 `json:"answer"`
-	RelevantMoviesTitles []*types.RelevantMovie `json:"relevantMovies"`
+	RelevantMoviesTitles []*types.RelevantMovie `json:"relevantMovies,omitempty"`
 	WrongQuery           bool                   `json:"wrongQuery,omitempty"`
 	Justification        string                 `json:"justification,omitempty"`
 }
@@ -79,8 +79,4 @@ func GetMovieFlow(ctx context.Context, model ai.Model, prompt string) (*genkit.F
 		},
 	)
 	return movieFlow, nil
-}
-
-func extractText(jsonText string) string {
-	return ""
 }
