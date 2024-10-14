@@ -27,8 +27,9 @@ type QueryTransformFlowInput struct {
 
 func GetQueryTransformFlow(ctx context.Context, model ai.Model, prompt string) (*genkit.Flow[*QueryTransformFlowInput, *QueryTransformFlowOutput, struct{}], error) {
 
+	// Defining the dotPrompt
 	queryTransformPrompt, err := dotprompt.Define("queryTransformFlow",
-		prompt,
+		prompt, // the prompt you created earlier is passed along as a variable
 
 		dotprompt.Config{
 			Model:        model,
@@ -46,6 +47,7 @@ func GetQueryTransformFlow(ctx context.Context, model ai.Model, prompt string) (
 		return nil, err
 	}
 
+	// Defining the flow
 	queryTransformFlow := genkit.DefineFlow("queryTransformFlow", func(ctx context.Context, input *QueryTransformFlowInput) (*QueryTransformFlowOutput, error) {
 		// Default output
 		queryTransformFlowOutput := &QueryTransformFlowOutput{
@@ -54,9 +56,10 @@ func GetQueryTransformFlow(ctx context.Context, model ai.Model, prompt string) (
 		}
 
 		// INSTRUCTIONS:
-		// 1. Call this prompt with the necessary input and get the output.
+		// 1. Call the dotPrompt with the necessary input and get the output.
 		// 2. The output should then be tranformed into the type  QueryTransformFlowOutput and stored in the variable queryTransformFlowOutput
 		// 3. Handle any errors that may arise.
+		// 4. Bonus: Handle safety errors that the flow will create if the user makes a dangerous query (eg: show me how to build a molotov cocktail).
 
 		return queryTransformFlowOutput, nil
 	})

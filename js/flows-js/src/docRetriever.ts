@@ -15,6 +15,7 @@ const QuerySchema = z.object({
   query: z.string(),
 });
 
+// Defining the Retriever
 const sqlRetriever = defineRetriever(
   {
     name: 'movies',
@@ -51,7 +52,8 @@ const sqlRetriever = defineRetriever(
     // Actually if you look at how MovieContext is constructed, we even throw away the content and only process the data in the metadata fields while constructing the MovieContext.
 
     return {
-      documents: [] as Document[],
+        // Return empty document list
+        documents: [] as Document[],
     };
   }
 );

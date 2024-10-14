@@ -140,7 +140,9 @@ func GetRetrieverFlow(ctx context.Context, ret ai.Retriever) *genkit.Flow[*Retri
 }
 
 func DefineRetriever(maxRetLength int, db *sql.DB, embedder ai.Embedder) ai.Retriever {
+	// Defining the Retriever
 	f := func(ctx context.Context, req *ai.RetrieverRequest) (*ai.RetrieverResponse, error) {
+		// Create an empty default response
 		retrieverResponse := &ai.RetrieverResponse{}
 		retrieverResponse.Documents = make([]*ai.Document, 0, maxRetLength)
 
@@ -171,5 +173,6 @@ func DefineRetriever(maxRetLength int, db *sql.DB, embedder ai.Embedder) ai.Retr
 		// Actually if you look at RetriveDocuments and ParseMovieContexts, we even throw away the content and only process the data in the metadata fields while constructing the MovieContext.
 		return retrieverResponse, nil
 	}
+	// Return the Retriever
 	return ai.DefineRetriever("pgvector", "movieRetriever", f)
 }

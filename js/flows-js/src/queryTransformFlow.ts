@@ -5,6 +5,7 @@ import {QueryTransformFlowInputSchema, QueryTransformFlowOutputSchema} from './q
 import { QueryTransformPromptText } from './prompts';
 import { z } from 'zod';
 
+// Defining the dotPrompt
 export const QueryTransformPrompt = defineDotprompt(
   {
     name: 'queryTransformFlow',
@@ -17,9 +18,10 @@ export const QueryTransformPrompt = defineDotprompt(
       schema: QueryTransformFlowOutputSchema,
     },  
   }, 
- QueryTransformPromptText
+ QueryTransformPromptText // the prompt you created earlier is passed along as a variable
 )
 
+// Defining the flow
 export const QueryTransformFlow = defineFlow(
   {
     name: 'queryTransformFlow',
