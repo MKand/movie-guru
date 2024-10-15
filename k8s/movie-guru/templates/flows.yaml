@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flows
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: flows
+  template:
+    metadata:
+      labels:
+        app: flows
+    spec:
+      containers:
+      - name: flows
+        image: "{{ .Values.Image.repository }}/movie-guru-server:ghack-sre"
+        command: ["/app/flows"]
+        ports:
+        - containerPort: 3401
+        env:
+        - name: POSTGRES_HOST
+          value: http://db:5432
+        - name: PROJECT_ID
+          value: {{ .Values.Config.projectID }}
+        - name: POSTGRES_DB_USER_PASSWORD
+          value: "minimal"
+        - name: POSTGRES_DB_USER
+          value: "minimal-user"
+        - name: POSTGRES_DB_NAME
+          value: "fake-movies-db"
+        - name: TABLE_NAME
+          value: "movies"
+        - name: LOCATION
+          value: {{ .Values.Config.geminiApiLocation }}
+        - name: SIMPLE
+          value: "true"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: flows-service
+spec:
+  selector:
+    app: flows 
+  ports:
+  - protocol: TCP
+    port: 3401 
+    targetPort: 3401 
+  type: ClusterIP

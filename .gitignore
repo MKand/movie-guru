@@ -15,3 +15,5 @@ lib
 dist
 .vscode
 .DS_Store
+
+*tfstate*

@@ -1,9 +1,8 @@
 
 resource "google_service_account" "default" {
-  account_id   = "movie-guru-sa"
-  display_name = "movie-guru-sa"
-  depends_on   = [google_project_service.default]
-
+  account_id   = "movie-guru-sre"
+  display_name = "movie-guru-sre"
+  project      = var.gcp_project_id
 }
 
 resource "google_project_iam_member" "vertex-user" {

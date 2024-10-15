@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db
+  template:
+    metadata:
+      labels:
+        app: db
+    spec:
+      containers:
+      - name: db
+        image: redis:6.2-alpine
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_PASSWORD
+          value: main
+        volumeMounts:
+        - name: initdb-sql-volume
+          mountPath: /docker-entrypoint-initdb.d/
+      volumes:
+      - name: initdb-sql-volume
+        secret:
+          secretName: initdb-sql
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: db-service
+spec:
+  selector:
+    app: db 
+  ports:
+  - protocol: TCP
+    port: 5432  
+    targetPort: 5432
+  type: ClusterIP
