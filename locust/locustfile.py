@@ -1,14 +1,16 @@
 from locust import HttpUser, task, between
 import os
 import random
-import re, requests
+import re
+import requests
 
 CHAT_SERVER = os.getenv("CHAT_SERVER")
 MOCK_USER_SERVER = os.getenv("MOCK_USER_SERVER")
 
 
-class MyUser(HttpUser):
-    wait_time = between(1, 2)  # Wait between 1 and 5 seconds between tasks
+class ChatUser(HttpUser):
+    wait_time = between(1, 2)
+    host = CHAT_SERVER
 
     @task(3)
     def conversation(self):
@@ -23,28 +25,27 @@ class MyUser(HttpUser):
             try:
                 agent_response = self.client.post(f"/chat", headers=headers, json={"content": mock_user_message})
                 agent_message = sanitize_response(agent_response.json()['answer'])  
-                print("agent:", agent_message)
             except Exception as e:
                 agent_response = "can you repeat that?"
+            finally:
+                print("agent:", agent_message)
             try:
                 response_mood, response_type = get_random_response()
-                mock_user_response = requests.post(f"{MOCK_USER_SERVER}/dummyUserFlow", json={"data": {"expert_answer": agent_message, "response_mood": response_mood, "response_type": response_type}})
-                mock_user_message = sanitize_response(mock_user_response.json()['answer'])
-                print("mock_user:", mock_user_message)
+                mock_user_response = requests.post(f"{MOCK_USER_SERVER}/mockUserFlow", json={"data": {"expert_answer": agent_message, "response_mood": response_mood, "response_type": response_type}})
+                mock_user_message = sanitize_response(mock_user_response.json()['result']['answer'])
                 if response_type == 'END_CONVERSATION':
                     stop_conversation = True
             except Exception as e:
                 mock_user_message = "can you repeat that?"
-        
+            finally:
+                print("mock_user mood:", response_mood, "mock_user response type:", response_type)
+                print("mock_user:", mock_user_message)
         self.client.delete(f"/history", headers=headers) 
         self.client.post(f"/logout", headers=headers) 
 
     def do_login(self, user_name):
         with requests.session() as session:
             session.post(f"{CHAT_SERVER}/login", headers={"user": user_name}) 
-            cookies = session.cookies.get_dict() 
-            print("cookies", cookies)
-            session_cookie = cookies.get("session")
             headers={"user": user_name, "Cookie": f"session=session_{user_name}"}
             return headers
 
@@ -78,25 +79,12 @@ def get_random_user_starting_message():
 
 
 def sanitize_response(response):
-  """
-  Sanitizes a response string by removing markdown and special characters.
-
-  Args:
-      response: The response string to sanitize.
-
-  Returns:
-      The sanitized response string.
-  """
   # Remove markdown
   response = re.sub(r"#+\s", "", response)        # Headings
   response = re.sub(r"\*\*([^*]+)\*\*", r"\1", response)  # Bold
   response = re.sub(r"\*([^*]+)\*", r"\1", response)    # Italics
-  response = re.sub(r"```[\s\S]*?```", "", response)    # Code blocks
-  response = re.sub(r"`[^`]+`", r"\1", response)      # Inline code
-  response = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", response)  # Links
-
   # Remove or replace special characters (customize as needed)
-  response = re.sub(r"[^\w\s]", "", response)  # Remove all punctuation
+  response = re.sub(r"[`*;]", "", response)
   return response
 
 
@@ -118,7 +106,7 @@ RESPONSE_TYPE = [
 def get_random_response():
     mood = get_random_value_from_array(RESPONSE_MOOD)
     type = get_random_value_from_array(RESPONSE_TYPE)
-    return { 'mood': mood, 'type': type }
+    return mood, type
 
 def get_random_value_from_array(array):
     random_index = random.randint(0, len(array) - 1) 

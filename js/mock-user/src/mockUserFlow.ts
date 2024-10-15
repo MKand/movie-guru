@@ -1,33 +1,33 @@
 import { defineFlow } from '@genkit-ai/flow';
 import { gemini15Flash } from '@genkit-ai/vertexai';
 import { defineDotprompt } from '@genkit-ai/dotprompt'
-import {DummyUserFlowInputSchema, DummyUserFlowOutputSchema} from './testChatFlowTypes'
-import { DummyUserFlowPrompt } from './prompts';
+import {MockUserFlowInputSchema, MockUserFlowOutputSchema} from './mockUserFlowTypes'
+import { MockUserFlowPrompt } from './prompts';
 
-export const DummyUserPrompt = defineDotprompt(
+export const MockUserPrompt = defineDotprompt(
     {
-      name: 'dummyUserFlow',
+      name: 'mockUserFlow',
       model: gemini15Flash,
       input: {
-        schema: DummyUserFlowInputSchema,
+        schema: MockUserFlowInputSchema,
       },
       output: {
         format: 'json',
-        schema: DummyUserFlowOutputSchema,
+        schema: MockUserFlowOutputSchema,
       },  
     }, 
-    DummyUserFlowPrompt
+    MockUserFlowPrompt
 )
-  export const DummyUserFlow = defineFlow(
+  export const MockUserFlow = defineFlow(
     {
-      name: 'dummyUserFlow',
-      inputSchema: DummyUserFlowInputSchema,
-      outputSchema: DummyUserFlowOutputSchema
+      name: 'mockUserFlow',
+      inputSchema: MockUserFlowInputSchema,
+      outputSchema: MockUserFlowOutputSchema
     },
     async (input) => {
       try {
         console.log("Generating response...", input);
-        const response = await DummyUserPrompt.generate({ input: input });
+        const response = await MockUserPrompt.generate({ input: input });
         console.log(response.output(0))
         return response.output(0);
       } catch (error) {

@@ -21,7 +21,7 @@ configureGenkit({
 });
 
 
-export {DummyUserPrompt, DummyUserFlow} from './testChatFlow'
+export {MockUserPrompt, MockUserFlow} from './mockUserFlow'
 
 // Start a flow server, which exposes your flows as HTTP endpoints. This call
 // must come last, after all of your plug-in configuration and flow definitions.

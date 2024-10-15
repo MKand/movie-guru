@@ -13,12 +13,12 @@ services:
     ports:
       - "3401:3401"
     environment:
-      - POSTGRES_HOST=$POSTGRES_HOST
+      - POSTGRES_HOST=db
       - PROJECT_ID=$PROJECT_ID
-      - POSTGRES_DB_USER_PASSWORD=$POSTGRES_DB_USER_PASSWORD
+      - POSTGRES_DB_USER_PASSWORD=minimal
       - POSTGRES_DB_USER=minimal-user
-      - TABLE_NAME=movies
       - POSTGRES_DB_NAME=fake-movies-db
+      - TABLE_NAME=movies
       - APP_VERSION=v1
       - GOOGLE_APPLICATION_CREDENTIALS=/key.json
       - LOCATION=europe-west4
@@ -35,7 +35,7 @@ services:
     environment:
       - POSTGRES_HOST=db
       - PROJECT_ID=$PROJECT_ID
-      - POSTGRES_DB_USER_PASSWORD=minimalpassword
+      - POSTGRES_DB_USER_PASSWORD=minimal
       - POSTGRES_DB_USER=minimal-user
       - POSTGRES_DB_NAME=fake-movies-db
       - TABLE_NAME=movies
@@ -56,14 +56,14 @@ services:
     networks:
       - movie-guru
       - db-shared-network
-  test-user-js:
-    build: ./js/test-user
+  mock-user-js:
+    build: ./js/mock-user
     ports:
-      - "3404:3401"
+      - "3404:3400"
     environment:
+      - PROJECT_ID=$PROJECT_ID
       - GOOGLE_APPLICATION_CREDENTIALS=/key.json
       - LOCATION=us-central1
-      - LOCAL=true
     volumes:
       - ./.key.json:/key.json
     networks:
@@ -87,7 +87,7 @@ services:
       - ./locust:/mnt/locust
     environment:
       - CHAT_SERVER=http://server:8080
-      - MOCK_USER_SERVER=http://test-user-js:3401
+      - MOCK_USER_SERVER=http://mock-user-js:3400
     command: -f /mnt/locust/locustfile.py 
     networks:
       - movie-guru

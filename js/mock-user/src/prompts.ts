@@ -1,4 +1,4 @@
-export const DummyUserFlowPrompt = `You are a movie enthusiast chatting with a knowledgeable film expert. 
+export const MockUserFlowPrompt = `You are a movie enthusiast chatting with a knowledgeable film expert. 
 
 **Your Task:**
 
