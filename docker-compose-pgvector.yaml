@@ -4,7 +4,7 @@ services:
     ports: 
       - "5432:5432"
     environment:
-      POSTGRES_PASSWORD: mainpassword
+      POSTGRES_PASSWORD: main
       restart: always
     volumes:
       - ./pgvector/init/:/docker-entrypoint-initdb.d/
