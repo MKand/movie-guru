@@ -27,10 +27,9 @@ services:
       - POSTGRES_DB_USER=minimal-user
       - POSTGRES_DB_NAME=fake-movies-db
       - TABLE_NAME=movies
-      - APP_VERSION=v1
       - GOOGLE_APPLICATION_CREDENTIALS=/key.json
       - LOCATION=europe-west4
-      - LOCAL=true
+      - SIMPLE=true
     volumes:
       - ./.key.json:/key.json
     networks:
@@ -47,9 +46,8 @@ services:
       - POSTGRES_DB_USER=minimal-user
       - POSTGRES_DB_NAME=fake-movies-db
       - TABLE_NAME=movies
-      - APP_VERSION=v1
       - LOCATION=europe-west4
-      - LOCAL=true
+      - SIMPLE=true
       - FLOWS_URL=http://flows:3401
       - REDIS_HOST=cache
       - REDIS_PORT=6379

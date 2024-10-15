@@ -22,17 +22,11 @@ var (
 	appConfig  = map[string]string{
 		"CORS_HEADERS": "Content-Type",
 	}
-	corsOrigins []string
 )
 
 func StartServer(ctx context.Context, ulh *UserLoginHandler, m *db.Metadata, deps *Dependencies) error {
 	metadata = m
 	setupSessionStore(ctx)
-
-	corsOrigins = strings.Split(metadata.CorsOrigin, ",")
-	for i := range corsOrigins {
-		corsOrigins[i] = strings.TrimSpace(corsOrigins[i])
-	}
 
 	loginMeters := metrics.NewLoginMeters()
 	hcMeters := metrics.NewHCMeters()
@@ -75,19 +69,16 @@ func randomisedFeaturedFilmsQuery() string {
 }
 
 func addResponseHeaders(w http.ResponseWriter, origin string) {
-	isAllowed := true
-	for _, allowedOrigin := range corsOrigins {
-		if origin == allowedOrigin {
-			isAllowed = true
-			break
-		}
-	}
-	if isAllowed {
-		w.Header().Set("Access-Control-Allow-Origin", origin)
-	}
+	w.Header().Set("Access-Control-Allow-Origin", origin)
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Headers", "user, Origin, Cookie, Accept, Content-Type, Content-Length, Accept-Encoding,Authorization")
 	w.Header().Set("Access-Control-Allow-Credentials", "true")
+}
+
+func handleOptions(w http.ResponseWriter, origin string) {
+	addResponseHeaders(w, origin)
+	w.Header().Set("Access-Control-Allow-Methods", "POST,GET,DELETE,OPTIONS,PUT")
+	w.WriteHeader(http.StatusOK)
 }
 
 func getSessionID(r *http.Request) (string, error) {
@@ -96,24 +87,6 @@ func getSessionID(r *http.Request) (string, error) {
 	}
 	sessionID := strings.Split(r.Header.Get("Cookie"), "movieguru=")[1]
 	return sessionID, nil
-}
-
-func handleOptions(w http.ResponseWriter, origin string) {
-	isAllowed := false
-	for _, allowedOrigin := range corsOrigins {
-		if origin == allowedOrigin {
-			isAllowed = true
-			break
-		}
-	}
-	if isAllowed {
-		w.Header().Set("Access-Control-Allow-Origin", origin)
-	}
-	w.Header().Set("Access-Control-Allow-Methods", "POST,GET,DELETE,OPTIONS,PUT")
-	w.Header().Set("Access-Control-Allow-Headers", "user, Origin, Cookie, Accept, Content-Type, Content-Length, Accept-Encoding,Authorization")
-	w.Header().Set("Access-Control-Allow-Credentials", "true")
-
-	w.WriteHeader(http.StatusOK)
 }
 
 func authenticateAndGetSessionInfo(ctx context.Context, sessionInfo *SessionInfo, err error, r *http.Request, w http.ResponseWriter) (*SessionInfo, bool) {

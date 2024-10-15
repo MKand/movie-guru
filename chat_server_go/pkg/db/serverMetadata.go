@@ -21,8 +21,8 @@ type Metadata struct {
 }
 
 func (d *MovieDB) GetMetadata(ctx context.Context, appVersion string) (*Metadata, error) {
-	if os.Getenv("LOCAL") == "true" {
-		return getMetadataLocal()
+	if os.Getenv("SIMPLE") == "true" {
+		return getMetadataSimple()
 	}
 	return d.getServerMetadata(ctx, appVersion)
 }
@@ -52,12 +52,11 @@ func (d *MovieDB) getServerMetadata(ctx context.Context, appVersion string) (*Me
 	return metadata, nil
 }
 
-func getMetadataLocal() (*Metadata, error) {
+func getMetadataSimple() (*Metadata, error) {
 	metadata := &Metadata{
-		AppVersion:               "local",
+		AppVersion:               "simple",
 		HistoryLength:            10,
 		MaxUserMessageLen:        1000,
-		CorsOrigin:               "http://localhost:5173",
 		RetrieverLength:          10,
 		GoogleChatModelName:      "gemini-1.5-flash",
 		GoogleEmbeddingModelName: "text-embedding-004",
