@@ -19,7 +19,10 @@ func NewHCMeters() *HCMeters {
 	if err != nil {
 		log.Printf("Error creating hc counter: %v", err)
 	}
-	hcLatencyHistogram, err := meter.Int64Histogram("movieguru_healthcheck_latency", metric.WithDescription("Histogram of healthcheck request latency"))
+	hcLatencyHistogram, err := meter.Int64Histogram("movieguru_healthcheck_latency", metric.WithDescription("Histogram of healthcheck request latency"),
+		metric.WithUnit("ms"),
+		metric.WithExplicitBucketBoundaries(0.1, 0.5, 1, 1.5, 2, 3, 10),
+	)
 	if err != nil {
 		log.Printf("Error creating hc latency histogram: %v", err)
 	}

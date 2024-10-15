@@ -41,7 +41,11 @@ func NewChatMeters() *ChatMeters {
 	if err != nil {
 		log.Printf("Error creating safety issue counter: %v", err)
 	}
-	cLatencyHistogram, err := meter.Int64Histogram("movieguru_chat_latency", metric.WithDescription("Histogram of chat request latency"))
+	cLatencyHistogram, err := meter.Int64Histogram("movieguru_chat_latency", metric.WithDescription("Histogram of chat request latency"),
+		metric.WithUnit("ms"),
+		metric.WithExplicitBucketBoundaries(100, 250, 500, 1000, 2000, 3000, 4000, 5000, 10000, 60000),
+	)
+
 	if err != nil {
 		log.Printf("Error creating login latency histogram: %v", err)
 	}

@@ -37,12 +37,18 @@ func NewPreferencesMeters() *PreferencesMeters {
 		log.Printf("Error creating preferencesUpdateSuccessCounter: %v", err)
 	}
 
-	prefGetLatencyHistogram, err := meter.Int64Histogram("movieguru_prefGet_latency", metric.WithDescription("Histogram of pref get request latency"))
+	prefGetLatencyHistogram, err := meter.Int64Histogram("movieguru_prefGet_latency", metric.WithDescription("Histogram of pref get request latency"),
+		metric.WithUnit("ms"),
+		metric.WithExplicitBucketBoundaries(0.1, 0.5, 1, 1.5, 2, 3, 10),
+	)
 	if err != nil {
 		log.Printf("Error creating prefGetLatencyHistogram: %v", err)
 	}
 
-	prefUpdateLatencyHistogram, err := meter.Int64Histogram("movieguru_prefUpdate_latency", metric.WithDescription("Histogram of pref update request latency"))
+	prefUpdateLatencyHistogram, err := meter.Int64Histogram("movieguru_prefUpdate_latency", metric.WithDescription("Histogram of pref update request latency"),
+		metric.WithUnit("ms"),
+		metric.WithExplicitBucketBoundaries(0.5, 1, 1.5, 2, 2.5, 3, 3.5, 10),
+	)
 	if err != nil {
 		log.Printf("Error creating prefUpdateLatencyHistogram: %v", err)
 	}

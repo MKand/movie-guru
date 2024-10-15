@@ -41,14 +41,16 @@ func StartServer(ctx context.Context, ulh *UserLoginHandler, m *db.Metadata, dep
 	hcMeters := metrics.NewHCMeters()
 	chatMeters := metrics.NewChatMeters()
 	prefMeters := metrics.NewPreferencesMeters()
+	startupMeters := metrics.NewStartupMeters()
+	logoutMeters := metrics.NewLogoutMeters()
 
 	http.HandleFunc("/", createHealthCheckHandler(deps, hcMeters))
 	http.HandleFunc("/chat", createChatHandler(deps, chatMeters))
 	http.HandleFunc("/history", createHistoryHandler())
 	http.HandleFunc("/preferences", createPreferencesHandler(deps.DB, prefMeters))
-	http.HandleFunc("/startup", createStartupHandler(deps))
+	http.HandleFunc("/startup", createStartupHandler(deps, startupMeters))
 	http.HandleFunc("/login", createLoginHandler(ulh, loginMeters))
-	http.HandleFunc("/logout", logoutHandler)
+	http.HandleFunc("/logout", createLogoutHandler(logoutMeters))
 	return http.ListenAndServe(":8080", nil)
 }
 
@@ -156,47 +158,6 @@ func deleteHistory(ctx context.Context, user string) error {
 	return nil
 }
 
-func createStartupHandler(deps *Dependencies) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var err error
-		ctx := r.Context()
-		origin := r.Header.Get("Origin")
-		addResponseHeaders(w, origin)
-		sessionInfo := &SessionInfo{}
-		if r.Method != "OPTIONS" {
-			var shouldReturn bool
-			sessionInfo, shouldReturn = authenticateAndGetSessionInfo(ctx, sessionInfo, err, r, w)
-			if shouldReturn {
-				return
-			}
-		}
-		if r.Method == "GET" {
-			addResponseHeaders(w, origin)
-			user := sessionInfo.User
-			pref, err := deps.DB.GetCurrentProfile(ctx, user)
-			if err != nil {
-				slog.ErrorContext(ctx, "Cannot get preferences", slog.String("user", user), slog.Any("error", err.Error()))
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-			context, err := deps.MovieRetrieverFlowClient.RetriveDocuments(ctx, randomisedFeaturedFilmsQuery())
-			if err != nil {
-				slog.ErrorContext(ctx, "Error getting movie recommendations", slog.Any("error", err.Error()))
-				http.Error(w, "Error get movie recommendations", http.StatusInternalServerError)
-				return
-			}
-			agentResp := types.NewAgentResponse()
-			agentResp.Context = context[0:5]
-			agentResp.Preferences = pref
-			agentResp.Result = types.SUCCESS
-
-			json.NewEncoder(w).Encode(agentResp)
-			return
-
-		}
-	}
-}
-
 func authenticateAndGetSessionInfo(ctx context.Context, sessionInfo *SessionInfo, err error, r *http.Request, w http.ResponseWriter) (*SessionInfo, bool) {
 	sessionInfo, err = getSessionInfo(ctx, r)
 	if err != nil {
@@ -288,38 +249,4 @@ func deleteSessionInfo(ctx context.Context, sessionID string) error {
 		return err
 	}
 	return nil
-}
-
-func logoutHandler(w http.ResponseWriter, r *http.Request) {
-	var err error
-	ctx := r.Context()
-	origin := r.Header.Get("Origin")
-	addResponseHeaders(w, origin)
-	sessionInfo := &SessionInfo{}
-	if r.Method != "OPTIONS" {
-		var shouldReturn bool
-		sessionInfo, shouldReturn = authenticateAndGetSessionInfo(ctx, sessionInfo, err, r, w)
-		if shouldReturn {
-			return
-		}
-	}
-	user := sessionInfo.User
-	if r.Method == "GET" {
-		addResponseHeaders(w, origin)
-		err := deleteSessionInfo(ctx, sessionInfo.ID)
-		if err != nil {
-			slog.ErrorContext(ctx, "Error while deleting session info", slog.String("user", user), slog.Any("error", err.Error()))
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		json.NewEncoder(w).Encode(map[string]string{"logout": "success"})
-
-		return
-	}
-	if r.Method == "OPTIONS" {
-		addResponseHeaders(w, origin)
-		handleOptions(w, origin)
-		return
-	}
-
 }
