@@ -46,7 +46,7 @@ class ChatUser(HttpUser):
     def do_login(self, user_name):
         with requests.session() as session:
             session.post(f"{CHAT_SERVER}/login", headers={"user": user_name}) 
-            headers={"user": user_name, "Cookie": f"session=session_{user_name}"}
+            headers={"user": user_name, "Cookie": f"movieguru=session_{user_name}"}
             return headers
 
     @task(1)
@@ -57,7 +57,63 @@ class ChatUser(HttpUser):
         self.client.post(f"/logout", headers=headers) 
 
 
+    @task(3)
+    def preferences(self):
+        user_name = "preferences_user"
+        headers = self.do_login(user_name)
+        self.client.post(f"/preferences", headers=headers, json=preferences_filled) 
+        self.client.get(f"/preferences", headers=headers) 
+        self.client.post(f"/preferences", headers=headers, json=preferences_updated) 
+        self.client.get(f"/preferences", headers=headers) 
+        self.client.post(f"/preferences", headers=headers, json=preferences_empty) 
+        self.client.get(f"/preferences", headers=headers) 
+        self.client.post(f"/logout", headers=headers) 
 
+
+preferences_filled = {
+    "likes":{
+        "genres":["action", "comedy"],
+        "actors":["Gene Hackman"],
+        "directors": ["George Lucas"],
+        "other":[]
+    },
+    "dislikes":{
+        "genres":["romance"],
+        "actors":[],
+        "directors": [],
+        "other":[]
+    }
+}
+
+preferences_updated = {
+    "likes":{
+        "genres":["action", "comedy"],
+        "actors":["Gene Hackman", "Tom Hanks"],
+        "directors": ["George Lucas"],
+        "other":[]
+    },
+    "dislikes":{
+        "genres":["romance"],
+        "actors":[],
+        "directors": [],
+        "other":[]
+    }
+}
+
+preferences_empty = {
+    "likes":{
+        "genres":[],
+        "actors":[],
+        "directors": [],
+        "other":[]
+    },
+    "dislikes":{
+        "genres":[],
+        "actors":[],
+        "directors": [],
+        "other":[]
+    }
+}
 
 user_starting_messages = [
     "hello",

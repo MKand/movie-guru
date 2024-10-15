@@ -4,26 +4,20 @@ Critical User Journeys:
 
 SLI:
 - Query Success Rate (percentage of successful movie information requests)
-- Query Latency (time taken to return movie information)
-- Information Accuracy (percentage of correct information provided, GenAI metric)
-- Example SLO: 99% of movie information queries should succeed within 500ms and have 98% accurate information.
-
-
-## Receiving Movie Recommendations:
-
-SLI:
-- Recommendation Success Rate (percentage of successful recommendation requests, GenAI metric)
-- Recommendation Latency (time taken to generate recommendations)
-- Recommendation Relevance (GenAI metric)
-- Example SLO: 95% of recommendation requests should succeed within 1 second and achieve a click-through rate of at least 20%.
+  - Chat Success Counter
+- User Engagement Rate (percentage of chat turns where the user is engaged in the conversation)
+  - Chat Outcome Counter (ENGAGED).
+- User Sentiment Rate (percentage of chat turns where the user is positive in the conversation)
+  - Chat Sentiment Counter (POSITIVE).
+- Query Latency (time taken to return movie information): Done
+- Example SLO: 99% of movie information queries should succeed within 500ms and have 90% POSITIVE User sentiment, and 60% ENGAGED outcome.
 
 ## Managing User Preferences:
 
 SLI:
-- Preference Saving Success Rate (percentage of successful preference saving actions)
-- Preference Deletion Success Rate (percentage of successful preference deletion actions)
+- Preference Update Success Rate (percentage of successful preference update actions)
 - Preference Retrieval Latency (time taken to retrieve user preferences)
-- Example SLO: 99.9% of preference saving and deletion actions should succeed within 200ms. 99% of preference retrieval should occur within 100ms.
+- Example SLO: 99.9% of preference update actions should succeed within 200ms. 99% of preference retrieval should occur within 100ms.
 
 
 https://cloud.google.com/trace/docs/setup/go-ot#run-sample

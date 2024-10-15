@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"log/slog"
 	"math/rand"
 	"net/http"
@@ -39,11 +40,12 @@ func StartServer(ctx context.Context, ulh *UserLoginHandler, m *db.Metadata, dep
 	loginMeters := metrics.NewLoginMeters()
 	hcMeters := metrics.NewHCMeters()
 	chatMeters := metrics.NewChatMeters()
+	prefMeters := metrics.NewPreferencesMeters()
 
 	http.HandleFunc("/", createHealthCheckHandler(deps, hcMeters))
 	http.HandleFunc("/chat", createChatHandler(deps, chatMeters))
 	http.HandleFunc("/history", createHistoryHandler())
-	http.HandleFunc("/preferences", createPreferencesHandler(deps.DB))
+	http.HandleFunc("/preferences", createPreferencesHandler(deps.DB, prefMeters))
 	http.HandleFunc("/startup", createStartupHandler(deps))
 	http.HandleFunc("/login", createLoginHandler(ulh, loginMeters))
 	http.HandleFunc("/logout", logoutHandler)
@@ -93,7 +95,8 @@ func getSessionID(r *http.Request) (string, error) {
 	if r.Header.Get("Cookie") == "" {
 		return "", errors.New("No cookie found")
 	}
-	sessionID := strings.Split(r.Header.Get("Cookie"), "session=")[1]
+	log.Println("cookies:", r.Header.Get("Cookie"))
+	sessionID := strings.Split(r.Header.Get("Cookie"), "movieguru=")[1]
 	return sessionID, nil
 }
 
@@ -212,61 +215,6 @@ func authenticateAndGetSessionInfo(ctx context.Context, sessionInfo *SessionInfo
 		return nil, true
 	}
 	return sessionInfo, false
-}
-
-func createPreferencesHandler(MovieDB *db.MovieDB) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var err error
-		ctx := r.Context()
-		origin := r.Header.Get("Origin")
-		addResponseHeaders(w, origin)
-		sessionInfo := &SessionInfo{}
-		if r.Method != "OPTIONS" {
-			var shouldReturn bool
-			sessionInfo, shouldReturn = authenticateAndGetSessionInfo(ctx, sessionInfo, err, r, w)
-			if shouldReturn {
-				return
-			}
-		}
-		user := sessionInfo.User
-		if r.Method == "GET" {
-			addResponseHeaders(w, origin)
-			pref, err := MovieDB.GetCurrentProfile(ctx, user)
-			if err != nil {
-				slog.ErrorContext(ctx, "Cannot get preferences", slog.String("user", user), slog.Any("error", err.Error()))
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-			json.NewEncoder(w).Encode(pref)
-			return
-		}
-		if r.Method == "POST" {
-			pref := &PrefBody{
-				Content: types.NewUserProfile(),
-			}
-			err := json.NewDecoder(r.Body).Decode(pref)
-			if err != nil {
-				slog.InfoContext(ctx, "Error while decoding request", slog.Any("error", err.Error()))
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-			err = MovieDB.UpdateProfile(ctx, pref.Content, sessionInfo.User)
-			if err != nil {
-				slog.ErrorContext(ctx, "Error while fetching preferences", slog.String("user", user), slog.Any("error", err.Error()))
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-
-			addResponseHeaders(w, origin)
-			json.NewEncoder(w).Encode(map[string]string{"update": "success"})
-			return
-		}
-		if r.Method == "OPTIONS" {
-			addResponseHeaders(w, origin)
-			handleOptions(w, origin)
-			return
-		}
-	}
 }
 
 func createHistoryHandler() http.HandlerFunc {
