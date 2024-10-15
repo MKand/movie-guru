@@ -68,12 +68,14 @@ services:
       - ./.key.json:/key.json
     networks:
       - movie-guru
-
   otelcol:
     image: otel/opentelemetry-collector-contrib:0.105.0
     ports:
       - 4318:4318
       - 8888:8888
+    environment:
+      - PROJECT_ID=$PROJECT_ID
+      - GOOGLE_APPLICATION_CREDENTIALS=/key.json
     volumes:
       - ./metrics/otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml:ro
       - ./.key.json:/key.json
