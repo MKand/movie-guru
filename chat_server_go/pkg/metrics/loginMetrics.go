@@ -27,7 +27,7 @@ func NewLoginMeters() *LoginMeters {
 
 	loginLatencyHistogram, err := meter.Int64Histogram("movieguru_login_latency", metric.WithDescription("Histogram of login request latency"),
 		metric.WithUnit("ms"),
-		metric.WithExplicitBucketBoundaries(0.1, 0.5, 1, 1.5, 2, 3, 10),
+		metric.WithExplicitBucketBoundaries(0.01, 0.05, 0.1, 0.5, 1, 1.5, 2, 3, 10),
 	)
 	if err != nil {
 		log.Printf("Error creating login latency histogram: %v", err)

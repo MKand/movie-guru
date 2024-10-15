@@ -5,10 +5,10 @@ import (
 	"net/http"
 	"time"
 
-	metrics "github.com/movie-guru/pkg/metrics"
+	m "github.com/movie-guru/pkg/metrics"
 )
 
-func createHealthCheckHandler(deps *Dependencies, meters *metrics.HCMeters) http.HandlerFunc {
+func createHealthCheckHandler(deps *Dependencies, meters *m.HCMeters) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		origin := r.Header.Get("Origin")

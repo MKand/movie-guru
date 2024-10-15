@@ -66,7 +66,7 @@ func createPreferencesHandler(MovieDB *db.MovieDB, meters *m.PreferencesMeters) 
 				return
 			}
 
-			meters.PreferencesGetSuccessCounter.Add(ctx, 1)
+			meters.PreferencesUpdateSuccessCounter.Add(ctx, 1)
 			addResponseHeaders(w, origin)
 			json.NewEncoder(w).Encode(map[string]string{"update": "success"})
 			return

@@ -68,6 +68,13 @@ class ChatUser(HttpUser):
         self.client.post(f"/preferences", headers=headers, json=preferences_empty) 
         self.client.get(f"/preferences", headers=headers) 
         self.client.post(f"/logout", headers=headers) 
+    
+    @task(3)
+    def startup(self):
+        user_name = "startup_user"
+        headers = self.do_login(user_name)
+        self.client.get(f"/startup", headers=headers) 
+        self.client.post(f"/logout", headers=headers) 
 
 
 preferences_filled = {
