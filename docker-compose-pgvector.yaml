@@ -8,6 +8,7 @@ services:
       restart: always
     volumes:
       - ./pgvector/init/:/docker-entrypoint-initdb.d/
+      - ./pgvector/pgdata/:/var/lib/postgresql/data/
     networks:
       - db-shared-network
   adminer:
