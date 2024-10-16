@@ -11,16 +11,16 @@ module "gcp-network" {
     },
   ]
 
-  secondary_ranges = {
-    ("cluster-subnet") = [
-      {
-        range_name    = "pods-range"
-        ip_cidr_range = "192.168.0.0/18"
-      },
-      {
-        range_name    = "services-range"
-        ip_cidr_range = "192.168.64.0/18"
-      },
-    ]
-  }
+#   secondary_ranges = {
+#     ("cluster-subnet") = [
+#       {
+#         range_name    = "pods-range"
+#         ip_cidr_range = "192.168.0.0/18"
+#       },
+#       {
+#         range_name    = "services-range"
+#         ip_cidr_range = "192.168.64.0/18"
+#       },
+#     ]
+#   }
 }

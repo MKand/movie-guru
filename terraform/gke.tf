@@ -7,22 +7,19 @@ provider "kubernetes" {
   cluster_ca_certificate = base64decode(module.cluster.ca_certificate)
 }
 
-resource "google_service_account" "default" {
-  account_id   = "service-account-id"
-  display_name = "Service Account"
-}
-
 resource "google_container_cluster" "primary" {
-  name               = "movie-guru"
+  name               = "movie-guru-gke"
   location           = var.region
   project = var.gcp_project_id
   initial_node_count = 1
+  network = module.gcp-network.network_name
+  subnetwork = "cluster-subnet"
 
   node_config {
     service_account = google_service_account.default.email
     oauth_scopes = [
       "https://www.googleapis.com/auth/cloud-platform",
-            "https://www.googleapis.com/auth/logging.write",
+      "https://www.googleapis.com/auth/logging.write",
       "https://www.googleapis.com/auth/monitoring",
     ]
   }
@@ -32,77 +29,25 @@ resource "google_container_cluster" "primary" {
   }
 }
 
-module "cluster" {
-  source                     = "terraform-google-modules/kubernetes-engine/google"
-  project_id                 = var.gcp_project_id
-  name                       = "movie-guru"
-  region                     = var.region
-  network                    = module.gcp-network.network_name
-  subnetwork                 = "cluster-subnet"
-  ip_range_pods              = "pods-range"
-  ip_range_services          = "services-range"
-  gateway_api_channel        = "CHANNEL_STANDARD"
-  horizontal_pod_autoscaling = true
-
-
-  node_pools = [
-    {
-      name                        = "default-node-pool"
-      machine_type                = "e2-medium"
-      min_count                   = 1
-      max_count                   = 2
-      local_ssd_count             = 0
-      spot                        = false
-      disk_size_gb                = 100
-      disk_type                   = "pd-standard"
-      image_type                  = "COS_CONTAINERD"
-      logging_variant             = "DEFAULT"
-      auto_repair                 = true
-      auto_upgrade                = true
-      service_account             = google_service_account.default.email      
-    },
-  ]
-
-  node_pools_oauth_scopes = {
-    all = [
+resource "google_container_node_pool" "np" {
+  name       = "workload-node-pool"
+  cluster    = google_container_cluster.primary.id
+  project = var.gcp_project_id
+  autoscaling {
+    min_node_count = 1
+    max_node_count = 2
+  }
+  node_config {
+    machine_type = "e2-medium"
+    service_account = google_service_account.default.email
+    oauth_scopes    = [
+       "https://www.googleapis.com/auth/cloud-platform",
       "https://www.googleapis.com/auth/logging.write",
       "https://www.googleapis.com/auth/monitoring",
     ]
   }
-
-  node_pools_labels = {
-    all = {}
-
-    default-node-pool = {
-      default-node-pool = true
-    }
-  }
-
-  node_pools_metadata = {
-    all = {}
-
-    default-node-pool = {
-      node-pool-metadata-custom-value = "my-node-pool"
-    }
-  }
-
-  node_pools_taints = {
-    all = []
-
-    default-node-pool = [
-      {
-        key    = "default-node-pool"
-        value  = true
-        effect = "PREFER_NO_SCHEDULE"
-      },
-    ]
-  }
-
-  node_pools_tags = {
-    all = []
-
-    default-node-pool = [
-      "default-node-pool",
-    ]
+  timeouts {
+    create = "30m"
+    update = "20m"
   }
 }
