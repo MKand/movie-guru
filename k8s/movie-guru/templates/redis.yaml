@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: cache
+  namespace: {{.Chart.Name }}
 spec:
   replicas: 1
   selector:
@@ -23,11 +24,12 @@ apiVersion: v1
 kind: Service
 metadata:
   name: cache-service
+  namespace: {{.Chart.Name }}
 spec:
   selector:
     app: cache 
   ports:
   - protocol: TCP
-    port: 5173
-    targetPort: 5173
+    port: 6379
+    targetPort: 6379
   type: ClusterIP

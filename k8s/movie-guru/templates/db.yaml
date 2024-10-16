@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: db
+  namespace: {{.Chart.Name }}
 spec:
   replicas: 1
   selector:
@@ -14,24 +15,18 @@ spec:
     spec:
       containers:
       - name: db
-        image: redis:6.2-alpine
+        image: "{{ .Values.Config.Image.Repository }}/movie-guru-db:ghack-sre"
         ports:
         - containerPort: 5432
         env:
         - name: POSTGRES_PASSWORD
           value: main
-        volumeMounts:
-        - name: initdb-sql-volume
-          mountPath: /docker-entrypoint-initdb.d/
-      volumes:
-      - name: initdb-sql-volume
-        secret:
-          secretName: initdb-sql
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: db-service
+  namespace: {{.Chart.Name }}
 spec:
   selector:
     app: db 

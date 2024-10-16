@@ -1,26 +1,27 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: flows
+  name: server
+  namespace: {{.Chart.Name }}
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: flows
+      app: server
   template:
     metadata:
       labels:
-        app: flows
+        app: server
     spec:
       containers:
-      - name: flows
-        image: "{{ .Values.Image.repository }}/movie-guru-server:ghack-sre"
+      - name: server
+        image: "{{ .Values.Config.Image.Repository }}/movie-guru-server:ghack-sre"
         command: ["/app/webserver"]
         ports:
         - containerPort: 8080
         env:
         - name: POSTGRES_HOST
-          value: http://db:5432
+          value: db-service
         - name: PROJECT_ID
           value: {{ .Values.Config.projectID }}
         - name: POSTGRES_DB_USER_PASSWORD
@@ -31,6 +32,12 @@ spec:
           value: "fake-movies-db"
         - name: TABLE_NAME
           value: "movies"
+        - name: REDIS_PORT
+          value: "6379"
+        - name: REDIS_PASSWORD
+          value: "my_redis_pwd"
+        - name: REDIS_HOST
+          value: "cache-service"
         - name: LOCATION
           value: {{ .Values.Config.geminiApiLocation }}
         - name: SIMPLE
@@ -40,11 +47,12 @@ apiVersion: v1
 kind: Service
 metadata:
   name: server-service
+  namespace: {{.Chart.Name }}
 spec:
   selector:
     app: server 
   ports:
   - protocol: TCP
-    port: 8080  # The port users will access the frontend on
+    port: 80  # The port users will access the frontend on
     targetPort: 8080 # The port your frontend container is listening on
   type: ClusterIP

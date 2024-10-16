@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: mock-user-js
+  namespace: {{.Chart.Name }}
 spec:
   replicas: 2
   selector:
@@ -14,7 +15,7 @@ spec:
     spec:
       containers:
       - name: mock-user-js
-        image: "{{ .Values.Image.repository }}/movie-guru-mockuser:ghack-sre"
+        image: "{{ .Values.Config.Image.Repository  }}/movie-guru-mockuser:ghack-sre"
         ports:
         - containerPort: 3400
         env:
@@ -26,12 +27,13 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: server-service
+  name: mockuser-service
+  namespace: {{.Chart.Name }}
 spec:
   selector:
-    app: server 
+    app: mock-user-js 
   ports:
   - protocol: TCP
-    port: 8080  # The port users will access the frontend on
-    targetPort: 8080 # The port your frontend container is listening on
+    port: 80  # The port users will access the frontend on
+    targetPort: 3400 # The port your frontend container is listening on
   type: ClusterIP
