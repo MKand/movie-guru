@@ -18,7 +18,6 @@ spec:
         image: otel/opentelemetry-collector-contrib:0.106.0 
         args:
         - --config=/etc/otel/config.yaml
-        - --feature-gates=exporter.googlemanagedprometheus.intToDouble
         ports:
         - containerPort: 4318
         volumeMounts:

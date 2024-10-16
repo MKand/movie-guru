@@ -38,6 +38,8 @@ spec:
           value: "my_redis_pwd"
         - name: REDIS_HOST
           value: "cache-service"
+        - name: FLOWS_URL
+          value: "http://flows-service.movie-guru.svc.cluster.local:3401"
         - name: LOCATION
           value: {{ .Values.Config.geminiApiLocation }}
         - name: SIMPLE
