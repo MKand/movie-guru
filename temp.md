@@ -9,10 +9,10 @@ gcloud container clusters get-credentials movie-guru-gke --region $LOCATION --pr
 ```sh
 kubectl create namespace locust
 kubectl create namespace movie-guru
+kubectl create namespace otel-collector
 kubectl create configmap loadtest-locustfile \
 --from-file locust/locustfile.py \
 --namespace locust
-
 ```
 
 ```sh

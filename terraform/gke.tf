@@ -14,7 +14,7 @@ resource "google_container_cluster" "primary" {
   initial_node_count = 1
   network = module.gcp-network.network_name
   subnetwork = "cluster-subnet"
-
+  
   node_config {
     service_account = google_service_account.default.email
     oauth_scopes = [
