@@ -1,7 +1,7 @@
 kubectl create secret generic initdb-sql --from-file=init.sql=./pgvector/init/init.sql 
 
 https://github.com/deliveryhero/helm-charts/tree/master/stable/locust
-
+https://stackoverflow.com/questions/66924732/how-to-distinguish-metrics-from-different-services
 ```sh
 gcloud container clusters get-credentials movie-guru-gke --region $LOCATION --project $PROJECT_ID
 ```
@@ -32,6 +32,7 @@ helm upgrade locust deliveryhero/locust \
 --set loadtest.locust_locustfile_configmap=loadtest-locustfile \
 --set loadtest.locust_locustfile=locustfile.py \
 --set service.type=LoadBalancer \
+--set worker.replicas=3 \
 --set master.environment.CHAT_SERVER=http://server-service.movie-guru.svc.cluster.local \
 --set master.environment.MOCK_USER_SERVER=http://mockuser-service.movie-guru.svc.cluster.local \
 --set worker.environment.CHAT_SERVER=http://server-service.movie-guru.svc.cluster.local \

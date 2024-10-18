@@ -3,7 +3,6 @@ package metrics
 import (
 	"log"
 
-	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/metric"
 )
 
@@ -13,9 +12,7 @@ type LoginMeters struct {
 	LoginLatencyHistogram metric.Int64Histogram
 }
 
-func NewLoginMeters() *LoginMeters {
-	meter := otel.Meter("login-handler")
-
+func NewLoginMeters(meter metric.Meter) *LoginMeters {
 	loginCounter, err := meter.Int64Counter("movieguru_login_attempts_total", metric.WithDescription("Total number of login attempts"))
 	if err != nil {
 		log.Printf("Error creating login counter: %v", err)

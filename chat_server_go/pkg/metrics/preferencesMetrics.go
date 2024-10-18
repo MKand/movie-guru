@@ -3,7 +3,6 @@ package metrics
 import (
 	"log"
 
-	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/metric"
 )
 
@@ -17,8 +16,7 @@ type PreferencesMeters struct {
 	PreferencesGetLatencyHistogram    metric.Int64Histogram
 }
 
-func NewPreferencesMeters() *PreferencesMeters {
-	meter := otel.Meter("preferences-handler")
+func NewPreferencesMeters(meter metric.Meter) *PreferencesMeters {
 
 	preferencesGetCounter, err := meter.Int64Counter("movieguru_prefGet_attempts_total", metric.WithDescription("Total number of pref get attempts"))
 	if err != nil {

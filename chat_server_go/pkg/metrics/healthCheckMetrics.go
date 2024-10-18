@@ -3,7 +3,6 @@ package metrics
 import (
 	"log"
 
-	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/metric"
 )
 
@@ -12,9 +11,7 @@ type HCMeters struct {
 	HCLatency metric.Int64Histogram
 }
 
-func NewHCMeters() *HCMeters {
-	meter := otel.Meter("healthcheck-handler")
-
+func NewHCMeters(meter metric.Meter) *HCMeters {
 	hcCounter, err := meter.Int64Counter("movieguru_healthcheck_attempts_total", metric.WithDescription("Total number of healthcheck attempts"))
 	if err != nil {
 		log.Printf("Error creating hc counter: %v", err)

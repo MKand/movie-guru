@@ -3,7 +3,6 @@ package metrics
 import (
 	"log"
 
-	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/metric"
 )
 
@@ -13,8 +12,7 @@ type StartupMeters struct {
 	StartupLatencyHistogram metric.Int64Histogram
 }
 
-func NewStartupMeters() *StartupMeters {
-	meter := otel.Meter("startup-handler")
+func NewStartupMeters(meter metric.Meter) *StartupMeters {
 
 	startupCounter, err := meter.Int64Counter("movieguru_startup_attempts_total", metric.WithDescription("Total number of startup attempts"))
 	if err != nil {

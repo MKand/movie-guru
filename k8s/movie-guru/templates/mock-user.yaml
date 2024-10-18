@@ -16,6 +16,7 @@ spec:
       containers:
       - name: mock-user-js
         image: "{{ .Values.Config.Image.Repository  }}/movie-guru-mockuser:ghack-sre"
+        imagePullPolicy: Always
         ports:
         - containerPort: 3400
         env:

@@ -3,7 +3,6 @@ package metrics
 import (
 	"log"
 
-	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/metric"
 )
 
@@ -16,8 +15,7 @@ type ChatMeters struct {
 	CLatencyHistogram   metric.Int64Histogram
 }
 
-func NewChatMeters() *ChatMeters {
-	meter := otel.Meter("chat-handler")
+func NewChatMeters(meter metric.Meter) *ChatMeters {
 
 	cCounter, err := meter.Int64Counter("movieguru_chat_calls_total", metric.WithDescription("Total number of chat calls"))
 	if err != nil {

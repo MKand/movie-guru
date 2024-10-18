@@ -14,6 +14,7 @@ import (
 	"github.com/movie-guru/pkg/db"
 	metrics "github.com/movie-guru/pkg/metrics"
 	"github.com/redis/go-redis/v9"
+	"go.opentelemetry.io/otel"
 )
 
 var (
@@ -28,12 +29,18 @@ func StartServer(ctx context.Context, ulh *UserLoginHandler, m *db.Metadata, dep
 	metadata = m
 	setupSessionStore(ctx)
 
-	loginMeters := metrics.NewLoginMeters()
-	hcMeters := metrics.NewHCMeters()
-	chatMeters := metrics.NewChatMeters()
-	prefMeters := metrics.NewPreferencesMeters()
-	startupMeters := metrics.NewStartupMeters()
-	logoutMeters := metrics.NewLogoutMeters()
+	podName := os.Getenv("POD_NAME")
+	if podName == "" {
+		podName = "local"
+	}
+	meter := otel.Meter(podName)
+
+	loginMeters := metrics.NewLoginMeters(meter)
+	hcMeters := metrics.NewHCMeters(meter)
+	chatMeters := metrics.NewChatMeters(meter)
+	prefMeters := metrics.NewPreferencesMeters(meter)
+	startupMeters := metrics.NewStartupMeters(meter)
+	logoutMeters := metrics.NewLogoutMeters(meter)
 
 	http.HandleFunc("/", createHealthCheckHandler(deps, hcMeters))
 	http.HandleFunc("/chat", createChatHandler(deps, chatMeters))

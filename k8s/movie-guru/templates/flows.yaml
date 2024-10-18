@@ -16,6 +16,7 @@ spec:
       containers:
       - name: flows
         image: "{{ .Values.Config.Image.Repository }}/movie-guru-server:ghack-sre"
+        imagePullPolicy: Always
         command: ["/app/flows"]
         ports:
         - containerPort: 3401
