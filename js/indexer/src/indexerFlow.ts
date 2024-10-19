@@ -51,7 +51,7 @@ export const IndexerFlow = defineFlow(
     }
   );
 
-   function createTextForEmbedding(movie: MovieContext): string {
+  function createTextForEmbedding(movie: MovieContext): string {
     // What fields in the text are useful to create an embedding from?
 
     const dataDict = {

@@ -21,46 +21,35 @@ const sqlRetriever = defineRetriever(
     name: 'movies',
     configSchema: RetrieverOptionsSchema,
   },
-
   async (query, options) => {
     const db = await openDB();
     if (!db) {
       throw new Error('Database connection failed');
     }
-    //INTRUCTIONS:
-    // 1. Create an embedding for the query
-    // 2. Query the database 
-    // 3. Create a document for each row (of type Document) 
-    // 4. Return the content field from the row as content in the document and the remaining fields as metadata
-    // 5. Return a list of documents.
-
-		// Why content and metadata?
-		// We separate movie data into 'content' and 'metadata' to accommodate varying approaches to data handling in GenAI frameworks.
-		// Some frameworks, particularly those focused on RAG and utilizing a 'Document' object,
-		// primarily use the 'content' field during RAG, potentially ignoring 'metadata'.
-
-		// This separation is partly rooted in the historical context of these frameworks, which were often initially designed
-		// to work with document-style databases rather than relational databases.
-		// In document dbs, all the informational content is contained in the content of the document and not its metadata.
-		// But in a relational db, the information may be spread across different columns.
-
-		// In our application (using Genkit), we have the flexibility to pass a custom 'MovieContext' object into the RAG flow (next challenge) 
-    // (and not restricted to document.content).
-		// However, when interacting with other frameworks, especially those relying on a 'Document' structure,
-		// it's crucial to be mindful of how metadata is utilized or if adjustments are needed to ensure all essential information is included.
-
-    // Actually if you look at how MovieContext is constructed, we even throw away the content and only process the data in the metadata fields while constructing the MovieContext.
-
+    const embedding = await embed({
+      embedder: textEmbedding004,
+      content: query,
+    });
+    const results = await db`
+      SELECT content, title, poster, released, runtime_mins, rating, genres, director, actors, plot, tconst
+     FROM movies
+        ORDER BY embedding <#> ${toSql(embedding)}
+        LIMIT ${options.k ?? 10}
+      `;
     return {
-        // Return empty document list
-        documents: [] as Document[],
+      documents: results.map((row) => {
+        const { content, ...metadata } = row;
+        return Document.fromText(content, metadata);
+      }),
     };
   }
 );
 
+
+
 export const movieDocFlow = defineFlow(
   {
-    name: 'movieDocFlow',
+    name: 'SemanticSearchFlow',
     inputSchema: QuerySchema,
     outputSchema: z.array(MovieContextSchema), // Array of MovieContextSchema
   },
@@ -80,7 +69,7 @@ export const movieDocFlow = defineFlow(
       if (doc.metadata) {
         const movieContext: MovieContext = {
           title: doc.metadata.title,
-          runtime_minutes: doc.metadata.runtimeMinutes,
+          runtime_minutes: doc.metadata.runtime_mins,
           genres: doc.metadata.genres,
           rating: doc.metadata.rating,
           plot: doc.metadata.plot,

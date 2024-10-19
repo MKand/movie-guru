@@ -6,7 +6,7 @@ import { MovieFlowPromptText } from './prompts';
 
 export const MovieFlowPrompt = defineDotprompt(
     {
-      name: 'movieFlow',
+      name: 'MovieFlowPrompt',
       model: gemini15Flash,
       input: {
         schema: MovieFlowInputSchema,
@@ -20,7 +20,7 @@ export const MovieFlowPrompt = defineDotprompt(
 )
   export const MovieFlow = defineFlow(
     {
-      name: 'movieQAFlow',
+      name: 'ChatbotFlow',
       inputSchema: MovieFlowInputSchema,
       outputSchema: MovieFlowOutputSchema
     },

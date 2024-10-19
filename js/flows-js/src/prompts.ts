@@ -1,9 +1,3 @@
-export const UserProfilePromptText = 
-	` 
-Here are the inputs:
-	1. Optional Message 0 from agent: {{agentMessage}}
-	2. Required Message 1 from user: {{query}}
-`
 export const QueryTransformPromptText = 
 `
 Here are the inputs:

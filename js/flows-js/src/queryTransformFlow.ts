@@ -8,7 +8,7 @@ import { z } from 'zod';
 // Defining the dotPrompt
 export const QueryTransformPrompt = defineDotprompt(
   {
-    name: 'queryTransformFlow',
+    name: 'QueryTransformFlowPrompt',
     model: gemini15Flash,
     input: {
       schema: QueryTransformFlowInputSchema,
