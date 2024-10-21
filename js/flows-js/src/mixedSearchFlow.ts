@@ -81,10 +81,11 @@ export const MixedSearchFlowPrompt = defineDotprompt(
     *   Queries about concepts, emotions, or themes.
     *   Queries matching analogies or metaphors (e.g., "movies that make you cry").
     *   Important: Any query that would require the LIKE operator in SQL on the title, plot, or genres fields should be classified as a **VECTOR** search.
+    *   Return a more concise form of the inputQuery as the outputQuery
     *   Examples:
-        *   inputQuery: "movies with strong female leads" . outputQuery: "movies with strong female leads" 
-        *   inputQuery: "movies with location names in their titles". outputQuery: "movies with location names in their titles"
-        *   inputQuery: "find movies like The Matrix". outputQuery: "movies like The Matrix"
+        *   inputQuery: "movies with strong female leads" . outputQuery: "strong female leads" 
+        *   inputQuery: "movies with location names in their titles". outputQuery: "location names in their titles"
+        *   inputQuery: "find movies like The Matrix". outputQuery: "like The Matrix"
    `
 )
 
@@ -99,9 +100,9 @@ export const mixedSearchFlow = defineFlow(
     const response = await MixedSearchFlowPrompt.generate({input : input})
     const searchFlowOutput = response.output(0)
     const movieContexts: MovieContext[] = [];
-    if (searchFlowOutput.outputQuery == "" ||  null){
-      searchFlowOutput.outputQuery = input
-    }
+    // if (searchFlowOutput.outputQuery == "" ||  null || "null"){
+    //   searchFlowOutput.outputQuery = input.inputQuery
+    // }
     let docs: Document[] = []
       if (searchFlowOutput.searchCategory == "VECTOR"){
       docs = await retrieve({
@@ -158,9 +159,10 @@ export const vectorRetriever = defineRetriever(
     if (!db) {
       throw new Error('Database connection failed');
     }
+    console.log("query text", query.text())
     const embedding = await embed({
       embedder: textEmbedding004,
-      content: query,
+      content: query.text(),
     });
     const results = await db`
       SELECT content, title, poster, released, runtime_mins, rating, genres, director, actors, plot, tconst

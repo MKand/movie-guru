@@ -17,3 +17,5 @@ dist
 .DS_Store
 
 pgvector/pgdata
+
+**tfstate**
