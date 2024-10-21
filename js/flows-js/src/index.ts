@@ -28,7 +28,7 @@ export {UserProfileFlowPrompt, UserProfileFlow} from './userProfileFlow'
 export {QueryTransformPrompt, QueryTransformFlow} from './queryTransformFlow'
 export {MovieFlowPrompt, MovieFlow} from './movieFlow'
 export {movieDocFlow} from './docRetriever'
-
+// export {keywordSearchTool} from './searchTool'
 
 // Start a flow server, which exposes your flows as HTTP endpoints. This call
 // must come last, after all of your plug-in configuration and flow definitions.

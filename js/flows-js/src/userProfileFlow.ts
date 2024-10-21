@@ -3,7 +3,6 @@ import { gemini15Flash } from '@genkit-ai/vertexai';
 import { defineDotprompt } from '@genkit-ai/dotprompt'
 import {UserProfileFlowInputSchema, UserProfileFlowOutputSchema} from './userProfileTypes'
 
-
 export const UserProfileFlowPrompt = defineDotprompt(
     {
       name: 'UserProfileFlowPrompt',
