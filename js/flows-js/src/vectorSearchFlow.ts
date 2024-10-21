@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { MovieContextSchema, MovieContext } from './movieFlowTypes';
 import { defineFlow } from '@genkit-ai/flow';
 import { retrieve } from '@genkit-ai/ai/retriever';
-import { vectorRetriever } from './docRetriever';
+import { vectorRetriever } from './mixedSearchFlow';
 
 export const SearchFlowInputSchema = z.object({
     inputQuery: z.string(),

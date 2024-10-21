@@ -22,7 +22,7 @@ export const SearchFlowOutputSchema = z.object({
   Justification: z.string(),
 });
 
-export const SearchFlowPrompt = defineDotprompt(
+export const MixedSearchFlowPrompt = defineDotprompt(
   {
     name: 'SearchFlowPrompt',
     model: gemini15Flash,
@@ -96,7 +96,7 @@ export const mixedSearchFlow = defineFlow(
     outputSchema: z.array(MovieContextSchema)
   },
   async (input) => {
-    const response = await SearchFlowPrompt.generate({input : input})
+    const response = await MixedSearchFlowPrompt.generate({input : input})
     const searchFlowOutput = response.output(0)
     const movieContexts: MovieContext[] = [];
     if (searchFlowOutput.outputQuery == "" ||  null){
