@@ -28,9 +28,18 @@ export const MovieContextSchema = z.object({
 export const MovieFlowInputSchema = z.object({
   history: z.array(SimpleMessageSchema),
   userPreferences: UserProfileSchema.optional(),
+  userMessage: z.string(),
+});
+
+// MovieFlowInput schema
+export const MoviePromptInputSchema = z.object({
+  history: z.array(SimpleMessageSchema),
+  userPreferences: UserProfileSchema.optional(),
   contextDocuments: z.array(MovieContextSchema).optional(),
   userMessage: z.string(),
 });
+
+
 
 // MovieFlowOutput schema
 export const MovieFlowOutputSchema = z.object({

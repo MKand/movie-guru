@@ -3,7 +3,6 @@ import { gemini15Flash } from '@genkit-ai/vertexai';
 import { defineDotprompt, promptRef } from '@genkit-ai/dotprompt'
 import {QueryTransformFlowInputSchema, QueryTransformFlowOutputSchema} from './queryTransformTypes'
 import { QueryTransformPromptText } from './prompts';
-import { z } from 'zod';
 
 // Defining the dotPrompt
 export const QueryTransformPrompt = defineDotprompt(
@@ -18,20 +17,27 @@ export const QueryTransformPrompt = defineDotprompt(
       schema: QueryTransformFlowOutputSchema,
     },  
   }, 
- QueryTransformPromptText // the prompt you created earlier is passed along as a variable
+ QueryTransformPromptText
 )
 
-// Defining the flow
 export const QueryTransformFlow = defineFlow(
   {
-    name: 'queryTransformFlow',
-    inputSchema: z.string(), //what should this be?
-    outputSchema: z.string(), // what should this be?
+    name: 'QueryTransformFlow',
+    inputSchema: QueryTransformFlowInputSchema,
+    outputSchema: QueryTransformFlowOutputSchema
   },
   async (input) => {
-    // Missing flow invocation
-        
-     // Just returning hello world
-     return "Hello World"
+    try {
+      const response = await QueryTransformPrompt.generate({ input: input });
+      console.log(response.output(0))
+      return response.output(0);
+    } catch (error) {
+      console.error("Error generating response:", error);
+      return { 
+        transformedQuery: "",
+        userIntent: 'UNCLEAR',
+        justification: ""
+       }; 
+    }
   }
 );

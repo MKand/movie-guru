@@ -58,7 +58,7 @@ Here are the inputs:
   
   export const UserProfileFlow = defineFlow(
     {
-      name: 'userProfileFlow',
+      name: 'UserProfileFlow',
       inputSchema: UserProfileFlowInputSchema,
       outputSchema: UserProfileFlowOutputSchema
     },

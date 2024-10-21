@@ -8,34 +8,26 @@ import { MovieContextSchema, MovieContext } from './movieFlowTypes';
 import { openDB } from './db';
 import { gemini15Flash } from '@genkit-ai/vertexai';
 import { defineDotprompt } from '@genkit-ai/dotprompt'
-import { SearchFlowInputSchema } from './vectorSearchFlow';
 
 const SearchTypeCategory = z.enum(['KEYWORD', 'VECTOR', 'NONE']);
 
 const RetrieverOptionsSchema = z.object({
   k: z.number().optional().default(10),
+  searchCategory: SearchTypeCategory.optional().default("VECTOR")
 });
 
-export const SearchFlowOutputSchema = z.object({
+const SearchFlowInputSchema = z.object({
+  inputQuery: z.string(),
+});
+
+const SearchFlowOutputSchema = z.object({
   outputQuery: z.string().optional(),
   searchCategory: SearchTypeCategory,
   Justification: z.string(),
 });
 
-export const MixedSearchFlowPrompt = defineDotprompt(
-  {
-    name: 'SearchFlowPrompt',
-    model: gemini15Flash,
-    input: {
-      schema: SearchFlowInputSchema,
-    },
-    output: {
-      format: 'json',
-      schema: SearchFlowOutputSchema,
-    },  
-  }, 
-    
-    `Analyze the query string: "{{inputQuery}}" with respect to a movie database with these fields:
+export const MixedSearchFlowPromptText = `
+Analyze the query string: "{{inputQuery}}" with respect to a movie database with these fields:
 
     *  embedding: Vector representation of the movie's title, plot, and genres.
     *  genres: List of genres (e.g., "Action", "Comedy", "Drama").
@@ -87,6 +79,19 @@ export const MixedSearchFlowPrompt = defineDotprompt(
         *   inputQuery: "movies with location names in their titles". outputQuery: "location names in their titles"
         *   inputQuery: "find movies like The Matrix". outputQuery: "like The Matrix"
    `
+export const MixedSearchFlowPrompt = defineDotprompt(
+  {
+    name: 'MixedSearchFlowPrompt',
+    model: gemini15Flash,
+    input: {
+      schema: SearchFlowInputSchema,
+    },
+    output: {
+      format: 'json',
+      schema: SearchFlowOutputSchema,
+    },  
+  }, 
+  MixedSearchFlowPromptText
 )
 
 
@@ -100,89 +105,46 @@ export const mixedSearchFlow = defineFlow(
     const response = await MixedSearchFlowPrompt.generate({input : input})
     const searchFlowOutput = response.output(0)
     const movieContexts: MovieContext[] = [];
-    // if (searchFlowOutput.outputQuery == "" ||  null || "null"){
-    //   searchFlowOutput.outputQuery = input.inputQuery
-    // }
+    console.log("Search flow output ", )
+
     let docs: Document[] = []
-      if (searchFlowOutput.searchCategory == "VECTOR"){
-      docs = await retrieve({
-        retriever: vectorRetriever,
+    docs = await retrieve({
+        retriever: mixedRetriever,
         query: {
           content: [{ text: searchFlowOutput.outputQuery }],
         },
         options: {
           k: 10,
+          searchCategory: searchFlowOutput.searchCategory
         },
       });
-    }
-    if (searchFlowOutput.searchCategory == "KEYWORD"){
-      console.log("doing keyword search ", searchFlowOutput)
-      docs = await retrieve({
-        retriever: keywordRetriever,
-        query: {
-          content: [{ text: searchFlowOutput.outputQuery }],
-        },
-        options: {
-          k: 10,
-        },
-      });
-    }
-    for (const doc of docs) {
-      if (doc.metadata) {
-        const movieContext: MovieContext = {
-          title: doc.metadata.title,
-          runtime_minutes: doc.metadata.runtime_mins,
-          genres: doc.metadata.genres,
-          rating: doc.metadata.rating,
-          plot: doc.metadata.plot,
-          released: doc.metadata.released,
-          director: doc.metadata.director,
-          actors: doc.metadata.actors,
-          poster: doc.metadata.poster,
-          tconst: doc.metadata.tconst,
-        };
-        movieContexts.push(movieContext);
-      } 
-    }
+      
+      for (const doc of docs) {
+        if (doc.metadata) {
+          const movieContext: MovieContext = {
+            title: doc.metadata.title,
+            runtime_minutes: doc.metadata.runtime_mins,
+            genres: doc.metadata.genres,
+            rating: doc.metadata.rating,
+            plot: doc.metadata.plot,
+            released: doc.metadata.released,
+            director: doc.metadata.director,
+            actors: doc.metadata.actors,
+            poster: doc.metadata.poster,
+            tconst: doc.metadata.tconst,
+          };
+          movieContexts.push(movieContext);
+        } 
+      }
     return movieContexts
   }
 );
 
-// Defining the vector Retriever
-export const vectorRetriever = defineRetriever(
-  {
-    name: 'vectorRetriever',
-    configSchema: RetrieverOptionsSchema,
-  },
-  async (query, options) => {
-    const db = await openDB();
-    if (!db) {
-      throw new Error('Database connection failed');
-    }
-    console.log("query text", query.text())
-    const embedding = await embed({
-      embedder: textEmbedding004,
-      content: query.text(),
-    });
-    const results = await db`
-      SELECT content, title, poster, released, runtime_mins, rating, genres, director, actors, plot, tconst
-     FROM movies
-        ORDER BY embedding <#> ${toSql(embedding)}
-        LIMIT ${options.k ?? 10}
-      ;`
-    return {
-      documents: results.map((row) => {
-        const { content, ...metadata } = row;
-        return Document.fromText(content, metadata);
-      }),
-    };
-  }
-);
 
-// Defining the keyword Retriever
-export const keywordRetriever = defineRetriever(
+// Defining the mixed Retriever
+export const mixedRetriever = defineRetriever(
   {
-    name: 'keywordRetriever',
+    name: 'MixedRetriever',
     configSchema: RetrieverOptionsSchema,
   },
   async (query, options) => {
@@ -190,12 +152,32 @@ export const keywordRetriever = defineRetriever(
     if (!db) {
       throw new Error('Database connection failed');
     }
-    const sqlQuery = `SELECT content, title, poster, released, runtime_mins, rating, genres, director, actors, plot, tconst
-       FROM movies
-       WHERE ${query.text()}
-       LIMIT ${options.k ?? 10}`
+    let results;
     
-    const results = await db.unsafe(sqlQuery)
+    //Regular SQL query
+    if(options.searchCategory == "KEYWORD"){
+      const sqlQuery = `SELECT content, title, poster, released, runtime_mins, rating, genres, director, actors, plot, tconst
+      FROM movies
+      WHERE ${query.text()}
+      LIMIT ${options.k ?? 10}`
+    results = await db.unsafe(sqlQuery)
+    }
+    //Vector Query
+    if(options.searchCategory == "VECTOR"){
+      const embedding = await embed({
+        embedder: textEmbedding004,
+        content: query.text(),
+      });
+        results = await db`
+        SELECT content, title, poster, released, runtime_mins, rating, genres, director, actors, plot, tconst
+       FROM movies
+          ORDER BY embedding <#> ${toSql(embedding)}
+          LIMIT ${options.k ?? 10}
+        ;`
+    }
+    if (!results) {
+      throw new Error('No results found.'); 
+    }    
     return {
       documents: results.map((row) => {
         const { content, ...metadata } = row;

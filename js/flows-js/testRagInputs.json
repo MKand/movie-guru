@@ -1,0 +1,7 @@
+[
+    {"inputQuery":"movies with cats"},
+    {"inputQuery":"movies with fantasy themes"},
+    {"inputQuery":"movies with rating > 4"},
+    {"inputQuery":"movies less than 1 hour long"},
+    {"inputQuery":"long films"}
+]

@@ -1,17 +1,21 @@
-
-import { z } from 'zod';
-import { MovieContextSchema, MovieContext } from './movieFlowTypes';
+import { embed } from '@genkit-ai/ai/embedder';
+import { Document, defineRetriever, retrieve } from '@genkit-ai/ai/retriever';
 import { defineFlow } from '@genkit-ai/flow';
-import { retrieve } from '@genkit-ai/ai/retriever';
-import { vectorRetriever } from './mixedSearchFlow';
+import { textEmbedding004 } from '@genkit-ai/vertexai';
+import { toSql } from 'pgvector';
+import { z } from 'zod';
+import { openDB } from './db';
+import { MovieContextSchema, MovieContext } from './movieFlowTypes';
 
-export const SearchFlowInputSchema = z.object({
+const RetrieverOptionsSchema = z.object({
+  k: z.number().optional().default(10),
+});
+
+const SearchFlowInputSchema = z.object({
     inputQuery: z.string(),
-  });
+});
   
-  
-
-export const VectorSearchFlow = defineFlow(
+export const vectorSearchFlow = defineFlow(
     {
       name: 'VectorSearchFlow',
       inputSchema: SearchFlowInputSchema,
@@ -52,4 +56,33 @@ export const VectorSearchFlow = defineFlow(
   
     }
   );
-  
+
+// Defining the vector Retriever
+export const vectorRetriever = defineRetriever(
+  {
+    name: 'vectorRetriever',
+    configSchema: RetrieverOptionsSchema,
+  },
+  async (query, options) => {
+    const db = await openDB();
+    if (!db) {
+      throw new Error('Database connection failed');
+    }
+    const embedding = await embed({
+      embedder: textEmbedding004,
+      content: query.text(),
+    });
+    const results = await db`
+      SELECT content, title, poster, released, runtime_mins, rating, genres, director, actors, plot, tconst
+     FROM movies
+        ORDER BY embedding <#> ${toSql(embedding)}
+        LIMIT ${options.k ?? 10}
+      ;`
+    return {
+      documents: results.map((row) => {
+        const { content, ...metadata } = row;
+        return Document.fromText(content, metadata);
+      }),
+    };
+  }
+);

@@ -3,7 +3,9 @@ import { configureGenkit } from '@genkit-ai/core';
 import { startFlowsServer } from '@genkit-ai/flow';
 import { vertexAI } from '@genkit-ai/vertexai';
 import { firebase } from '@genkit-ai/firebase';
-import { dotprompt, promptRef } from '@genkit-ai/dotprompt';
+import { dotprompt } from '@genkit-ai/dotprompt';
+import { GenkitMetric, genkitEval } from '@genkit-ai/evaluator';
+import { textEmbedding004, gemini15Flash } from '@genkit-ai/vertexai';
 
 const LOCATION = process.env.LOCATION|| 'us-central1';
 const PROJECT_ID = process.env.PROJECT_ID;
@@ -13,7 +15,12 @@ configureGenkit({
   
     vertexAI({ projectId: PROJECT_ID, location: LOCATION }),
     firebase(),
-    dotprompt()
+    dotprompt(),
+    genkitEval({
+      judge: gemini15Flash,
+      metrics: [GenkitMetric.FAITHFULNESS, GenkitMetric.ANSWER_RELEVANCY],
+      embedder: textEmbedding004,
+    }),
   ],
   logLevel: 'debug',
   enableTracingAndMetrics: true,
@@ -26,9 +33,11 @@ configureGenkit({
 
 export {UserProfileFlowPrompt, UserProfileFlow} from './userProfileFlow'
 export {QueryTransformPrompt, QueryTransformFlow} from './queryTransformFlow'
-export {MovieFlowPrompt, MovieFlow} from './movieFlow'
+export {MovieRAGFlow} from './movieRAGFlow'
+export {MovieFlow} from './movieFlow'
+
 export {mixedSearchFlow} from './mixedSearchFlow'
-// export {keywordSearchTool} from './searchTool'
+export {vectorSearchFlow} from './vectorSearchFlow'
 
 // Start a flow server, which exposes your flows as HTTP endpoints. This call
 // must come last, after all of your plug-in configuration and flow definitions.
