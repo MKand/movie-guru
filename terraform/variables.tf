@@ -13,6 +13,10 @@ variable "region" {
 
 variable "locust_file" {
   description = "URL of the locustfile"
-  default = "https://raw.githubusercontent.com/MKand/movie-guru/refs/heads/adding-instrumentation/locust/locustfile.py"
+  default = "https://raw.githubusercontent.com/MKand/movie-guru/refs/heads/ghack-sre/locust/locustfile.py"
 }
 
+variable "helm_chart" {
+  description = "URL of the movie guru helm chart"
+  default = "oci://github.com/MKand/movie-guru/k8s/movie-guru?ref=ghack-sre"
+}

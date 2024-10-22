@@ -24,7 +24,7 @@ data "http" "locustfile" {
 
 resource "helm_release" "movie_guru" {
   name  = "movie-guru"
-  chart = "./k8s/movie-guru"
+  chart = var.helm_chart
   set {
     name  = "Config.Image.Repository"
     value = "manaskandula"
