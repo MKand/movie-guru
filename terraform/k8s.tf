@@ -39,7 +39,7 @@ resource "kubernetes_config_map" "loadtest_locustfile" {
   }
 
   data = {
-    "locustfile.py" = filebase64sha256("./config-map/locustfile.py")
+    "/mnt/locust/main.py" = filebase64sha256("./config-map/locustfile.py")
   }
   depends_on = [helm_release.movie_guru]
 }
@@ -61,7 +61,7 @@ resource "helm_release" "locust" {
 
   set {
     name  = "loadtest.locust_locustfile"
-    value = "locustfile.py"
+    value = "/mnt/locust/main.py"
   }
 
   set {
