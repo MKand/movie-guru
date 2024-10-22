@@ -9,6 +9,6 @@ entries:
     name: movie-guru
     type: application
     urls:
-    - https://mkand.github.com/charts/movie-guru-0.1.0.tgz
+    - https://mkand.github.io/charts/movie-guru-0.1.0.tgz
     version: 0.1.0
 generated: "2024-10-22T16:49:58.317529331Z"
