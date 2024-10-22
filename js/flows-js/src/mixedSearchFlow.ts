@@ -40,9 +40,10 @@ Analyze the query string: "{{inputQuery}}" with respect to a movie database with
     *  rating: Numerical rating from 1 to 5.
 
     Determine if the query is best satisfied by a **KEYWORD** or **VECTOR** search.
+   Queries involving searching for genres are automatically Vector search.
 
     **KEYWORD search:** Use for queries that can be expressed with simple SQL operators (=, !=, >, <, IN) on the title, actors, director, genres, runtime_mins, or released fields.
-
+    
     *   Do not include the WHERE keyword in the output query.
     *   Some user queries might need to be transformed (for KEYWORD search). Where this is necessary is:
        - User is asking for movies based on their lengths, ratings, quality or recency. 

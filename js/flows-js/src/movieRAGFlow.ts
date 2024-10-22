@@ -1,15 +1,13 @@
 import { defineFlow } from '@genkit-ai/flow';
-import { gemini15Flash } from '@genkit-ai/vertexai';
-import { defineDotprompt } from '@genkit-ai/dotprompt';
+
 import { 
   MovieFlowInputSchema, 
-  MoviePromptInputSchema, 
   MovieFlowOutputSchema,
   MovieContext 
 } from './movieFlowTypes';
 import { MovieFlowPrompt } from './movieFlow';
 import { Document, retrieve } from '@genkit-ai/ai/retriever';
-import { MixedSearchFlowPrompt, mixedRetriever, mixedSearchFlow } from './mixedSearchFlow';
+import { MixedSearchFlowPrompt, mixedRetriever } from './mixedSearchFlow';
 
 import {  QueryTransformPrompt } from './queryTransformFlow';
 
@@ -21,7 +19,6 @@ export const MovieRAGFlow = defineFlow(
   },
   async (input) => {
     try {
-
       let qtInput = {
         history: input.history,
         userProfile: {},
@@ -36,41 +33,41 @@ export const MovieRAGFlow = defineFlow(
       console.log("searchResponse.output(0) ", searchResponseOutput)
       let docs: Document[] = []
       const movieContexts: MovieContext[] = [];
-      docs = await retrieve({
-        retriever: mixedRetriever,
-        query: searchResponseOutput.outputQuery,
-        options: {
-          k: 10,
-          searchCategory: searchResponseOutput.searchCategory
-        },
-      });
-
-      for (const doc of docs) {
-        if (doc.metadata) {
-          const movieContext: MovieContext = {
-            title: doc.metadata.title,
-            runtime_minutes: doc.metadata.runtime_mins,
-            genres: doc.metadata.genres,
-            rating: doc.metadata.rating,
-            plot: doc.metadata.plot,
-            released: doc.metadata.released,
-            director: doc.metadata.director,
-            actors: doc.metadata.actors,
-            poster: doc.metadata.poster,
-            tconst: doc.metadata.tconst,
-          };
-          movieContexts.push(movieContext);
-        } 
+      if(searchResponseOutput.searchCategory!= "NONE"){
+        docs = await retrieve({
+          retriever: mixedRetriever,
+          query: searchResponseOutput.outputQuery,
+          options: {
+            k: 10,
+            searchCategory: searchResponseOutput.searchCategory
+          },
+        });
+  
+        for (const doc of docs) {
+          if (doc.metadata) {
+            const movieContext: MovieContext = {
+              title: doc.metadata.title,
+              runtime_minutes: doc.metadata.runtime_mins,
+              genres: doc.metadata.genres,
+              rating: doc.metadata.rating,
+              plot: doc.metadata.plot,
+              released: doc.metadata.released,
+              director: doc.metadata.director,
+              actors: doc.metadata.actors,
+              poster: doc.metadata.poster,
+              tconst: doc.metadata.tconst,
+            };
+            movieContexts.push(movieContext);
+          } 
+        }
       }
-
       let mfInput = {
         history: input.history,
         userProfile: {},
         userMessage: input.userMessage,
         contextDocuments: movieContexts
       }
-      const response = await MovieFlowPrompt.generate({ input : mfInput});
-
+      const response = await MovieFlowPrompt.generate({ input : mfInput})
       return response.output(0);
     } catch (error) {
       console.error("Error generating response:", error);
