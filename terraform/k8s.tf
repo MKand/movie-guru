@@ -100,5 +100,11 @@ resource "helm_release" "locust" {
     value = "http://mockuser-service.movie-guru.svc.cluster.local"
   }
     depends_on = [helm_release.movie_guru, kubernetes_config_map.loadtest_locustfile]
+}
 
+data "kubernetes_service" "locust" {
+  metadata {
+    name      = "locust"  
+    namespace = "locust"   
+  }
 }
