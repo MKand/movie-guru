@@ -21,6 +21,7 @@ helm upgrade movie-guru ./k8s/movie-guru \
 --set Config.projectID=$PROJECT_ID \
 --namespace movie-guru \
 --install
+
 ```
 
 ```sh

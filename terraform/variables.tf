@@ -7,8 +7,8 @@ variable "repo_prefix" {
 }
 
 variable "region" {
-    default = "europe-west4"
-    description = "Region"
+  default     = "europe-west4"
+  description = "Region"
 }
 
 
