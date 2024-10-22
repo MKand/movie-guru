@@ -1,5 +1,4 @@
 import { defineFlow } from '@genkit-ai/flow';
-
 import { 
   MovieFlowInputSchema, 
   MovieFlowOutputSchema,
@@ -24,11 +23,14 @@ export const MovieRAGFlow = defineFlow(
         userProfile: {},
         userMessage: input.userMessage,
       }
+     
       const qtResponse = await QueryTransformPrompt.generate({input: qtInput});
+      
       const searchResponse = await MixedSearchFlowPrompt.generate({ 
         input: {
           inputQuery: qtResponse.output(0).transformedQuery}
       });
+
       const searchResponseOutput = searchResponse.output(0)
       console.log("searchResponse.output(0) ", searchResponseOutput)
       let docs: Document[] = []

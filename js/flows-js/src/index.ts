@@ -1,7 +1,7 @@
 
 import { configureGenkit } from '@genkit-ai/core';
 import { startFlowsServer } from '@genkit-ai/flow';
-import { vertexAI } from '@genkit-ai/vertexai';
+import { vertexAI, VertexAIEvaluationMetricType } from '@genkit-ai/vertexai';
 import { firebase } from '@genkit-ai/firebase';
 import { dotprompt } from '@genkit-ai/dotprompt';
 import { GenkitMetric, genkitEval } from '@genkit-ai/evaluator';
@@ -13,12 +13,19 @@ const PROJECT_ID = process.env.PROJECT_ID;
 configureGenkit({
   plugins: [
   
-    vertexAI({ projectId: PROJECT_ID, location: LOCATION }),
+    vertexAI({ projectId: PROJECT_ID, location: LOCATION,
+      evaluation:{
+        metrics: [
+          VertexAIEvaluationMetricType.GROUNDEDNESS,
+          VertexAIEvaluationMetricType.SUMMARIZATION_HELPFULNESS
+        ]
+      },}
+    ),
     firebase(),
     dotprompt(),
     genkitEval({
       judge: gemini15Flash,
-      metrics: [GenkitMetric.FAITHFULNESS, GenkitMetric.ANSWER_RELEVANCY],
+      metrics: [],
       embedder: textEmbedding004,
     }),
   ],
