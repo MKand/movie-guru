@@ -11,4 +11,8 @@ variable "region" {
   description = "Region"
 }
 
+variable "locust_file" {
+  description = "URL of the locustfile"
+  default = "https://raw.githubusercontent.com/MKand/movie-guru/refs/heads/adding-instrumentation/locust/locustfile.py"
+}
 

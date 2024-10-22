@@ -1,7 +1,7 @@
 data "google_client_config" "default" {}
 
 provider "kubernetes" {
-  host                   = google_container_cluster.primary.endpoint
+  host                   = "https://${google_container_cluster.primary.endpoint}"
   token                  = data.google_client_config.default.access_token
   client_certificate     = base64decode(google_container_cluster.primary.master_auth.0.client_certificate)
   client_key             = base64decode(google_container_cluster.primary.master_auth.0.client_key)
@@ -10,12 +10,16 @@ provider "kubernetes" {
 
 provider "helm" {
   kubernetes {
-    host                   = google_container_cluster.primary.endpoint
+    host                   = "https://${google_container_cluster.primary.endpoint}"
     token                  = data.google_client_config.default.access_token
     client_certificate     = base64decode(google_container_cluster.primary.master_auth.0.client_certificate)
     client_key             = base64decode(google_container_cluster.primary.master_auth.0.client_key)
     cluster_ca_certificate = base64decode(google_container_cluster.primary.master_auth.0.cluster_ca_certificate)
   }
+}
+
+data "http" "locustfile" {
+  url = var.locust_file
 }
 
 resource "helm_release" "movie_guru" {
@@ -39,7 +43,9 @@ resource "kubernetes_config_map" "loadtest_locustfile" {
   }
 
   data = {
-    "/mnt/locust/main.py" = filebase64sha256("./config-map/locustfile.py")
+    "locustfile.py" = (
+      data.http.locustfile.response_body
+    )
   }
   depends_on = [helm_release.movie_guru]
 }
@@ -61,7 +67,7 @@ resource "helm_release" "locust" {
 
   set {
     name  = "loadtest.locust_locustfile"
-    value = "/mnt/locust/main.py"
+    value = "locustfile.py"
   }
 
   set {
