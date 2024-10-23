@@ -17,8 +17,8 @@ services:
       - ./.key.json:/key.json
     working_dir: /app
     networks:
-      - db-shared-network
+      - shared-network
 networks:
-  db-shared-network:
+  shared-network:
     external: true
   

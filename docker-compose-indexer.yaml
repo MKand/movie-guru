@@ -16,9 +16,9 @@ services:
       - ./.key.json:/key.json
       - ./dataset/:/dataset
     networks:
-      - db-shared-network
+      - shared-network
 networks:
-  db-shared-network:
+  shared-network:
     external: true
  
   
