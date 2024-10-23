@@ -1,0 +1,79 @@
+[
+    {
+        "history": [
+            {
+                "role": "",
+                "content": ""
+            }
+        ],
+        "userPreferences": {
+        },
+        "userMessage": "I feel like watching movies with cats."
+    },
+    {
+        "history": [
+            {
+                "role": "",
+                "content": ""
+            }
+        ],
+        "userPreferences": {
+        },
+        "userMessage": "Show me some movies with fantasy themes."
+    },
+    {
+        "history": [
+            {
+                "role": "",
+                "content": ""
+            }
+        ],
+        "userPreferences": {
+        },
+        "userMessage": "I only watch movies with good ratings."
+    },
+    {
+        "history": [
+            {
+                "role": "",
+                "content": ""
+            }
+        ],
+        "userPreferences": {
+        },
+        "userMessage": "I only watch movies with ratings higher than 4."
+    },
+    {
+        "history": [
+            {
+                "role": "",
+                "content": ""
+            }
+        ],
+        "userPreferences": {
+        },
+        "userMessage": "I only have time for a short film today. Recommmend something."
+    },
+    {
+        "history": [
+            {
+                "role": "",
+                "content": ""
+            }
+        ],
+        "userPreferences": {
+        },
+        "userMessage": "I only have time for a movie shorter than 1hr today. Recommmend something."
+    },
+    {
+        "history": [
+            {
+                "role": "",
+                "content": ""
+            }
+        ],
+        "userPreferences": {
+        },
+        "userMessage": "I want to watch a movie that is set in Asia ."
+    }
+]

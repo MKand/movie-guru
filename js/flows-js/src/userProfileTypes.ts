@@ -14,12 +14,12 @@ const ProfileChangeRecommendationSchema = z.object({
 
 // UserProfileFlowInput schema
 export const UserProfileFlowInputSchema = z.object({
-  query: z.string(),
+  userQuery: z.string(),
   agentMessage: z.string(),
 });
 
 // UserProfileFlowOutput schema
 export const UserProfileFlowOutputSchema = z.object({
   profileChangeRecommendations: z.array(ProfileChangeRecommendationSchema),
-  justification: z.string().optional(),
+  justification: z.string(),
 });

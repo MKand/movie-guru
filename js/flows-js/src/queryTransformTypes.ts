@@ -32,8 +32,8 @@ export const SimpleMessageSchema = z.object({
 
 // QueryTransformFlowInput schema
 export const QueryTransformFlowInputSchema = z.object({
-  history: z.array(SimpleMessageSchema),
-  userProfile: UserProfileSchema.optional(),
+  history:  z.array(SimpleMessageSchema),
+  userProfile: UserProfileSchema,
   userMessage: z.string(),
 });
 

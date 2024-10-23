@@ -2,11 +2,11 @@ services:
   genkit:
     build: ./genkit
     ports: 
-      - "4003:4000"
+      - "4000:4000"
     environment:
-      - POSTGRES_HOST=$POSTGRES_HOST
+      - POSTGRES_HOST=db
       - PROJECT_ID=$PROJECT_ID
-      - POSTGRES_DB_USER_PASSWORD=$POSTGRES_DB_USER_PASSWORD
+      - POSTGRES_DB_USER_PASSWORD=minimal
       - POSTGRES_DB_USER=minimal-user
       - POSTGRES_DB_NAME=fake-movies-db      
       - LOCATION=us-central1
@@ -20,6 +20,6 @@ services:
     networks:
       - shared-network
 networks:
-  db-shared-network:
+  shared-network:
     external: true
   
