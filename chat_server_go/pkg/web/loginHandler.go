@@ -88,8 +88,8 @@ func createLoginHandler(ulh *UserLoginHandler, meters *m.LoginMeters) http.Handl
 			}
 			meters.LoginSuccessCounter.Add(ctx, 1)
 			setCookieHeader := ""
-			if os.Getenv("LOCAL") == "true" {
-				setCookieHeader = fmt.Sprintf("movieguru=%s; HttpOnly; SameSite=Lax; Path=/; Domain=localhost; Max-Age=86400", sessionID)
+			if os.Getenv("SIMPLE") == "true" {
+				setCookieHeader = fmt.Sprintf("movieguru=%s; HttpOnly; Path=/; SameSite=Lax; Max-Age=86400", sessionID)
 			} else {
 				setCookieHeader = fmt.Sprintf("movieguru=%s; HttpOnly; Secure; SameSite=None; Path=/; Domain=%s; Max-Age=86400", sessionID, metadata.FrontEndDomain)
 			}

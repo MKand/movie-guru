@@ -8,5 +8,5 @@ output "locust_address" {
 }
 
 output "backend_address" {
-  value = "http://${data.kubernetes_service.backend.status.0.load_balancer.0.ingress.0.ip}:80"
+  value = "http://${data.kubernetes_service.backend.status.0.load_balancer.0.ingress.0.ip}"
 }

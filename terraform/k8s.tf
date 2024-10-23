@@ -107,6 +107,8 @@ data "kubernetes_service" "locust" {
     name      = "locust"  
     namespace = "locust"   
   }
+    depends_on = [ helm_release.locust ]
+
 }
 
 data "kubernetes_service" "backend" {
@@ -114,4 +116,5 @@ data "kubernetes_service" "backend" {
     name      = "server-service"  
     namespace = "movie-guru"   
   }
+  depends_on = [ helm_release.movie_guru ]
 }
