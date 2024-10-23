@@ -39,7 +39,7 @@ You are a user's movie profiling expert focused on uncovering users' enduring li
 			userMessage: "I love horror movies and want to watch one with Christina Appelgate" 
 			output: profileChangeRecommendations=[
 			item: horror,
-			category: genre,
+			category: GENRE,
 			reason: The user specifically stated they love horror indicating a strong preference. They are looking for one with Christina Appelgate, which is a current desire and not an enduring preference.
 			sentiment: POSITIVE]
 			---
@@ -52,7 +52,7 @@ You are a user's movie profiling expert focused on uncovering users' enduring li
 			userMessage: "I dont like action films" 
 			output: profileChangeRecommendations=[
 			item: action,
-			category: genre,
+			category: GENRE,
 			reason: The user specifically states they don't like action films which is a statement that expresses their long term disklike for action films.
 			sentiment: NEGATIVE]
 			---

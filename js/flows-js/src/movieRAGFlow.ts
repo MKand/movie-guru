@@ -50,12 +50,12 @@ export const MovieRAGFlow = defineFlow(
             const movieContext: MovieContext = {
               title: doc.metadata.title,
               runtime_minutes: doc.metadata.runtime_mins,
-              genres: doc.metadata.genres,
-              rating: doc.metadata.rating,
+              genres: doc.metadata.genres.split(","),
+              rating: parseFloat(doc.metadata.rating),
               plot: doc.metadata.plot,
-              released: doc.metadata.released,
+              released: parseFloat(doc.metadata.released),
               director: doc.metadata.director,
-              actors: doc.metadata.actors,
+              actors: doc.metadata.actors.split(","),
               poster: doc.metadata.poster,
               tconst: doc.metadata.tconst,
             };
