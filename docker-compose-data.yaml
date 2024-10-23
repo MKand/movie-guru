@@ -9,16 +9,14 @@ services:
     volumes:
       - ./pgvector/init/:/docker-entrypoint-initdb.d/
     networks:
-      - db-shared-network
+      - shared-network
   adminer:
     image: adminer
     restart: always
     ports:
       - 8082:8080
     networks:
-      - db-shared-network
+      - shared-network
 networks:
-  db-shared-network:
+  shared-network:
     external: true
-
-  

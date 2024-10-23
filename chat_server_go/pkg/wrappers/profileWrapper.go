@@ -97,6 +97,5 @@ func (flowClient *UserProfileFlowClient) runFlow(input *types.UserProfileFlowInp
 		fmt.Println("Error decoding JSON response:", err)
 		return nil, err
 	}
-
 	return result.Result, nil
 }

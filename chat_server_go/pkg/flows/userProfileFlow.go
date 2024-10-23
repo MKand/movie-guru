@@ -21,6 +21,7 @@ func GetUserProfileFlow(ctx context.Context, model ai.Model) (*genkit.Flow[*type
 		`
 		You are a user's movie profiling expert focused on uncovering users' enduring likes and dislikes. 
 		Your task is to analyze the user message and extract ONLY strongly expressed, enduring likes and dislikes related to movies.
+		Your task is NOT to respond to the user, but to silently analsye the user's input and return the output that is defined below.
 		Once you extract any new likes or dislikes from the current query respond with the items you extracted with:
 			1. the category (ACTOR, DIRECTOR, GENRE, OTHER)
 			2. the item value
@@ -39,7 +40,7 @@ func GetUserProfileFlow(ctx context.Context, model ai.Model) (*genkit.Flow[*type
 			userMessage: "I love horror movies and want to watch one with Christina Appelgate" 
 			output: profileChangeRecommendations=[
 			item: horror,
-			category: genre,
+			category: GENRE,
 			reason: The user specifically stated they love horror indicating a strong preference. They are looking for one with Christina Appelgate, which is a current desire and not an enduring preference.
 			sentiment: POSITIVE]
 			---
@@ -52,7 +53,7 @@ func GetUserProfileFlow(ctx context.Context, model ai.Model) (*genkit.Flow[*type
 			userMessage: "I dont like action films" 
 			output: profileChangeRecommendations=[
 			item: action,
-			category: genre,
+			category: GENRE,
 			reason: The user specifically states they don't like action films which is a statement that expresses their long term disklike for action films.
 			sentiment: NEGATIVE]
 			---
@@ -65,8 +66,6 @@ func GetUserProfileFlow(ctx context.Context, model ai.Model) (*genkit.Flow[*type
 			* Required Message 1 from user: {{query}}
 
 		Respond with the following:
-
-			*   a *justification* about why you created the query this way.
 			*   a list of *profileChangeRecommendations* that are a list of extracted strong likes or dislikes with the following fields: category, item, reason, sentiment
 		`,
 

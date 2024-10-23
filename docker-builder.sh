@@ -5,7 +5,7 @@ docker login -u ${DOCKER_NAME} -p ${DOCKER_PASS}
 TAG_NAME=ghack-sre
 
 # Build the Docker image
-docker build -t ${DOCKER_NAME}/movie-guru-server:$TAG_NAME ./chat_server_go
+docker build -t ${DOCKER_NAME}/movie-guru-server:$TAG_NAME ./chat_server_go --no-cache
 docker push ${DOCKER_NAME}/movie-guru-server:$TAG_NAME
 echo "Image ${DOCKER_NAME}/movie-guru-server:$TAG_NAME built and pushed successfully!"
 

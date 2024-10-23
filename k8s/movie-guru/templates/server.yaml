@@ -60,6 +60,6 @@ spec:
     app: server 
   ports:
   - protocol: TCP
-    port: 80  # The port users will access the frontend on
-    targetPort: 8080 # The port your frontend container is listening on
+    port: 80 
+    targetPort: 8080
   type: LoadBalancer

@@ -92,6 +92,7 @@ func getSessionID(r *http.Request) (string, error) {
 	if r.Header.Get("Cookie") == "" {
 		return "", errors.New("No cookie found")
 	}
+	slog.InfoContext(r.Context(), "Cookies", r.Header.Get("Cookie"))
 	sessionID := strings.Split(r.Header.Get("Cookie"), "movieguru=")[1]
 	return sessionID, nil
 }

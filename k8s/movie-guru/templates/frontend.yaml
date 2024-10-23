@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: {{.Chart.Name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - name: frontend
+        image: "{{ .Values.Config.Image.Repository }}/movie-guru-frontend:ghack-sre"
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5173
+        env:
+        - name: VITE_CHAT_SERVER_URL
+          value: {{ .Values.Config.serverIP }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+  namespace: {{.Chart.Name }}
+spec:
+  selector:
+    app: frontend 
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 5173
+  type: LoadBalancer
