@@ -62,4 +62,4 @@ spec:
   - protocol: TCP
     port: 80  # The port users will access the frontend on
     targetPort: 8080 # The port your frontend container is listening on
-  type: ClusterIP
+  type: LoadBalancer

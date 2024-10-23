@@ -108,3 +108,10 @@ data "kubernetes_service" "locust" {
     namespace = "locust"   
   }
 }
+
+data "kubernetes_service" "backend" {
+  metadata {
+    name      = "server-service"  
+    namespace = "movie-guru"   
+  }
+}
