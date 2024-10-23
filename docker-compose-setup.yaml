@@ -1,0 +1,22 @@
+services:
+  db:
+    image: pgvector/pgvector:pg17
+    ports: 
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: main
+      restart: always
+    volumes:
+      - ./pgvector/init/:/docker-entrypoint-initdb.d/
+    networks:
+      - shared-network
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8082:8080
+    networks:
+      - shared-network
+networks:
+  shared-network:
+    external: true
