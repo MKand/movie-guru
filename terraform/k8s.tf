@@ -22,6 +22,7 @@ resource "google_compute_address" "server-address" {
   name         = "frontend-address"
   address_type = "EXTERNAL"
   purpose      = "GCE_ENDPOINT"
+  project = var.gcp_project_id
 }
 
 data "http" "locustfile" {

@@ -1,9 +1,11 @@
 variable "gcp_project_id" {
   description = "GCP Project ID"
+  default = "movie-guru-ghack"
 }
 
 variable "repo_prefix" {
   description = "Docker/Artifact registry prefix"
+  default = "manaskandula"
 }
 
 variable "region" {
