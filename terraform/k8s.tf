@@ -127,3 +127,11 @@ data "kubernetes_service" "backend" {
   }
   depends_on = [ helm_release.movie_guru ]
 }
+
+data "kubernetes_service" "frontend" {
+  metadata {
+    name      = "frontend-service"  
+    namespace = "movie-guru"   
+  }
+  depends_on = [ helm_release.movie_guru ]
+}
