@@ -14,7 +14,7 @@ resource "google_monitoring_dashboard" "chat_dashboard" {
             "dataSets": [
               {
                 "timeSeriesQuery": {
-                  "prometheusQuery": "(sum(rate(movieguru_chat_calls_success_total[$${__interval}]) / sum(rate(movieguru_chat_calls_total[$${__interval}]))) * 100",
+                  "prometheusQuery": "(sum(rate(movieguru_chat_calls_success_total[$${__interval}])) / sum(rate(movieguru_chat_calls_total[$${__interval}]))) * 100",
                   "unitOverride": "%",
                   "outputFullDuration": false
                 },
