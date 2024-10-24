@@ -36,6 +36,7 @@ func StartServer(ctx context.Context, ulh *UserLoginHandler, m *db.Metadata, dep
 	meter := otel.Meter(podName)
 
 	loginMeters := metrics.NewLoginMeters(meter)
+
 	hcMeters := metrics.NewHCMeters(meter)
 	chatMeters := metrics.NewChatMeters(meter)
 	prefMeters := metrics.NewPreferencesMeters(meter)
@@ -47,7 +48,7 @@ func StartServer(ctx context.Context, ulh *UserLoginHandler, m *db.Metadata, dep
 	http.HandleFunc("/history", createHistoryHandler())
 	http.HandleFunc("/preferences", createPreferencesHandler(deps.DB, prefMeters))
 	http.HandleFunc("/startup", createStartupHandler(deps, startupMeters))
-	http.HandleFunc("/login", createLoginHandler(ulh, loginMeters))
+	http.HandleFunc("/login", createLoginHandler(ulh, loginMeters, m))
 	http.HandleFunc("/logout", createLogoutHandler(logoutMeters))
 	return http.ListenAndServe(":8080", nil)
 }
@@ -89,11 +90,17 @@ func handleOptions(w http.ResponseWriter, origin string) {
 }
 
 func getSessionID(r *http.Request) (string, error) {
+	sessionID := ""
+	if os.Getenv("SIMPLE") == "true" {
+		user := r.Header.Get("user")
+		sessionID = createSessionID(user)
+		return sessionID, nil
+	}
 	if r.Header.Get("Cookie") == "" {
 		return "", errors.New("No cookie found")
 	}
 	slog.InfoContext(r.Context(), "Cookies", r.Header.Get("Cookie"))
-	sessionID := strings.Split(r.Header.Get("Cookie"), "movieguru=")[1]
+	sessionID = strings.Split(r.Header.Get("Cookie"), "movieguru=")[1]
 	return sessionID, nil
 }
 

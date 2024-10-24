@@ -39,7 +39,7 @@ func (ulh *UserLoginHandler) HandleLogin(ctx context.Context, user string) (stri
 	return user, nil
 }
 
-func createLoginHandler(ulh *UserLoginHandler, meters *m.LoginMeters) http.HandlerFunc {
+func createLoginHandler(ulh *UserLoginHandler, meters *m.LoginMeters, metadata *db.Metadata) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		origin := r.Header.Get("Origin")
@@ -69,7 +69,7 @@ func createLoginHandler(ulh *UserLoginHandler, meters *m.LoginMeters) http.Handl
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
-			sessionID := fmt.Sprintf("session_%s", user)
+			sessionID := createSessionID(user, metadata)
 			session := &SessionInfo{
 				ID:            sessionID,
 				User:          user,
@@ -88,12 +88,10 @@ func createLoginHandler(ulh *UserLoginHandler, meters *m.LoginMeters) http.Handl
 			}
 			meters.LoginSuccessCounter.Add(ctx, 1)
 			setCookieHeader := ""
-			if os.Getenv("SIMPLE") == "true" {
-				setCookieHeader = fmt.Sprintf("movieguru=%s; HttpOnly; Path=/; SameSite=Lax; Max-Age=86400", sessionID)
-			} else {
+			if os.Getenv("SIMPLE") != "true" || os.Getenv("SIMPLE") == "" {
 				setCookieHeader = fmt.Sprintf("movieguru=%s; HttpOnly; Secure; SameSite=None; Path=/; Domain=%s; Max-Age=86400", sessionID, metadata.FrontEndDomain)
+				w.Header().Set("Set-Cookie", setCookieHeader)
 			}
-			w.Header().Set("Set-Cookie", setCookieHeader)
 			w.Header().Set("Vary", "Cookie, Origin")
 			addResponseHeaders(w, origin)
 			json.NewEncoder(w).Encode(map[string]string{"login": "success"})
@@ -103,4 +101,9 @@ func createLoginHandler(ulh *UserLoginHandler, meters *m.LoginMeters) http.Handl
 			return
 		}
 	}
+}
+
+func createSessionID(user string, metadata *db.Metadata) string {
+	sessionID := fmt.Sprintf("session_%s", user)
+	return sessionID
 }
