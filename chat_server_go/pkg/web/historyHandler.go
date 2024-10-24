@@ -8,7 +8,6 @@ import (
 	"time"
 
 	db "github.com/movie-guru/pkg/db"
-
 	"github.com/movie-guru/pkg/types"
 	"github.com/redis/go-redis/v9"
 )

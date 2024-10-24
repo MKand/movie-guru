@@ -7,7 +7,6 @@ import (
 	"time"
 
 	db "github.com/movie-guru/pkg/db"
-
 	m "github.com/movie-guru/pkg/metrics"
 )
 
