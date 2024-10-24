@@ -20,5 +20,5 @@ variable "locust_file" {
 
 variable "helm_chart" {
   description = "URL of the movie guru helm chart"
-  default = "https://mkand.github.com/charts/movie-guru-0.1.0.tgz"
+  default = "https://mkand.github.io/movie-guru/movie-guru-0.1.0.tgz"
 }

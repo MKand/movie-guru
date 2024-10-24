@@ -36,3 +36,4 @@ spec:
     port: 80
     targetPort: 5173
   type: LoadBalancer
+  loadBalancerIP: {{ .Values.Config.frontendIP }}

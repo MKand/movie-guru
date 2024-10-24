@@ -19,10 +19,17 @@ provider "helm" {
 }
 
 resource "google_compute_address" "server-address" {
+  name         = "server-address"
+  address_type = "EXTERNAL"
+  project = var.gcp_project_id
+  region = var.region
+}
+
+resource "google_compute_address" "frontend-address" {
   name         = "frontend-address"
   address_type = "EXTERNAL"
-  purpose      = "GCE_ENDPOINT"
   project = var.gcp_project_id
+  region = var.region
 }
 
 data "http" "locustfile" {
@@ -44,6 +51,7 @@ resource "helm_release" "movie_guru" {
     name  = "Config.projectID"
     value = var.gcp_project_id
   }
+  depends_on = [ google_compute_address.server-address ]
 }
 
 resource "kubernetes_config_map" "loadtest_locustfile" {
