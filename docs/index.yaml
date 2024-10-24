@@ -11,4 +11,14 @@ entries:
     urls:
     - https://mkand.github.io/charts/movie-guru-0.1.0.tgz
     version: 0.1.0
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2024-10-22T16:49:58.318124651Z"
+    description: A Helm chart for Kubernetes
+    digest: cbc777075084d2d7fc1f7bfad6def066d9cb087cdd7c081e1ea2344b0cfa272d
+    name: movie-guru
+    type: application
+    urls:
+    - https://mkand.github.io/charts/movie-guru-0.2.0.tgz
+    version: 0.2.0
 generated: "2024-10-22T16:49:58.317529331Z"

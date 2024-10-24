@@ -47,6 +47,10 @@ resource "helm_release" "movie_guru" {
     name  = "Config.serverIP"
     value = google_compute_address.server-address.address
   }
+    set {
+    name  = "Config.frontendIP"
+    value = google_compute_address.frontend-address.address
+  }
   set {
     name  = "Config.projectID"
     value = var.gcp_project_id
@@ -129,18 +133,18 @@ data "kubernetes_service" "locust" {
 
 }
 
-data "kubernetes_service" "backend" {
-  metadata {
-    name      = "server-service"  
-    namespace = "movie-guru"   
-  }
-  depends_on = [ helm_release.movie_guru ]
-}
+# data "kubernetes_service" "backend" {
+#   metadata {
+#     name      = "server-service"  
+#     namespace = "movie-guru"   
+#   }
+#   depends_on = [ helm_release.movie_guru ]
+# }
 
-data "kubernetes_service" "frontend" {
-  metadata {
-    name      = "frontend-service"  
-    namespace = "movie-guru"   
-  }
-  depends_on = [ helm_release.movie_guru ]
-}
+# data "kubernetes_service" "frontend" {
+#   metadata {
+#     name      = "frontend-service"  
+#     namespace = "movie-guru"   
+#   }
+#   depends_on = [ helm_release.movie_guru ]
+# }
