@@ -18,6 +18,12 @@ provider "helm" {
   }
 }
 
+resource "google_compute_address" "server-address" {
+  name         = "frontend-address"
+  address_type = "EXTERNAL"
+  purpose      = "GCE_ENDPOINT"
+}
+
 data "http" "locustfile" {
   url = var.locust_file
 }
@@ -29,7 +35,10 @@ resource "helm_release" "movie_guru" {
     name  = "Config.Image.Repository"
     value = "manaskandula"
   }
-
+  set {
+    name  = "Config.serverIP"
+    value = google_compute_address.server-address.address
+  }
   set {
     name  = "Config.projectID"
     value = var.gcp_project_id

@@ -21,7 +21,7 @@ spec:
         - containerPort: 5173
         env:
         - name: VITE_CHAT_SERVER_URL
-          value: {{ .Values.Config.serverIP }}
+          value: "http://{{ .Values.Config.serverIP }}"
 ---
 apiVersion: v1
 kind: Service
