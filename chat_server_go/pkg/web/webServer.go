@@ -11,7 +11,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/movie-guru/pkg/db"
+	db "github.com/movie-guru/pkg/db"
 	metrics "github.com/movie-guru/pkg/metrics"
 	"github.com/redis/go-redis/v9"
 	"go.opentelemetry.io/otel"
@@ -26,7 +26,6 @@ var (
 )
 
 func StartServer(ctx context.Context, ulh *UserLoginHandler, m *db.Metadata, deps *Dependencies) error {
-	metadata = m
 	setupSessionStore(ctx)
 
 	podName := os.Getenv("POD_NAME")
@@ -44,12 +43,12 @@ func StartServer(ctx context.Context, ulh *UserLoginHandler, m *db.Metadata, dep
 	logoutMeters := metrics.NewLogoutMeters(meter)
 
 	http.HandleFunc("/", createHealthCheckHandler(deps, hcMeters))
-	http.HandleFunc("/chat", createChatHandler(deps, chatMeters))
-	http.HandleFunc("/history", createHistoryHandler())
-	http.HandleFunc("/preferences", createPreferencesHandler(deps.DB, prefMeters))
-	http.HandleFunc("/startup", createStartupHandler(deps, startupMeters))
+	http.HandleFunc("/chat", createChatHandler(deps, chatMeters, m))
+	http.HandleFunc("/history", createHistoryHandler(m))
+	http.HandleFunc("/preferences", createPreferencesHandler(deps.DB, prefMeters, m))
+	http.HandleFunc("/startup", createStartupHandler(deps, startupMeters, m))
 	http.HandleFunc("/login", createLoginHandler(ulh, loginMeters, m))
-	http.HandleFunc("/logout", createLogoutHandler(logoutMeters))
+	http.HandleFunc("/logout", createLogoutHandler(logoutMeters, m))
 	return http.ListenAndServe(":8080", nil)
 }
 
@@ -89,11 +88,11 @@ func handleOptions(w http.ResponseWriter, origin string) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func getSessionID(r *http.Request) (string, error) {
+func getSessionID(r *http.Request, metadata *db.Metadata) (string, error) {
 	sessionID := ""
-	if os.Getenv("SIMPLE") == "true" {
+	if metadata.AppVersion == "simple" {
 		user := r.Header.Get("user")
-		sessionID = createSessionID(user)
+		sessionID = createSessionID(user, metadata)
 		return sessionID, nil
 	}
 	if r.Header.Get("Cookie") == "" {
@@ -104,8 +103,8 @@ func getSessionID(r *http.Request) (string, error) {
 	return sessionID, nil
 }
 
-func authenticateAndGetSessionInfo(ctx context.Context, sessionInfo *SessionInfo, err error, r *http.Request, w http.ResponseWriter) (*SessionInfo, bool) {
-	sessionInfo, err = getSessionInfo(ctx, r)
+func authenticateAndGetSessionInfo(ctx context.Context, sessionInfo *SessionInfo, err error, r *http.Request, w http.ResponseWriter, metadata *db.Metadata) (*SessionInfo, bool) {
+	sessionInfo, err = getSessionInfo(ctx, r, metadata)
 	if err != nil {
 		if err, ok := err.(*AuthorizationError); ok {
 			slog.InfoContext(ctx, "Unauthorized", slog.Any("error", err.Error()))
@@ -124,9 +123,9 @@ func authenticateAndGetSessionInfo(ctx context.Context, sessionInfo *SessionInfo
 	return sessionInfo, false
 }
 
-func getSessionInfo(ctx context.Context, r *http.Request) (*SessionInfo, error) {
+func getSessionInfo(ctx context.Context, r *http.Request, metadata *db.Metadata) (*SessionInfo, error) {
 	session := &SessionInfo{}
-	sessionID, err := getSessionID(r)
+	sessionID, err := getSessionID(r, metadata)
 	if err != nil {
 		return session, &AuthorizationError{err.Error()}
 	}

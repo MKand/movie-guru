@@ -6,11 +6,13 @@ import (
 	"net/http"
 	"time"
 
+	db "github.com/movie-guru/pkg/db"
+
 	m "github.com/movie-guru/pkg/metrics"
 	"github.com/movie-guru/pkg/types"
 )
 
-func createStartupHandler(deps *Dependencies, meters *m.StartupMeters) http.HandlerFunc {
+func createStartupHandler(deps *Dependencies, meters *m.StartupMeters, metadata *db.Metadata) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var err error
 		ctx := r.Context()
@@ -19,7 +21,7 @@ func createStartupHandler(deps *Dependencies, meters *m.StartupMeters) http.Hand
 		sessionInfo := &SessionInfo{}
 		if r.Method != "OPTIONS" {
 			var shouldReturn bool
-			sessionInfo, shouldReturn = authenticateAndGetSessionInfo(ctx, sessionInfo, err, r, w)
+			sessionInfo, shouldReturn = authenticateAndGetSessionInfo(ctx, sessionInfo, err, r, w, metadata)
 			if shouldReturn {
 				return
 			}

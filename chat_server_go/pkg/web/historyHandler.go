@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"time"
 
+	db "github.com/movie-guru/pkg/db"
+
 	"github.com/movie-guru/pkg/types"
 	"github.com/redis/go-redis/v9"
 )
@@ -28,7 +30,7 @@ func getHistory(ctx context.Context, user string) (*types.ChatHistory, error) {
 	return ch, nil
 }
 
-func saveHistory(ctx context.Context, history *types.ChatHistory, user string) error {
+func saveHistory(ctx context.Context, history *types.ChatHistory, user string, metadata *db.Metadata) error {
 	history.Trim(metadata.HistoryLength)
 	redisContext, cancel := context.WithTimeout(ctx, 3*time.Second)
 	defer cancel()
@@ -49,7 +51,7 @@ func deleteHistory(ctx context.Context, user string) error {
 	return nil
 }
 
-func createHistoryHandler() http.HandlerFunc {
+func createHistoryHandler(metadata *db.Metadata) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		origin := r.Header.Get("Origin")
@@ -58,7 +60,7 @@ func createHistoryHandler() http.HandlerFunc {
 		sessionInfo := &SessionInfo{}
 		if r.Method != "OPTIONS" {
 			var shouldReturn bool
-			sessionInfo, shouldReturn = authenticateAndGetSessionInfo(ctx, sessionInfo, err, r, w)
+			sessionInfo, shouldReturn = authenticateAndGetSessionInfo(ctx, sessionInfo, err, r, w, metadata)
 			if shouldReturn {
 				return
 			}

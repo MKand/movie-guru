@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"os"
 	"time"
 
 	_ "github.com/lib/pq"
@@ -88,7 +87,7 @@ func createLoginHandler(ulh *UserLoginHandler, meters *m.LoginMeters, metadata *
 			}
 			meters.LoginSuccessCounter.Add(ctx, 1)
 			setCookieHeader := ""
-			if os.Getenv("SIMPLE") != "true" || os.Getenv("SIMPLE") == "" {
+			if metadata.AppVersion != "simple" {
 				setCookieHeader = fmt.Sprintf("movieguru=%s; HttpOnly; Secure; SameSite=None; Path=/; Domain=%s; Max-Age=86400", sessionID, metadata.FrontEndDomain)
 				w.Header().Set("Set-Cookie", setCookieHeader)
 			}

@@ -11,7 +11,7 @@ import (
 	"github.com/movie-guru/pkg/types"
 )
 
-func createPreferencesHandler(MovieDB *db.MovieDB, meters *m.PreferencesMeters) http.HandlerFunc {
+func createPreferencesHandler(MovieDB *db.MovieDB, meters *m.PreferencesMeters, metadata *db.Metadata) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var err error
 		ctx := r.Context()
@@ -20,7 +20,7 @@ func createPreferencesHandler(MovieDB *db.MovieDB, meters *m.PreferencesMeters) 
 		sessionInfo := &SessionInfo{}
 		if r.Method != "OPTIONS" {
 			var shouldReturn bool
-			sessionInfo, shouldReturn = authenticateAndGetSessionInfo(ctx, sessionInfo, err, r, w)
+			sessionInfo, shouldReturn = authenticateAndGetSessionInfo(ctx, sessionInfo, err, r, w, metadata)
 			if shouldReturn {
 				return
 			}
