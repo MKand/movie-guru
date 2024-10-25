@@ -27,8 +27,8 @@ type Dependencies struct {
 }
 
 type MetricsProb struct {
-	ChatSuccess float32
-	ChatSafety  float32
+	ChatSuccess     float32
+	ChatSafetyIssue float32
 
 	ChatEngaged      float32
 	ChatRejected     float32

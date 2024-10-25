@@ -33,7 +33,7 @@ func createChatHandler(deps *Dependencies, meters *m.ChatMeters) http.HandlerFun
 					UserSentiment: types.SentimentUnknown,
 				}
 
-				if PickSuccess(deps.CurrentProbMetrics.ChatSafety) {
+				if PickSuccess(deps.CurrentProbMetrics.ChatSafetyIssue) {
 					agentResp = types.NewSafetyIssueAgentResponse()
 				}
 				sentimentProbabilities := []float32{deps.CurrentProbMetrics.ChatSPositive, deps.CurrentProbMetrics.ChatSNegative, deps.CurrentProbMetrics.ChatSNeutral, deps.CurrentProbMetrics.ChatSUnclassified}

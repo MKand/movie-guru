@@ -33,7 +33,7 @@ func getDependencies() *web.Dependencies {
 
 	initialPhase := &web.MetricsProb{
 		ChatSuccess:       0.7,
-		ChatSafety:        0.8,
+		ChatSafetyIssue:   0.2,
 		ChatEngaged:       0.5,
 		ChatAcknowledged:  0.15,
 		ChatRejected:      0.25,
