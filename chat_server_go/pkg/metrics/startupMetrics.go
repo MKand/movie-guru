@@ -25,7 +25,7 @@ func NewStartupMeters(meter metric.Meter) *StartupMeters {
 
 	startupLatencyHistogram, err := meter.Int64Histogram("movieguru_startup_latency", metric.WithDescription("Histogram of startup request latency"),
 		metric.WithUnit("ms"),
-		metric.WithExplicitBucketBoundaries(1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 10000),
+		metric.WithExplicitBucketBoundaries(1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 3000, 10000),
 	)
 	if err != nil {
 		log.Printf("Error creating startup latency histogram: %v", err)

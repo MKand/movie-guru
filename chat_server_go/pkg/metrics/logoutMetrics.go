@@ -24,7 +24,7 @@ func NewLogoutMeters(meter metric.Meter) *LogoutMeters {
 
 	logoutLatencyHistogram, err := meter.Int64Histogram("movieguru_Logout_latency", metric.WithDescription("Histogram of Logout request latency"),
 		metric.WithUnit("ms"),
-		metric.WithExplicitBucketBoundaries(0.1, 0.5, 1, 1.5, 2, 3, 10),
+		metric.WithExplicitBucketBoundaries(0.05, 0.1, 0.5, 1, 10, 50, 100, 200, 500, 1000, 5000),
 	)
 	if err != nil {
 		log.Printf("Error creating Logout latency histogram: %v", err)
