@@ -1,7 +1,7 @@
 apiVersion: v1
 entries:
   movie-guru:
-  - apiVersion: v1  # Changed to v1
+  - apiVersion: v1
     appVersion: 1.16.0
     created: "2024-10-22T16:49:58.318124651Z"
     description: A Helm chart for Kubernetes
@@ -11,7 +11,7 @@ entries:
     urls:
     - https://mkand.github.io/movie-guru/movie-guru-0.1.0.tgz
     version: 0.1.0
-  - apiVersion: v1  # Changed to v1
+  - apiVersion: v1
     appVersion: 1.16.0
     created: "2024-10-22T16:49:58.318124651Z"
     description: A Helm chart for Kubernetes
@@ -21,7 +21,7 @@ entries:
     urls:
     - https://mkand.github.io/movie-guru/movie-guru-0.2.0.tgz
     version: 0.2.0
-  - apiVersion: v1  # Changed to v1
+  - apiVersion: v1
     appVersion: 1.16.0
     created: "2024-10-22T16:49:58.318124651Z"
     description: A Helm chart for Kubernetes
@@ -30,5 +30,15 @@ entries:
     type: application
     urls:
     - https://mkand.github.io/movie-guru/movie-guru-0.3.0.tgz
-    version: 0.3.0
+    version: 0.4.0
+  - apiVersion: v1
+    appVersion: 1.16.0
+    created: "2024-10-22T16:49:58.318124651Z"
+    description: A Helm chart for Kubernetes
+    digest: cbc777075084d2d7fc1f7bfad6def066d9cb087cdd7c081e1ea2344b0cfa272d
+    name: movie-guru
+    type: application
+    urls:
+    - https://mkand.github.io/movie-guru/movie-guru-0.4.0.tgz
+    version: 0.4.0
 generated: "2024-10-22T16:49:58.317529331Z"

@@ -57,7 +57,7 @@ resource "helm_release" "movie_guru" {
   }
     set {
     name  = "Config.mockserverIP"
-    value = google_compute_address.mockerserver-address.address
+    value = google_compute_address.mockserver-address.address
   }
   
     set {
