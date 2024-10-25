@@ -104,6 +104,10 @@ resource "helm_release" "locust" {
     name  = "loadtest.locust_locustfile"
     value = "locustfile.py"
   }
+  set {
+    name  = "loadtest.locust_host"
+    value = "http://mockserver-service.movie-guru.svc.cluster.local"
+  }
 
   set {
     name  = "service.type"
