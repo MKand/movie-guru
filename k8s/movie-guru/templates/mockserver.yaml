@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mockserver
+  namespace: {{.Chart.Name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mockserver
+  template:
+    metadata:
+      labels:
+        app: mockserver
+    spec:
+      containers:
+      - name: mockserver
+        image: "{{ .Values.Config.Image.Repository }}/movie-guru-server:ghack-sre"
+        command: ["/app/mockserver"]
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mockserver-service
+  namespace: {{.Chart.Name }}
+spec:
+  selector:
+    app: mockserver 
+  ports:
+  - protocol: TCP
+    port: 80 
+    targetPort: 8080
+  type: LoadBalancer
+  loadBalancerIP: {{ .Values.Config.serverIP }}

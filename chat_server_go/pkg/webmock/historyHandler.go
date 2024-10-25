@@ -1,4 +1,4 @@
-package web
+package webmock
 
 import (
 	"net/http"

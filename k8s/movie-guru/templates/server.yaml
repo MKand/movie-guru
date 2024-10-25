@@ -4,7 +4,7 @@ metadata:
   name: server
   namespace: {{.Chart.Name }}
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: server

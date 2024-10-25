@@ -7,6 +7,7 @@ import (
 	"os"
 
 	met "github.com/movie-guru/pkg/metrics"
+	web "github.com/movie-guru/pkg/webmock"
 )
 
 func main() {

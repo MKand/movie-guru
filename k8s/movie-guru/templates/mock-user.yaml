@@ -4,7 +4,7 @@ metadata:
   name: mock-user-js
   namespace: {{.Chart.Name }}
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: mock-user-js

@@ -104,22 +104,7 @@ resource "helm_release" "locust" {
 
   set {
     name  = "master.environment.CHAT_SERVER"
-    value = "http://server-service.movie-guru.svc.cluster.local"
-  }
-
-  set {
-    name  = "master.environment.MOCK_USER_SERVER"
-    value = "http://mockuser-service.movie-guru.svc.cluster.local"
-  }
-
-  set {
-    name  = "worker.environment.CHAT_SERVER"
-    value = "http://server-service.movie-guru.svc.cluster.local"
-  }
-
-  set {
-    name  = "worker.environment.MOCK_USER_SERVER"
-    value = "http://mockuser-service.movie-guru.svc.cluster.local"
+    value = "http://mockserver-service.movie-guru.svc.cluster.local"
   }
     depends_on = [helm_release.movie_guru, kubernetes_config_map.loadtest_locustfile]
 }
@@ -133,18 +118,3 @@ data "kubernetes_service" "locust" {
 
 }
 
-# data "kubernetes_service" "backend" {
-#   metadata {
-#     name      = "server-service"  
-#     namespace = "movie-guru"   
-#   }
-#   depends_on = [ helm_release.movie_guru ]
-# }
-
-# data "kubernetes_service" "frontend" {
-#   metadata {
-#     name      = "frontend-service"  
-#     namespace = "movie-guru"   
-#   }
-#   depends_on = [ helm_release.movie_guru ]
-# }
