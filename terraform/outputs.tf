@@ -8,7 +8,7 @@ output "locust_address" {
 }
 
 output "backend_address" {
-  value = "http://${google_compute_address.server-address.address}"
+  value = "http://${google_compute_address.mockerserver-address.address}"
 }
 
 output "frontend_address" {

@@ -34,4 +34,4 @@ spec:
     port: 80 
     targetPort: 8080
   type: LoadBalancer
-  loadBalancerIP: {{ .Values.Config.serverIP }}
+  loadBalancerIP: {{ .Values.Config.mockserverIP }}
