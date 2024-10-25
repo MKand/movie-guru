@@ -42,8 +42,8 @@ func getDependencies() *web.Dependencies {
 		ChatSNegative:     0.3,
 		ChatSNeutral:      0.1,
 		ChatSUnclassified: 0.2,
-		LoginSuccess:      0.999,
-		StartupSuccess:    0.85,
+		LoginSuccess:      0.99,
+		StartupSuccess:    0.75,
 		PrefUpdateSuccess: 0.84,
 		PrefGetSuccess:    0.99,
 
