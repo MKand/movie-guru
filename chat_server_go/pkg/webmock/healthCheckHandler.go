@@ -18,7 +18,6 @@ func createHealthCheckHandler(deps *Dependencies, meters *m.HCMeters) http.Handl
 				meters.HCLatency.Record(ctx, int64(time.Since(startTime).Milliseconds()))
 			}()
 			json.NewEncoder(w).Encode("OK")
-			w.WriteHeader(http.StatusOK)
 			return
 		}
 	}

@@ -8,10 +8,12 @@ spec:
   selector:
     matchLabels:
       app: frontend
+      svc: frontend
   template:
     metadata:
       labels:
         app: frontend
+        svc: frontend
     spec:
       containers:
       - name: frontend
@@ -30,7 +32,7 @@ metadata:
   namespace: {{.Chart.Name }}
 spec:
   selector:
-    app: frontend 
+    svc: frontend 
   ports:
   - protocol: TCP
     port: 80

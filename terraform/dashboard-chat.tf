@@ -50,7 +50,7 @@ resource "google_monitoring_dashboard" "chat_dashboard" {
             "dataSets": [
               {
                 "timeSeriesQuery": {
-                  "prometheusQuery": "(sum(rate(movieguru_chat_outcome_counter_total{Outcome=~\"Engaged|Acknowledged\"}[$${__interval}])) / sum(rate(movieguru_chat_outcome_counter_total[$${__interval}]))) * 100",
+                  "prometheusQuery": "(sum(rate(movieguru_chat_outcome_counter_total{Outcome=~\"Engaged\"}[$${__interval}])) / sum(rate(movieguru_chat_outcome_counter_total[$${__interval}]))) * 100",
                   "unitOverride": "%",
                   "outputFullDuration": false
                 },

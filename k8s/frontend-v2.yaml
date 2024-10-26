@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-2
+  namespace: movie-guru
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend-2
+      svc: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend-2
+        svc: frontend
+    spec:
+      containers:
+      - name: frontend
+        image: manaskandula/movie-guru-frontend:ghack-sre"
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5173
+        env:
+        - name: VITE_CHAT_SERVER_URL
+          value: "http://server-service.movie-guru.svc.cluster.local"
