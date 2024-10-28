@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: manaskandula/movie-guru-frontend:ghack-sre"
+        image: manaskandula/movie-guru-frontend:ghack-sre
         imagePullPolicy: Always
         ports:
         - containerPort: 5173
