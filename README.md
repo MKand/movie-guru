@@ -75,11 +75,12 @@ git checkout genkit-version
 ```
 
 ## Create and populate the database
-### Create tables
-Connect to the sql db through the **cloud sql studio**.
-For ease of use, the terraform script when creating the db allows all IPs to access the db. This is not good practice in production.
-We will use the **main** user for this step. If you followed the getting started step, you would have a postgres DB with a **main** user. The DB password for **main** user (and the **minimal-user**) is stored in the secret manager in the project. 
 
+### Create tables (if using Cloud SQL)
+
+Connect to the sql db through the **Cloud Sql Studio**.
+For ease of use, the terraform script when creating the db allows all IPs to access the db. This is not good practice in production.
+We will use the **main** user for this step. If you followed the getting started step, you would have a postgres DB with a **main** user. The DB password for **main** user (and the **minimal-user**) is stored in the secret manager in the project.
 
 ```SQL
 CREATE EXTENSION IF NOT EXISTS vector;
@@ -106,7 +107,9 @@ CREATE TABLE user_preferences (
 );
 
 ```
-## Reduce the permissions on the minimal-user 
+
+## Reduce the permissions on the minimal-user
+
 The **minimal user** should be allowed to only read data from the movies table and read and write to the user_preferences table. This is the user we will use for the application. You can choose to just use the **main** user instead for all db activities. If that is the case, update the docker-compose files and the set_env_vars.sh script.
 
 ```SQL
@@ -114,52 +117,85 @@ GRANT SELECT ON movies TO "minimal-user";
 GRANT SELECT, INSERT, UPDATE, DELETE ON user_preferences TO "minimal-user";
 ```
 
-## Insert data into movies tables
-We'll be running the indexer flow chat_server_go/cmd/indexer/main.go to insert data into the datapace.
-Go to *set_env_vars.sh*. 
-Replace the values of the environment variables there and then run. (We use 2 db users, one is the *main* user and the other is a *minimal-user*. You can decide to skip the *minimal-user*, and use the *main* user for everything.)
+### Create tables (Local DB)
+
+There is a local version of the db with pre-populated data.
+To use that instead run the following
+
+```sh
+docker compose -f docker-compose-pgvector.yaml up -d
+```
+
+If you navigate to localhost:8082, you can access the db via *Adminer*. Use the main user credentials (user name: main, password: mainpassword).
+
+At this stage, there will be 2 tables, with no data. We will populate the table in the next steps.
+
+We'll grant the necessary permissions to minimal-user.
+
+```SQL
+GRANT SELECT ON movies TO "minimal-user";
+GRANT SELECT, INSERT, UPDATE, DELETE ON user_preferences TO "minimal-user";
+```
+
+### Populating the movie table
+
+First, edit the *set_env_vars.sh* file. Update the project id, to reflect the ID of the GCP project you are using. If you are using a CloudSQL db, then you'll need to also update the postgres host, user name, and passwords to the correct ones. If you are running the local db, then you can leave the DB related env variables as is.
+Then run the following command.
+
 ```sh
 source set_env_vars.sh
 ```
-Next, 
-* Go to the project in the GCP console. Go to **IAM > Service Accounts**. 
-* Select the movie guru service account (movie-guru-chat-server-sa@<project id>.iam.gserviceaccount.com). * Create a new JSON key. 
-* Download the key and store it as **.key.json** in the root of this repo (make sure you use the filename exactly). 
+
+Next:
+
+* Go to the project in the GCP console. Go to **IAM > Service Accounts**.
+* Select the movie guru service account (movie-guru-chat-server-sa@<project id>.iam.gserviceaccount.com). * Create a new JSON key.
+* Download the key and store it as **.key.json** in the root of this repo (make sure you use the filename exactly).
 
 This key is used to authorise the **indexer** and the **flows** backend to use the VertexAI APIs needed to generate the embeddings and query the model.
-Let's run the indexer so it can add movies data into the database.
+
+Let's run the javascript indexer so it can add movies data into the database. (You can also choose to use the Golang indexer in which case replace **indexer-js** with **indexer-go** in the command below).
 
 ```sh
-docker compose -f docker-compose-indexer.yaml up --build -d 
+docker compose -f docker-compose-indexer.yaml up --build -d indexer-js
 ```
-This takes about 5 minutes to run, so be patient. The embedding creation process is slowed down intentionally to ensure we stay under the rate limit.
+
+This takes about 10-15 minutes to run, so be patient. The embedding creation process is slowed down intentionally to ensure we stay under the rate limit.
 You can run the command below to ensure there are **652** entries in the db.
 
 ```sql
 SELECT COUNT(*)
 FROM "movies";
 ```
-Lets turn down the container. 
+
+Lets turn down the container.
+
 ```sh
 docker compose -f docker-compose-indexer.yaml down
 ```
+
 Once all the required data is added, it is time to run the application that consists of the **frontend**, the **webserver**, the **genkit flows** server and the **redis cache**. These will be running locally in containers. The servers communicate with the **postgres DB** running in the cloud.
 
 ## Run the app
+
 Let us make sure the env variables are in the execution context of docker-compose.
-Re-run this if you are using a new terminal. If you've run it once before, its ok to re-run it. 
+Re-run this if you are using a new terminal. If you've run it once before, its ok to re-run it.
 Make sure you replace the dummy values in the file with real ones before you run it.
+
 ```sh
 source set_env_vars.sh 
 ```
+
 Now, let's get the application running.
+
 ```sh
 docker compose -f docker-compose.yaml up --build
 ```
+
 This should start the application. You can go to **http://localhost:5173** to visit the front end and interact with the application.
 
 Once finished, run the following to take the application down.
+
 ```sh
 docker compose -f docker-compose.yaml down
 ```
-

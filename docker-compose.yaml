@@ -15,7 +15,7 @@ services:
     environment:
       - POSTGRES_HOST=$POSTGRES_HOST
       - PROJECT_ID=$PROJECT_ID
-      - POSTGRES_DB_USER_PASSWORD=$POSTGRES_DB_USER_PASSWORD
+      - POSTGRES_DB_USER_PASSWORD=minimalpassword
       - POSTGRES_DB_USER=minimal-user
       - TABLE_NAME=movies
       - POSTGRES_DB_NAME=fake-movies-db
@@ -35,7 +35,7 @@ services:
     environment:
       - POSTGRES_HOST=$POSTGRES_HOST
       - PROJECT_ID=$PROJECT_ID
-      - POSTGRES_DB_USER_PASSWORD=$POSTGRES_DB_USER_PASSWORD
+      - POSTGRES_DB_USER_PASSWORD=minimalpassword
       - POSTGRES_DB_USER=minimal-user
       - POSTGRES_DB_NAME=fake-movies-db
       - TABLE_NAME=movies
@@ -81,4 +81,5 @@ services:
 networks:
   db-shared-network:
     external: true
-  movie-guru: bridge
+  movie-guru: 
+    driver: bridge
