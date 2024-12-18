@@ -1,4 +1,5 @@
 import * as z from 'zod';
+import { ModelOutputMetadata } from './modelOutputMetadataTypes';
 
 // Enums as Zod Enums
 const MovieFeatureCategory = z.enum(['OTHER', 'ACTOR', 'DIRECTOR', 'GENRE']);
@@ -21,5 +22,5 @@ export const UserProfileFlowInputSchema = z.object({
 // UserProfileFlowOutput schema
 export const UserProfileFlowOutputSchema = z.object({
   profileChangeRecommendations: z.array(ProfileChangeRecommendationSchema),
-  justification: z.string().optional(),
+  ModelOutputMetadata: ModelOutputMetadata
 });
