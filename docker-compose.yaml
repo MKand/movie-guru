@@ -27,6 +27,25 @@ services:
       - ./.key.json:/key.json
     networks:
       - db-shared-network
+  flows-js:
+    build: ./js/flows-js
+    ports:
+      - "3402:3401"
+    environment:
+      - POSTGRES_HOST=$POSTGRES_HOST
+      - PROJECT_ID=$PROJECT_ID
+      - POSTGRES_DB_USER_PASSWORD=minimalpassword
+      - POSTGRES_DB_USER=minimal-user
+      - TABLE_NAME=movies
+      - POSTGRES_DB_NAME=fake-movies-db
+      - APP_VERSION=v1
+      - GOOGLE_APPLICATION_CREDENTIALS=/key.json
+      - LOCATION=europe-west4
+      - LOCAL=true
+    volumes:
+      - ./.key.json:/key.json
+    networks:
+      - db-shared-network    
   server:
     build: ./chat_server_go
     command: /app/webserver

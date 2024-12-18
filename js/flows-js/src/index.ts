@@ -3,19 +3,12 @@ import { configureGenkit } from '@genkit-ai/core';
 import { startFlowsServer } from '@genkit-ai/flow';
 import { vertexAI, textEmbedding004, gemini15Flash } from '@genkit-ai/vertexai';
 import { firebase } from '@genkit-ai/firebase';
-import { GenkitMetric, genkitEval } from '@genkit-ai/evaluator';
 
 const LOCATION = process.env.LOCATION|| 'us-central1';
 const PROJECT_ID = process.env.PROJECT_ID;
 
 configureGenkit({
   plugins: [
-    genkitEval({
-      judge: gemini15Flash,
-      metrics: [GenkitMetric.ANSWER_RELEVANCY],
-      embedder: textEmbedding004,
-    }),
-    vertexAI({ projectId: PROJECT_ID, location: LOCATION }),
     firebase()
   ],
   logLevel: 'debug',

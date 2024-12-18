@@ -17,7 +17,6 @@
     "@genkit-ai/ai": "^0.5.14",
     "@genkit-ai/core": "^0.5.14",
     "@genkit-ai/dotprompt": "^0.5.14",
-    "@genkit-ai/evaluator": "^0.5.16",
     "@genkit-ai/firebase": "^0.5.14",
     "@genkit-ai/flow": "^0.5.14",
     "@genkit-ai/vertexai": "^0.5.14",

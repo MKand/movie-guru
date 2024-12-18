@@ -2,7 +2,6 @@ package web
 
 import (
 	"context"
-	"log/slog"
 
 	"github.com/movie-guru/pkg/db"
 	"github.com/movie-guru/pkg/types"
@@ -11,22 +10,23 @@ import (
 func chat(ctx context.Context, deps *Dependencies, metadata *db.Metadata, h *types.ChatHistory, user string, userMessage string) (*types.AgentResponse, *types.ResponseQualityOutput) {
 	h.AddUserMessage(userMessage)
 	simpleHistory, err := types.ParseRecentHistory(h.GetHistory(), metadata.HistoryLength)
+
 	respQuality := &types.ResponseQualityOutput{
 		Outcome:       types.OutcomeUnknown,
 		UserSentiment: types.SentimentUnknown,
 	}
-	respQualityChan := make(chan *types.ResponseQualityOutput)
-	errChan := make(chan error)
+	// respQualityChan := make(chan *types.ResponseQualityOutput)
+	// errChan := make(chan error)
 
 	// Launch the goroutine
-	go func() {
-		pResp, err := deps.ResponseQualityFlowClient.Run(ctx, simpleHistory, user)
-		if err != nil {
-			errChan <- err
-		} else {
-			respQualityChan <- pResp
-		}
-	}()
+	// go func() {
+	// 	pResp, err := deps.ResponseQualityFlowClient.Run(ctx, simpleHistory, user)
+	// 	if err != nil {
+	// 		errChan <- err
+	// 	} else {
+	// 		respQualityChan <- pResp
+	// 	}
+	// }()
 
 	pResp, err := deps.UserProfileFlowClient.Run(ctx, h, user)
 	if agentResp, shouldReturn := processFlowOutput(pResp.ModelOutputMetadata, err, h); shouldReturn {
@@ -52,12 +52,12 @@ func chat(ctx context.Context, deps *Dependencies, metadata *db.Metadata, h *typ
 	}
 	h.AddAgentMessage(mAgentResp.Answer)
 
-	select {
-	case respQuality = <-respQualityChan:
-		slog.InfoContext(ctx, "Output response quality flow", slog.Any("responseQuality", respQuality))
-	case err := <-errChan:
-		slog.ErrorContext(ctx, "Error while executing response quality flow", slog.Any("error", err.Error()))
-	}
+	// select {
+	// case respQuality = <-respQualityChan:
+	// 	slog.InfoContext(ctx, "Output response quality flow", slog.Any("responseQuality", respQuality))
+	// case err := <-errChan:
+	// 	slog.ErrorContext(ctx, "Error while executing response quality flow", slog.Any("error", err.Error()))
+	// }
 
 	return mAgentResp, respQuality
 }
