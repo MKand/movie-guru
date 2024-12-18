@@ -19,6 +19,7 @@ export const UserProfileFlowInputSchema = z.object({
   agentMessage: z.string(),
 });
 
+
 // UserProfileFlowOutput schema
 export const UserProfileFlowOutputSchema = z.object({
   profileChangeRecommendations: z.array(ProfileChangeRecommendationSchema),

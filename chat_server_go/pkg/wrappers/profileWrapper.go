@@ -76,6 +76,8 @@ func (flowClient *UserProfileFlowClient) runFlow(input *types.UserProfileFlowInp
 	if err != nil {
 		return nil, fmt.Errorf("error marshaling input to JSON: %w", err)
 	}
+	fmt.Println("Payload:", string(inputJSON))
+
 	req, err := http.NewRequest("POST", flowClient.URL, bytes.NewBuffer(inputJSON))
 	if err != nil {
 		fmt.Println("Error creating request:", err)
