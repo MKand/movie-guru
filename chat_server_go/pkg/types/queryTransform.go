@@ -12,9 +12,9 @@ const (
 )
 
 type QueryTransformFlowOutput struct {
-	TransformedQuery string     `json:"transformedQuery, omitempty"`
-	Intent           USERINTENT `json:"userIntent, omitempty"`
-	*ModelOutputMetadata
+	TransformedQuery     string     `json:"transformedQuery, omitempty"`
+	Intent               USERINTENT `json:"userIntent, omitempty"`
+	*ModelOutputMetadata `json:"modelOutputMetadata"`
 }
 
 type QueryTransformFlowInput struct {

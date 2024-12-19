@@ -19,17 +19,26 @@ const ProfileCategoriesSchema = z.object({
   others: z.array(z.string()).optional(),
 });
 
+export type ProfileCategories = z.infer<typeof ProfileCategoriesSchema>
+
+
 // UserProfile schema
 export const UserProfileSchema = z.object({
   likes: ProfileCategoriesSchema.optional(),
   dislikes: ProfileCategoriesSchema.optional(),
 });
 
+export type UserProfile = z.infer<typeof UserProfileSchema>
+
+
 // SimpleMessage schema
 export const SimpleMessageSchema = z.object({
   role: z.string(), 
   content: z.string(),
 });
+
+export type SimpleMessage = z.infer<typeof SimpleMessageSchema>
+
 
 // QueryTransformFlowInput schema
 export const QueryTransformFlowInputSchema = z.object({
@@ -38,9 +47,14 @@ export const QueryTransformFlowInputSchema = z.object({
   userMessage: z.string(),
 });
 
+export type QueryTransformFlowInput = z.infer<typeof QueryTransformFlowInputSchema>
+
+
 // QueryTransformFlowOutput schema
 export const QueryTransformFlowOutputSchema = z.object({
-  transformedQuery: z.string().optional(),
+  transformedQuery: z.string(),
   userIntent: USERINTENT.optional(),
-  justification: z.string().optional(),
+  modelOutputMetadata: ModelOutputMetadata,
 });
+
+export type QueryTransformFlowOutput = z.infer<typeof QueryTransformFlowOutputSchema>

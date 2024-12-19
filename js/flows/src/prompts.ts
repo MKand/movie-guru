@@ -55,7 +55,8 @@ Inputs:
 
 Respond with:
 
-* justification: Why you created the query this way.
+* a *justification*: Why you created the query this way.
+* a *safetyIssue* returned as true if the query is considered dangerous.
 * transformedQuery: The refined search query.
 * userIntent: One of: GREET, END_CONVERSATION, REQUEST, RESPONSE, ACKNOWLEDGE, UNCLEAR
 `

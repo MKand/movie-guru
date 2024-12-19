@@ -1,24 +1,22 @@
-import { defineFlow } from '@genkit-ai/flow';
 import { gemini15Flash } from '@genkit-ai/vertexai';
-import { defineDotprompt } from '@genkit-ai/dotprompt'
-import {QueryTransformFlowInputSchema, QueryTransformFlowOutputSchema} from './queryTransformTypes'
+import {QueryTransformFlowOutput, QueryTransformFlowInputSchema, QueryTransformFlowOutputSchema} from './queryTransformTypes'
 import { QueryTransformPromptText } from './prompts';
+import { ai } from './genkitConfig'
 
-export const QueryTransformPrompt = defineDotprompt(
+export const QueryTransformPrompt = ai.definePrompt(
     {
-      name: 'queryTransformFlow',
+      name: 'queryTransformFlowPrompt',
       model: gemini15Flash,
       input: {
         schema: QueryTransformFlowInputSchema,
       },
       output: {
         format: 'json',
-        schema: QueryTransformFlowOutputSchema,
       },  
     }, 
    QueryTransformPromptText
 )
-  export const QueryTransformFlow = defineFlow(
+  export const QueryTransformFlow = ai.defineFlow(
     {
       name: 'queryTransformFlow',
       inputSchema: QueryTransformFlowInputSchema,
@@ -26,9 +24,17 @@ export const QueryTransformPrompt = defineDotprompt(
     },
     async (input) => {
       try {
-        const response = await QueryTransformPrompt.generate({ input: input });
-        console.log(response.output(0))
-        return response.output(0);
+        const response = await QueryTransformPrompt({ history: input.history, userMessage: input.userMessage, userProfile: input.userProfile});
+        const jsonResponse =  JSON.parse(response.text);
+        const output: QueryTransformFlowOutput = {
+          "transformedQuery":  jsonResponse.transformedQuery,
+          "userIntent": jsonResponse.userIntent,
+          "modelOutputMetadata": {
+            "justification": jsonResponse.justification,
+            "safetyIssue": jsonResponse.safetyIssue,
+          }
+        }
+        return output
       } catch (error) {
         console.error("Error generating response:", error);
         return { 
