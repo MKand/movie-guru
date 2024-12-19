@@ -6,55 +6,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strconv"
-	"strings"
 
-	"github.com/firebase/genkit/go/ai"
 	_ "github.com/lib/pq"
-	_ "github.com/movie-guru/pkg/types"
 	types "github.com/movie-guru/pkg/types"
 )
-
-func parseMovieContexts(docs []*ai.Document) ([]*types.MovieContext, error) {
-	movies := make([]*types.MovieContext, 0, len(docs))
-
-	for _, doc := range docs {
-		var intermediate struct {
-			Title       string `json:"title"`
-			RuntimeMins int    `json:"runtime_mins"`
-			Genres      string `json:"genres"`
-			Rating      string `json:"rating"`
-			Released    int    `json:"released"`
-			Actors      string `json:"actors"`
-			Director    string `json:"director"`
-			Plot        string `json:"plot"`
-		}
-
-		err := json.Unmarshal([]byte(doc.Content[0].Text), &intermediate)
-		if err != nil {
-			return nil, err
-		}
-
-		rating, err := strconv.ParseFloat(intermediate.Rating, 32)
-		if err != nil {
-			rating = 0
-		}
-
-		movies = append(movies, &types.MovieContext{
-			Title:          intermediate.Title,
-			RuntimeMinutes: intermediate.RuntimeMins,
-			Genres:         strings.Split(intermediate.Genres, ", "),
-			Rating:         float32(rating),
-			Plot:           intermediate.Plot,
-			Released:       intermediate.Released,
-			Director:       intermediate.Director,
-			Actors:         strings.Split(intermediate.Actors, ", "),
-			Poster:         doc.Metadata["poster"].(string),
-		})
-	}
-
-	return movies, nil
-}
 
 type MovieRetrieverFlowClient struct {
 	RetrieverLength int

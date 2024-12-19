@@ -40,7 +40,10 @@ export const QueryTransformPrompt = ai.definePrompt(
         return { 
           transformedQuery: "",
           userIntent: 'UNCLEAR',
-          justification: ""
+          modelOutputMetadata: {
+            "justification": "",
+            "safetyIssue": false,
+          }
          }; 
       }
     }

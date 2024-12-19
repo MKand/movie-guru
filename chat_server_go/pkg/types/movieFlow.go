@@ -11,7 +11,7 @@ type MovieFlowOutput struct {
 	Answer               string           `json:"answer"`
 	RelevantMoviesTitles []*RelevantMovie `json:"relevantMovies"`
 	WrongQuery           bool             `json:"wrongQuery,omitempty" `
-	*ModelOutputMetadata
+	*ModelOutputMetadata `json:"modelOutputMetadata"`
 }
 
 type RelevantMovie struct {

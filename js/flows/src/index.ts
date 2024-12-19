@@ -8,6 +8,9 @@ export { QueryTransformPrompt } from './queryTransformFlow'
 
 import { MovieDocFlow } from './docRetriever'
 
+import { MovieFlow } from './movieFlow'
+export { MovieFlowPrompt } from './movieFlow'
+
 ai.startFlowServer({
-    flows: [UserProfileFlow, QueryTransformFlow, MovieDocFlow],
+    flows: [UserProfileFlow, QueryTransformFlow, MovieDocFlow, MovieFlow],
   });

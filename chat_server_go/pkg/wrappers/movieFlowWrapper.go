@@ -53,7 +53,11 @@ func (flowClient *MovieFlowClient) Run(movieDocs []*types.MovieContext, history 
 
 func (flowClient *MovieFlowClient) runFlow(input *types.MovieFlowInput) (*types.MovieFlowOutput, error) {
 	// Marshal the input struct to JSON
-	inputJSON, err := json.Marshal(input)
+	dataInput := DataInput{
+		Data: input,
+	}
+
+	inputJSON, err := json.Marshal(dataInput)
 	if err != nil {
 		return nil, fmt.Errorf("error marshaling input to JSON: %w", err)
 	}

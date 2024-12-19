@@ -38,7 +38,10 @@ export const UserProfileFlowPrompt = ai.definePrompt(
         console.error("Error generating response:", error);
         return { 
           profileChangeRecommendations: [],
-          justification: ""
+          modelOutputMetadata: {
+            "justification": "",
+            "safetyIssue": false,
+          }
          }; 
       }
     }

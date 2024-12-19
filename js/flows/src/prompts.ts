@@ -103,9 +103,10 @@ Movie:
   Respond with the following infomation:
 
   * a *justification* about why you answered the way you did, with specific references to the context documents whenever possible.
-  * an *answer* which is yout answer to the user's question, written in a friendly and conversational way.
-  * a list of *relevantMovies* which is a list of relevant movie titles extracted from the context documents, with reasons for their relevance. If none are relevant, leave this list empty.
+  * an *answer* which is your answer to the user's question, written in a friendly and conversational way.
+  * a list of *relevantMovies* which is a list of objects of type relevantmovie with the *title* extracted from the context documents, with and *reason* for their relevance. If none are relevant, leave this list empty. 
   * a *wrongQuery* boolean which is set to "true" if the user asks something outside your movie expertise; otherwise, set to "false."
+  * a *safetyIssue* returned as true if the query is considered dangerous.
 
   Important: Always check if a question complies with your mission before answering. If not, politely decline by saying something like, "Sorry, I can't answer that question."
 `

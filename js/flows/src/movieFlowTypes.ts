@@ -1,6 +1,6 @@
 import { z } from 'genkit';
-
 import { SimpleMessageSchema, UserProfileSchema } from './queryTransformTypes'; 
+import { ModelOutputMetadata } from './modelOutputMetadataTypes';
 
 
 // RelevantMovie schema
@@ -40,6 +40,6 @@ export const MovieFlowOutputSchema = z.object({
   answer: z.string(),
   relevantMovies: z.array(RelevantMovieSchema), // Changed to 'relevantMovies' for clarity
   wrongQuery: z.boolean().optional(),
-  justification: z.string().optional(),
+  modelOutputMetadata: ModelOutputMetadata
 });
 export type MovieFlowOutput = z.infer<typeof MovieFlowOutputSchema>
