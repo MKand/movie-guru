@@ -7,7 +7,7 @@ type UserProfileFlowInput struct {
 
 type UserProfileFlowOutput struct {
 	ProfileChangeRecommendations []*ProfileChangeRecommendation `json:"profileChangeRecommendations"`
-	*ModelOutputMetadata
+	*ModelOutputMetadata         `json:"modelOutputMetadata"`
 }
 
 type ProfileChangeRecommendation struct {

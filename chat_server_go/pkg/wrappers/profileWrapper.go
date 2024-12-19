@@ -72,7 +72,11 @@ func (flowClient *UserProfileFlowClient) Run(ctx context.Context, history *types
 
 func (flowClient *UserProfileFlowClient) runFlow(input *types.UserProfileFlowInput) (*types.UserProfileFlowOutput, error) {
 	// Marshal the input struct to JSON
-	inputJSON, err := json.Marshal(input)
+	dataInput := DataInput{
+		Data: input,
+	}
+
+	inputJSON, err := json.Marshal(dataInput)
 	if err != nil {
 		return nil, fmt.Errorf("error marshaling input to JSON: %w", err)
 	}
