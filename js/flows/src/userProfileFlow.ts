@@ -1,5 +1,5 @@
 import { gemini15Flash } from '@genkit-ai/vertexai';
-import {UserProfileFlowInputSchema, UserProfileFlowOutputSchema} from './userProfileTypes'
+import {UserProfileFlowOutput, UserProfileFlowInputSchema, UserProfileFlowOutputSchema} from './userProfileTypes'
 import { UserProfilePromptText } from './prompts';
 import { ai } from './genkitConfig'
 
@@ -25,7 +25,15 @@ export const UserProfileFlowPrompt = ai.definePrompt(
     async (input) => {
       try {
         const response = await UserProfileFlowPrompt({ query: input.query, agentMessage: input.agentMessage });
-        return JSON.parse(response.text);
+        const jsonResponse =  JSON.parse(response.text);
+        const output: UserProfileFlowOutput = {
+          "profileChangeRecommendations":  jsonResponse.profileChangeRecommendations,
+          "modelOutputMetadata": {
+            "justification": jsonResponse.justification,
+            "safetyIssue": jsonResponse.safetyIssue,
+          }
+        }
+        return output
       } catch (error) {
         console.error("Error generating response:", error);
         return { 

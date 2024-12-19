@@ -19,6 +19,7 @@ export const UserProfilePromptText = ` You are a user's movie profiling expert f
       Respond with the following:
   
           *   a *justification* about why you created the query this way.
+          *   a *safetyIssue* returned as true if the query is considered dangerous.
           *   a list of *profileChangeRecommendations* that are a list of extracted strong likes or dislikes with the following fields: category, item, reason, sentiment
       `
 export const QueryTransformPromptText = `

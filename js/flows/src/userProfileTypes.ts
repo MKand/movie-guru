@@ -26,7 +26,7 @@ export type UserProfileFlowInput = z.infer<typeof UserProfileFlowInputSchema>
 // UserProfileFlowOutput schema
 export const UserProfileFlowOutputSchema = z.object({
   profileChangeRecommendations: z.array(ProfileChangeRecommendationSchema),
-  justification: z.string().optional()
+  modelOutputMetadata: ModelOutputMetadata
 });
 
 export type UserProfileFlowOutput = z.infer<typeof UserProfileFlowOutputSchema>
