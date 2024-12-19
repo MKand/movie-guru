@@ -4,6 +4,8 @@
   },
   "dependencies": {
     "@genkit-ai/vertexai": "^0.9.12",
-    "genkit": "^0.9.12"
+    "genkit": "^0.9.12",
+    "pgvector": "^0.2.0",
+    "postgres": "^3.4.5"
   }
 }

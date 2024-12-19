@@ -1,8 +1,13 @@
 import { ai } from './genkitConfig'
 
-import { UserProfileFlowPrompt, UserProfileFlow} from './userProfileFlow'
-import { QueryTransformPrompt, QueryTransformFlow} from './queryTransformFlow'
+import { UserProfileFlow } from './userProfileFlow'
+export { UserProfileFlowPrompt } from './userProfileFlow'
+
+import { QueryTransformFlow } from './queryTransformFlow'
+export { QueryTransformPrompt } from './queryTransformFlow'
+
+import { MovieDocFlow } from './docRetriever'
 
 ai.startFlowServer({
-    flows: [UserProfileFlow, QueryTransformFlow],
+    flows: [UserProfileFlow, QueryTransformFlow, MovieDocFlow],
   });

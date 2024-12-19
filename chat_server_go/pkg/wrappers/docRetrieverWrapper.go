@@ -69,21 +69,25 @@ func CreateMovieRetrieverFlowClient(retrieverLength int, url string) *MovieRetri
 }
 
 func (flowClient *MovieRetrieverFlowClient) RetriveDocuments(ctx context.Context, query string) ([]*types.MovieContext, error) {
-	doc := ai.DocumentFromText(query, nil)
-	retDoc := ai.RetrieverRequest{
-		Document: doc,
-		Options:  flowClient.RetrieverLength,
-	}
-	rResp, err := flowClient.runFlow(retDoc)
+	rResp, err := flowClient.runFlow(query)
 	if err != nil {
 		return nil, err
 	}
-	return parseMovieContexts(rResp)
+	return rResp, nil
 }
 
-func (flowClient *MovieRetrieverFlowClient) runFlow(retRequest ai.RetrieverRequest) ([]*ai.Document, error) {
+type QueryData struct {
+	Query string `json:"query"`
+}
+
+func (flowClient *MovieRetrieverFlowClient) runFlow(input string) ([]*types.MovieContext, error) {
 	// Marshal the input struct to JSON
-	inputJSON, err := json.Marshal(retRequest)
+	dataInput := DataInput{
+		Data: &QueryData{
+			Query: input, // Assuming input is a string
+		},
+	}
+	inputJSON, err := json.Marshal(dataInput)
 	if err != nil {
 		return nil, fmt.Errorf("error marshaling input to JSON: %w", err)
 	}
@@ -101,7 +105,7 @@ func (flowClient *MovieRetrieverFlowClient) runFlow(retRequest ai.RetrieverReque
 		return nil, err
 	}
 	var result struct {
-		Result []*ai.Document `json:"result"`
+		Result []*types.MovieContext `json:"result"`
 	}
 	defer resp.Body.Close()
 
