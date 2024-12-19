@@ -1,0 +1,9 @@
+{
+  "devDependencies": {
+    "genkit-cli": "^0.9.12"
+  },
+  "dependencies": {
+    "@genkit-ai/vertexai": "^0.9.12",
+    "genkit": "^0.9.12"
+  }
+}
