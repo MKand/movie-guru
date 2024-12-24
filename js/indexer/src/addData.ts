@@ -1,14 +1,21 @@
 import fs from 'fs/promises'; 
 import { parse } from 'csv-parse'; 
-import { runFlow } from '@genkit-ai/flow';
 import { IndexerFlow } from './indexerFlow'; 
 import { MovieContext } from './types'; 
 import { openDB } from './db';
 
+const FILENAME = process.env.DATASETFILE || "/dataset/movies_with_posters.csv";
+
+const sleep = (ms: number): Promise<void> => 
+  new Promise((resolve) => setTimeout(resolve, ms));
+
+
 export async function processMovies() { 
   try {
-    const fileContent = await fs.readFile('/dataset/movies_with_posters.csv', 'utf8');
+    const fileContent = await fs.readFile(FILENAME, 'utf8');
 
+    await sleep(100);
+    
     const parser = parse({
       delimiter: '\t',
       from_line: 2, 
@@ -31,6 +38,8 @@ export async function processMovies() {
 
     let index = 0;
     const db = await openDB();
+    console.log("starting indexing")
+
     for (const record of records) {
       const year = parseFloat(record[1]);
       const rating = parseFloat(record[5]);
@@ -49,7 +58,9 @@ export async function processMovies() {
         tconst: index.toString(),
       };
       try {
-        const response = await runFlow(IndexerFlow, movieContext);
+        await IndexerFlow(movieContext)
+        // Slowing down to avoid pesky rate limits
+        await sleep(1500)
         console.log("processed ", record[0])
       } catch (err) {
         console.error('Error loading movie: ', record[0], err);
@@ -57,6 +68,8 @@ export async function processMovies() {
       index++;
     
   }
+  console.log(`finished indexing ${index} documents.`)
+
   } catch (err) {
     console.error('Error opening or processing file:', err);
   }

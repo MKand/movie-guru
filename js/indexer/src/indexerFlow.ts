@@ -1,12 +1,11 @@
-import { embed } from '@genkit-ai/ai/embedder';
 import { textEmbedding004 } from '@genkit-ai/vertexai';
-import { defineFlow } from '@genkit-ai/flow';
 import { toSql } from 'pgvector';
-import { z } from 'zod';
+import { z } from 'genkit';
 import { MovieContextSchema, MovieContext } from './types';
 import { openDB } from './db';
+import { ai } from './genkitConfig'
 
-export const IndexerFlow = defineFlow(
+export const IndexerFlow = ai.defineFlow(
   {
       name: 'indexerFlow',
       inputSchema: MovieContextSchema,
@@ -21,7 +20,7 @@ export const IndexerFlow = defineFlow(
         // Reduce rate at which operation is performed to avoid hitting VertexAI rate limits
         await new Promise((resolve) => setTimeout(resolve, 300));
         const contentString = createText(doc);
-        const eres = await embed({
+        const eres = await ai.embed({
           embedder: textEmbedding004,
           content: contentString,
         });

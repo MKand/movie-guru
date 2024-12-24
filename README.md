@@ -159,10 +159,10 @@ Next:
 
 This key is used to authorise the **indexer** and the **flows** backend to use the VertexAI APIs needed to generate the embeddings and query the model.
 
-Let's run the javascript indexer so it can add movies data into the database. (You can also choose to use the Golang indexer in which case replace **indexer-js** with **indexer-go** in the command below).
+Let's run the javascript indexer so it can add movies data into the database. The execution of this intentionally slowed down to stay below the ratelimits.
 
 ```sh
-docker compose -f docker-compose-indexer.yaml up --build -d indexer-js
+docker compose -f docker-compose-indexer.yaml up --build -d 
 ```
 
 This takes about 10-15 minutes to run, so be patient. The embedding creation process is slowed down intentionally to ensure we stay under the rate limit.

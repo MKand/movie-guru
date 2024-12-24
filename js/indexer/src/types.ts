@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'genkit';
 
 export type MovieContext = z.infer<typeof MovieContextSchema>;
 
