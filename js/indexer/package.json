@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "tsc && node lib/index.js"
   },
-  "name": "flow",
+  "name": "indexer",
   "version": "1.0.0",
   "keywords": [],
   "author": "",

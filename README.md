@@ -50,24 +50,29 @@ This describes how the Go-Genkit backend agents works.
 * **The Doc Retriever Flow**: Takes a user query and returns relevant documents from the vector database. This flow is responsible for generating a vector representation of the query, and returning the relevant documents from the PGVector database.
 * **Indexer Flow**: This flow is run to add the *movies* data into the vector database. This flow parses each entry in the *dataset/movies_withy_posters.csv* file, restructures it, creates a vector embedding and adds the resturctured data with the embeddings to the Postgres PGVector database. This flow is only invoked once during the setup of the application.
 
-
 ### Data
+
 * The data about the movies is stored in CloudSQL pgVector database. There are around 600 movies, with a plot, list of actors, director, rating, genre, and poster link. The posters are stored in a cloud storage bucket.
 * The user's profile data (their likes and dislikes) are stored in the CloudSQL database.
 * The user's conversation history is stored in memory store for Redis. Only the most recent 10 messages are stored. This number is configurable. The session info for the webserver is also stored in memory store.
 
 ### CloudSQL
+
 There are 2 tables:
+
 * *movies*: This contains the information about the AI Generated movies and their embeddings. The data for the table is found in dataset/movies_with_posters.csv. If you choose to host your own posters, replace the links in this file.
 * *user_preferences*: This contains the user's long term preferences profile information. 
 
 ## Getting Started
+
 Make sure you have deployed the core infrastructure (mainly postgres db, service accounts, and DB users), and enabled the APIs for this application. We'll perform the first step *Steps for backend infra* in the **main** branch (instructions are added here for convenience).
+
 ```sh
 git checkout main
 export PROJECT_ID=<set project id>
 ./deploy/deploy.sh --skipapp --backend genkit-go 
 ```
+
 Once finished, go back to the ghack-version branch.
 
 ```sh
@@ -126,7 +131,7 @@ To use that instead run the following
 docker compose -f docker-compose-pgvector.yaml up -d
 ```
 
-If you navigate to localhost:8082, you can access the db via *Adminer*. Use the main user credentials (user name: main, password: mainpassword).
+If you navigate to *localhost:8082*, you can access the db via *Adminer*. Use the main user credentials (user name: main, password: mainpassword).
 
 At this stage, there will be 2 tables, with no data. We will populate the table in the next steps.
 

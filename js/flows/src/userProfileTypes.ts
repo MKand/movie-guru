@@ -1,5 +1,5 @@
 import { z } from 'genkit';
-import { ModelOutputMetadata } from './modelOutputMetadataTypes';
+import { ModelOutputMetadata, ModelOutputMetadataSchema } from './modelOutputMetadataTypes';
 
 // Enums as Zod Enums
 const MovieFeatureCategory = z.enum(['OTHER', 'ACTOR', 'DIRECTOR', 'GENRE']);
@@ -26,7 +26,7 @@ export type UserProfileFlowInput = z.infer<typeof UserProfileFlowInputSchema>
 // UserProfileFlowOutput schema
 export const UserProfileFlowOutputSchema = z.object({
   profileChangeRecommendations: z.array(ProfileChangeRecommendationSchema),
-  modelOutputMetadata: ModelOutputMetadata
+  modelOutputMetadata: ModelOutputMetadataSchema
 });
 
 export type UserProfileFlowOutput = z.infer<typeof UserProfileFlowOutputSchema>

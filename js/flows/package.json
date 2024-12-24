@@ -1,6 +1,21 @@
 {
+  "main": "lib/index.js",
+  "scripts": {
+    "start": "node lib/index.js",
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "tsc && node lib/index.js"
+  },
+  "name": "flow",
+  "version": "1.0.0",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
   "devDependencies": {
-    "genkit-cli": "^0.9.12"
+    "genkit-cli": "^0.9.12",
+    "typescript": "^5.6.2"
   },
   "dependencies": {
     "@genkit-ai/vertexai": "^0.9.12",

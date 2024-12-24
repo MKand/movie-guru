@@ -1,8 +1,8 @@
 import { z } from 'genkit';
-import { ModelOutputMetadata } from './modelOutputMetadataTypes';
+import { ModelOutputMetadata, ModelOutputMetadataSchema } from './modelOutputMetadataTypes';
 
 // USERINTENT as Zod Enum
-const USERINTENT = z.enum([
+export const USERINTENT = z.enum([
   'UNCLEAR',
   'GREET',
   'END_CONVERSATION',
@@ -53,8 +53,8 @@ export type QueryTransformFlowInput = z.infer<typeof QueryTransformFlowInputSche
 // QueryTransformFlowOutput schema
 export const QueryTransformFlowOutputSchema = z.object({
   transformedQuery: z.string(),
-  userIntent: USERINTENT.optional(),
-  modelOutputMetadata: ModelOutputMetadata,
+  userIntent: z.string(),
+  modelOutputMetadata: ModelOutputMetadataSchema,
 });
 
 export type QueryTransformFlowOutput = z.infer<typeof QueryTransformFlowOutputSchema>
