@@ -194,7 +194,7 @@ source set_env_vars.sh
 Now, let's get the application running.
 
 ```sh
-docker compose -f docker-compose.yaml up --build
+docker compose up --build
 ```
 
 This should start the application. You can go to **http://localhost:5173** to visit the front end and interact with the application.
@@ -202,5 +202,5 @@ This should start the application. You can go to **http://localhost:5173** to vi
 Once finished, run the following to take the application down.
 
 ```sh
-docker compose -f docker-compose.yaml down
+docker compose down
 ```

@@ -15,18 +15,6 @@ func chat(ctx context.Context, deps *Dependencies, metadata *db.Metadata, h *typ
 		Outcome:       types.OutcomeUnknown,
 		UserSentiment: types.SentimentUnknown,
 	}
-	// respQualityChan := make(chan *types.ResponseQualityOutput)
-	// errChan := make(chan error)
-
-	// Launch the goroutine
-	// go func() {
-	// 	pResp, err := deps.ResponseQualityFlowClient.Run(ctx, simpleHistory, user)
-	// 	if err != nil {
-	// 		errChan <- err
-	// 	} else {
-	// 		respQualityChan <- pResp
-	// 	}
-	// }()
 
 	pResp, err := deps.UserProfileFlowClient.Run(ctx, h, user)
 	if agentResp, shouldReturn := processFlowOutput(pResp.ModelOutputMetadata, err, h); shouldReturn {
@@ -51,13 +39,6 @@ func chat(ctx context.Context, deps *Dependencies, metadata *db.Metadata, h *typ
 		return agentResp, respQuality
 	}
 	h.AddAgentMessage(mAgentResp.Answer)
-
-	// select {
-	// case respQuality = <-respQualityChan:
-	// 	slog.InfoContext(ctx, "Output response quality flow", slog.Any("responseQuality", respQuality))
-	// case err := <-errChan:
-	// 	slog.ErrorContext(ctx, "Error while executing response quality flow", slog.Any("error", err.Error()))
-	// }
 
 	return mAgentResp, respQuality
 }

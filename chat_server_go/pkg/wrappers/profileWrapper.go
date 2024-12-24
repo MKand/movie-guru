@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 
 	db "github.com/movie-guru/pkg/db"
@@ -53,8 +52,6 @@ func (flowClient *UserProfileFlowClient) Run(ctx context.Context, history *types
 	}
 	userProfileOutput.ModelOutputMetadata.Justification = resp.ModelOutputMetadata.Justification
 	userProfileOutput.ModelOutputMetadata.SafetyIssue = resp.ModelOutputMetadata.SafetyIssue
-
-	log.Println("user preferences", userProfileOutput.ModelOutputMetadata.Justification)
 
 	if len(resp.ProfileChangeRecommendations) > 0 {
 		updatedProfile, err := utils.ProcessProfileChanges(userProfile, resp.ProfileChangeRecommendations)
