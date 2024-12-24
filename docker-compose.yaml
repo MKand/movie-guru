@@ -10,8 +10,8 @@ services:
   flows:
     build: ./js/flows
     ports:
-      - "3402:3400"
-      - "4001:4000"
+      - "3400:3400"
+      - "4000:4000"
     environment:
       - POSTGRES_HOST=$POSTGRES_HOST
       - PROJECT_ID=$PROJECT_ID

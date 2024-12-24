@@ -41,11 +41,11 @@ export const QueryTransformFlow = ai.defineFlow(
 
       const jsonResponse = JSON.parse(response.text)
       return {
-        transformedQuery: jsonResponse.transformedQuery,
+        transformedQuery: jsonResponse.transformedQuery || "",
         userIntent: jsonResponse.userIntent || 'UNCLEAR',
         modelOutputMetadata: {
-          justification: jsonResponse.justification,
-          safetyIssue: jsonResponse.safetyIssue,
+          justification: jsonResponse.justification || "",
+          safetyIssue: jsonResponse.safetyIssue || false,
         },
       };
     } catch (error) {

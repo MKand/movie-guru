@@ -11,6 +11,7 @@ export const USERINTENT = z.enum([
   'ACKNOWLEDGE',
 ]);
 
+
 // ProfileCategories schema
 const ProfileCategoriesSchema = z.object({
   actors: z.array(z.string()).optional(),
@@ -53,7 +54,7 @@ export type QueryTransformFlowInput = z.infer<typeof QueryTransformFlowInputSche
 // QueryTransformFlowOutput schema
 export const QueryTransformFlowOutputSchema = z.object({
   transformedQuery: z.string(),
-  userIntent: z.string(),
+  userIntent: USERINTENT,
   modelOutputMetadata: ModelOutputMetadataSchema,
 });
 
