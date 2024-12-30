@@ -67,7 +67,7 @@ func setupSessionStore(ctx context.Context) {
 
 func randomisedFeaturedFilmsQuery() string {
 	queries := []string{
-		"top films", "cool films", "best films", "new films", "top rated films", "classic films",
+		"great films", "cool films", "best films", "new films", "high rated films", "classic films",
 	}
 	return queries[rand.Intn(len(queries))]
 

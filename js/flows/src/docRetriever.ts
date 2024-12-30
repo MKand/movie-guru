@@ -63,7 +63,7 @@ export const MovieDocFlow = ai.defineFlow(
     const searchFlowOutput = {
       vectorQuery: jsonResponse.vectorQuery || "",
       keywordQuery: jsonResponse.keywordQuery || "",
-      searchCategory: jsonResponse.searchCategory || 'VECTOR',
+      searchCategory: jsonResponse.searchCategory || 'NONE',
       modelOutputMetadata: {
         justification: jsonResponse.justification || "",
         safetyIssue: jsonResponse.safetyIssue || false,
@@ -90,7 +90,7 @@ export const MovieDocFlow = ai.defineFlow(
           title: doc.metadata.title,
           runtime_minutes: doc.metadata.runtime_mins,
           genres: doc.metadata.genres.split(","),
-          rating: parseInt(doc.metadata.rating, 10),
+          rating: parseFloat(parseFloat(doc.metadata.rating).toFixed(1)),
           plot: doc.metadata.plot,
           released: parseInt(doc.metadata.released,10),
           director: doc.metadata.director,
@@ -121,11 +121,10 @@ export const sqlRetriever = ai.defineRetriever(
     let results;
 
     if(options.searchCategory == "KEYWORD"){
-      const sqlQuery = `SELECT content, title, poster, released, runtime_mins, rating, genres, director, actors, plot, tconst
+      results =  await db`SELECT content, title, poster, released, runtime_mins, rating, genres, director, actors, plot, tconst
       FROM movies
-      WHERE ${options.keywordQuery}
+      WHERE ${db.unsafe(options.keywordQuery)} 
       LIMIT ${options.k ?? 10}`
-      results = await db.unsafe(sqlQuery)
     }
 
      //Vector Query
@@ -141,6 +140,41 @@ export const sqlRetriever = ai.defineRetriever(
           LIMIT ${options.k ?? 10}
         ;`
     }
+
+    //Mixed Query
+    if (options.searchCategory === "MIXED") {
+      // Generate the vector embedding for the vector query
+      const embedding = await ai.embed({
+        embedder: textEmbedding004,
+        content: options.vectorQuery,
+      });
+    
+      // Execute the database query with both keyword and vector search components
+      results = await db`
+        SELECT 
+          content, 
+          title, 
+          poster, 
+          released, 
+          runtime_mins, 
+          rating, 
+          genres, 
+          director, 
+          actors, 
+          plot, 
+          tconst
+        FROM 
+          movies
+        WHERE 
+        ${db.unsafe(options.keywordQuery)} 
+        ORDER BY 
+          embedding <#> ${toSql(embedding)}
+        LIMIT 
+          ${options.k ?? 10}
+      ;`;
+    
+    }
+
     if (!results) {
       throw new Error('No results found.'); 
     }  
