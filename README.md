@@ -1,50 +1,55 @@
 # Movie Guru
+
 [![Movie Guru](https://img.youtube.com/vi/l_KhN3RJ8qA/0.jpg)](https://youtu.be/YOUR_VIDEO_ID)
 
- **BRANCH: ghack-version**: This version is a *minimal version* of the frontend and backend that doesn't have complex login logic like the version in **main**. It is meant to be run locally (except for the postgresDB, which is running in a cloudSQL instance on GCP). You could also choose to run the postgresdb locally.
+ This version is a *minimal version* of the frontend and backend that doesn't have complex login logic like the version in **main**. It is meant to be run locally (except for the postgresDB, which is running in a cloudSQL instance on GCP). You could also choose to run the postgresdb locally.
 
 ## Description
 
-Movie Guru is a website that helps users find movies to watch through an RAG powered chatbot. The movies are all fictional and are generated using GenAI. 
+Movie Guru is a website that helps users find movies to watch through an RAG powered chatbot. The movies are all fictional and are generated using GenAI.
 The goal of this repo is to explore the best practices when building AI powered applications.
 
 This demo is *NOT* endorsed by Google or Google Cloud.  
 The repo is intended for educational/hobbyists use only.
 
-Refer to the readme in the **main** branch for more information. 
-
+Refer to the readme in the **main** branch for more information.
 
 ## Overall Architecture
 
 The application follows a standard client-server model:
 
 * **Frontend (Vue.js):**
-    * Handles user interactions, displays movie suggestions, and manages the chat interface.
+  * Handles user interactions, displays movie suggestions, and manages the chat interface.
+
 * **Web Backend (Go):**
     * The backend hosts the webserver.
     * Provides an API for the frontend to interact with.
     * Communicates with the Flows backend to execute the AI tasks that are a part of the application.
-* **Flows Backend (Go-Genkit/ JS-Genkit):** 
+
+* **Flows Backend (Go-Genkit/ JS-Genkit):**
     * There are 2 options for the *flows*. The two versions have identical functionality and can be used interchangibly:
-        * Go-Genkit 
-        * JS-Genkit (WIP)
+        * Go-Genkit
+        * JS-Genkit (preferred)
+  
     * The flows run the AI flows using Genkit. See the **FLOW** section below for more information.
     * Connects to GenAI models (through VertexAI APIs) to chat with users.
-    * Connects to the VectorDB (CloudSQL with pgvector) to search for movies and information about movies.
+    * Connects to the VectorDB (CloudSQL with pgvector or local pgvector db) to search for movies and information about movies.
 
 ## Deployment
+
 * **Frontend**: Deployed in a docker container.
 * **Web Backend:** Deployed in a docker container.
 * **Flows Backend:** Deployed in a docker container.
 * **Cache:**  Redis cache is used as a cache to improve performance and reduce latency for frequently accessed data like chat history. Deployed in a docker container.
 * **Database:** The movies with their embeddings and user preferences dbs are deplyed on a CloudSQL postgres db. Can also be deployed in a docker container.
 
-
 ### Flow
-There are 3 agents used in this repo and are part of the backend. While they differ greatly in their roles, they are mostly similar in structure. All agents use a Gemini model through VertexAI APIs. 
+
+There are 3 flows used in this repo and are part of the backend. While they differ greatly in their roles, they are mostly similar in structure. All agents use a Gemini model through VertexAI APIs.
 
 This describes how the Go-Genkit backend agents works.
-* **The User Profile / User Preferences Flow**: Used to analyse the user message and extract any long-lasting likes and dislikes from the conversation. 
+
+* **The User Profile / User Preferences Flow**: Used to analyse the user message and extract any long-lasting likes and dislikes from the conversation.
 * **The Query Transform Flow**: Analyses the last (max 10) messages in the history to extract the context and understand the user's latest message. For example, if the if the agent mentions, that it knows of 3 horror movies (movies A, B, C) and the user then asks to know more about "the last one", the query transform agent analyses this and states that the user's query is to know more about "movie C". The output of this agent is passed onto the retriever to retrieve relevant documents.
 * **The Movie Flow**: Takes the information about the user's conversation, their profile, and the documents related to the context of the conversation and returns a response. The response consists of the answer, the justfication of hte answer, and finally a list of relevant movies that are related to the answer.
 * **The Doc Retriever Flow**: Takes a user query and returns relevant documents from the vector database. This flow is responsible for generating a vector representation of the query, and returning the relevant documents from the PGVector database.
@@ -122,7 +127,7 @@ GRANT SELECT ON movies TO "minimal-user";
 GRANT SELECT, INSERT, UPDATE, DELETE ON user_preferences TO "minimal-user";
 ```
 
-### Create tables (Local DB)
+### Create tables (if using Local DB)
 
 There is a local version of the db with pre-populated data.
 To use that instead run the following
