@@ -47,12 +47,10 @@ The application follows a standard client-server model:
 
 There are 3 flows used in this repo and are part of the backend. While they differ greatly in their roles, they are mostly similar in structure. All agents use a Gemini model through VertexAI APIs.
 
-This describes how the Go-Genkit backend agents works.
-
 * **The User Profile / User Preferences Flow**: Used to analyse the user message and extract any long-lasting likes and dislikes from the conversation.
 * **The Query Transform Flow**: Analyses the last (max 10) messages in the history to extract the context and understand the user's latest message. For example, if the if the agent mentions, that it knows of 3 horror movies (movies A, B, C) and the user then asks to know more about "the last one", the query transform agent analyses this and states that the user's query is to know more about "movie C". The output of this agent is passed onto the retriever to retrieve relevant documents.
 * **The Movie Flow**: Takes the information about the user's conversation, their profile, and the documents related to the context of the conversation and returns a response. The response consists of the answer, the justfication of hte answer, and finally a list of relevant movies that are related to the answer.
-* **The Doc Retriever Flow**: Takes a user query and returns relevant documents from the vector database. This flow is responsible for generating a vector representation of the query, and returning the relevant documents from the PGVector database.
+* **The Movie Doc Flow**: Takes a user query and returns relevant documents from the vector database. This flow is responsible for generating a vector representation of the query, and returning the relevant documents from the PGVector database using a retriever .
 * **Indexer Flow**: This flow is run to add the *movies* data into the vector database. This flow parses each entry in the *dataset/movies_withy_posters.csv* file, restructures it, creates a vector embedding and adds the resturctured data with the embeddings to the Postgres PGVector database. This flow is only invoked once during the setup of the application.
 
 ### Data
