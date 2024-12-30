@@ -59,7 +59,7 @@ Refer to the readme in the **main** branch for more information.
 1. **User Profile Flow:** Extracts user preferences from conversations.
 2. **Query Transform Flow:** Maps vague user queries to specific database queries.
 3. **Movie Flow:** Combines user data and relevant documents to provide responses.
-4. **Movie Doc Flow:** Retrieves relevant documents from the vector database.
+4. **Movie Doc Flow:** Retrieves relevant documents from the vector database. Perform a keyword based, vector based, or mixed search based on the type of query.
 5. **Indexer Flow:** Parses movie data and adds it to the vector database.
 
 ### Data
