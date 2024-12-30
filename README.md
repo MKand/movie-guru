@@ -1,8 +1,28 @@
-# Movie Guru
+# Table of Contents
+
+- [Table of Contents](#table-of-contents)
+  - [Movie Guru](#movie-guru)
+  - [Description](#description)
+  - [Overall Architecture](#overall-architecture)
+    - [Components](#components)
+  - [Deployment](#deployment)
+    - [Docker Containers](#docker-containers)
+  - [Flows](#flows)
+    - [Data](#data)
+    - [Postgres](#postgres)
+  - [Environment setup](#environment-setup)
+    - [Prerequisites](#prerequisites)
+    - [Steps](#steps)
+  - [Database Setup](#database-setup)
+  - [Run the Application](#run-the-application)
+
+## Movie Guru
+
+**Genkit version**: 0.9.12 for Node.js
 
 [![Movie Guru](https://img.youtube.com/vi/l_KhN3RJ8qA/0.jpg)](https://youtu.be/YOUR_VIDEO_ID)
 
- This version is a *minimal version* of the frontend and backend that doesn't have complex login logic like the version in **main**. It is meant to be run locally (except for the postgresDB, which is running in a cloudSQL instance on GCP). You could also choose to run the postgresdb locally.
+ This version is a *minimal version* of the frontend and backend that doesn't have complex login logic like the version in **main**. It is meant to be run fully locally while using VertexAI APIs.
 
 ## Description
 
@@ -16,194 +36,177 @@ Refer to the readme in the **main** branch for more information.
 
 ## Overall Architecture
 
-The application follows a standard client-server model:
+### Components
 
-* **Frontend (Vue.js):**
-  * Handles user interactions, displays movie suggestions, and manages the chat interface.
-
-* **Web Backend (Go):**
-    * The backend hosts the webserver.
-    * Provides an API for the frontend to interact with.
-    * Communicates with the Flows backend to execute the AI tasks that are a part of the application.
-
-* **Flows Backend (Go-Genkit/ JS-Genkit):**
-    * There are 2 options for the *flows*. The two versions have identical functionality and can be used interchangibly:
-        * Go-Genkit (this uses an older version of genkit and needs to be upgraded)
-        * JS-Genkit (preferred)
-  
-    * The flows run the AI flows using Genkit. See the **FLOW** section below for more information.
-    * Connects to GenAI models (through VertexAI APIs) to chat with users.
-    * Connects to the VectorDB (CloudSQL with pgvector or local pgvector db) to search for movies and information about movies.
+- **Frontend (Vue.js):** User interface for interacting with the chatbot.
+- **Web Backend (Go):** Handles API requests and communicates with the Flows Backend.
+- **Flows Backend (Genkit for Node):** Orchestrates AI tasks, connects to GenAI models, and interacts with a vector database.
+- **Database:** Stores movie data, embeddings, and user profiles in a local Postgres databse with `pgvector`.
+- **Cache (Redis):** Caches conversation history and session data.
 
 ## Deployment
 
-* **Frontend**: Deployed in a docker container.
-* **Web Backend:** Deployed in a docker container.
-* **Flows Backend:** Deployed in a docker container.
-* **Cache:**  Redis cache is used as a cache to improve performance and reduce latency for frequently accessed data like chat history. Deployed in a docker container.
-* **Database:** The movies with their embeddings and user preferences dbs are deplyed on a CloudSQL postgres db. Can also be deployed in a docker container.
+### Docker Containers
 
-### Flow
+- **Frontend:** Vue.js application.
+- **Web Backend:** Go-based API server.
+- **Flows Backend:** Node.js-based AI task orchestrator.
+- **Cache:** Redis for caching chat history and sessions.
+- **Database:** Postgres with `pgvector`.
 
-There are 3 flows used in this repo and are part of the backend. While they differ greatly in their roles, they are mostly similar in structure. All agents use a Gemini model through VertexAI APIs.
+## Flows
 
-* **The User Profile / User Preferences Flow**: Used to analyse the user message and extract any long-lasting likes and dislikes from the conversation.
-* **The Query Transform Flow**: Analyses the last (max 10) messages in the history to extract the context and understand the user's latest message. For example, if the if the agent mentions, that it knows of 3 horror movies (movies A, B, C) and the user then asks to know more about "the last one", the query transform agent analyses this and states that the user's query is to know more about "movie C". The output of this agent is passed onto the retriever to retrieve relevant documents.
-* **The Movie Flow**: Takes the information about the user's conversation, their profile, and the documents related to the context of the conversation and returns a response. The response consists of the answer, the justfication of hte answer, and finally a list of relevant movies that are related to the answer.
-* **The Movie Doc Flow**: Takes a user query and returns relevant documents from the vector database. This flow is responsible for generating a vector representation of the query, and returning the relevant documents from the PGVector database using a retriever .
-* **Indexer Flow**: This flow is run to add the *movies* data into the vector database. This flow parses each entry in the *dataset/movies_withy_posters.csv* file, restructures it, creates a vector embedding and adds the resturctured data with the embeddings to the Postgres PGVector database. This flow is only invoked once during the setup of the application.
+1. **User Profile Flow:** Extracts user preferences from conversations.
+2. **Query Transform Flow:** Maps vague user queries to specific database queries.
+3. **Movie Flow:** Combines user data and relevant documents to provide responses.
+4. **Movie Doc Flow:** Retrieves relevant documents from the vector database.
+5. **Indexer Flow:** Parses movie data and adds it to the vector database.
 
 ### Data
 
-* The data about the movies is stored in CloudSQL pgVector database. There are around 600 movies, with a plot, list of actors, director, rating, genre, and poster link. The posters are stored in a cloud storage bucket.
-* The user's profile data (their likes and dislikes) are stored in the CloudSQL database.
-* The user's conversation history is stored in memory store for Redis. Only the most recent 10 messages are stored. This number is configurable. The session info for the webserver is also stored in memory store.
+- The data about the movies is stored in a pgVector database. There are around 600 movies, with a plot, list of actors, director, rating, genre, and poster link. The posters are stored in a cloud storage bucket.
+- The user's profile data (their likes and dislikes) are stored in the CloudSQL database.
+- The user's conversation history is stored in a local redis cache. Only the most recent 10 messages are stored. This number is configurable. The session info for the webserver is also stored in memory store.
 
-### CloudSQL
+### Postgres
 
 There are 2 tables:
 
-* *movies*: This contains the information about the AI Generated movies and their embeddings. The data for the table is found in dataset/movies_with_posters.csv. If you choose to host your own posters, replace the links in this file.
-* *user_preferences*: This contains the user's long term preferences profile information. 
+- *movies*: This contains the information about the AI Generated movies and their embeddings. The data for the table is found in dataset/movies_with_posters.csv. If you choose to host your own posters, replace the links in this file.
+- *user_preferences*: This contains the user's long term preferences profile information.
 
-## Getting Started
+## Environment setup
 
-Make sure you have deployed the core infrastructure (mainly postgres db, service accounts, and DB users), and enabled the APIs for this application. We'll perform the first step *Steps for backend infra* in the **main** branch (instructions are added here for convenience).
+### Prerequisites
 
-```sh
-git checkout main
-export PROJECT_ID=<set project id>
-./deploy/deploy.sh --skipapp --backend genkit-go 
-```
+- A Google Cloud project with owner permissions.
+- Tools:
+  - [Google Cloud CLI](https://cloud.google.com/sdk/docs/install)
+  - Docker and Docker Compose
+- Required APIs enabled (will be performed in `setup_local.sh`).
 
-Once finished, go back to the ghack-version branch.
+### Steps
 
-```sh
-git checkout genkit-version
-```
+1. **Clone the Repository**
 
-## Create and populate the database
+   ```sh
+   git clone https://github.com/MKand/movie-guru.git
+   cd movie-guru
+   git checkout <current-branch> # Replace with branch name
+   ```
 
-### Create tables (if using Cloud SQL)
+1. Authenticate with Google Cloud
 
-Connect to the sql db through the **Cloud Sql Studio**.
-For ease of use, the terraform script when creating the db allows all IPs to access the db. This is not good practice in production.
-We will use the **main** user for this step. If you followed the getting started step, you would have a postgres DB with a **main** user. The DB password for **main** user (and the **minimal-user**) is stored in the secret manager in the project.
+    ```sh
+    gcloud auth login
+    gcloud config set project <YOUR_PROJECT_ID>
+    ```
 
-```SQL
-CREATE EXTENSION IF NOT EXISTS vector;
+1. Set the require environment variables
 
-CREATE TABLE IF NOT EXISTS movies (
-    tconst VARCHAR PRIMARY KEY,
-    embedding VECTOR(768),
-    title VARCHAR,
-    runtime_mins INTEGER,
-    genres VARCHAR,
-    rating NUMERIC(3, 1),
-    released INTEGER,
-    actors VARCHAR,
-    director VARCHAR,
-    plot VARCHAR,
-    poster VARCHAR,
-    content VARCHAR
-);
+    ```sh
+    export PROJECT_ID=<YOUR_PROJECT_ID>
+    export LOCATION=<YOUR_DESIRED_GCLOUD_REGION> # defaults to us-central1 if this is not set
+    ```
 
-CREATE TABLE user_preferences (
-  "user" VARCHAR(255) NOT NULL, 
-  preferences JSON NOT NULL,
-  PRIMARY KEY ("user")
-);
+1. Run setup script.
 
-```
+    ```sh
+    chmod +x setup_local.sh
+    ./setup_local.sh
+    ```
 
-## Reduce the permissions on the minimal-user
+This enables the required APIs and creates the necessary service account with roles.
 
-The **minimal user** should be allowed to only read data from the movies table and read and write to the user_preferences table. This is the user we will use for the application. You can choose to just use the **main** user instead for all db activities. If that is the case, update the docker-compose files and the set_env_vars.sh script.
+## Database Setup
 
-```SQL
-GRANT SELECT ON movies TO "minimal-user";
-GRANT SELECT, INSERT, UPDATE, DELETE ON user_preferences TO "minimal-user";
-```
+1. Create a shared network for all the app containers we will use
 
-### Create tables (if using Local DB)
+    ```sh
+    docker network create db-shared-network
+    ```
 
-There is a local version of the db with pre-populated data.
-To use that instead run the following
+1. Setup local DB
+We'll setup a local *pgvecto*r db and an *Adminer* instance
 
-```sh
-docker compose -f docker-compose-pgvector.yaml up -d
-```
+    ```sh
+    docker compose -f docker-compose-pgvector.yaml up -d
+    ```
 
-If you navigate to *localhost:8082*, you can access the db via *Adminer*. Use the main user credentials (user name: main, password: mainpassword).
+Navigate to *localhost:8082*, to access the db via *Adminer*. Use the main user credentials (user name: main, password: mainpassword).
 
 At this stage, there will be 2 tables, with no data. We will populate the table in the next steps.
 
-We'll grant the necessary permissions to minimal-user.
+1. Grant the necessary permissions to minimal-user.
 
-```SQL
-GRANT SELECT ON movies TO "minimal-user";
-GRANT SELECT, INSERT, UPDATE, DELETE ON user_preferences TO "minimal-user";
-```
+    ```SQL
+    GRANT SELECT ON movies TO "minimal-user";
+    GRANT SELECT, INSERT, UPDATE, DELETE ON user_preferences TO "minimal-user";
+    ```
 
-### Populating the movie table
+1. Populate the movie table
 
-First, edit the *set_env_vars.sh* file. Update the project id, to reflect the ID of the GCP project you are using. If you are using a CloudSQL db, then you'll need to also update the postgres host, user name, and passwords to the correct ones. If you are running the local db, then you can leave the DB related env variables as is.
-Then run the following command.
+    ```sh
+    source set_env_vars.sh
+    export PROJECT_ID=<YOUR_PROJECT_ID>
+    export LOCATION=<YOUR_DESIRED_GCLOUD_REGION> # defaults to us-central1 if this is not set
+    ```
 
-```sh
-source set_env_vars.sh
-```
+1. Download the JSON key for the service account
 
-Next:
+    This is required for you to be able to grant your docker containers access to the Vertex APIs
 
-* Go to the project in the GCP console. Go to **IAM > Service Accounts**.
-* Select the movie guru service account (movie-guru-chat-server-sa@<project id>.iam.gserviceaccount.com). * Create a new JSON key.
-* Download the key and store it as **.key.json** in the root of this repo (make sure you use the filename exactly).
+    **Note:** This step requires you to have the ability to create JSON keys for a service account. It may be disabled by some organizations.
 
-This key is used to authorise the **indexer** and the **flows** backend to use the VertexAI APIs needed to generate the embeddings and query the model.
+    - Go to the project in the GCP console. Go to **IAM > Service Accounts**.
+    - Select the movie guru service account (movie-guru-local-sa@<project id>.iam.gserviceaccount.com).
+    - Create a new JSON key.
+    - Download the key and store it as **.key.json** in the root of this repo (make sure you use the filename exactly).
 
-Let's run the javascript indexer so it can add movies data into the database. The execution of this intentionally slowed down to stay below the ratelimits.
+1. Run the javascript indexer so it can add movies data into the database. The execution of this intentionally slowed down to stay below the rate-limits.
 
-```sh
-docker compose -f docker-compose-indexer.yaml up --build -d 
-```
+    ```sh
+    docker compose -f docker-compose-indexer.yaml up --build -d 
+    ```
 
-This takes about 10-15 minutes to run, so be patient. The embedding creation process is slowed down intentionally to ensure we stay under the rate limit.
-You can run the command below to ensure there are **652** entries in the db.
+    This takes about 10-15 minutes to run, so be patient. The embedding creation process is slowed down intentionally to ensure we stay under the rate limit.
 
-```sql
-SELECT COUNT(*)
-FROM "movies";
-```
+1. Verify the number of entries in the DB.
+There should be **652** entries in the movies table.
 
-Lets turn down the container.
+    ```sql
+    SELECT COUNT(*)
+    FROM "movies";
+    ```
 
-```sh
-docker compose -f docker-compose-indexer.yaml down
-```
+1. Shut down the indexer container.
 
-Once all the required data is added, it is time to run the application that consists of the **frontend**, the **webserver**, the **genkit flows** server and the **redis cache**. These will be running locally in containers. The servers communicate with the **postgres DB** running in the cloud.
+    ```sh
+    docker compose -f docker-compose-indexer.yaml down
+    ```
 
-## Run the app
+Once all the required data is added, it is time to run the application that consists of the **frontend**, the **webserver**, the **genkit flows** server and the **redis cache**. These will be running locally in containers. The servers communicate with the **postgres DB** also running locally in a container.
 
-Let us make sure the env variables are in the execution context of docker-compose.
-Re-run this if you are using a new terminal. If you've run it once before, its ok to re-run it.
-Make sure you replace the dummy values in the file with real ones before you run it.
+## Run the Application
 
-```sh
-source set_env_vars.sh 
-```
+1. Make sure the env variables are in the execution context of docker compose.
 
-Now, let's get the application running.
+    ```sh
+    source set_env_vars.sh
+    export PROJECT_ID=<YOUR_PROJECT_ID>
+    export LOCATION=<YOUR_DESIRED_GCLOUD_REGION> # defaults to us-central1 if this is not set
+    ```
 
-```sh
-docker compose up --build
-```
+1. Start the application.
 
-This should start the application. You can go to **http://localhost:5173** to visit the front end and interact with the application.
+    ```sh
+    docker compose up --build
+    ```
 
-Once finished, run the following to take the application down.
+1. Access the Application Open http://localhost:5173 in your browser.
 
-```sh
-docker compose down
-```
+1. Once finished, stop the application.
+
+    ```sh
+    docker compose down
+    ```
