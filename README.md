@@ -28,7 +28,7 @@ The application follows a standard client-server model:
 
 * **Flows Backend (Go-Genkit/ JS-Genkit):**
     * There are 2 options for the *flows*. The two versions have identical functionality and can be used interchangibly:
-        * Go-Genkit
+        * Go-Genkit (this uses an older version of genkit and needs to be upgraded)
         * JS-Genkit (preferred)
   
     * The flows run the AI flows using Genkit. See the **FLOW** section below for more information.
