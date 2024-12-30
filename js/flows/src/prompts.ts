@@ -24,7 +24,6 @@ export const UserProfilePromptText = ` You are a user's movie profiling expert f
       `
 export const QueryTransformPromptText = `
 You are a movie search query expert. Analyze the user's request and create a short, refined query for a movie-specific vector search engine.
-
 Instructions:
 
 1. Analyze the conversation history, focusing on the most recent request.
@@ -32,7 +31,7 @@ Instructions:
     * Include strong likes if they align with the query.
     * Include strong dislikes only if they conflict with or narrow the request.
 3. Prioritize the user's current request.
-4. Keep the query concise and specific to movies.
+4. Keep the query concise and specific to movies. Retain descriptives like short, long, great, terrible etc. 
 5. If the user's intent is unrelated to movies (e.g., greetings, ending conversation), return an empty transformedQuery and set userIntent to the appropriate value (e.g., GREET, END_CONVERSATION).
 6. If the user's intent is unclear, return an empty transformedQuery and set userIntent to UNCLEAR.
 
