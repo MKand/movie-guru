@@ -9,12 +9,15 @@ import { gemini15Flash } from '@genkit-ai/vertexai';
 import { DocSearchFlowPromptText } from './prompts';
 import { ModelOutputMetadata, ModelOutputMetadataSchema } from './modelOutputMetadataTypes';
 
-const SearchTypeCategory = z.enum(['KEYWORD', 'VECTOR', 'NONE']);
+const SearchTypeCategory = z.enum(['KEYWORD', 'VECTOR', 'MIXED', 'NONE']);
 
 
 export const RetrieverOptionsSchema = z.object({
   k: z.number().optional().default(10),
-  searchCategory: SearchTypeCategory.optional().default("VECTOR")
+  searchCategory: SearchTypeCategory.optional().default("VECTOR"),
+  keywordQuery: z.string().default(""),
+  vectorQuery: z.string().default(""),
+
 });
 
 export const QuerySchema = z.object({
@@ -22,7 +25,8 @@ export const QuerySchema = z.object({
 });
 
 export const SearchFlowOutputSchema = z.object({
-  outputQuery: z.string().optional(),
+  keywordQuery: z.string().optional(),
+  vectorQuery: z.string().optional(),
   searchCategory: SearchTypeCategory,
   modelOutputMetadata: ModelOutputMetadataSchema,
 });
@@ -57,7 +61,8 @@ export const MovieDocFlow = ai.defineFlow(
     }
     const jsonResponse = JSON.parse(response.text)
     const searchFlowOutput = {
-      outputQuery: jsonResponse.outputQuery || "",
+      vectorQuery: jsonResponse.vectorQuery || "",
+      keywordQuery: jsonResponse.keywordQuery || "",
       searchCategory: jsonResponse.searchCategory || 'VECTOR',
       modelOutputMetadata: {
         justification: jsonResponse.justification || "",
@@ -68,11 +73,13 @@ export const MovieDocFlow = ai.defineFlow(
     const docs = await ai.retrieve({
       retriever: sqlRetriever,
       query: {
-        content: [{ text: searchFlowOutput.outputQuery }],
+        content: [{ text: "" }],
       },
       options: {
         k: 10,
-        searchCategory: searchFlowOutput.searchCategory
+        searchCategory: searchFlowOutput.searchCategory,
+        keywordQuery: searchFlowOutput.keywordQuery,
+        vectorQuery: searchFlowOutput.vectorQuery
       },
     });
     const movieContexts: MovieContext[] = [];
@@ -116,7 +123,7 @@ export const sqlRetriever = ai.defineRetriever(
     if(options.searchCategory == "KEYWORD"){
       const sqlQuery = `SELECT content, title, poster, released, runtime_mins, rating, genres, director, actors, plot, tconst
       FROM movies
-      WHERE ${query.text}
+      WHERE ${options.keywordQuery}
       LIMIT ${options.k ?? 10}`
       results = await db.unsafe(sqlQuery)
     }
@@ -125,7 +132,7 @@ export const sqlRetriever = ai.defineRetriever(
      if(options.searchCategory == "VECTOR"){
       const embedding = await ai.embed({
         embedder: textEmbedding004,
-        content: query,
+        content: options.vectorQuery,
       });  
         results = await db`
         SELECT content, title, poster, released, runtime_mins, rating, genres, director, actors, plot, tconst

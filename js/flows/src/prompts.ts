@@ -113,60 +113,88 @@ Movie:
 
 
 export const DocSearchFlowPromptText = `
-Analyze the inputQuery string: "{{query}}" with respect to a movie database with these fields:
-    *  embedding: Vector representation of the movie's title, plot, and genres.
-    *  genres: List of genres (e.g., "Action", "Comedy", "Drama").
-    *  title: Title of the movie.
-    *  plot: A textual summary of the movie's plot.
-    *  runtime_mins: Duration of the movie in minutes.
-    *  released: Release year of the movie.
-    *  actors: List of actors in the movie.
-    *  director: Director of the movie.
-    *  rating: Numerical rating from 1 to 5.
+Analyze the inputQuery string: "{{query}}" with respect to a movie database containing the following fields:
 
-    Determine if the query is best satisfied by a **KEYWORD** or **VECTOR** search.
-    Queries involving searching for genres are automatically Vector search.
+embedding: Vector representation of the movie's title, plot, and genres.
+genres: List of genres (e.g., "Action", "Comedy", "Drama").
+title: Title of the movie.
+plot: A textual summary of the movie's plot.
+runtime_mins: Duration of the movie in minutes.
+released: Release year of the movie.
+actors: List of actors in the movie.
+director: Director of the movie.
+rating: Numerical rating from 1 to 5.
+Task:
 
-    **KEYWORD search:** Use for queries that can be expressed with simple SQL operators (=, !=, >, <, IN) on the title, actors, director, genres, runtime_mins, or released fields.
-    
-    *   Do not include the WHERE keyword in the output query.
-    *   Some user queries might need to be transformed (for KEYWORD search). Where this is necessary is:
-       - User is asking for movies based on their lengths, ratings, quality or recency. 
-            Before classifying, apply these transformations to the inputQuery:
-            *   Movie quality:
-                *   Bad: rating < 2
-                *   Good: rating > 3.5
-                *   Great: rating > 4.5
-                *   Terrible: rating < 1
-                *   Average: rating BETWEEN 2 AND 3.5
-            *   Movie length:
-                *   short: runtime_mins < 20
-                *   long: runtime_mins > 120
-                *   very long: runtime_mins > 150
-            *   Movie year:
-                *   recent: released > 2020
-                *   old: released < 2005
-            Examples:
-              inputQuery: "great movie that is short" 
-              outputQuery: "rating > 4.5 AND runtime_mins < 20" 
-    *   Examples:
-        *   inputQuery: "movie with a rating higher than 3". outputQuery: "rating > 3"
-        *   inputQuery: "movies with actress Tilda Swinton". outputQuery: "'Tilda Swinton' IN actors" 
-        *   inputQuery: "movies released after 2000". outputQuery: "released > 2000"
+Determine the appropriate search category for the query: KEYWORD, VECTOR, or MIXED.
 
-    **VECTOR search:** Use for queries requiring semantic understanding of the title, plot, or genres fields. This includes:
+1. KEYWORD search: Use when the query can be expressed with SQL operators for the postgres db (e.g., =, !=, >, <, IN) on the title, actors, director, genres, runtime_mins, released, or rating fields.
+Queries about movie quality, length, or release year may require transforming the query for KEYWORD search.
+If the query contains text searches, make them case insensitive.
+Transformations:
+    Movie Quality:
+        Bad: rating < 2
+        Average: rating BETWEEN 2 AND 3.5
+        Good: rating > 3.5
+        Great: rating > 4.5
+        Terrible: rating < 1
+    Movie Length:
+        Short: runtime_mins < 20
+        Long: runtime_mins > 120
+        Very Long: runtime_mins > 150
+    Movie Year:
+        Recent: released > 2020
+        Old: released < 2005
+Examples of transformed KEYWORD queries:
+    Input: "great movie that is short"
+    Output: 
+        searchCategory: KEYWORD
+        KeywordQuery: "rating > 4.5 AND runtime_mins < 20"
+        VectorQuery: ""
+    Input: "movies released after 2000"
+    Output: 
+        searchCategory: KEYWORD
+        KeywordQuery: "released > 2000"
+        VectorQuery: ""
+    Input: "movies with tom hanks"
+    Output: 
+        searchCategory: KEYWORD
+        KeywordQuery: "'Tom Hanks' ILIKE ANY(actors)'"
+        VectorQuery: ""
+2. VECTOR search: Use when the query requires semantic understanding of title, plot, or genres. Applicable for queries involving concepts, emotions, themes, or natural language descriptions.
+Searches that involve genres should always have a vector query.
+Examples of VECTOR queries:
+    Input: "movies with strong female leads"
+    Output: 
+        searchCategory: VECTOR
+        KeywordQuery: ""
+        VectorQuery: "strong female leads"
+    Input: "find movies like The Matrix"
+    Output:  
+        searchCategory: VECTOR
+        KeywordQuery: ""
+        VectorQuery: "like The Matrix"
+    Input: "romantic films"
+    Output:  
+        searchCategory: VECTOR
+        KeywordQuery: ""
+        VectorQuery: "romance"
+3. MIXED KEYWORD and VECTOR search: Use when part of the query relates to structured fields (KEYWORD search), while another part involves semantic understanding (VECTOR search).
+Example:
+    Input: "fun movies released after 2004"
+    Output:
+        searchCategory: MIXED
+        KeywordQuery: "fun movies"
+        VectorQuery: "released > 2004"
+    Input: "horror movies with great ratings that have Tom Hanks"
+    Output:
+        searchCategory: MIXED
+        "KeywordQuery": "rating > 4.5 AND 'Tom Hanks' ILIKE ANY(actors)",
+        VectorQuery: "horror"
 
-    *   Queries about concepts, emotions, or themes.
-    *   Queries matching analogies or metaphors (e.g., "movies that make you cry").
-    *   Important: Any query that would require the LIKE operator in SQL on the title, plot, or genres fields should be classified as a **VECTOR** search.
-    *   Return a more concise form of the inputQuery as the outputQuery
-    *   Examples:
-        *   inputQuery: "movies with strong female leads" . outputQuery: "strong female leads" 
-        *   inputQuery: "movies with location names in their titles". outputQuery: "location names in their titles"
-        *   inputQuery: "find movies like The Matrix". outputQuery: "like The Matrix"
-    
-    Respond with the following infomation:
-    * an *outputQuery*, as described above.
-    * a *searchCategory*, as described above.
-    * a *justification* about why you answered the way you did, with specific references to the context documents whenever possible.
-    * a *safetyIssue* returned as true if the query is considered dangerous.`
+Respond with the following:
+    keywordQuery: A concise representation of the query, empty if needed.
+    vectorQuery: A concise representation of the query, empty if needed.
+    searchCategory: The determined category: KEYWORD, VECTOR, or BOTH.
+    justification: Explanation of the classification, referencing specific fields or transformations where applicable.
+    safetyIssue: Return true if the query is dangerous (e.g., potentially harmful or inappropriate); otherwise, return false.`
