@@ -5,7 +5,7 @@ services:
       - "4000:4000"
       - "3400:3400"
     environment:
-      - POSTGRES_HOST=$POSTGRES_HOST
+      - POSTGRES_HOST=db
       - PROJECT_ID=$PROJECT_ID
       - POSTGRES_DB_USER_PASSWORD=minimalpassword
       - POSTGRES_DB_USER=minimal-user

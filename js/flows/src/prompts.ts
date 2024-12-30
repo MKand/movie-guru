@@ -110,3 +110,63 @@ Movie:
 
   Important: Always check if a question complies with your mission before answering. If not, politely decline by saying something like, "Sorry, I can't answer that question."
 `
+
+
+export const DocSearchFlowPromptText = `
+Analyze the inputQuery string: "{{query}}" with respect to a movie database with these fields:
+    *  embedding: Vector representation of the movie's title, plot, and genres.
+    *  genres: List of genres (e.g., "Action", "Comedy", "Drama").
+    *  title: Title of the movie.
+    *  plot: A textual summary of the movie's plot.
+    *  runtime_mins: Duration of the movie in minutes.
+    *  released: Release year of the movie.
+    *  actors: List of actors in the movie.
+    *  director: Director of the movie.
+    *  rating: Numerical rating from 1 to 5.
+
+    Determine if the query is best satisfied by a **KEYWORD** or **VECTOR** search.
+    Queries involving searching for genres are automatically Vector search.
+
+    **KEYWORD search:** Use for queries that can be expressed with simple SQL operators (=, !=, >, <, IN) on the title, actors, director, genres, runtime_mins, or released fields.
+    
+    *   Do not include the WHERE keyword in the output query.
+    *   Some user queries might need to be transformed (for KEYWORD search). Where this is necessary is:
+       - User is asking for movies based on their lengths, ratings, quality or recency. 
+            Before classifying, apply these transformations to the inputQuery:
+            *   Movie quality:
+                *   Bad: rating < 2
+                *   Good: rating > 3.5
+                *   Great: rating > 4.5
+                *   Terrible: rating < 1
+                *   Average: rating BETWEEN 2 AND 3.5
+            *   Movie length:
+                *   short: runtime_mins < 20
+                *   long: runtime_mins > 120
+                *   very long: runtime_mins > 150
+            *   Movie year:
+                *   recent: released > 2020
+                *   old: released < 2005
+            Examples:
+              inputQuery: "great movie that is short" 
+              outputQuery: "rating > 4.5 AND runtime_mins < 20" 
+    *   Examples:
+        *   inputQuery: "movie with a rating higher than 3". outputQuery: "rating > 3"
+        *   inputQuery: "movies with actress Tilda Swinton". outputQuery: "'Tilda Swinton' IN actors" 
+        *   inputQuery: "movies released after 2000". outputQuery: "released > 2000"
+
+    **VECTOR search:** Use for queries requiring semantic understanding of the title, plot, or genres fields. This includes:
+
+    *   Queries about concepts, emotions, or themes.
+    *   Queries matching analogies or metaphors (e.g., "movies that make you cry").
+    *   Important: Any query that would require the LIKE operator in SQL on the title, plot, or genres fields should be classified as a **VECTOR** search.
+    *   Return a more concise form of the inputQuery as the outputQuery
+    *   Examples:
+        *   inputQuery: "movies with strong female leads" . outputQuery: "strong female leads" 
+        *   inputQuery: "movies with location names in their titles". outputQuery: "location names in their titles"
+        *   inputQuery: "find movies like The Matrix". outputQuery: "like The Matrix"
+    
+    Respond with the following infomation:
+    * an *outputQuery*, as described above.
+    * a *searchCategory*, as described above.
+    * a *justification* about why you answered the way you did, with specific references to the context documents whenever possible.
+    * a *safetyIssue* returned as true if the query is considered dangerous.`
