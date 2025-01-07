@@ -95,7 +95,7 @@ Movie:
 - actors:{{this.actors}} 
 - directors:{{this.directors}} 
 - rating:{{this.rating}} 
-- runtimeMinutes:{{this.runtimeMinutes}}
+- runtimeMinutes:{{this.runtime_minutes}}
 - released:{{this.released}} 
 {{/each}}
 
@@ -138,7 +138,7 @@ Transformations:
         Great: rating > 4.5
         Terrible: rating < 1
     Movie Length:
-        Short: runtime_mins < 20
+        Short: runtime_mins < 45
         Long: runtime_mins > 120
         Very Long: runtime_mins > 150
     Movie Year:
