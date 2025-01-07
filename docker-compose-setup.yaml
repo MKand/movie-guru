@@ -1,0 +1,43 @@
+services:
+  db:
+    image: pgvector/pgvector:pg17
+    ports: 
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: mainpassword
+      restart: always
+    volumes:
+      - ./pgvector/init/:/docker-entrypoint-initdb.d/
+    networks:
+      - db-shared-network
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8082:8080
+    networks:
+      - db-shared-network
+  genkit:
+    build: ./genkit
+    ports: 
+      - "4000:4000"
+      - "3400:3400"
+    environment:
+      - POSTGRES_HOST=db
+      - PROJECT_ID=$PROJECT_ID
+      - POSTGRES_DB_USER_PASSWORD=minimalpassword
+      - POSTGRES_DB_USER=minimal-user
+      - POSTGRES_DB_NAME=fake-movies-db      
+      - LOCATION=us-central1
+      - GOOGLE_APPLICATION_CREDENTIALS=/key.json
+      - LOCAL=true
+    volumes:
+      - ./js/flows:/app
+      - ./.key.json:/key.json
+    working_dir: /app
+    networks:
+      - db-shared-network
+
+networks:
+  db-shared-network:
+    external: true

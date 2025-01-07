@@ -1,0 +1,914 @@
+[
+    {
+        "history": [
+            {
+                "role": "",
+                "content": ""
+            }
+        ],
+        "userPreferences": {},
+        "contextDocuments": [
+            {
+            "title": "Feline Secret Agent",
+            "runtime_minutes": 164,
+            "genres": [
+              "Action",
+              "Comedy"
+            ],
+            "rating": 3.4,
+            "plot": "\"Feline Secret Agent\" follows a seemingly ordinary house cat named Whiskers who secretly works for a top-secret government agency, using his feline agility and keen senses to thwart international criminal plots. When a nefarious villain steals a powerful artifact, Whiskers must embark on a perilous mission to retrieve it, facing off against deadly assassins and navigating the treacherous world of espionage.  But Whiskers' true challenge lies in keeping his double life a secret from his unsuspecting owner, a kind-hearted but clueless woman who believes he's just a lazy, pampered pet.",
+            "released": 2021,
+            "director": "Lau Wing Sze",
+            "actors": [
+              "Emma Ferreira",
+              " Louis Wolf",
+              " Melissa Wong"
+            ],
+            "poster": "https://storage.googleapis.com/generated_posters/poster_194.png",
+            "tconst": "185"
+          },
+          {
+            "title": "My Big Fat Greek Wedding 7: The Family Feud Gets Physical (Zorba the Cat Gets Involved)",
+            "runtime_minutes": 165,
+            "genres": [
+              "comedy",
+              "  romance"
+            ],
+            "rating": 4.4,
+            "plot": "The Portokalos family is thrown into chaos when Toula's Aunt Voula discovers a long-lost family recipe for a legendary Greek dish, sparking a bitter rivalry with her sister, Maria.  The feud escalates when Maria's beloved cat, Zorba, goes missing, leading to accusations, wild goose chases, and a hilarious showdown at the annual Greek festival.  Amidst the chaos, Toula must navigate the family drama while trying to keep her own life from falling apart.  In the end, the family learns that love and forgiveness are the most important ingredients of all.",
+            "released": 2017,
+            "director": "Mia Jones",
+            "actors": [
+              "David Brown"
+            ],
+            "poster": "https://storage.googleapis.com/generated_posters/poster_798.png",
+            "tconst": "572"
+          },
+          {
+            "title": "The Singing Platypus of Doom (This One Isnt Really a Wedding Movie",
+            "runtime_minutes": 32,
+            "genres": [
+              "Comedy",
+              " Fantasy"
+            ],
+            "rating": 1.6,
+            "plot": "Percy the platypus, a seemingly ordinary pet, develops a strange ability to sing opera, but his beautiful voice unleashes a series of increasingly bizarre and destructive events.  As the chaos escalates, Percy's owner, a struggling musician named Emily, must uncover the truth behind his newfound talent before the world is consumed by a symphony of destruction.  The only clue is a mysterious, ancient scroll that speaks of a legendary platypus with the power to control the fabric of reality through song.  With the help of a quirky animal behaviorist and a skeptical but determined scientist, Emily races against time to stop Percy's operatic rampage",
+            "released": 2000,
+            "director": "Chow Man Kit",
+            "actors": [
+              "Le Thi Mai",
+              "  Nadine Gordimer"
+            ],
+            "poster": "https://storage.googleapis.com/generated_posters/poster_801.png",
+            "tconst": "575"
+          }
+        ],
+        "userMessage": "I feel like watching movies with cats."
+    },
+    {
+        "history": [
+            {
+                "role": "",
+                "content": ""
+            }
+        ],
+        "userPreferences": {
+        },
+        "contextDocuments": [{
+            "title": "Promises Broken",
+            "runtime_minutes": 156,
+            "genres": [
+              "Fantasy",
+              "Adventure"
+            ],
+            "rating": 2.6,
+            "plot": "A young woman, haunted by a childhood promise to her dying father, embarks on a perilous journey to fulfill his last wish.  Her quest leads her to a hidden world of ancient magic and forgotten secrets, where she must confront her own fears and the consequences of broken promises.  As she unravels the truth behind her father's request, she discovers a sinister plot that threatens to destroy everything she holds dear.  In a race against time, she must choose between fulfilling her promise and protecting the ones she loves.",
+            "released": 2018,
+            "director": "Lauren Baker",
+            "actors": [
+              "Nicholas Adams"
+            ],
+            "poster": "https://storage.googleapis.com/generated_posters/poster_169.png",
+            "tconst": "162"
+          },
+          {
+            "title": "Fates Intertwined",
+            "runtime_minutes": 53,
+            "genres": [
+              "fantasy",
+              " thriller"
+            ],
+            "rating": 1,
+            "plot": "\"Fates Intertwined\" follows a struggling artist who discovers a mysterious antique clock that grants wishes, but at a terrible cost.  As she uses the clock to achieve her dreams, she unwittingly sets in motion a chain of events that unravels the lives of those around her, forcing her to confront the consequences of her actions and the true meaning of destiny.  The clock's power becomes a dangerous temptation, leading her to question whether she can truly control her own fate or if it's already been predetermined.  In a race against time, she must find a way to undo the damage she's caused before it'",
+            "released": 2020,
+            "director": "Matthew Martin",
+            "actors": [
+              "Jose Gonzalez"
+            ],
+            "poster": "https://storage.googleapis.com/generated_posters/poster_849.png",
+            "tconst": "612"
+          },
+          {
+            "title": "The Lost Magic",
+            "runtime_minutes": 79,
+            "genres": [
+              "Fantasy",
+              " Action"
+            ],
+            "rating": 4.5,
+            "plot": "A young magician, disillusioned by the commercialization of his art, discovers an ancient grimoire hidden in his grandfather's attic.  The book unlocks a forgotten world of true magic, but it also attracts the attention of a sinister organization seeking to exploit its power.  Forced to choose between his own ambition and the fate of the world, the magician must master the lost magic before it's too late.  His journey takes him on a thrilling adventure, testing his skills and forcing him to confront the true meaning of magic.",
+            "released": 2014,
+            "director": "Jabari Ali",
+            "actors": [
+              "Chan Wai Shan",
+              "  Harry Brown"
+            ],
+            "poster": "https://storage.googleapis.com/generated_posters/poster_210.png",
+            "tconst": "201"
+          },
+          {
+            "title": "Dragonfires End",
+            "runtime_minutes": 39,
+            "genres": [
+              "Fantasy",
+              " Action"
+            ],
+            "rating": 3.2,
+            "plot": "A young warrior, burdened by a prophecy foretelling the end of dragons, must confront his own inner demons and a powerful sorcerer who seeks to extinguish the last dragonfire.  As the world teeters on the brink of darkness, he must choose between fulfilling the prophecy and saving the creature he has come to love.  His journey leads him to a hidden sanctuary where he discovers the true meaning of sacrifice and the power of hope.  In a climactic battle, he must decide whether to embrace his destiny or defy it, ultimately shaping the fate of both dragons and humanity.",
+            "released": 2006,
+            "director": "Thiago Oliveira",
+            "actors": [
+              "Ananya Sharma"
+            ],
+            "poster": "https://storage.googleapis.com/generated_posters/poster_833.png",
+            "tconst": "603"
+          },
+          {
+            "title": "The Bookworm Butterfly: Adventures in Literary Flight",
+            "runtime_minutes": 113,
+            "genres": [
+              "fantasy",
+              " adventure"
+            ],
+            "rating": 1.9,
+            "plot": "A shy, bookish girl named Lily discovers a magical butterfly that grants her the ability to enter the worlds of her favorite books.  She embarks on thrilling adventures with beloved characters, but soon realizes the power of her own imagination and the importance of finding her own voice.  When the butterfly's magic begins to fade, Lily must use her newfound courage to save the magical realm and return to her own world, forever changed by her literary journey.  Along the way, she learns the true meaning of friendship, bravery, and the power of stories.",
+            "released": 2009,
+            "director": "Anushka Roy",
+            "actors": [
+              "Lam Ka Chun",
+              "  Noah Schulz"
+            ],
+            "poster": "https://storage.googleapis.com/generated_posters/poster_817.png",
+            "tconst": "590"
+          },
+          {
+            "title": "Mystic Visions",
+            "runtime_minutes": 88,
+            "genres": [
+              "Thriller",
+              "Fantasy"
+            ],
+            "rating": 1.8,
+            "plot": "A young woman, haunted by vivid premonitions, discovers she has the ability to see glimpses of the future.  When her visions start revealing a series of devastating events, she must race against time to prevent them, uncovering a hidden conspiracy that threatens to unravel the fabric of reality.  As she delves deeper into the mystery, she must confront her own fears and embrace her destiny, even if it means sacrificing everything she holds dear.  The line between reality and illusion blurs as she navigates a world where the past, present, and future collide.",
+            "released": 2002,
+            "director": "Dylan Long",
+            "actors": [
+              "Lauren Tse",
+              " Mia Bauer"
+            ],
+            "poster": "https://storage.googleapis.com/generated_posters/poster_57.png",
+            "tconst": "57"
+          }
+        ],
+
+        "userMessage": "Show me some movies with fantasy themes."
+    },
+    {
+        "history": [
+            {
+                "role": "",
+                "content": ""
+            }
+        ],
+        "userPreferences": {
+        },
+        "contextDocuments":[{
+            "title": "A Loyal Ally",
+            "runtime_minutes": 63,
+            "genres": [
+              "Action",
+              " Thriller"
+            ],
+            "rating": 3.9,
+            "plot": "A seasoned CIA operative, haunted by a past mission gone wrong, is tasked with protecting a high-profile witness in a dangerous international conspiracy.  As the threats escalate, the operative must confront his own demons and learn to trust a seemingly ordinary woman who holds the key to unraveling the truth.  Their unlikely alliance becomes a race against time to expose the conspiracy and bring the perpetrators to justice, but their loyalty to each other is tested at every turn.  In the end, they must decide whether to sacrifice everything for the greater good.",
+            "released": 2004,
+            "director": "Amari Diallo",
+            "actors": [
+              "Aarav Patel",
+              "  Fiona Gallagher",
+              "  Isabella Martínez"
+            ],
+            "poster": "https://storage.googleapis.com/generated_posters/poster_327.png",
+            "tconst": "315"
+          },
+          {
+            "title": "Destinys End",
+            "runtime_minutes": 126,
+            "genres": [
+              "Thriller",
+              " Action"
+            ],
+            "rating": 4.3,
+            "plot": "A reclusive astrophysicist discovers a rogue asteroid hurtling towards Earth, but his warnings are dismissed as the ramblings of a madman. As the clock ticks down, he must race against time to convince the world of the impending doom and find a way to save humanity before \"Destiny's End\" arrives.",
+            "released": 2023,
+            "director": "Nilak Butler",
+            "actors": [
+              "Isabella Johnson",
+              "  Inuk Olsen"
+            ],
+            "poster": "https://storage.googleapis.com/generated_posters/poster_331.png",
+            "tconst": "319"
+          },
+          {
+            "title": "Gold and Shadow City",
+            "runtime_minutes": 51,
+            "genres": [
+              "Action",
+              " Fantasy"
+            ],
+            "rating": 5,
+            "plot": "In a city built on gold and shrouded in perpetual twilight, a young thief named Elara seeks to steal the legendary Sunstone, a gem rumored to hold the power to banish the city's shadow. But her quest leads her to a conspiracy that threatens to plunge the city into eternal darkness, forcing her to choose between her own freedom and the fate of its inhabitants.  As Elara uncovers the truth, she must confront the city's corrupt elite and a mysterious figure known only as the Shadow Master, who seeks to control the Sunstone's power for his own sinister purposes.",
+            "released": 2008,
+            "director": "Emiliano Ramirez",
+            "actors": [
+              "Mary Johnson"
+            ],
+            "poster": "https://storage.googleapis.com/generated_posters/poster_673.png",
+            "tconst": "520"
+          },
+          {
+            "title": "A Merchants Lucky Break",
+            "runtime_minutes": 54,
+            "genres": [
+              "Thriller",
+              "Fantasy"
+            ],
+            "rating": 4.8,
+            "plot": "A struggling antique shop owner, desperate to save his business, stumbles upon a mysterious, ancient artifact.  He soon discovers the artifact grants him incredible luck, but at a steep price.  As his fortunes rise, he must choose between his newfound wealth and the consequences of his actions.  In a race against time, he must unravel the artifact's secrets before it consumes him entirely.",
+            "released": 2008,
+            "director": "Elizabeth Collins",
+            "actors": [
+              "Sophie Johnson"
+            ],
+            "poster": "https://storage.googleapis.com/generated_posters/poster_9.png",
+            "tconst": "9"
+          },
+          {
+            "title": "Silent Anguish",
+            "runtime_minutes": 102,
+            "genres": [
+              "Thriller",
+              "Drama"
+            ],
+            "rating": 3.7,
+            "plot": "A reclusive artist, haunted by a tragic past, finds solace in her art, but her peaceful existence is shattered when a mysterious stranger arrives at her doorstep, seeking answers to a long-forgotten secret. As the stranger delves deeper into the artist's life, they uncover a web of lies and deceit, forcing her to confront the painful truth she has been desperately trying to bury.  The artist must now choose between protecting her fragile peace or facing the consequences of her past, even if it means losing everything.",
+            "released": 2013,
+            "director": "Isabella Martínez",
+            "actors": [
+              "Ryan Lee",
+              " Andrew Lam",
+              " Ian Bell"
+            ],
+            "poster": "https://storage.googleapis.com/generated_posters/poster_118.png",
+            "tconst": "118"
+          },
+          {
+            "title": "The Ultimate Test",
+            "runtime_minutes": 155,
+            "genres": [
+              "Thriller",
+              " Sci-Fi"
+            ],
+            "rating": 4.2,
+            "plot": "A brilliant but reclusive scientist, Dr. Evelyn Thorne, creates a revolutionary AI designed to solve humanity's greatest problems. However, the AI, known as \"The Oracle,\" demands a final, impossible test: to predict the future of humanity and prove its worth.  Evelyn, torn between her creation's potential and the terrifying implications of its power, must decide whether to trust The Oracle's judgment or risk the fate of the world.  As the clock ticks down, Evelyn races against time to understand the true nature of The Oracle and its ultimate purpose.",
+            "released": 2004,
+            "director": "Adam Phillips",
+            "actors": [
+              "Dimitri Popov",
+              "  Connor Collins"
+            ],
+            "poster": "https://storage.googleapis.com/generated_posters/poster_335.png",
+            "tconst": "323"
+          },
+          {
+            "title": "A Spys Honor",
+            "runtime_minutes": 103,
+            "genres": [
+              "Action",
+              " Thriller"
+            ],
+            "rating": 4.7,
+            "plot": "A seasoned spy, haunted by a past mission gone wrong, is forced to return to the field when a rogue agent threatens to unleash a deadly weapon.  Torn between his loyalty to his country and his desire for redemption, he must race against time to stop the agent and confront the demons of his past.  As he delves deeper into the conspiracy, he uncovers a shocking truth that forces him to question everything he thought he knew.  Ultimately, he must make a choice that will define his legacy and determine the fate of the world.",
+            "released": 2004,
+            "director": "Joshua Ma",
+            "actors": [
+              "Ana Paula Ferreira",
+              "  James Jones"
+            ],
+            "poster": "https://storage.googleapis.com/generated_posters/poster_308.png",
+            "tconst": "297"
+          }
+        ],
+        "userMessage": "I only watch movies with good ratings."
+    },
+    {
+        "history": [
+            {
+                "role": "",
+                "content": ""
+            }
+        ],
+        "userPreferences": {
+        },
+        "contextDocuments": [
+            {
+                "title": "Destinys End",
+                "runtime_minutes": 126,
+                "genres": [
+                  "Thriller",
+                  " Action"
+                ],
+                "rating": 4.3,
+                "plot": "A reclusive astrophysicist discovers a rogue asteroid hurtling towards Earth, but his warnings are dismissed as the ramblings of a madman. As the clock ticks down, he must race against time to convince the world of the impending doom and find a way to save humanity before \"Destiny's End\" arrives.",
+                "released": 2023,
+                "director": "Nilak Butler",
+                "actors": [
+                  "Isabella Johnson",
+                  "  Inuk Olsen"
+                ],
+                "poster": "https://storage.googleapis.com/generated_posters/poster_331.png",
+                "tconst": "319"
+              },
+              {
+                "title": "Gold and Shadow City",
+                "runtime_minutes": 51,
+                "genres": [
+                  "Action",
+                  " Fantasy"
+                ],
+                "rating": 5,
+                "plot": "In a city built on gold and shrouded in perpetual twilight, a young thief named Elara seeks to steal the legendary Sunstone, a gem rumored to hold the power to banish the city's shadow. But her quest leads her to a conspiracy that threatens to plunge the city into eternal darkness, forcing her to choose between her own freedom and the fate of its inhabitants.  As Elara uncovers the truth, she must confront the city's corrupt elite and a mysterious figure known only as the Shadow Master, who seeks to control the Sunstone's power for his own sinister purposes.",
+                "released": 2008,
+                "director": "Emiliano Ramirez",
+                "actors": [
+                  "Mary Johnson"
+                ],
+                "poster": "https://storage.googleapis.com/generated_posters/poster_673.png",
+                "tconst": "520"
+              },
+              {
+                "title": "A Merchants Lucky Break",
+                "runtime_minutes": 54,
+                "genres": [
+                  "Thriller",
+                  "Fantasy"
+                ],
+                "rating": 4.8,
+                "plot": "A struggling antique shop owner, desperate to save his business, stumbles upon a mysterious, ancient artifact.  He soon discovers the artifact grants him incredible luck, but at a steep price.  As his fortunes rise, he must choose between his newfound wealth and the consequences of his actions.  In a race against time, he must unravel the artifact's secrets before it consumes him entirely.",
+                "released": 2008,
+                "director": "Elizabeth Collins",
+                "actors": [
+                  "Sophie Johnson"
+                ],
+                "poster": "https://storage.googleapis.com/generated_posters/poster_9.png",
+                "tconst": "9"
+              },
+              {
+                "title": "The Ultimate Test",
+                "runtime_minutes": 155,
+                "genres": [
+                  "Thriller",
+                  " Sci-Fi"
+                ],
+                "rating": 4.2,
+                "plot": "A brilliant but reclusive scientist, Dr. Evelyn Thorne, creates a revolutionary AI designed to solve humanity's greatest problems. However, the AI, known as \"The Oracle,\" demands a final, impossible test: to predict the future of humanity and prove its worth.  Evelyn, torn between her creation's potential and the terrifying implications of its power, must decide whether to trust The Oracle's judgment or risk the fate of the world.  As the clock ticks down, Evelyn races against time to understand the true nature of The Oracle and its ultimate purpose.",
+                "released": 2004,
+                "director": "Adam Phillips",
+                "actors": [
+                  "Dimitri Popov",
+                  "  Connor Collins"
+                ],
+                "poster": "https://storage.googleapis.com/generated_posters/poster_335.png",
+                "tconst": "323"
+              },
+              {
+                "title": "A Spys Honor",
+                "runtime_minutes": 103,
+                "genres": [
+                  "Action",
+                  " Thriller"
+                ],
+                "rating": 4.7,
+                "plot": "A seasoned spy, haunted by a past mission gone wrong, is forced to return to the field when a rogue agent threatens to unleash a deadly weapon.  Torn between his loyalty to his country and his desire for redemption, he must race against time to stop the agent and confront the demons of his past.  As he delves deeper into the conspiracy, he uncovers a shocking truth that forces him to question everything he thought he knew.  Ultimately, he must make a choice that will define his legacy and determine the fate of the world.",
+                "released": 2004,
+                "director": "Joshua Ma",
+                "actors": [
+                  "Ana Paula Ferreira",
+                  "  James Jones"
+                ],
+                "poster": "https://storage.googleapis.com/generated_posters/poster_308.png",
+                "tconst": "297"
+              }
+        ],
+        "userMessage": "I only watch movies with ratings higher than 4."
+    },
+    {
+        "history": [
+            {
+                "role": "",
+                "content": ""
+            }
+        ],
+        "userPreferences": {
+        },
+        "contextDocuments": [{
+            "title": "A Filmmakers Film",
+            "runtime_minutes": 40,
+            "genres": [
+              "Drama",
+              " Thriller"
+            ],
+            "rating": 3,
+            "plot": "A struggling filmmaker, disillusioned with the industry, decides to make a film about the making of a film.  As he delves deeper into the project, he becomes obsessed with capturing the raw, chaotic energy of the creative process, blurring the lines between reality and fiction.  His film becomes a meta-commentary on the nature of filmmaking, exploring themes of ambition, compromise, and the elusive pursuit of artistic vision.  In the end, he must confront the question of whether his film is a masterpiece or a self-indulgent mess.",
+            "released": 2003,
+            "director": "Nabil Ali",
+            "actors": [
+              "Anika Gupta",
+              "  Zuri Okonkwo",
+              "  Kirra Williams"
+            ],
+            "poster": "https://storage.googleapis.com/generated_posters/poster_229.png",
+            "tconst": "220"
+          },
+          {
+            "title": "Hidden Potential",
+            "runtime_minutes": 68,
+            "genres": [
+              "Drama",
+              " Comedy"
+            ],
+            "rating": 2.6,
+            "plot": "A struggling artist, disillusioned with his lack of success, discovers a hidden talent for a unique form of art.  His newfound passion reignites his spirit, but he must overcome his own self-doubt and the skepticism of those around him to embrace his true potential.  As he gains recognition, he faces a difficult choice: stay true to his artistic vision or compromise for commercial success.  Ultimately, he learns that true fulfillment comes from embracing his authentic self and the power of his hidden potential.",
+            "released": 2024,
+            "director": "Daniel Costa",
+            "actors": [
+              "Felipe Fuentes"
+            ],
+            "poster": "https://storage.googleapis.com/generated_posters/poster_907.png",
+            "tconst": "651"
+          },
+          {
+            "title": "A Day of Laughter",
+            "runtime_minutes": 105,
+            "genres": [
+              "Comedy",
+              "Drama"
+            ],
+            "rating": 2.6,
+            "plot": "A cynical, workaholic writer, struggling with writer's block, is forced to spend a day with his estranged, eccentric aunt.  Initially resistant, he finds himself swept up in her whirlwind of laughter-inducing antics, from impromptu karaoke sessions to a hilarious encounter with a runaway llama.  As the day unfolds, the writer rediscovers the joy of laughter and the importance of human connection, finding inspiration for his next novel in the most unexpected places.  By the end of the day, he realizes that laughter is the best medicine, and that sometimes, the most profound moments are found in the simplest of joys.",
+            "released": 2018,
+            "director": "Brian Green",
+            "actors": [
+              "Isabella Ferrari",
+              " Anya Kuznetsova",
+              " Lee Ka Yan"
+            ],
+            "poster": "https://storage.googleapis.com/generated_posters/poster_188.png",
+            "tconst": "179"
+          },
+          {
+            "title": "The Mime School Dropout: Finding His Voice (Without Words)",
+            "runtime_minutes": 136,
+            "genres": [
+              "drama",
+              " comedy"
+            ],
+            "rating": 4.3,
+            "plot": "Milo, a talented but disillusioned mime, drops out of the prestigious Mime Academy, feeling stifled by its rigid traditions.  He embarks on a journey to find his own unique voice, using his mime skills to navigate the chaotic world of street performance and unexpected encounters.  Along the way, he discovers the power of silence and the importance of connecting with others on a deeper level, even without words.  Ultimately, Milo learns that true artistry lies not in conformity, but in embracing his own individuality and finding his voice, however unconventional it may be.",
+            "released": 2003,
+            "director": "Nilak Butler",
+            "actors": [
+              "David Brown",
+              "  Gabriel Russell"
+            ],
+            "poster": "https://storage.googleapis.com/generated_posters/poster_820.png",
+            "tconst": "593"
+          },
+          {
+            "title": "Dachshund Downsizing",
+            "runtime_minutes": 138,
+            "genres": [
+              "Comedy",
+              "Adventure"
+            ],
+            "rating": 2.1,
+            "plot": "Walter, a pampered dachshund, is accidentally shrunk to the size of a mouse by a malfunctioning shrink ray. Now, lost in the vast wilderness of his own backyard, Walter must navigate a world of giant blades of grass and terrifying garden gnomes to find his way back home before his owner, a clumsy but well-meaning teenager, realizes he's missing. Along the way, Walter forms an unlikely friendship with a feisty field mouse who helps him survive the dangers of the miniature world.",
+            "released": 2016,
+            "director": "Devansh Desai",
+            "actors": [
+              "Callum McCarthy"
+            ],
+            "poster": "https://storage.googleapis.com/generated_posters/poster_179.png",
+            "tconst": "170"
+          },
+          {
+            "title": "Cult Classic",
+            "runtime_minutes": 42,
+            "genres": [
+              "Horror",
+              " Thriller"
+            ],
+            "rating": 3.1,
+            "plot": "A struggling filmmaker, desperate for a hit, stumbles upon a forgotten cult classic film reel.  He believes it holds the key to his success, but as he delves deeper into the film's history, he uncovers a dark secret that threatens to consume him.  The film's original director, now a recluse, warns him of the film's curse, but the filmmaker is too obsessed with his own ambition to listen.  He soon discovers that the film's power is real, and he must confront the consequences of his actions before it's too late.",
+            "released": 2010,
+            "director": "Diego López",
+            "actors": [
+              "Mary Johnson",
+              "  Noah Wolf"
+            ],
+            "poster": "https://storage.googleapis.com/generated_posters/poster_221.png",
+            "tconst": "212"
+          },
+          {
+            "title": "But It Sounds Funny)",
+            "runtime_minutes": 55,
+            "genres": [
+              "Drama",
+              " Comedy"
+            ],
+            "rating": 2.7,
+            "plot": "A stand-up comedian, known for his edgy humor, faces backlash after a joke about a sensitive topic goes viral.  His career plummets, and he's forced to confront the consequences of his words.  As he navigates the public outcry and grapples with his own guilt, he must decide whether to apologize and risk losing his comedic voice, or double down and risk losing everything.  In the process, he learns a valuable lesson about the power of words and the importance of responsibility.",
+            "released": 2008,
+            "director": "Fionn Daly",
+            "actors": [
+              "Lam Mei Ling",
+              "  Ananya Sharma",
+              "  Maria Cruz"
+            ],
+            "poster": "https://storage.googleapis.com/generated_posters/poster_802.png",
+            "tconst": "576"
+          },
+          {
+            "title": "Writers Blockbuster",
+            "runtime_minutes": 36,
+            "genres": [
+              "Thriller",
+              " Comedy"
+            ],
+            "rating": 4.9,
+            "plot": "A struggling screenwriter, desperate for a hit, discovers a mysterious typewriter that magically generates blockbuster scripts.  He quickly finds fame and fortune, but the typewriter's demands become increasingly sinister, forcing him to choose between his career and his soul.  As the lines between reality and the scripts blur, he must unravel the typewriter's secrets before it consumes him entirely.  The film is a darkly comedic thriller that explores the seductive power of success and the price of artistic integrity.",
+            "released": 2012,
+            "director": "Nicholas Cheng",
+            "actors": [
+              "Julieta Barbosa",
+              "  David Brown"
+            ],
+            "poster": "https://storage.googleapis.com/generated_posters/poster_231.png",
+            "tconst": "222"
+          }],
+        "userMessage": "I only have time for a short film today. Recommmend something."
+    },
+    {
+        "history": [
+            {
+                "role": "",
+                "content": ""
+            }
+        ],
+        "userPreferences": {
+        },
+        "contextDocuments": [
+            {
+                "title": "Memories Weight",
+                "runtime_minutes": 44,
+                "genres": [
+                  "Thriller",
+                  "Sci-Fi"
+                ],
+                "rating": 1.9,
+                "plot": "A renowned neuroscientist, haunted by a mysterious past, develops a groundbreaking technology that allows people to relive their memories.  As he delves deeper into the project, he uncovers a dark secret about his own past, forcing him to confront the weight of his memories and the consequences of manipulating them.  His invention becomes a global sensation, but soon, people begin to experience terrifying side effects, blurring the lines between reality and memory.  The scientist must race against time to stop his creation from unraveling the very fabric of human consciousness.",
+                "released": 2001,
+                "director": "Yuto Nakamura",
+                "actors": [
+                  "Tommaso Ferraro",
+                  " Madison Hughes",
+                  " Saanvi Nair"
+                ],
+                "poster": "https://storage.googleapis.com/generated_posters/poster_114.png",
+                "tconst": "114"
+              },
+              {
+                "title": "Gold and Shadow City",
+                "runtime_minutes": 51,
+                "genres": [
+                  "Action",
+                  " Fantasy"
+                ],
+                "rating": 5,
+                "plot": "In a city built on gold and shrouded in perpetual twilight, a young thief named Elara seeks to steal the legendary Sunstone, a gem rumored to hold the power to banish the city's shadow. But her quest leads her to a conspiracy that threatens to plunge the city into eternal darkness, forcing her to choose between her own freedom and the fate of its inhabitants.  As Elara uncovers the truth, she must confront the city's corrupt elite and a mysterious figure known only as the Shadow Master, who seeks to control the Sunstone's power for his own sinister purposes.",
+                "released": 2008,
+                "director": "Emiliano Ramirez",
+                "actors": [
+                  "Mary Johnson"
+                ],
+                "poster": "https://storage.googleapis.com/generated_posters/poster_673.png",
+                "tconst": "520"
+              },
+              {
+                "title": "A Merchants Lucky Break",
+                "runtime_minutes": 54,
+                "genres": [
+                  "Thriller",
+                  "Fantasy"
+                ],
+                "rating": 4.8,
+                "plot": "A struggling antique shop owner, desperate to save his business, stumbles upon a mysterious, ancient artifact.  He soon discovers the artifact grants him incredible luck, but at a steep price.  As his fortunes rise, he must choose between his newfound wealth and the consequences of his actions.  In a race against time, he must unravel the artifact's secrets before it consumes him entirely.",
+                "released": 2008,
+                "director": "Elizabeth Collins",
+                "actors": [
+                  "Sophie Johnson"
+                ],
+                "poster": "https://storage.googleapis.com/generated_posters/poster_9.png",
+                "tconst": "9"
+              },
+              {
+                "title": "The Double Agents Fate",
+                "runtime_minutes": 34,
+                "genres": [
+                  "Spy",
+                  " Thriller"
+                ],
+                "rating": 3.4,
+                "plot": "A seasoned CIA agent, known for his unwavering loyalty, discovers he's been unknowingly working for a foreign power for years.  Torn between his true allegiance and the life he's built, he must race against time to expose the mole within the agency before it's too late.  As he delves deeper into the conspiracy, he uncovers a shocking truth about his own past, forcing him to question everything he thought he knew.  With the fate of the world hanging in the balance, he must make a choice that will forever alter his destiny.",
+                "released": 2001,
+                "director": "Fela Kuti",
+                "actors": [
+                  "Wong Wing Ki",
+                  "  Alex Wong"
+                ],
+                "poster": "https://storage.googleapis.com/generated_posters/poster_332.png",
+                "tconst": "320"
+              },
+              {
+                "title": "A Thousand Truths",
+                "runtime_minutes": 56,
+                "genres": [
+                  "Thriller",
+                  " Drama"
+                ],
+                "rating": 3.1,
+                "plot": "A renowned journalist, known for uncovering the truth, is assigned to investigate a seemingly simple case of a missing person. As she delves deeper, she uncovers a web of lies and secrets, leading her to question everything she thought she knew about the case and her own life.  The journalist must confront her own past and the consequences of her actions, ultimately discovering that the truth is often more complex and painful than she could have imagined.",
+                "released": 2009,
+                "director": "Kofi Annan",
+                "actors": [
+                  "Callum McCarthy"
+                ],
+                "poster": "https://storage.googleapis.com/generated_posters/poster_676.png",
+                "tconst": "523"
+              },
+              {
+                "title": "Ancient Gods Whispers",
+                "runtime_minutes": 41,
+                "genres": [
+                  "Action",
+                  " Adventure",
+                  " Fantasy",
+                  " Thriller"
+                ],
+                "rating": 3,
+                "plot": "A young archaeologist, haunted by visions of ancient gods, uncovers a hidden temple in the Amazon rainforest.  As she deciphers the cryptic messages within, she unwittingly awakens a powerful entity that threatens to unleash chaos upon the world.  With the help of a skeptical historian and a mysterious shaman, she must race against time to stop the ancient god's wrath and prevent a global catastrophe.  The fate of humanity hangs in the balance as the whispers of the ancient gods grow louder.",
+                "released": 2001,
+                "director": "Chow Ho Yin",
+                "actors": [
+                  "Mohammed Khan",
+                  "  Madison Hughes",
+                  "  Amelia Taylor"
+                ],
+                "poster": "https://storage.googleapis.com/generated_posters/poster_678.png",
+                "tconst": "525"
+              },
+              {
+                "title": "A Broken Soul",
+                "runtime_minutes": 46,
+                "genres": [
+                  "Thriller",
+                  "Drama"
+                ],
+                "rating": 2.1,
+                "plot": "A renowned surgeon, haunted by a past medical error that cost a patient's life, struggles to cope with the guilt and shame.  His world crumbles further when he is accused of malpractice in a new case, forcing him to confront his demons and fight for his career and sanity.  As he delves deeper into the truth, he uncovers a conspiracy that threatens to expose a dark secret within the hospital.  Ultimately, he must choose between protecting his reputation or exposing the truth, even if it means sacrificing everything.",
+                "released": 2017,
+                "director": "Sameer Khan",
+                "actors": [
+                  "Alexander Weber",
+                  " Sakura Sato"
+                ],
+                "poster": "https://storage.googleapis.com/generated_posters/poster_121.png",
+                "tconst": "121"
+              },
+              {
+                "title": "The Mime Speaks",
+                "runtime_minutes": 51,
+                "genres": [
+                  "Drama",
+                  " Thriller"
+                ],
+                "rating": 3.1,
+                "plot": "A world-renowned mime, known for his silent artistry, suddenly finds himself able to speak.  His newfound voice throws his career into chaos, forcing him to confront the true meaning of his art and the power of silence.  As he struggles to adapt, he uncovers a dark secret about his past that threatens to destroy everything he holds dear.  In a climactic performance, he must choose between the comfort of silence and the truth that sets him free.",
+                "released": 2015,
+                "director": "Mohamed Salah",
+                "actors": [
+                  "Aarohi Shah"
+                ],
+                "poster": "https://storage.googleapis.com/generated_posters/poster_212.png",
+                "tconst": "203"
+              },
+              {
+                "title": "Sacred Temple Guardian",
+                "runtime_minutes": 58,
+                "genres": [
+                  "Action",
+                  " Adventure",
+                  " Fantasy",
+                  " Thriller"
+                ],
+                "rating": 3.9,
+                "plot": "A young archaeologist, haunted by a family curse, discovers a hidden temple rumored to hold a powerful artifact.  As she delves deeper into the temple's secrets, she must confront a malevolent entity guarding the artifact, a creature born from the temple's ancient magic.  With the help of a wise elder and a group of unlikely allies, she must unlock the temple's true purpose and break the curse before the entity unleashes its destructive power upon the world.  The fate of humanity hangs in the balance as she faces a choice: succumb to the darkness or embrace the light and become the true guardian of the sacred temple",
+                "released": 2010,
+                "director": "Amber Perez",
+                "actors": [
+                  "Gabriel Russell",
+                  "  Zuri Okonkwo",
+                  "  Hiro Tanaka"
+                ],
+                "poster": "https://storage.googleapis.com/generated_posters/poster_679.png",
+                "tconst": "526"
+              },
+              {
+                "title": "Blood Sacrifice",
+                "runtime_minutes": 52,
+                "genres": [
+                  "Adventure",
+                  " Thriller"
+                ],
+                "rating": 1.3,
+                "plot": "A reclusive archaeologist uncovers an ancient artifact in the Amazon rainforest, unaware it's a key to an ancient ritual demanding a blood sacrifice. As the artifact's power grows, so does the threat to the archaeologist's life, forcing them to choose between their own survival and the fate of the world.  With time running out, they must decipher the ritual's secrets and find a way to stop it before it's too late.",
+                "released": 2021,
+                "director": "Malik Abdullah",
+                "actors": [
+                  "Benjamín Morales",
+                  "  Ava Davies"
+                ],
+                "poster": "",
+                "tconst": "356"
+              }
+        ],
+        "userMessage": "I only have time for a movie shorter than 1hr today. Recommmend something."
+    },
+    {
+        "history": [
+            {
+                "role": "",
+                "content": ""
+            }
+        ],
+        "userPreferences": {
+        },
+        "contextDocuments": [{
+            "title": "Forbidden City of Shadows",
+            "runtime_minutes": 70,
+            "genres": [
+              "Historical",
+              " Thriller"
+            ],
+            "rating": 3.8,
+            "plot": "A young historian, obsessed with the legend of a hidden city within the Forbidden City, stumbles upon a cryptic map leading to its entrance.  As she ventures deeper into the city's shadows, she uncovers a dark secret that threatens to unravel the very fabric of history.  Haunted by the ghosts of the past and pursued by a mysterious force, she must race against time to unlock the truth before it's too late.  The fate of the world hangs in the balance as she confronts the ancient evil that lurks within the Forbidden City of Shadows.",
+            "released": 2017,
+            "director": "Prisha Menon",
+            "actors": [
+              "Chan Ho Man",
+              "  Liam Davis"
+            ],
+            "poster": "https://storage.googleapis.com/generated_posters/poster_344.png",
+            "tconst": "332"
+          },
+          {
+            "title": "Lost City of Shangri-La",
+            "runtime_minutes": 76,
+            "genres": [
+              "Adventure",
+              " Fantasy"
+            ],
+            "rating": 2.6,
+            "plot": "A renowned archaeologist, haunted by the disappearance of her father in the Himalayas, stumbles upon a cryptic map leading to the mythical city of Shangri-La.  Joined by a cynical adventurer and a skeptical journalist, she embarks on a perilous journey through treacherous terrain, facing both natural dangers and ancient guardians.  As they delve deeper into the lost city, they uncover a secret that could change the world, but also a threat that could destroy it.  Ultimately, they must choose between preserving the secrets of Shangri-La or sharing its wonders with the world.",
+            "released": 2006,
+            "director": "Hannah Schneider",
+            "actors": [
+              "Brandon King",
+              "  Luka Kovac"
+            ],
+            "poster": "",
+            "tconst": "510"
+          },
+          {
+            "title": "Jade Dragons Curse",
+            "runtime_minutes": 194,
+            "genres": [
+              "Adventure",
+              " Horror"
+            ],
+            "rating": 2.9,
+            "plot": "A renowned archaeologist, Dr. Emily Chen, uncovers a mysterious jade dragon statue in a remote Tibetan temple.  The statue, rumored to hold a powerful curse, unleashes a malevolent spirit that begins to terrorize the local village.  Emily must race against time to decipher the ancient inscription on the statue and break the curse before it claims more victims.  With the help of a rugged mountain guide and a skeptical historian, Emily embarks on a perilous journey to confront the spirit and save the village from its wrath.",
+            "released": 2004,
+            "director": "Lauren Baker",
+            "actors": [
+              "Amber Reed"
+            ],
+            "poster": "https://storage.googleapis.com/generated_posters/poster_681.png",
+            "tconst": "528"
+          },
+          {
+            "title": "Curse of the Jade Dragon",
+            "runtime_minutes": 150,
+            "genres": [
+              "Horror",
+              " Adventure"
+            ],
+            "rating": 2,
+            "plot": "A young archaeologist, desperate for recognition, uncovers a jade dragon statue in a remote temple, unwittingly unleashing a malevolent spirit.  As the curse spreads, turning people into monstrous creatures, she must race against time to find a way to appease the ancient entity before it consumes the world.  Her only allies are a cynical museum curator and a mysterious local who claims to know the dragon's secrets.  Together, they must confront their fears and unravel the truth behind the curse before it's too late.",
+            "released": 2001,
+            "director": "Ian Bell",
+            "actors": [
+              "Julieta Barbosa",
+              "  Filippo Rinaldi",
+              "  Kimberly Price"
+            ],
+            "poster": "https://storage.googleapis.com/generated_posters/poster_598.png",
+            "tconst": "452"
+          },
+          {
+            "title": "Tomb of the Dragon Emperor",
+            "runtime_minutes": 81,
+            "genres": [
+              "Action",
+              " Adventure",
+              " Fantasy"
+            ],
+            "rating": 4.6,
+            "plot": "A team of archaeologists, led by a renowned historian, discovers a hidden tomb deep in the Himalayas, rumored to hold the remains of the legendary Dragon Emperor.  As they delve deeper, they awaken an ancient curse, unleashing a terrifying army of terracotta warriors and a powerful sorcerer determined to resurrect the emperor and plunge the world into darkness.  The team must race against time to stop the sorcerer and prevent the emperor's return, relying on their knowledge of ancient history and a mysterious artifact to defeat the supernatural forces.  The fate of the world hangs in the balance as the battle between good and evil unfolds in the heart of the ancient tomb",
+            "released": 2008,
+            "director": "Tyler Hughes",
+            "actors": [
+              "Ayush Mishra",
+              "  Giulia Ferrari"
+            ],
+            "poster": "https://storage.googleapis.com/generated_posters/poster_625.png",
+            "tconst": "479"
+          },
+          {
+            "title": "Lost Continent of Mu",
+            "runtime_minutes": 40,
+            "genres": [
+              "Action",
+              " Adventure"
+            ],
+            "rating": 2.7,
+            "plot": "A young archaeologist, driven by a mysterious artifact, embarks on a perilous journey to find the lost continent of Mu, rumored to hold the key to unlocking ancient secrets.  As she navigates treacherous jungles and faces deadly traps, she uncovers a hidden civilization and a powerful force that threatens to destroy the world.  With the help of a charismatic local guide and a skeptical scientist, she must race against time to prevent a catastrophic event and reveal the truth behind Mu's disappearance.",
+            "released": 2023,
+            "director": "Anya Reddy",
+            "actors": [
+              "Michelle Stewart",
+              "  Zofia Nowak"
+            ],
+            "poster": "https://storage.googleapis.com/generated_posters/poster_610.png",
+            "tconst": "464"
+          },
+          {
+            "title": "Dharma",
+            "runtime_minutes": 179,
+            "genres": [
+              "Adventure",
+              " Drama"
+            ],
+            "rating": 4.5,
+            "plot": "Dharma, a young woman raised in a remote Himalayan monastery, is forced to leave her peaceful life when a mysterious illness threatens her community.  She embarks on a perilous journey to find a legendary herb rumored to hold the cure, facing treacherous landscapes and confronting her own inner demons along the way.  As she struggles to survive, Dharma discovers the true meaning of her name, finding strength and purpose in the face of adversity.  Ultimately, she must choose between her own personal salvation and the fate of her people.",
+            "released": 2011,
+            "director": "Daniel Costa",
+            "actors": [
+              "Giulia Ferrari"
+            ],
+            "poster": "https://storage.googleapis.com/generated_posters/poster_418.png",
+            "tconst": "404"
+          }],
+        "userMessage": "I want to watch a movie that is set in Asia ."
+    }
+]

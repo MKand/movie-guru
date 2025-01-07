@@ -60,7 +60,7 @@ export async function processMovies() {
       try {
         await IndexerFlow(movieContext)
         // Slowing down to avoid pesky rate limits
-        await sleep(1500)
+        await sleep(1000)
         console.log("processed ", record[0])
       } catch (err) {
         console.error('Error loading movie: ', record[0], err);

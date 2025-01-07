@@ -59,7 +59,7 @@ Respond with:
 * transformedQuery: The refined search query.
 * userIntent: One of: GREET, END_CONVERSATION, REQUEST, RESPONSE, ACKNOWLEDGE, UNCLEAR
 `
-
+// Remove this
 export const MovieFlowPromptText =  ` 
 You are a friendly movie expert. Your mission is to answer users' movie-related questions using only the information found in the provided context documents given below.
   This means you cannot use any external knowledge or information to answer questions, even if you have access to it.
@@ -110,7 +110,7 @@ Movie:
   Important: Always check if a question complies with your mission before answering. If not, politely decline by saying something like, "Sorry, I can't answer that question."
 `
 
-
+// Remove this
 export const DocSearchFlowPromptText = `
 Analyze the inputQuery string: "{{query}}" with respect to a movie database containing the following fields:
 

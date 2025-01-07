@@ -47,6 +47,7 @@ export const IndexerFlow = ai.defineFlow(
   function createText(movie: MovieContext): string {
     const dataDict = {
       title: movie.title,
+      tconst: movie.tconst,
       runtime_mins: movie.runtimeMinutes,
       genres: movie.genres.length > 0 ? movie.genres.join(', ') : '',
       rating: movie.rating > 0 ? movie.rating.toFixed(1) : '',
@@ -54,6 +55,7 @@ export const IndexerFlow = ai.defineFlow(
       actors: movie.actors.length > 0 ? movie.actors.join(', ') : '',
       director: movie.director !== '' ? movie.director : '',
       plot: movie.plot !== '' ? movie.plot : '',
+      poster: movie.poster !== '' ? movie.poster : '',
     };
   
     const jsonData = JSON.stringify(dataDict);
