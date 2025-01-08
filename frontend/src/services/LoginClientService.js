@@ -2,26 +2,34 @@ import {fetch as fetchPolyfill} from 'whatwg-fetch'
 import store  from '../stores';
 
 class LoginClientService {
-  async login(user, inviteCode){
-    const requestOptions = {
+  async login(user, inviteCode) {
+    try {
+      const requestOptions = {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json',
+        headers: {
+          'Content-Type': 'application/json',
           'Authorization': `Bearer ${user.accessToken}`,
         },
-        body: JSON.stringify({"inviteCode": inviteCode }),
-        credentials: 'include'
-    };
-    const response = await fetchPolyfill(import.meta.env.VITE_CHAT_SERVER_URL + '/login', requestOptions)
-    if (!response.ok) {
+        body: JSON.stringify({ inviteCode }),
+        credentials: 'include', // Include cookies or authentication credentials
+      };
+  
+      const response = await fetch(
+        `${import.meta.env.VITE_CHAT_SERVER_URL}/login`,
+        requestOptions
+      );
+  
+      if (!response.ok) {
         throw new Error(`Response status: ${response.status}`);
       }
   
       const json = await response.json();
-      return json
+      return json;
     } catch (error) {
       console.error(error.message);
       throw error;
     }
+  }
   
     async logout(){
       const requestOptions = {

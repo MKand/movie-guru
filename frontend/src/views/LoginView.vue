@@ -26,7 +26,7 @@ export default {
           let inviteCode = document.querySelector('input[type="text"]').value;
 
           LoginClientService.login(result.user, inviteCode).then(() => {
-            store.commit('user/logIn', result.user)
+            store.commit('user/logIn', result.user.email)
             router.push('/')
             this.loginFailed = false;
           }).catch(() => {

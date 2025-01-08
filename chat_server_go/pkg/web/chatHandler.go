@@ -18,8 +18,6 @@ func createChatHandler(deps *Dependencies, meters *m.ChatMeters) http.HandlerFun
 	return func(w http.ResponseWriter, r *http.Request) {
 		var err error
 		ctx := r.Context()
-		origin := r.Header.Get("Origin")
-		addResponseHeaders(w, origin)
 		sessionInfo := &SessionInfo{}
 		if r.Method != "OPTIONS" {
 			var shouldReturn bool
@@ -34,7 +32,6 @@ func createChatHandler(deps *Dependencies, meters *m.ChatMeters) http.HandlerFun
 			defer func() {
 				meters.CLatencyHistogram.Record(ctx, int64(time.Since(startTime).Milliseconds()))
 			}()
-			addResponseHeaders(w, origin)
 			user := sessionInfo.User
 			chatRequest := &ChatRequest{
 				Content: "",
@@ -64,11 +61,6 @@ func createChatHandler(deps *Dependencies, meters *m.ChatMeters) http.HandlerFun
 			json.NewEncoder(w).Encode(agentResp)
 			return
 
-		}
-		if r.Method == "OPTIONS" {
-			addResponseHeaders(w, origin)
-			handleOptions(w, origin)
-			return
 		}
 	}
 }

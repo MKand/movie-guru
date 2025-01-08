@@ -27,6 +27,24 @@ var (
 	corsOrigins []string
 )
 
+func enableCORS(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:5173")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		w.Header().Set("Access-Control-Allow-Credentials", "true") // Allow credentials
+
+		// Handle preflight requests
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
 func StartServer(ctx context.Context, ulh *UserLoginHandler, m *db.Metadata, deps *Dependencies) error {
 	metadata = m
 	setupSessionStore(ctx)
@@ -40,14 +58,16 @@ func StartServer(ctx context.Context, ulh *UserLoginHandler, m *db.Metadata, dep
 	hcMeters := metrics.NewHCMeters()
 	chatMeters := metrics.NewChatMeters()
 
+	mux := http.NewServeMux()
+
 	http.HandleFunc("/", createHealthCheckHandler(deps, hcMeters))
-	http.HandleFunc("/chat", createChatHandler(deps, chatMeters))
-	http.HandleFunc("/history", createHistoryHandler())
-	http.HandleFunc("/preferences", createPreferencesHandler(deps.DB))
-	http.HandleFunc("/startup", createStartupHandler(deps))
-	http.HandleFunc("/login", createLoginHandler(ulh, loginMeters))
-	http.HandleFunc("/logout", logoutHandler)
-	return http.ListenAndServe(":8080", nil)
+	mux.HandleFunc("/chat", createChatHandler(deps, chatMeters))
+	mux.HandleFunc("/history", createHistoryHandler())
+	mux.HandleFunc("/preferences", createPreferencesHandler(deps.DB))
+	mux.HandleFunc("/startup", createStartupHandler(deps))
+	mux.HandleFunc("/login", createLoginHandler(ulh, loginMeters))
+	mux.HandleFunc("/logout", logoutHandler)
+	return http.ListenAndServe(":8080", enableCORS(mux))
 }
 
 func setupSessionStore(ctx context.Context) {
@@ -73,46 +93,12 @@ func randomisedFeaturedFilmsQuery() string {
 
 }
 
-func addResponseHeaders(w http.ResponseWriter, origin string) {
-	isAllowed := true
-	for _, allowedOrigin := range corsOrigins {
-		if origin == allowedOrigin {
-			isAllowed = true
-			break
-		}
-	}
-	if isAllowed {
-		w.Header().Set("Access-Control-Allow-Origin", origin)
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Headers", "user, Origin, Cookie, Accept, Content-Type, Content-Length, Accept-Encoding,Authorization")
-	w.Header().Set("Access-Control-Allow-Credentials", "true")
-}
-
 func getSessionID(r *http.Request) (string, error) {
 	if r.Header.Get("Cookie") == "" {
 		return "", errors.New("No cookie found")
 	}
 	sessionID := strings.Split(r.Header.Get("Cookie"), "session=")[1]
 	return sessionID, nil
-}
-
-func handleOptions(w http.ResponseWriter, origin string) {
-	isAllowed := false
-	for _, allowedOrigin := range corsOrigins {
-		if origin == allowedOrigin {
-			isAllowed = true
-			break
-		}
-	}
-	if isAllowed {
-		w.Header().Set("Access-Control-Allow-Origin", origin)
-	}
-	w.Header().Set("Access-Control-Allow-Methods", "POST,GET,DELETE,OPTIONS,PUT")
-	w.Header().Set("Access-Control-Allow-Headers", "user, Origin, Cookie, Accept, Content-Type, Content-Length, Accept-Encoding,Authorization")
-	w.Header().Set("Access-Control-Allow-Credentials", "true")
-
-	w.WriteHeader(http.StatusOK)
 }
 
 func getHistory(ctx context.Context, user string) (*types.ChatHistory, error) {
@@ -157,8 +143,6 @@ func createStartupHandler(deps *Dependencies) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var err error
 		ctx := r.Context()
-		origin := r.Header.Get("Origin")
-		addResponseHeaders(w, origin)
 		sessionInfo := &SessionInfo{}
 		if r.Method != "OPTIONS" {
 			var shouldReturn bool
@@ -168,7 +152,6 @@ func createStartupHandler(deps *Dependencies) http.HandlerFunc {
 			}
 		}
 		if r.Method == "GET" {
-			addResponseHeaders(w, origin)
 			user := sessionInfo.User
 			pref, err := deps.DB.GetCurrentProfile(ctx, user)
 			if err != nil {
@@ -218,8 +201,6 @@ func createPreferencesHandler(MovieDB *db.MovieDB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var err error
 		ctx := r.Context()
-		origin := r.Header.Get("Origin")
-		addResponseHeaders(w, origin)
 		sessionInfo := &SessionInfo{}
 		if r.Method != "OPTIONS" {
 			var shouldReturn bool
@@ -230,7 +211,6 @@ func createPreferencesHandler(MovieDB *db.MovieDB) http.HandlerFunc {
 		}
 		user := sessionInfo.User
 		if r.Method == "GET" {
-			addResponseHeaders(w, origin)
 			pref, err := MovieDB.GetCurrentProfile(ctx, user)
 			if err != nil {
 				slog.ErrorContext(ctx, "Cannot get preferences", slog.String("user", user), slog.Any("error", err.Error()))
@@ -257,13 +237,7 @@ func createPreferencesHandler(MovieDB *db.MovieDB) http.HandlerFunc {
 				return
 			}
 
-			addResponseHeaders(w, origin)
 			json.NewEncoder(w).Encode(map[string]string{"update": "success"})
-			return
-		}
-		if r.Method == "OPTIONS" {
-			addResponseHeaders(w, origin)
-			handleOptions(w, origin)
 			return
 		}
 	}
@@ -272,9 +246,7 @@ func createPreferencesHandler(MovieDB *db.MovieDB) http.HandlerFunc {
 func createHistoryHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
-		origin := r.Header.Get("Origin")
 		var err error
-		addResponseHeaders(w, origin)
 		sessionInfo := &SessionInfo{}
 		if r.Method != "OPTIONS" {
 			var shouldReturn bool
@@ -285,7 +257,6 @@ func createHistoryHandler() http.HandlerFunc {
 		}
 		user := sessionInfo.User
 		if r.Method == "GET" {
-			addResponseHeaders(w, origin)
 			ch, err := getHistory(ctx, user)
 			if err != nil {
 				slog.ErrorContext(ctx, "Error while fetching history", slog.String("user", user), slog.Any("error", err.Error()))
@@ -302,7 +273,6 @@ func createHistoryHandler() http.HandlerFunc {
 			json.NewEncoder(w).Encode(simpleHistory)
 		}
 		if r.Method == "DELETE" {
-			addResponseHeaders(w, origin)
 			err := deleteHistory(ctx, sessionInfo.User)
 			if err != nil {
 				slog.ErrorContext(ctx, "Error while deleting history", slog.String("user", user), slog.Any("error", err.Error()))
@@ -310,11 +280,6 @@ func createHistoryHandler() http.HandlerFunc {
 				return
 			}
 			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method == "OPTIONS" {
-			addResponseHeaders(w, origin)
-			handleOptions(w, origin)
 			return
 		}
 	}
@@ -345,8 +310,6 @@ func deleteSessionInfo(ctx context.Context, sessionID string) error {
 func logoutHandler(w http.ResponseWriter, r *http.Request) {
 	var err error
 	ctx := r.Context()
-	origin := r.Header.Get("Origin")
-	addResponseHeaders(w, origin)
 	sessionInfo := &SessionInfo{}
 	if r.Method != "OPTIONS" {
 		var shouldReturn bool
@@ -357,7 +320,6 @@ func logoutHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	user := sessionInfo.User
 	if r.Method == "GET" {
-		addResponseHeaders(w, origin)
 		err := deleteSessionInfo(ctx, sessionInfo.ID)
 		if err != nil {
 			slog.ErrorContext(ctx, "Error while deleting session info", slog.String("user", user), slog.Any("error", err.Error()))
@@ -366,11 +328,6 @@ func logoutHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		json.NewEncoder(w).Encode(map[string]string{"logout": "success"})
 
-		return
-	}
-	if r.Method == "OPTIONS" {
-		addResponseHeaders(w, origin)
-		handleOptions(w, origin)
 		return
 	}
 

@@ -3,7 +3,6 @@ package db
 import (
 	"context"
 	"log"
-	"os"
 	"time"
 )
 
@@ -21,9 +20,6 @@ type Metadata struct {
 }
 
 func (d *MovieDB) GetMetadata(ctx context.Context, appVersion string) (*Metadata, error) {
-	if os.Getenv("LOCAL") == "true" {
-		return getMetadataLocal()
-	}
 	return d.getServerMetadata(ctx, appVersion)
 }
 
@@ -31,7 +27,7 @@ func (d *MovieDB) GetMetadata(ctx context.Context, appVersion string) (*Metadata
 func (d *MovieDB) getServerMetadata(ctx context.Context, appVersion string) (*Metadata, error) {
 	dbCtx, cancel := context.WithTimeout(ctx, 3*time.Second)
 	defer cancel()
-	query := `SELECT * FROM app_metadata WHERE "app_version" = $1;`
+	query := `SELECT * FROM app_metadata WHERE "appversion" = $1;`
 	metadata := &Metadata{}
 	rows := d.DB.QueryRowContext(dbCtx, query, appVersion)
 	err := rows.Scan(
@@ -47,20 +43,6 @@ func (d *MovieDB) getServerMetadata(ctx context.Context, appVersion string) (*Me
 	)
 	if err != nil {
 		return metadata, err
-	}
-	log.Println(metadata)
-	return metadata, nil
-}
-
-func getMetadataLocal() (*Metadata, error) {
-	metadata := &Metadata{
-		AppVersion:               "local",
-		HistoryLength:            10,
-		MaxUserMessageLen:        1000,
-		CorsOrigin:               "http://localhost:5173",
-		RetrieverLength:          10,
-		GoogleChatModelName:      "gemini-1.5-flash",
-		GoogleEmbeddingModelName: "text-embedding-004",
 	}
 	log.Println(metadata)
 	return metadata, nil

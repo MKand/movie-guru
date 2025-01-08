@@ -11,8 +11,6 @@ import (
 func createHealthCheckHandler(deps *Dependencies, meters *metrics.HCMeters) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
-		origin := r.Header.Get("Origin")
-		addResponseHeaders(w, origin)
 		if r.Method == "GET" {
 			startTime := time.Now()
 			defer func() {

@@ -97,7 +97,6 @@ func (ulh *UserLoginHandler) verifyGoogleToken(tokenString string) (string, erro
 func createLoginHandler(ulh *UserLoginHandler, meters *m.LoginMeters) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
-		origin := r.Header.Get("Origin")
 		if r.Method == "POST" {
 			startTime := time.Now()
 			defer func() {
@@ -158,12 +157,7 @@ func createLoginHandler(ulh *UserLoginHandler, meters *m.LoginMeters) http.Handl
 			}
 			w.Header().Set("Set-Cookie", setCookieHeader)
 			w.Header().Set("Vary", "Cookie, Origin")
-			addResponseHeaders(w, origin)
 			json.NewEncoder(w).Encode(map[string]string{"login": "success"})
-		}
-		if r.Method == "OPTIONS" {
-			handleOptions(w, origin)
-			return
 		}
 	}
 }
