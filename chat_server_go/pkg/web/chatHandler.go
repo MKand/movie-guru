@@ -7,6 +7,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/movie-guru/pkg/db"
+
 	m "github.com/movie-guru/pkg/metrics"
 	"github.com/movie-guru/pkg/types"
 	"go.opentelemetry.io/otel/attribute"
@@ -14,7 +16,7 @@ import (
 	"golang.org/x/exp/slog"
 )
 
-func createChatHandler(deps *Dependencies, meters *m.ChatMeters) http.HandlerFunc {
+func createChatHandler(deps *Dependencies, meters *m.ChatMeters, metadata *db.Metadata) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var err error
 		ctx := r.Context()
@@ -56,7 +58,7 @@ func createChatHandler(deps *Dependencies, meters *m.ChatMeters) http.HandlerFun
 			agentResp, respQuality := chat(ctx, deps, metadata, ch, user, chatRequest.Content)
 			updateChatMeters(ctx, agentResp, meters, respQuality)
 
-			saveHistory(ctx, ch, user)
+			saveHistory(ctx, ch, user, metadata)
 			w.WriteHeader(http.StatusOK)
 			json.NewEncoder(w).Encode(agentResp)
 			return

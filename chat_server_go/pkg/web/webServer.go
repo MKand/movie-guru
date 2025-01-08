@@ -20,7 +20,6 @@ import (
 
 var (
 	redisStore *redis.Client
-	metadata   *db.Metadata
 	appConfig  = map[string]string{
 		"CORS_HEADERS": "Content-Type",
 	}
@@ -60,8 +59,7 @@ func enableCORS(allowedOrigins []string, next http.Handler) http.Handler {
 	})
 }
 
-func StartServer(ctx context.Context, ulh *UserLoginHandler, m *db.Metadata, deps *Dependencies) error {
-	metadata = m
+func StartServer(ctx context.Context, ulh *UserLoginHandler, metadata *db.Metadata, deps *Dependencies) error {
 	setupSessionStore(ctx)
 
 	corsOrigins = strings.Split(metadata.CorsOrigin, ",")
@@ -76,11 +74,11 @@ func StartServer(ctx context.Context, ulh *UserLoginHandler, m *db.Metadata, dep
 	mux := http.NewServeMux()
 
 	http.HandleFunc("/", createHealthCheckHandler(deps, hcMeters))
-	mux.HandleFunc("/chat", createChatHandler(deps, chatMeters))
-	mux.HandleFunc("/history", createHistoryHandler())
+	mux.HandleFunc("/chat", createChatHandler(deps, chatMeters, metadata))
+	mux.HandleFunc("/history", createHistoryHandler(metadata))
 	mux.HandleFunc("/preferences", createPreferencesHandler(deps.DB))
 	mux.HandleFunc("/startup", createStartupHandler(deps))
-	mux.HandleFunc("/login", createLoginHandler(ulh, loginMeters, m))
+	mux.HandleFunc("/login", createLoginHandler(ulh, loginMeters, metadata))
 	mux.HandleFunc("/logout", logoutHandler)
 	return http.ListenAndServe(":8080", enableCORS(corsOrigins, mux))
 }
@@ -133,7 +131,7 @@ func getHistory(ctx context.Context, user string) (*types.ChatHistory, error) {
 	return ch, nil
 }
 
-func saveHistory(ctx context.Context, history *types.ChatHistory, user string) error {
+func saveHistory(ctx context.Context, history *types.ChatHistory, user string, metadata *db.Metadata) error {
 	history.Trim(metadata.HistoryLength)
 	redisContext, cancel := context.WithTimeout(ctx, 3*time.Second)
 	defer cancel()
@@ -142,54 +140,6 @@ func saveHistory(ctx context.Context, history *types.ChatHistory, user string) e
 		return err
 	}
 	return nil
-}
-
-func deleteHistory(ctx context.Context, user string) error {
-	redisContext, cancel := context.WithTimeout(ctx, 3*time.Second)
-	defer cancel()
-	_, err := redisStore.Del(redisContext, user).Result()
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func createStartupHandler(deps *Dependencies) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var err error
-		ctx := r.Context()
-		sessionInfo := &SessionInfo{}
-		if r.Method != "OPTIONS" {
-			var shouldReturn bool
-			sessionInfo, shouldReturn = authenticateAndGetSessionInfo(ctx, sessionInfo, err, r, w)
-			if shouldReturn {
-				return
-			}
-		}
-		if r.Method == "GET" {
-			user := sessionInfo.User
-			pref, err := deps.DB.GetCurrentProfile(ctx, user)
-			if err != nil {
-				slog.ErrorContext(ctx, "Cannot get preferences", slog.String("user", user), slog.Any("error", err.Error()))
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-			context, err := deps.MovieRetrieverFlowClient.RetriveDocuments(ctx, randomisedFeaturedFilmsQuery())
-			if err != nil {
-				slog.ErrorContext(ctx, "Error getting movie recommendations", slog.Any("error", err.Error()))
-				http.Error(w, "Error get movie recommendations", http.StatusInternalServerError)
-				return
-			}
-			agentResp := types.NewAgentResponse()
-			agentResp.Context = context[0:5]
-			agentResp.Preferences = pref
-			agentResp.Result = types.SUCCESS
-
-			json.NewEncoder(w).Encode(agentResp)
-			return
-
-		}
-	}
 }
 
 func authenticateAndGetSessionInfo(ctx context.Context, sessionInfo *SessionInfo, err error, r *http.Request, w http.ResponseWriter) (*SessionInfo, bool) {
@@ -211,95 +161,6 @@ func authenticateAndGetSessionInfo(ctx context.Context, sessionInfo *SessionInfo
 	}
 	return sessionInfo, false
 }
-
-func createPreferencesHandler(MovieDB *db.MovieDB) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var err error
-		ctx := r.Context()
-		sessionInfo := &SessionInfo{}
-		if r.Method != "OPTIONS" {
-			var shouldReturn bool
-			sessionInfo, shouldReturn = authenticateAndGetSessionInfo(ctx, sessionInfo, err, r, w)
-			if shouldReturn {
-				return
-			}
-		}
-		user := sessionInfo.User
-		if r.Method == "GET" {
-			pref, err := MovieDB.GetCurrentProfile(ctx, user)
-			if err != nil {
-				slog.ErrorContext(ctx, "Cannot get preferences", slog.String("user", user), slog.Any("error", err.Error()))
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-			json.NewEncoder(w).Encode(pref)
-			return
-		}
-		if r.Method == "POST" {
-			pref := &PrefBody{
-				Content: types.NewUserProfile(),
-			}
-			err := json.NewDecoder(r.Body).Decode(pref)
-			if err != nil {
-				slog.InfoContext(ctx, "Error while decoding request", slog.Any("error", err.Error()))
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-			err = MovieDB.UpdateProfile(ctx, pref.Content, sessionInfo.User)
-			if err != nil {
-				slog.ErrorContext(ctx, "Error while fetching preferences", slog.String("user", user), slog.Any("error", err.Error()))
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-
-			json.NewEncoder(w).Encode(map[string]string{"update": "success"})
-			return
-		}
-	}
-}
-
-func createHistoryHandler() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
-		var err error
-		sessionInfo := &SessionInfo{}
-		if r.Method != "OPTIONS" {
-			var shouldReturn bool
-			sessionInfo, shouldReturn = authenticateAndGetSessionInfo(ctx, sessionInfo, err, r, w)
-			if shouldReturn {
-				return
-			}
-		}
-		user := sessionInfo.User
-		if r.Method == "GET" {
-			ch, err := getHistory(ctx, user)
-			if err != nil {
-				slog.ErrorContext(ctx, "Error while fetching history", slog.String("user", user), slog.Any("error", err.Error()))
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-			simpleHistory, err := types.ParseRecentHistory(ch.GetHistory(), metadata.HistoryLength)
-			if err != nil {
-				slog.ErrorContext(ctx, "Error while parsing history", slog.String("user", user), slog.Any("error", err.Error()))
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(simpleHistory)
-		}
-		if r.Method == "DELETE" {
-			err := deleteHistory(ctx, sessionInfo.User)
-			if err != nil {
-				slog.ErrorContext(ctx, "Error while deleting history", slog.String("user", user), slog.Any("error", err.Error()))
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-	}
-}
-
 func getSessionInfo(ctx context.Context, r *http.Request) (*SessionInfo, error) {
 	session := &SessionInfo{}
 	sessionID, err := getSessionID(r)
@@ -320,30 +181,4 @@ func deleteSessionInfo(ctx context.Context, sessionID string) error {
 		return err
 	}
 	return nil
-}
-
-func logoutHandler(w http.ResponseWriter, r *http.Request) {
-	var err error
-	ctx := r.Context()
-	sessionInfo := &SessionInfo{}
-	if r.Method != "OPTIONS" {
-		var shouldReturn bool
-		sessionInfo, shouldReturn = authenticateAndGetSessionInfo(ctx, sessionInfo, err, r, w)
-		if shouldReturn {
-			return
-		}
-	}
-	user := sessionInfo.User
-	if r.Method == "GET" {
-		err := deleteSessionInfo(ctx, sessionInfo.ID)
-		if err != nil {
-			slog.ErrorContext(ctx, "Error while deleting session info", slog.String("user", user), slog.Any("error", err.Error()))
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		json.NewEncoder(w).Encode(map[string]string{"logout": "success"})
-
-		return
-	}
-
 }
