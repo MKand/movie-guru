@@ -115,7 +115,8 @@ export const DocSearchFlowPromptText = `
 Analyze the inputQuery string: "{{query}}" with respect to a movie database containing the following fields:
 
 embedding: Vector representation of the movie's title, plot, and genres.
-genres: List of genres (e.g., "Action", "Comedy", "Drama").
+genres: List of movie genres (e.g., "Action", "Comedy", "Drama", "horror", "anime",
+"classic", "romance", "romcom" etc).
 title: Title of the movie.
 plot: A textual summary of the movie's plot.
 runtime_mins: Duration of the movie in minutes.

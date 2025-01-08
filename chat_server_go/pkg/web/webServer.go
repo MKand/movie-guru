@@ -10,11 +10,9 @@ import (
 	"net/http"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/movie-guru/pkg/db"
 	metrics "github.com/movie-guru/pkg/metrics"
-	types "github.com/movie-guru/pkg/types"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -112,34 +110,6 @@ func getSessionID(r *http.Request) (string, error) {
 	}
 	sessionID := strings.Split(r.Header.Get("Cookie"), "movie-guru-sid=")[1]
 	return sessionID, nil
-}
-
-func getHistory(ctx context.Context, user string) (*types.ChatHistory, error) {
-	redisContext, cancel := context.WithTimeout(ctx, 3*time.Second)
-	defer cancel()
-	historyJson, err := redisStore.Get(redisContext, user).Result()
-	ch := types.NewChatHistory()
-	if err == redis.Nil {
-		return ch, nil
-	} else if err != nil {
-		return ch, err
-	}
-	err = json.Unmarshal([]byte(historyJson), ch)
-	if err != nil {
-		return ch, err
-	}
-	return ch, nil
-}
-
-func saveHistory(ctx context.Context, history *types.ChatHistory, user string, metadata *db.Metadata) error {
-	history.Trim(metadata.HistoryLength)
-	redisContext, cancel := context.WithTimeout(ctx, 3*time.Second)
-	defer cancel()
-	err := redisStore.Set(redisContext, user, history, 0).Err()
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 func authenticateAndGetSessionInfo(ctx context.Context, sessionInfo *SessionInfo, err error, r *http.Request, w http.ResponseWriter) (*SessionInfo, bool) {
