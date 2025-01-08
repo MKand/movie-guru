@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"os"
 	"strings"
 	"time"
 
@@ -94,7 +93,7 @@ func (ulh *UserLoginHandler) verifyGoogleToken(tokenString string) (string, erro
 	return email, nil
 }
 
-func createLoginHandler(ulh *UserLoginHandler, meters *m.LoginMeters) http.HandlerFunc {
+func createLoginHandler(ulh *UserLoginHandler, meters *m.LoginMeters, metadata *db.Metadata) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		if r.Method == "POST" {
@@ -149,12 +148,7 @@ func createLoginHandler(ulh *UserLoginHandler, meters *m.LoginMeters) http.Handl
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 			}
 			meters.LoginSuccessCounter.Add(ctx, 1)
-			setCookieHeader := ""
-			if os.Getenv("LOCAL") == "true" {
-				setCookieHeader = fmt.Sprintf("session=%s; HttpOnly; SameSite=Lax; Path=/; Domain=localhost; Max-Age=86400", sessionID)
-			} else {
-				setCookieHeader = fmt.Sprintf("session=%s; HttpOnly; Secure; SameSite=None; Path=/; Domain=%s; Max-Age=86400", sessionID, metadata.FrontEndDomain)
-			}
+			setCookieHeader := fmt.Sprintf("movie-guru-sid=%s; HttpOnly; SameSite=Lax; Path=/; Domain=%s; Max-Age=86400", sessionID, metadata.ServerDomain)
 			w.Header().Set("Set-Cookie", setCookieHeader)
 			w.Header().Set("Vary", "Cookie, Origin")
 			json.NewEncoder(w).Encode(map[string]string{"login": "success"})

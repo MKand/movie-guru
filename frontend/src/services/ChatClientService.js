@@ -5,7 +5,7 @@ class ChatClientService {
   async send(message){
     const requestOptions = {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'user': store.getters["user/email"]},
+        headers: { 'Content-Type': 'application/json'},
         body: JSON.stringify({ content: message }),
         credentials: 'include'
     };
@@ -24,7 +24,7 @@ class ChatClientService {
   async startup(){
     const requestOptions = {
         method: 'GET',
-        headers: { 'Content-Type': 'application/json', 'user': store.getters["user/email"]},
+        headers: { 'Content-Type': 'application/json'},
         credentials: 'include'
     };
     const response = await fetchPolyfill(import.meta.env.VITE_CHAT_SERVER_URL + '/startup', requestOptions)
@@ -42,7 +42,7 @@ class ChatClientService {
     async getHistory(){
       const requestOptions = {
           method: 'GET',
-          headers: { 'Content-Type': 'application/json', 'user': store.getters["user/email"]},
+          headers: { 'Content-Type': 'application/json'},
           credentials: 'include'
       };
       const response = await fetchPolyfill(import.meta.env.VITE_CHAT_SERVER_URL + '/history', requestOptions)
@@ -60,7 +60,7 @@ class ChatClientService {
       async clearHistory(){
       const requestOptions = {
           method: 'DELETE',
-          headers: { 'Content-Type': 'application/json', 'user': store.getters["user/email"]},
+          headers: { 'Content-Type': 'application/json'},
           credentials: 'include'
       };
       const response = await fetchPolyfill(import.meta.env.VITE_CHAT_SERVER_URL + '/history', requestOptions)

@@ -65,7 +65,7 @@ func StartServer(ctx context.Context, ulh *UserLoginHandler, m *db.Metadata, dep
 	mux.HandleFunc("/history", createHistoryHandler())
 	mux.HandleFunc("/preferences", createPreferencesHandler(deps.DB))
 	mux.HandleFunc("/startup", createStartupHandler(deps))
-	mux.HandleFunc("/login", createLoginHandler(ulh, loginMeters))
+	mux.HandleFunc("/login", createLoginHandler(ulh, loginMeters, m))
 	mux.HandleFunc("/logout", logoutHandler)
 	return http.ListenAndServe(":8080", enableCORS(mux))
 }
@@ -97,7 +97,7 @@ func getSessionID(r *http.Request) (string, error) {
 	if r.Header.Get("Cookie") == "" {
 		return "", errors.New("No cookie found")
 	}
-	sessionID := strings.Split(r.Header.Get("Cookie"), "session=")[1]
+	sessionID := strings.Split(r.Header.Get("Cookie"), "movie-guru-sid=")[1]
 	return sessionID, nil
 }
 

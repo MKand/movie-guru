@@ -16,7 +16,7 @@ type Metadata struct {
 	RetrieverLength          int    `json:"retriever_length"`
 	GoogleChatModelName      string `json:"google_chat_model_name"`
 	GoogleEmbeddingModelName string `json:"google_embedding_model_name"`
-	FrontEndDomain           string `json:"front_end_domain"`
+	ServerDomain             string `json:"server_domain"`
 }
 
 func (d *MovieDB) GetMetadata(ctx context.Context, appVersion string) (*Metadata, error) {
@@ -39,7 +39,7 @@ func (d *MovieDB) getServerMetadata(ctx context.Context, appVersion string) (*Me
 		&metadata.RetrieverLength,
 		&metadata.GoogleChatModelName,
 		&metadata.GoogleEmbeddingModelName,
-		&metadata.FrontEndDomain,
+		&metadata.ServerDomain,
 	)
 	if err != nil {
 		return metadata, err
