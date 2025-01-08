@@ -15,8 +15,6 @@ COPY . .
 
 # Build
 RUN CGO_ENABLED=0 GOOS=linux go build -o /app/webserver cmd/webserver/main.go 
-RUN CGO_ENABLED=0 GOOS=linux go build -o /app/flows cmd/flows/main.go 
-RUN CGO_ENABLED=0 GOOS=linux go build -o /app/indexer cmd/indexer/main.go 
 
 # Optional:
 # To bind to a TCP port, runtime parameters must be supplied to the docker command.

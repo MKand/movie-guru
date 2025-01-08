@@ -2,11 +2,13 @@ import {fetch as fetchPolyfill} from 'whatwg-fetch'
 import store  from '../stores';
 
 class LoginClientService {
-  async login(email){
+  async login(user, inviteCode){
     const requestOptions = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json',
-          'user': email},
+          'Authorization': `Bearer ${user.accessToken}`,
+        },
+        body: JSON.stringify({"inviteCode": inviteCode }),
         credentials: 'include'
     };
     const response = await fetchPolyfill(import.meta.env.VITE_CHAT_SERVER_URL + '/login', requestOptions)

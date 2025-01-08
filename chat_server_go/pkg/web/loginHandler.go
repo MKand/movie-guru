@@ -6,12 +6,15 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
+	jwt "github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	_ "github.com/lib/pq"
 	"github.com/movie-guru/pkg/db"
 	m "github.com/movie-guru/pkg/metrics"
+	utils "github.com/movie-guru/pkg/utils"
 	"golang.org/x/exp/slog"
 )
 
@@ -35,9 +38,60 @@ func NewUserLoginHandler(tokenAudience string, db *db.MovieDB) *UserLoginHandler
 	}
 }
 
-func (ulh *UserLoginHandler) HandleLogin(ctx context.Context, user string) (string, error) {
-	// Minimal login logic for simplicity. Accepts any email and just returns it.
-	return user, nil
+func (ulh *UserLoginHandler) HandleLogin(ctx context.Context, authHeader, inviteCode string) (string, error) {
+	token := ulh.getToken(authHeader)
+	user, err := ulh.verifyGoogleToken(token)
+	if err != nil {
+		return "", err
+	}
+
+	if ulh.db.CheckUser(ctx, user) {
+		return user, nil
+	}
+
+	inviteCodes, err := ulh.db.GetInviteCodes()
+	if err != nil {
+		return "", err
+	}
+
+	if utils.Contains(inviteCodes, inviteCode) {
+		if err := ulh.db.CreateUser(user); err != nil {
+			return "", err
+		}
+		return user, nil
+	}
+
+	return "", &AuthorizationError{"Invalid invite code"}
+}
+
+// verify_google_token verifies the Google token and extracts the user email
+func (ulh *UserLoginHandler) verifyGoogleToken(tokenString string) (string, error) {
+	token, _, err := new(jwt.Parser).ParseUnverified(tokenString, jwt.MapClaims{})
+	if err != nil {
+		return "", &AuthorizationError{"Invalid token"}
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return "", &AuthorizationError{"Invalid token claims"}
+	}
+
+	aud, ok := claims["aud"].(string)
+	if !ok || aud != ulh.tokenAudience {
+		return "", &AuthorizationError{"Invalid token audience"}
+	}
+
+	emailVerified, ok := claims["email_verified"].(bool)
+	if !ok || !emailVerified {
+		return "", &AuthorizationError{"Email not verified"}
+	}
+
+	email, ok := claims["email"].(string)
+	if !ok {
+		return "", &AuthorizationError{"Email not found in token"}
+	}
+
+	return email, nil
 }
 
 func createLoginHandler(ulh *UserLoginHandler, meters *m.LoginMeters) http.HandlerFunc {
@@ -52,14 +106,22 @@ func createLoginHandler(ulh *UserLoginHandler, meters *m.LoginMeters) http.Handl
 
 			meters.LoginCounter.Add(ctx, 1)
 
-			user := r.Header.Get("user")
-			if user == "" {
-				slog.InfoContext(ctx, "No user header")
+			authHeader := r.Header.Get("Authorization")
+			if authHeader == "" {
+				slog.InfoContext(ctx, "No auth header")
 				http.Error(w, "Unauthorized", http.StatusUnauthorized)
 				return
 			}
+			var loginBody LoginBody
+			err := json.NewDecoder(r.Body).Decode(&loginBody)
+			if err != nil {
+				slog.ErrorContext(ctx, "Bad Request at login", slog.Any("error", err.Error()))
 
-			user, err := ulh.HandleLogin(ctx, user)
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+
+			user, err := ulh.HandleLogin(ctx, authHeader, loginBody.InviteCode)
 			if err != nil {
 				if _, ok := err.(*AuthorizationError); ok {
 					slog.InfoContext(ctx, "Unauthorized")
@@ -104,4 +166,13 @@ func createLoginHandler(ulh *UserLoginHandler, meters *m.LoginMeters) http.Handl
 			return
 		}
 	}
+}
+
+// get_token extracts the token from the authorization header
+func (ulh *UserLoginHandler) getToken(authHeader string) string {
+	tokenParts := strings.Split(authHeader, " ")
+	if len(tokenParts) == 2 && strings.ToLower(tokenParts[0]) == "bearer" {
+		return tokenParts[1]
+	}
+	return ""
 }
