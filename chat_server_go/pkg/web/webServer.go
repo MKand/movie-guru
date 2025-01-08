@@ -27,10 +27,24 @@ var (
 	corsOrigins []string
 )
 
-func enableCORS(next http.Handler) http.Handler {
+func enableCORS(allowedOrigins []string, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		origin := r.Header.Get("Origin")
 
-		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:5173")
+		// Check if the origin is in the allowed list
+		isAllowed := false
+		for _, allowedOrigin := range allowedOrigins {
+			if origin == allowedOrigin {
+				isAllowed = true
+				break
+			}
+		}
+
+		if isAllowed {
+			w.Header().Set("Access-Control-Allow-Origin", origin)
+		}
+
+		// Set other CORS headers
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 		w.Header().Set("Access-Control-Allow-Credentials", "true") // Allow credentials
@@ -41,6 +55,7 @@ func enableCORS(next http.Handler) http.Handler {
 			return
 		}
 
+		// Pass the request to the next handler
 		next.ServeHTTP(w, r)
 	})
 }
@@ -67,7 +82,7 @@ func StartServer(ctx context.Context, ulh *UserLoginHandler, m *db.Metadata, dep
 	mux.HandleFunc("/startup", createStartupHandler(deps))
 	mux.HandleFunc("/login", createLoginHandler(ulh, loginMeters, m))
 	mux.HandleFunc("/logout", logoutHandler)
-	return http.ListenAndServe(":8080", enableCORS(mux))
+	return http.ListenAndServe(":8080", enableCORS(corsOrigins, mux))
 }
 
 func setupSessionStore(ctx context.Context) {
