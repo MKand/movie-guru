@@ -52,7 +52,7 @@ export const MovieRAGFlow = ai.defineFlow(
       const jsonResponse =  JSON.parse(response.text);
       const output: MovieFlowOutput = {
         "answer":  jsonResponse.answer,
-        "relevantMovies": jsonResponse.relevantMovies,
+        "relevantMovies": jsonResponse.relevantMovies || [],
         "wrongQuery": jsonResponse.wrongQuery,
         "modelOutputMetadata": {
           "justification": jsonResponse.justification,
