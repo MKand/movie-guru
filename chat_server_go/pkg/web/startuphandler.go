@@ -3,10 +3,19 @@ package web
 import (
 	"encoding/json"
 	"log/slog"
+	"math/rand"
 	"net/http"
 
 	types "github.com/movie-guru/pkg/types"
 )
+
+func randomisedFeaturedFilmsQuery() string {
+	queries := []string{
+		"great films", "cool films", "best films", "new films", "high rated films", "classic films",
+	}
+	return queries[rand.Intn(len(queries))]
+
+}
 
 func createStartupHandler(deps *Dependencies) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
