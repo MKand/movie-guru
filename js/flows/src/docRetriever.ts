@@ -53,6 +53,7 @@ export const MovieDocFlow = ai.defineFlow(
     outputSchema: z.array(MovieContextSchema), // Array of MovieContextSchema
   },
   async (input) => {
+  
     const response = await SearchFlowPrompt( {
       query: input.query
     })
@@ -69,7 +70,10 @@ export const MovieDocFlow = ai.defineFlow(
         safetyIssue: jsonResponse.safetyIssue || false,
       },
     }
+    const movieContexts: MovieContext[] = [];
 
+    try{
+      
     const docs = await ai.retrieve({
       retriever: sqlRetriever,
       query: {
@@ -82,7 +86,6 @@ export const MovieDocFlow = ai.defineFlow(
         vectorQuery: searchFlowOutput.vectorQuery
       },
     });
-    const movieContexts: MovieContext[] = [];
 
     for (const doc of docs) {
       if (doc.metadata) {
@@ -104,6 +107,11 @@ export const MovieDocFlow = ai.defineFlow(
       }
     }
     return movieContexts;
+  }
+  catch(e){
+    console.error(`Unable to get documents: ${e instanceof Error ? e.message : e}`)
+    throw new Error(`Unable to get documents: ${e instanceof Error ? e.message : e}`);
+  }
   }
 );
 

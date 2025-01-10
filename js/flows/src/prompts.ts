@@ -130,7 +130,7 @@ Determine the appropriate search category for the query: KEYWORD, VECTOR, or MIX
 
 1. KEYWORD search: Use when the query can be expressed with SQL operators for the postgres db (e.g., =, !=, >, <, IN) on the title, actors, director, genres, runtime_mins, released, or rating fields.
 Queries about movie quality, length, or release year may require transforming the query for KEYWORD search.
-If the query contains text searches, make them case insensitive.
+If the query contains text searches, make them case insensitive. 
 Transformations:
     Movie Quality:
         Bad: rating < 2
@@ -156,11 +156,19 @@ Examples of transformed KEYWORD queries:
         searchCategory: KEYWORD
         KeywordQuery: "released > 2000"
         VectorQuery: ""
+    Input: "The Bee movie"
+    Output: 
+        searchCategory: KEYWORD
+        KeywordQuery: "title ILIKE '%The Bee movie%'"
+        VectorQuery: ""
+    For searches involving actors always use the following query format. See example below.
     Input: "movies with tom hanks"
     Output: 
         searchCategory: KEYWORD
-        KeywordQuery: "'Tom Hanks' ILIKE ANY(actors)'"
+        KeywordQuery: " 'Tom Hanks' ILIKE ANY(string_to_array(actors, ', '))"
         VectorQuery: ""
+
+
 2. VECTOR search: Use when the query requires semantic understanding of title, plot, or genres. Applicable for queries involving concepts, emotions, themes, or natural language descriptions.
 Searches that involve genres should always have a vector query.
 Examples of VECTOR queries:
@@ -189,7 +197,7 @@ Example:
     Input: "horror movies with great ratings that have Tom Hanks"
     Output:
         searchCategory: MIXED
-        "KeywordQuery": "rating > 4.5 AND 'Tom Hanks' ILIKE ANY(actors)",
+        "KeywordQuery": "rating > 4.5 AND 'Tom Hanks' ILIKE ANY(string_to_array(actors, ', '))",
         VectorQuery: "horror"
 
 Respond with the following:

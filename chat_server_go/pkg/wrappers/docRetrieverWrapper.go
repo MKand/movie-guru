@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 
 	_ "github.com/lib/pq"
@@ -59,6 +60,13 @@ func (flowClient *MovieRetrieverFlowClient) runFlow(input string) ([]*types.Movi
 		fmt.Println("Error sending request:", err)
 		return nil, err
 	}
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		bodyBytes, _ := io.ReadAll(resp.Body)
+		fmt.Printf("Server returned error: %s\n", string(bodyBytes))
+		return nil, fmt.Errorf("server returned error: %s (%d)", http.StatusText(resp.StatusCode), resp.StatusCode)
+	}
+
 	var result struct {
 		Result []*types.MovieContext `json:"result"`
 	}

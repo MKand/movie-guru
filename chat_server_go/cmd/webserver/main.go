@@ -2,9 +2,9 @@ package main
 
 import (
 	"context"
-	"errors"
 	"log/slog"
 	"os"
+	"strconv"
 
 	"github.com/firebase/genkit/go/genkit"
 	"github.com/firebase/genkit/go/plugins/vertexai"
@@ -17,37 +17,50 @@ import (
 func main() {
 	ctx := context.Background()
 
+	// Load environment variables
 	URL := os.Getenv("FLOWS_URL")
+	metricsEnabled, _ := strconv.ParseBool(os.Getenv("ENABLE_METRICS"))
 
-	shutdown, err := met.SetupOpenTelemetry(ctx)
-	if err != nil {
-		slog.ErrorContext(ctx, "error setting up OpenTelemetry", slog.Any("error", err))
-		os.Exit(1)
-	}
-
+	// Set up database
 	movieAgentDB, err := db.GetDB()
 	if err != nil {
-		slog.ErrorContext(ctx, "error setting up DB", slog.Any("error", err))
+		slog.ErrorContext(ctx, "Error setting up DB", slog.Any("error", err))
+		os.Exit(1)
 	}
 	defer movieAgentDB.DB.Close()
 
+	// Fetch metadata
 	metadata, err := movieAgentDB.GetMetadata(ctx, os.Getenv("APP_VERSION"))
 	if err != nil {
-		slog.ErrorContext(ctx, "error getting metadata", slog.Any("error", err))
-	}
-
-	ulh := web.NewUserLoginHandler(metadata.TokenAudience, movieAgentDB)
-	deps := getDependencies(ctx, metadata, movieAgentDB, URL)
-
-	if err = errors.Join(web.StartServer(ctx, ulh, metadata, deps), shutdown(ctx)); err != nil {
-		slog.ErrorContext(ctx, "server exited with error", slog.Any("error", err))
+		slog.ErrorContext(ctx, "Error getting metadata", slog.Any("error", err))
 		os.Exit(1)
 	}
 
-	if err := genkit.Init(ctx, nil); err != nil {
-		slog.ErrorContext(ctx, "error setting up genkit", slog.Any("error", err))
+	// Set up dependencies
+	ulh := web.NewUserLoginHandler(metadata.TokenAudience, movieAgentDB)
+	deps := getDependencies(ctx, metadata, movieAgentDB, URL)
+
+	// Start telemetry if metrics are enabled
+	if metricsEnabled {
+		if shutdown, err := met.SetupOpenTelemetry(ctx); err != nil {
+			slog.ErrorContext(ctx, "Error setting up OpenTelemetry", slog.Any("error", err))
+			os.Exit(1)
+		} else {
+			defer shutdown(ctx)
+		}
 	}
 
+	// Start the server
+	if err := web.StartServer(ctx, ulh, metadata, deps); err != nil {
+		slog.ErrorContext(ctx, "Server exited with error", slog.Any("error", err))
+		os.Exit(1)
+	}
+
+	// Initialize genkit
+	if err := genkit.Init(ctx, nil); err != nil {
+		slog.ErrorContext(ctx, "Error setting up genkit", slog.Any("error", err))
+		os.Exit(1)
+	}
 }
 
 func getDependencies(ctx context.Context, metadata *db.Metadata, db *db.MovieDB, url string) *web.Dependencies {
