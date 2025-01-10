@@ -20,7 +20,7 @@
 
 **Genkit version**: 0.9.12 for Node.js
 
-[![Movie Guru](https://img.youtube.com/vi/l_KhN3RJ8qA/0.jpg)](https://youtu.be/YOUR_VIDEO_ID)
+[![Movie Guru](https://img.youtube.com/vi/l_KhN3RJ8qA/0.jpg)](https://youtu.be/l_KhN3RJ8qA)
 
  This version is a *minimal version* of the frontend and backend that doesn't have complex login logic like the version in **main**. It is meant to be run fully locally while using VertexAI APIs.
 
