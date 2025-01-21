@@ -1,21 +1,20 @@
 FROM node:lts-alpine
 
-# set the working direction
+# Set the working directory
 WORKDIR /app
 
-# install app dependencies
+# Install app dependencies
 COPY package.json ./
 COPY package-lock.json ./
 
-# Fix permissions for packages
-# RUN npm config set unsafe-perm true
-
+# Install dependencies
 RUN npm install
-RUN npm install -g serve
 
 # Bundle app source
 COPY . ./
 
+# Build the application
+RUN npm run build
 
-# Start the production server (adjust the command if necessary)
-CMD [ "npm", "run", "dev", "--", "--host",  "0.0.0.0" ]
+# Start the production server
+CMD ["npm", "start", "--", "--host", "0.0.0.0"]

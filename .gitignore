@@ -1,4 +1,5 @@
 .* 
+!.env
 !.gitignore
 !.dockerignore
 /var
