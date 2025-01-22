@@ -50,4 +50,8 @@ gcloud projects add-iam-policy-binding "$PROJECT_ID" \
     --member="serviceAccount:$SERVICE_ACCOUNT_EMAIL" \
     --role="roles/cloudtrace.agent"
 
+echo -e "\e[95mCreating service account local key as .key.json\e[0m"
+gcloud iam service-accounts keys create ./.key.json \
+    --iam-account=movie-guru-local-sa@$PROJECT_ID.iam.gserviceaccount.com
+
 echo -e "\e[95mService account $SERVICE_ACCOUNT_NAME has been created and configured successfully.\e[0m"

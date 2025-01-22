@@ -120,17 +120,6 @@ There are 2 tables:
 This enables the required APIs and creates the necessary service account with roles.
 
 ## Database Setup
-
-1. Download the JSON key for the service account
-
-    This is required for you to be able to grant your docker containers access to the Vertex APIs
-
-    **Note:** This step requires you to have the ability to create JSON keys for a service account. It may be disabled by some organizations.
-
-    - Go to the project in the GCP console. Go to **IAM > Service Accounts**.
-    - Select the movie guru service account (movie-guru-local-sa@<project id>.iam.gserviceaccount.com).
-    - Create a new JSON key.
-    - Download the key and store it as **.key.json** in the root of this repo (make sure you use the filename exactly).
   
 1. Create a shared network for all the app containers we will use
 
@@ -138,14 +127,15 @@ This enables the required APIs and creates the necessary service account with ro
     docker network create db-shared-network
     ```
 
-1. Setup local DB
+2. Setup local DB
 We'll setup a local *pgvector* db and an *Adminer* instance
 
     ```sh
     docker compose -f docker-compose-pgvector.yaml up -d
     ```
 
-Navigate to *localhost:8082*, to access the db via *Adminer*. Use the main user credentials (user name: main, password: mainpassword).
+Navigate to *localhost:8082*, to access the db via *Adminer*. Use the main user credentials (user name: main, password: mainpassword). 
+Make sure you set `System` as `PostgresSQL` and `Server` as `db`, and `Database` as `fake-movies-db`.
 
 At this stage, there will be 2 tables, with data pre-loaded.
 You can either choose to either reload the data into the table again or skip ahead to the [Run the application](#run-the-application) step.
