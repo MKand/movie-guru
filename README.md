@@ -148,7 +148,8 @@ We'll setup a local *pgvector* db and an *Adminer* instance
 Navigate to *localhost:8082*, to access the db via *Adminer*. Use the main user credentials (user name: main, password: mainpassword).
 
 At this stage, there will be 2 tables, with data pre-loaded.
-You can either choose to skip to [Run the application](#run-the-application) or reload the data into the table from scratch.
+You can either choose to either reload the data into the table again or skip ahead to the [Run the application](#run-the-application) step.
+Skipping ahead will save you approx. 20 minutes of the setup time.
 
 1. Populate the movie table
 
@@ -158,7 +159,7 @@ You can either choose to skip to [Run the application](#run-the-application) or 
     export LOCATION=<YOUR_DESIRED_GCLOUD_REGION> # defaults to us-central1 if this is not set
     ```
 
-1. Run the javascript indexer so it can add movies data into the database. The database comes pre-populated with the required data, but you can choose to re-add the data. The execution of this intentionally slowed down to stay below the rate-limits.
+2. Run the javascript indexer so it can add movies data into the database. The database comes pre-populated with the required data, but you can choose to re-add the data. The execution of this intentionally slowed down to stay below the rate-limits.
 
     ```sh
     docker compose -f docker-compose-indexer.yaml up --build -d 
@@ -166,13 +167,13 @@ You can either choose to skip to [Run the application](#run-the-application) or 
 
     This takes about 10-15 minutes to run, so be patient. The embedding creation process is slowed down intentionally to ensure we stay under the rate limit.
 
-1. Shut down the indexer container.
+3. Shut down the indexer container.
 
     ```sh
     docker compose -f docker-compose-indexer.yaml down
     ```
 
-1. Verify the number of entries in the DB.
+4. Verify the number of entries in the DB.
 There should be **652** entries in the movies table.
 
     ```sql
@@ -181,7 +182,6 @@ There should be **652** entries in the movies table.
     ```
 
 Once all the required data is added, it is time to run the application that consists of the **frontend**, the **webserver**, the **genkit flows** server and the **redis cache**. These will be running locally in containers. The servers communicate with the **postgres DB** also running locally in a container.
-
 
 ## Run the Application
 
