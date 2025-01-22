@@ -134,7 +134,7 @@ We'll setup a local *pgvector* db and an *Adminer* instance
     docker compose -f docker-compose-pgvector.yaml up -d
     ```
 
-Navigate to *localhost:8082*, to access the db via *Adminer*. Use the main user credentials (user name: main, password: mainpassword). 
+Navigate to *localhost:8082*, to access the db via *Adminer*. Use the main user credentials (user name: main, password: mainpassword).
 Make sure you set `System` as `PostgresSQL` and `Server` as `db`, and `Database` as `fake-movies-db`.
 
 At this stage, there will be 2 tables, with data pre-loaded.

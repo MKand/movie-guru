@@ -52,6 +52,6 @@ gcloud projects add-iam-policy-binding "$PROJECT_ID" \
 
 echo -e "\e[95mCreating service account local key as .key.json\e[0m"
 gcloud iam service-accounts keys create ./.key.json \
-    --iam-account=movie-guru-local-sa@$PROJECT_ID.iam.gserviceaccount.com
+    --iam-account=$SERVICE_ACCOUNT_EMAIL
 
 echo -e "\e[95mService account $SERVICE_ACCOUNT_NAME has been created and configured successfully.\e[0m"
