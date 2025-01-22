@@ -163,7 +163,7 @@ At this stage, there will be 2 tables, with no data. We will populate the table 
     - Create a new JSON key.
     - Download the key and store it as **.key.json** in the root of this repo (make sure you use the filename exactly).
 
-1. Run the javascript indexer so it can add movies data into the database. The execution of this intentionally slowed down to stay below the rate-limits.
+1. [OPTIONAL] Run the javascript indexer so it can add movies data into the database. The database comes pre-populated with the required data, but you can choose to re-add the data. The execution of this intentionally slowed down to stay below the rate-limits.
 
     ```sh
     docker compose -f docker-compose-indexer.yaml up --build -d 
@@ -171,18 +171,18 @@ At this stage, there will be 2 tables, with no data. We will populate the table 
 
     This takes about 10-15 minutes to run, so be patient. The embedding creation process is slowed down intentionally to ensure we stay under the rate limit.
 
+1. Shut down the indexer container.
+
+    ```sh
+    docker compose -f docker-compose-indexer.yaml down
+    ```
+
 1. Verify the number of entries in the DB.
 There should be **652** entries in the movies table.
 
     ```sql
     SELECT COUNT(*)
     FROM "movies";
-    ```
-
-1. Shut down the indexer container.
-
-    ```sh
-    docker compose -f docker-compose-indexer.yaml down
     ```
 
 Once all the required data is added, it is time to run the application that consists of the **frontend**, the **webserver**, the **genkit flows** server and the **redis cache**. These will be running locally in containers. The servers communicate with the **postgres DB** also running locally in a container.
