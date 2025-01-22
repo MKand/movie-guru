@@ -15,6 +15,7 @@
     - [Steps](#steps)
   - [Database Setup](#database-setup)
   - [Run the Application](#run-the-application)
+  - [\[Optional\] Create a Firebase project to view AI monitoring](#optional-create-a-firebase-project-to-view-ai-monitoring)
 
 ## Movie Guru
 
@@ -120,38 +121,6 @@ This enables the required APIs and creates the necessary service account with ro
 
 ## Database Setup
 
-1. Create a shared network for all the app containers we will use
-
-    ```sh
-    docker network create db-shared-network
-    ```
-
-1. Setup local DB
-We'll setup a local *pgvecto*r db and an *Adminer* instance
-
-    ```sh
-    docker compose -f docker-compose-pgvector.yaml up -d
-    ```
-
-Navigate to *localhost:8082*, to access the db via *Adminer*. Use the main user credentials (user name: main, password: mainpassword).
-
-At this stage, there will be 2 tables, with no data. We will populate the table in the next steps.
-
-1. Grant the necessary permissions to minimal-user.
-
-    ```SQL
-    GRANT SELECT ON movies TO "minimal-user";
-    GRANT SELECT, INSERT, UPDATE, DELETE ON user_preferences TO "minimal-user";
-    ```
-
-1. Populate the movie table
-
-    ```sh
-    source set_env_vars.sh
-    export PROJECT_ID=<YOUR_PROJECT_ID>
-    export LOCATION=<YOUR_DESIRED_GCLOUD_REGION> # defaults to us-central1 if this is not set
-    ```
-
 1. Download the JSON key for the service account
 
     This is required for you to be able to grant your docker containers access to the Vertex APIs
@@ -162,8 +131,34 @@ At this stage, there will be 2 tables, with no data. We will populate the table 
     - Select the movie guru service account (movie-guru-local-sa@<project id>.iam.gserviceaccount.com).
     - Create a new JSON key.
     - Download the key and store it as **.key.json** in the root of this repo (make sure you use the filename exactly).
+  
+1. Create a shared network for all the app containers we will use
 
-1. [OPTIONAL] Run the javascript indexer so it can add movies data into the database. The database comes pre-populated with the required data, but you can choose to re-add the data. The execution of this intentionally slowed down to stay below the rate-limits.
+    ```sh
+    docker network create db-shared-network
+    ```
+
+1. Setup local DB
+We'll setup a local *pgvector* db and an *Adminer* instance
+
+    ```sh
+    docker compose -f docker-compose-pgvector.yaml up -d
+    ```
+
+Navigate to *localhost:8082*, to access the db via *Adminer*. Use the main user credentials (user name: main, password: mainpassword).
+
+At this stage, there will be 2 tables, with data pre-loaded.
+You can either choose to skip to [Run the application](#run-the-application) or reload the data into the table from scratch.
+
+1. Populate the movie table
+
+    ```sh
+    source set_env_vars.sh
+    export PROJECT_ID=<YOUR_PROJECT_ID>
+    export LOCATION=<YOUR_DESIRED_GCLOUD_REGION> # defaults to us-central1 if this is not set
+    ```
+
+1. Run the javascript indexer so it can add movies data into the database. The database comes pre-populated with the required data, but you can choose to re-add the data. The execution of this intentionally slowed down to stay below the rate-limits.
 
     ```sh
     docker compose -f docker-compose-indexer.yaml up --build -d 
@@ -186,6 +181,7 @@ There should be **652** entries in the movies table.
     ```
 
 Once all the required data is added, it is time to run the application that consists of the **frontend**, the **webserver**, the **genkit flows** server and the **redis cache**. These will be running locally in containers. The servers communicate with the **postgres DB** also running locally in a container.
+
 
 ## Run the Application
 
@@ -210,3 +206,9 @@ Once all the required data is added, it is time to run the application that cons
     ```sh
     docker compose down
     ```
+
+## [Optional] Create a Firebase project to view AI monitoring
+
+To view the traces of the application Genkit flows, you will need to add firebase to the Project.
+Follow the steps [here](https://firebase.google.com/docs/projects/use-firebase-with-existing-cloud-project#how-to-add-firebase_console) and use the value of the PROJECT_ID of the Google Cloud project.
+Once created, you can navigate to the Genkit section of the firebase console to view the traces of your AI flows in the application.
