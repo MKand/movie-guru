@@ -22,6 +22,7 @@ gcloud services enable \
     aiplatform.googleapis.com \
     storage-api.googleapis.com \
     firebase.googleapis.com \
+    monitoring.googleapis.com
 
 echo -e "\e[95mAPIs have been enabled successfully.\e[0m"
 
