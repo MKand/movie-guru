@@ -23,26 +23,6 @@ resource "google_compute_subnetwork" "custom" {
   }
 }
 
-# module "gke" {
-#   source                     = "terraform-google-modules/kubernetes-engine/google//modules/beta-autopilot-public-cluster"
-#   version                    = "~> 35.0"
-#   project_id                 = var.project_id
-#   name                       = "movie-guru-cluster"
-#   regional                   = true
-#   region                     = var.region
-#   network                    = google_compute_network.custom.name
-#   subnetwork                 = google_compute_subnetwork.custom.name
-#   ip_range_pods              = "pod-ranges"
-#   ip_range_services          = "services-range"
-#   horizontal_pod_autoscaling = true
-#   create_service_account     = false
-#   service_account             = google_service_account.sa.email
-#   enable_binary_authorization = true
-#   grant_registry_access      = true
-#   deletion_protection        = false
-#   }
-
-
 resource "google_container_cluster" "primary" {
   name                = "movie-guru-cluster"
   project             = var.project_id
