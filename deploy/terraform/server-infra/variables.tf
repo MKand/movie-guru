@@ -4,7 +4,7 @@ variable "project_id" {
 
 variable "region" {
   description = "Region. Defaults to europe-west4"
-  default = "europe-west4"
+  default     = "europe-west4"
 }
 
 variable "kubernetes_version" {

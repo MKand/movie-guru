@@ -73,7 +73,23 @@ done
 [[ ! "${PROJECT_ID}" ]] && echo -e "Please export PROJECT_ID variable (\e[95mexport PROJECT_ID=<YOUR PROJECT ID>\e[0m)\nExiting." && exit 0
 echo -e "\e[95mPROJECT_ID is set to ${PROJECT_ID}\e[0m"
 gcloud config set core/project ${PROJECT_ID}
-echo -e "\e[95mBACKEND is set to ${BACKEND}\e[0m"
+
+BUCKET_NAME="gs://${PROJECT_ID}"
+REGION="europe-west4"
+
+      # Check if the bucket exists.  gsutil ls exits with 0 if it exists, non-zero otherwise.
+      gsutil ls "$BUCKET_NAME" > /dev/null 2>&1  # Redirect output to suppress it
+
+      if [[ $? -ne 0 ]]; then  # Check the exit code of gsutil ls
+        echo -e "\e[95mBucket $BUCKET_NAME for terraform state does not exist. Creating...\e[0m"
+        gsutil mb -l "$REGION" "$BUCKET_NAME"
+      else
+        echo -e "\e[95mBucket $BUCKET_NAME for terraform state already exists.\e[0m"
+      fi
+
+      gsutil versioning set on "$BUCKET_NAME" # Enable versioning (always do this)
+      echo -e "\e[95mVersioning enabled on $BUCKET_NAME\e[0m"
+      
 
 # Enable Cloudbuild API
 echo -e "\e[95mEnabling Cloudbuild API in ${PROJECT_ID}\e[0m"

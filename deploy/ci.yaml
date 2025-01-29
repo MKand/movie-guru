@@ -1,0 +1,65 @@
+# Copyright 2022 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+timeout: 7200s # 2hr
+tags:
+  - ci
+substitutions:
+  _PROJECT_ID: ${PROJECT_ID}
+  _REGION: europe-west4
+  _SHORT_SHA: ${SHORT_SHA}
+
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  dir: './chat_server_go'
+  entrypoint: "sh"
+  args:
+    - -xe 
+    - -c
+    - |
+      docker build \
+         -t "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/chatserver:${_SHORT_SHA}" \
+         -t "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/chatserver:latest" \
+         --cache-from "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/chatserver:latest" \
+         .
+
+- name: 'gcr.io/cloud-builders/docker'
+  dir: './js/flows'
+  entrypoint: "sh"
+  args:
+    - -xe 
+    - -c
+    - |
+      docker build \
+         -t "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/flows:${_SHORT_SHA}" \
+         -t "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/flows:latest" \
+         --cache-from "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/flows:latest" \
+         .
+
+- name: 'gcr.io/cloud-builders/docker'
+  entrypoint: "sh"
+  args:
+    - -xe 
+    - -c
+    - |
+      docker push '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/chatserver:${_SHORT_SHA}'
+
+- name: 'gcr.io/cloud-builders/docker'
+  entrypoint: "sh"
+  args:
+    - -xe 
+    - -c
+    - |
+      docker push '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/flows:${_SHORT_SHA}'
+

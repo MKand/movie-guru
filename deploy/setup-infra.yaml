@@ -14,25 +14,12 @@
 
 timeout: 7200s # 2hr
 tags:
-  - infra-create-gcs
+  - infra-create
 substitutions:
   _PROJECT_ID: ${PROJECT_ID}
   _REGION: europe-west4
-  _SHORT_SHA: ${SHORT_SHA}
 
 steps:
-- name: "gcr.io/cloud-builders/gcloud"
-  id: "infra-create-gcs"
-  entrypoint: bash
-  args:
-    - -c
-    - |
-      [[ "${_INFRA}" == "false" ]] && exit 0
-      ([[ $(gsutil ls | grep "gs://${_PROJECT_ID}/") ]] || \
-      gsutil mb -p ${PROJECT_ID} gs://${_PROJECT_ID}) && \
-      ([[ $(gsutil versioning get gs://${_PROJECT_ID} | grep Enabled) ]] || \
-      gsutil versioning set on gs://${_PROJECT_ID})
-
 - name: "hashicorp/terraform:1.8.2"
   id: "create-artifact-registry"
   entrypoint: "sh"
@@ -41,58 +28,16 @@ steps:
     - -c
     - |
       [[ "${_INFRA}" == "false" ]] && exit 0
-      terraform init -backend-config="bucket=${_PROJECT_ID}"
+      terraform init -backend-config="bucket=${_PROJECT_ID}-tfstate"
       terraform apply -var="project_id=${_PROJECT_ID}" --auto-approve
     - -xe
 - name: "hashicorp/terraform:1.8.2"
   id: "create-server-infra"
   entrypoint: "sh"
-  dir: "deploy/terraform/go-server-infra"
+  dir: "deploy/terraform/server-infra"
   args:
     - -xe
     - -c
     - |
-      terraform init -backend-config="bucket=${_PROJECT_ID}"
+      terraform init -backend-config="bucket=${_PROJECT_ID}-tfstate"
       terraform apply -var=deploy_app=${_APP} -var="project_id=${_PROJECT_ID}" -var="app_version=${_APP_VERSION}" -var="image_tag=${_SHORT_SHA}" -var="region=${_REGION}" --auto-approve
-- name: 'gcr.io/cloud-builders/docker'
-  dir: './chat_server_go'
-  entrypoint: "sh"
-  args:
-    - -xe 
-    - -c
-    - |
-      docker build \
-         -t "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/chatserver:${_SHORT_SHA}" \
-         -t "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/chatserver:latest" \
-         --cache-from "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/chatserver:latest" \
-         .
-
-- name: 'gcr.io/cloud-builders/docker'
-  dir: './js/flows'
-  entrypoint: "sh"
-  args:
-    - -xe 
-    - -c
-    - |
-      docker build \
-         -t "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/flows:${_SHORT_SHA}" \
-         -t "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/flows:latest" \
-         --cache-from "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/flows:latest" \
-         .
-
-- name: 'gcr.io/cloud-builders/docker'
-  entrypoint: "sh"
-  args:
-    - -xe 
-    - -c
-    - |
-      docker push '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/chatserver:${_SHORT_SHA}'
-
-- name: 'gcr.io/cloud-builders/docker'
-  entrypoint: "sh"
-  args:
-    - -xe 
-    - -c
-    - |
-      docker push '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/flows:${_SHORT_SHA}'
-

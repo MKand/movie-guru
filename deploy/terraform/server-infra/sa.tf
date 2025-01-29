@@ -1,4 +1,5 @@
 resource "google_service_account" "sa" {
+  project      = var.project_id
   account_id   = "movie-guru-chat-server-sa"
   display_name = "movie-guru-chat-server-sa"
 }
