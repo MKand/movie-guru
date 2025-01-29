@@ -15,10 +15,6 @@
 timeout: 7200s # 2hr
 tags:
   - infra-create
-substitutions:
-  _PROJECT_ID: ${PROJECT_ID}
-  _REGION: europe-west4
-
 steps:
 - name: "hashicorp/terraform:1.8.2"
   id: "create-artifact-registry"
@@ -27,8 +23,7 @@ steps:
   args:
     - -c
     - |
-      [[ "${_INFRA}" == "false" ]] && exit 0
-      terraform init -backend-config="bucket=${_PROJECT_ID}-tfstate"
+      terraform init -backend-config="bucket=${_PROJECT_ID}"
       terraform apply -var="project_id=${_PROJECT_ID}" --auto-approve
     - -xe
 - name: "hashicorp/terraform:1.8.2"
@@ -39,5 +34,5 @@ steps:
     - -xe
     - -c
     - |
-      terraform init -backend-config="bucket=${_PROJECT_ID}-tfstate"
-      terraform apply -var=deploy_app=${_APP} -var="project_id=${_PROJECT_ID}" -var="app_version=${_APP_VERSION}" -var="image_tag=${_SHORT_SHA}" -var="region=${_REGION}" --auto-approve
+      terraform init -backend-config="bucket=${_PROJECT_ID}"
+      terraform apply  -var="project_id=${_PROJECT_ID}" -var="region=${_REGION}" --auto-approve

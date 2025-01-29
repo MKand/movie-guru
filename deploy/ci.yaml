@@ -15,11 +15,6 @@
 timeout: 7200s # 2hr
 tags:
   - ci
-substitutions:
-  _PROJECT_ID: ${PROJECT_ID}
-  _REGION: europe-west4
-  _SHORT_SHA: ${SHORT_SHA}
-
 steps:
 - name: 'gcr.io/cloud-builders/docker'
   dir: './chat_server_go'
