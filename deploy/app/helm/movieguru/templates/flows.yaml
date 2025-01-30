@@ -15,17 +15,16 @@ spec:
     spec:
       containers:
         - name: flows
-          image: "{{ .REGION }}-docker.pkg.dev/{{ .PROJECT_ID }}/movie-guru/flows:{{ .IMAGE.TAG }}"
+          image: "{{ .Values.REGION }}-docker.pkg.dev/{{ .Values.PROJECT_ID }}/movie-guru/flows:{{ .Values.IMAGE.TAG }}"
           ports:
             - containerPort: 3400
-            - containerPort: 4000
           env:
             - name: POSTGRES_HOST
               value: db.movieguru.svc.cluster.local
             - name: PROJECT_ID
-              value: {{ .PROJECT_ID }}
+              value: {{ .Values.PROJECT_ID }}
             - name: POSTGRES_DB_USER_PASSWORD
-              value: "minimalpassword"
+              value: "minimal"
             - name: POSTGRES_DB_USER
               value: "minimal-user"
             - name: TABLE_NAME
@@ -35,7 +34,7 @@ spec:
             - name: APP_VERSION
               value: "v1"
             - name: LOCATION
-              value: {{ .REGION }}
+              value: {{ .Values.REGION }}
 
 ---
 apiVersion: v1
@@ -49,8 +48,22 @@ spec:
     - protocol: TCP
       port: 3400
       targetPort: 3400
-    - protocol: TCP
-      port: 4000
-      targetPort: 4000
   type: ClusterIP
-
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: flows-route
+  namespace: movieguru
+spec:
+  parentRefs:
+    - name: movieguru-gateway 
+      namespace: movieguru
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: "/"
+      backendRefs:
+        - name: flows
+          port: 3400

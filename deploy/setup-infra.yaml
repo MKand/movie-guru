@@ -30,9 +30,11 @@ steps:
       terraform apply -var="project_id=${_PROJECT_ID}" -var="region=${_REGION}" --auto-approve
 
 - name: 'gcr.io/cloud-builders/docker'
+  id: "build-helm-deployer"
   dir: "deploy/helm-builder"
   args: ['build', '--tag=gcr.io/${_PROJECT_ID}/helm:${_HELM_VERSION}', '--tag=gcr.io/${_PROJECT_ID}/helm:latest', '--build-arg', 'HELM_VERSION=v${_HELM_VERSION}', '.']
 - name: 'gcr.io/cloud-builders/docker'
+  id: "push-helm-deployer"
   args: [
       'push',
       'gcr.io/${_PROJECT_ID}/helm:latest'

@@ -37,9 +37,9 @@ func (d *MovieDB) getServerMetadata(ctx context.Context, appVersion string) (*Me
 		&metadata.MaxUserMessageLen,
 		&metadata.CorsOrigin,
 		&metadata.RetrieverLength,
+		&metadata.ServerDomain,
 		&metadata.GoogleChatModelName,
 		&metadata.GoogleEmbeddingModelName,
-		&metadata.ServerDomain,
 	)
 	if err != nil {
 		return metadata, err

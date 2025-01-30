@@ -27,3 +27,9 @@ resource "google_project_iam_member" "trace-agent" {
   role    = "roles/cloudtrace.agent"
   member  = "serviceAccount:${google_service_account.sa.email}"
 }
+
+resource "google_project_iam_member" "ar-reader" {
+  project = var.project_id
+  role    = "roles/artifactregistry.reader"
+  member  = "serviceAccount:${google_service_account.sa.email}"
+}

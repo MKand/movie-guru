@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: db
-          image: db-app
+          image: "{{ .Values.REGION }}-docker.pkg.dev/{{ .Values.PROJECT_ID }}/movie-guru/db:{{ .Values.IMAGE.TAG }}"
           ports:
             - containerPort: 5432
           env:
@@ -27,6 +27,9 @@ kind: Service
 metadata:
   name: db
   namespace: movieguru
+  annotations:
+    networking.gke.io/load-balancer-type: "EXTERNAL"
+    cloud.google.com/load-balancer-ip: movie-guru-internal-ip-db
 spec:
   selector:
     app: db
@@ -34,6 +37,8 @@ spec:
     - protocol: TCP
       port: 5432
       targetPort: 5432
+  type: LoadBalancer
+
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -61,11 +66,15 @@ kind: Service
 metadata:
   name: adminer
   namespace: movieguru
+
 spec:
   selector:
     app: adminer
   ports:
     - protocol: TCP
-      port: 8082
+      port: 8080
       targetPort: 8080
   type: ClusterIP
+
+
+

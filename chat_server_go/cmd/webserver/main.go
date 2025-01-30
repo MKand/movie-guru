@@ -2,12 +2,11 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"os"
 	"strconv"
 
-	"github.com/firebase/genkit/go/genkit"
-	"github.com/firebase/genkit/go/plugins/vertexai"
 	"github.com/movie-guru/pkg/db"
 	met "github.com/movie-guru/pkg/metrics"
 	web "github.com/movie-guru/pkg/web"
@@ -19,11 +18,16 @@ func main() {
 
 	// Load environment variables
 	URL := os.Getenv("FLOWS_URL")
-	metricsEnabled, _ := strconv.ParseBool(os.Getenv("ENABLE_METRICS"))
+	metricsEnabled, err := strconv.ParseBool(os.Getenv("ENABLE_METRICS"))
 
+	if err != nil {
+		slog.ErrorContext(ctx, "Error getting ENABLE_METRICS", slog.Any("error", err))
+		metricsEnabled = false
+	}
 	// Set up database
 	movieAgentDB, err := db.GetDB()
 	if err != nil {
+		fmt.Println("Error setting up DB")
 		slog.ErrorContext(ctx, "Error setting up DB", slog.Any("error", err))
 		os.Exit(1)
 	}
@@ -55,20 +59,10 @@ func main() {
 		slog.ErrorContext(ctx, "Server exited with error", slog.Any("error", err))
 		os.Exit(1)
 	}
-
-	// Initialize genkit
-	if err := genkit.Init(ctx, nil); err != nil {
-		slog.ErrorContext(ctx, "Error setting up genkit", slog.Any("error", err))
-		os.Exit(1)
-	}
 }
 
 func getDependencies(ctx context.Context, metadata *db.Metadata, db *db.MovieDB, url string) *web.Dependencies {
-	model := vertexai.Model(metadata.GoogleChatModelName)
 
-	if model == nil {
-		slog.ErrorContext(ctx, "error getting model", slog.Any("model name", metadata.GoogleChatModelName))
-	}
 	queryTransformFlowClient, err := wrappers.CreateQueryTransformFlowClient(db, url)
 	if err != nil {
 		slog.ErrorContext(ctx, "error setting up queryTransformFlowClient client")

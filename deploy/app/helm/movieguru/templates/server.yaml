@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: server
+  namespace: movieguru
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: server
+  template:
+    metadata:
+      labels:
+        app: server
+    spec:
+      containers:
+        - name: server
+          image: "{{ .Values.REGION }}-docker.pkg.dev/{{ .Values.PROJECT_ID }}/movie-guru/chatserver:{{ .Values.IMAGE.TAG }}"
+          command:
+            - /app/webserver
+          ports:
+            - containerPort: 8080
+          env:
+            - name: POSTGRES_HOST
+              value: "db.movieguru.svc.cluster.local"
+            - name: PROJECT_ID
+              value: {{ .Values.PROJECT_ID }}
+            - name: POSTGRES_DB_USER_PASSWORD
+              value: "minimal"
+            - name: POSTGRES_DB_USER
+              value: "minimal-user"
+            - name: TABLE_NAME
+              value: "movies"
+            - name: POSTGRES_DB_NAME
+              value: "fake-movies-db"
+            - name: APP_VERSION
+              value: "v1"
+            - name: LOCATION
+              value: "{{ .Values.REGION }}"
+            - name: FLOWS_URL
+              value: "http://flows.movieguru.svc.cluster.local:3400"
+            - name: REDIS_HOST
+              value: "cache.movieguru.svc.cluster.local"
+            - name: REDIS_PORT
+              value: "6379"
+            - name: REDIS_PASSWORD
+              value: "my_redis_pwd"
+            - name: ENABLE_METRICS
+              value: "false"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: server
+  namespace: movieguru
+spec:
+  selector:
+    app: server
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+  type: ClusterIP
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: server-route
+  namespace: movieguru
+spec:
+  parentRefs:
+    - name: movieguru-gateway 
+      namespace: movieguru
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: "/"
+      backendRefs:
+        - name: server
+          port: 8080
