@@ -6,7 +6,6 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/firebase/genkit/go/genkit"
 	"github.com/firebase/genkit/go/plugins/vertexai"
 	"github.com/movie-guru/pkg/db"
 	met "github.com/movie-guru/pkg/metrics"
@@ -37,25 +36,16 @@ func main() {
 	}
 
 	ulh := web.NewUserLoginHandler(metadata.TokenAudience, movieAgentDB)
-	deps := getDependencies(ctx, metadata, movieAgentDB, URL)
+	deps := getDependencies(ctx, movieAgentDB, URL)
 
 	if err = errors.Join(web.StartServer(ctx, ulh, metadata, deps), shutdown(ctx)); err != nil {
 		slog.ErrorContext(ctx, "server exited with error", slog.Any("error", err))
 		os.Exit(1)
 	}
 
-	if err := genkit.Init(ctx, nil); err != nil {
-		slog.ErrorContext(ctx, "error setting up genkit", slog.Any("error", err))
-	}
-
 }
 
-func getDependencies(ctx context.Context, metadata *db.Metadata, db *db.MovieDB, url string) *web.Dependencies {
-	model := vertexai.Model(metadata.GoogleChatModelName)
-
-	if model == nil {
-		slog.ErrorContext(ctx, "error getting model", slog.Any("model name", metadata.GoogleChatModelName))
-	}
+func getDependencies(ctx context.Context, db *db.MovieDB, url string) *web.Dependencies {
 	queryTransformFlowClient, err := wrappers.CreateQueryTransformFlowClient(db, url)
 	if err != nil {
 		slog.ErrorContext(ctx, "error setting up queryTransformFlowClient client")
