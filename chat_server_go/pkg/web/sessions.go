@@ -29,6 +29,7 @@ func setupSessionStore(ctx context.Context) {
 	})
 	if err := redisStore.Ping(ctx).Err(); err != nil {
 		slog.ErrorContext(ctx, "error connecting to redis", slog.Any("error", err))
+		os.Exit(1)
 	}
 }
 

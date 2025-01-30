@@ -28,7 +28,7 @@ metadata:
   name: db
   namespace: movieguru
   annotations:
-    networking.gke.io/load-balancer-type: "EXTERNAL"
+    networking.gke.io/load-balancer-type: "INTERNAL"
     cloud.google.com/load-balancer-ip: movie-guru-internal-ip-db
 spec:
   selector:

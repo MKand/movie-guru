@@ -57,7 +57,7 @@ func StartServer(ctx context.Context, ulh *UserLoginHandler, metadata *db.Metada
 
 	mux := http.NewServeMux()
 
-	http.HandleFunc("/", createHealthCheckHandler(deps, hcMeters))
+	mux.HandleFunc("/", createHealthCheckHandler(deps, hcMeters))
 	mux.HandleFunc("/chat", createChatHandler(deps, chatMeters, metadata))
 	mux.HandleFunc("/history", createHistoryHandler(metadata))
 	mux.HandleFunc("/preferences", createPreferencesHandler(deps.DB))
