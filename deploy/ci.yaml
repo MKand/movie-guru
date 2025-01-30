@@ -16,17 +16,6 @@ timeout: 7200s # 2hr
 tags:
   - ci
 steps:
-# - name: "gcr.io/${_PROJECT_ID}/helm"
-#   id: "build-helm-chart"
-#   entrypoint: bash
-#   dir: deploy/app/helm 
-#   args:
-#     - "-c"
-#     - |
-#       helm package movieguru --app-version ${_SHORT_SHA} && \
-#       helm push movieguru-*.tgz \
-#       oci://${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/charts \
-#       .
 - name: 'gcr.io/cloud-builders/docker'
   id: "build-server-image"
   dir: './chat_server_go'
@@ -76,8 +65,6 @@ steps:
          --cache-from "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/db:latest" \
          .
 
-
-
 - name: 'gcr.io/cloud-builders/docker'
   id: "push-flows-image"
   entrypoint: "sh"
@@ -109,3 +96,17 @@ steps:
       --skaffold-file=./skaffold.yaml \
       --parameters=PROJECT_ID=${_PROJECT_ID},_REGION=${_REGION},_SHORT_SHA=${_SHORT_SHA}
 
+- name: "gcr.io/${_PROJECT_ID}/helm"
+  id: "deploy-helm-chart"
+  entrypoint: bash
+  dir: deploy/app/helm 
+  args:
+    - "-c"
+    - |
+       helm upgrade --install movieguru \
+        ./deploy/app/helm/movieguru \
+       --namespace movieguru \
+       --create-namespace \
+        --set PROJECT_ID=${_PROJECT_ID} \
+        --set IMAGE.TAG=${_SHORT_SHA} \
+        --set REGION=${_REGION}

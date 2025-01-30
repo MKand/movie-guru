@@ -63,7 +63,7 @@ spec:
     - matches:
         - path:
             type: PathPrefix
-            value: "/"
+            value: "/flows"
       backendRefs:
         - name: flows
           port: 3400
