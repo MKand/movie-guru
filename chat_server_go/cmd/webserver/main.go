@@ -35,7 +35,7 @@ func main() {
 	}
 
 	ulh := web.NewUserLoginHandler(metadata.TokenAudience, movieAgentDB)
-	deps := getDependencies(ctx, movieAgentDB, URL)
+	deps := getDependencies(ctx, metadata movieAgentDB, URL)
 
 	if err = errors.Join(web.StartServer(ctx, ulh, metadata, deps), shutdown(ctx)); err != nil {
 		slog.ErrorContext(ctx, "server exited with error", slog.Any("error", err))
@@ -44,7 +44,7 @@ func main() {
 
 }
 
-func getDependencies(ctx context.Context, db *db.MovieDB, url string) *web.Dependencies {
+func getDependencies(ctx context.Context,  metadata *db.Metadata, db *db.MovieDB, url string) *web.Dependencies {
 	queryTransformFlowClient, err := wrappers.CreateQueryTransformFlowClient(db, url)
 	if err != nil {
 		slog.ErrorContext(ctx, "error setting up queryTransformFlowClient client")
