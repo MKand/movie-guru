@@ -25,20 +25,8 @@ steps:
     - |
       helm package movieguru --app-version ${_SHORT_SHA} && \
       helm push movieguru-*.tgz \
-        oci://${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/charts
-- name: 'gcr.io/cloud-builders/docker'
-  id: "build-server-image"
-  dir: './pgvector'
-  entrypoint: "sh"
-  args:
-    - -xe 
-    - -c
-    - |
-      docker build \
-         -t "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/db:${_SHORT_SHA}" \
-         -t "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/db:latest" \
-         --cache-from "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/db:latest" \
-         .
+      oci://${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/charts \
+      .
 - name: 'gcr.io/cloud-builders/docker'
   id: "build-server-image"
   dir: './chat_server_go'
@@ -113,12 +101,9 @@ steps:
   args:
     - -c
     - |
-      echo -e "_PROJECT_ID is ${_PROJECT_ID}"
-      echo -e "_SHORT_SHA is ${_SHORT_SHA}"
-      echo -e "_PIPELINE_LOCATION is ${_REGION}"
-
       gcloud deploy releases create rel-${_SHORT_SHA} \
-      --delivery-pipeline ${_SERVICE}-pipeline \
+      --delivery-pipeline movieguru-pipeline \
       --region ${_REGION} \
-      --skaffold-file=./skaffold_workload_clusters.yaml \
+      --skaffold-file=./skaffold.yaml \
       --parameters=PROJECT_ID=${_PROJECT_ID},_REGION=${_REGION},_SHORT_SHA=${_SHORT_SHA}
+

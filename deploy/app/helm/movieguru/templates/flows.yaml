@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: flows
-          image: flows-app
+          image: "{{ .REGION }}-docker.pkg.dev/{{ .PROJECT_ID }}/movie-guru/flows:{{ .IMAGE.TAG }}"
           ports:
             - containerPort: 3400
             - containerPort: 4000
@@ -23,7 +23,7 @@ spec:
             - name: POSTGRES_HOST
               value: db.movieguru.svc.cluster.local
             - name: PROJECT_ID
-              value: "{{.PROJECT_ID}}"
+              value: {{ .PROJECT_ID }}
             - name: POSTGRES_DB_USER_PASSWORD
               value: "minimalpassword"
             - name: POSTGRES_DB_USER
@@ -35,7 +35,7 @@ spec:
             - name: APP_VERSION
               value: "v1"
             - name: LOCATION
-              value: "europe-west4"
+              value: {{ .REGION }}
 
 ---
 apiVersion: v1

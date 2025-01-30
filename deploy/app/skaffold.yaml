@@ -16,4 +16,7 @@ deploy:
         setValues:
           .PROJECT_ID: ${PROJECT_ID}
           .IMAGE.TAG: ${SHORT_SHA} 
-          .REGIION: ${REGION}
+          .REGION: ${REGION}
+profiles:
+  - name: prod
+
