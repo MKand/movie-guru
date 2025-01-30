@@ -6,7 +6,6 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/firebase/genkit/go/plugins/vertexai"
 	"github.com/movie-guru/pkg/db"
 	met "github.com/movie-guru/pkg/metrics"
 	web "github.com/movie-guru/pkg/web"
