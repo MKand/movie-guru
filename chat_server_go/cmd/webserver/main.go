@@ -43,11 +43,6 @@ func main() {
 		slog.ErrorContext(ctx, "server exited with error", slog.Any("error", err))
 		os.Exit(1)
 	}
-
-	if err := genkit.Init(ctx, nil); err != nil {
-		slog.ErrorContext(ctx, "error setting up genkit", slog.Any("error", err))
-	}
-
 }
 
 func getDependencies(ctx context.Context, metadata *db.Metadata, db *db.MovieDB, url string) *web.Dependencies {
