@@ -1,20 +1,17 @@
-ARG PG_MAJOR=17
-FROM postgres:$PG_MAJOR
-ARG PG_MAJOR
+# Use the official PostgreSQL image as a base
+FROM pgvector/pgvector:pg17
 
-COPY . /tmp/pgvector
+# Set the working directory inside the container
+WORKDIR /docker-entrypoint-initdb.d/
 
-RUN apt-get update && \
-		apt-mark hold locales && \
-		apt-get install -y --no-install-recommends build-essential postgresql-server-dev-$PG_MAJOR && \
-		cd /tmp/pgvector && \
-		make clean && \
-		make OPTFLAGS="" && \
-		make install && \
-		mkdir /usr/share/doc/pgvector && \
-		cp LICENSE README.md /usr/share/doc/pgvector && \
-		rm -r /tmp/pgvector && \
-		apt-get remove -y build-essential postgresql-server-dev-$PG_MAJOR && \
-		apt-get autoremove -y && \
-		apt-mark unhold locales && \
-		rm -rf /var/lib/apt/lists/*
+# Copy the init.sql script to the container
+COPY init.sql /docker-entrypoint-initdb.d/
+
+# Ensure proper file permissions
+RUN chmod 644 /docker-entrypoint-initdb.d/init.sql
+
+# Expose the PostgreSQL port
+EXPOSE 5432
+
+# Use the default PostgreSQL entrypoint script
+CMD ["postgres"]

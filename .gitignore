@@ -17,6 +17,6 @@ dist
 .vscode
 .DS_Store
 
-pgvector
+pgdata
 *.tfstate
 *.tfstate.*

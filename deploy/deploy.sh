@@ -80,12 +80,7 @@ gcloud services enable servicenetworking.googleapis.com \
     cloudbuild.googleapis.com \
     serviceusage.googleapis.com \
     cloudresourcemanager.googleapis.com \
-    aiplatform.googleapis.com \
-    artifactregistry.googleapis.com \
-    cloudresourcemanager.googleapis.com \
-    storage-api.googleapis.com \
-    run.googleapis.com \
-    firebase.googleapis.com
+    
 
 
 # Make cloudbuild SA roles/owner for PROJECT_ID

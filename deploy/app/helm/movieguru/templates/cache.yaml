@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cache
+  namespace: movieguru
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cache
+  template:
+    metadata:
+      labels:
+        app: cache
+    spec:
+      containers:
+        - name: cache
+          image: redis:6.2-alpine
+          args: ["redis-server", "--save", "20", "1", "--loglevel", "warning", "--requirepass", "my_redis_pwd"]
+          ports:
+            - containerPort: 6379
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cache
+  namespace: movieguru
+spec:
+  selector:
+    app: cache
+  ports:
+    - protocol: TCP
+      port: 6379
+      targetPort: 6379

@@ -1,0 +1,19 @@
+apiVersion: skaffold/v3
+kind: Config
+metadata:
+  name: movie-guru-app
+build:
+  artifacts:
+    - image: helm-cicd-image
+      context: /
+deploy:
+  helm:
+    releases:
+      - name: movieguru
+        remoteChart: ${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/charts/movieguru:1.0.0
+        createNamespace: true
+        namespace: movieguru
+        setValues:
+          .PROJECT_ID: ${PROJECT_ID}
+          .IMAGE.TAG: ${SHORT_SHA} 
+          .REGIION: ${REGION}

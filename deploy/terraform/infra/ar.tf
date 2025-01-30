@@ -1,9 +1,8 @@
 resource "google_artifact_registry_repository" "repo" {
   location      =  var.region
-  repository_id =  var.app_name
-  description   = "docker repository for app ${var.app_name}"
+  repository_id =  "movie-guru"
+  description   = "docker repository for app movie-guru"
   format        = "DOCKER"
-  project       = var.project_id
   docker_config {
     immutable_tags = false
   }

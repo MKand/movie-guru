@@ -2,6 +2,7 @@ resource "google_compute_network" "custom" {
   name                    = "movie-guru-network"
   auto_create_subnetworks = false
   project                 = var.project_id
+  depends_on = [ google_project_service.enable_apis ]
 
 }
 
@@ -21,6 +22,17 @@ resource "google_compute_subnetwork" "custom" {
     range_name    = "pod-ranges"
     ip_cidr_range = "192.168.64.0/22"
   }
+    depends_on = [ google_project_service.enable_apis ]
+
+}
+
+resource "google_compute_address" "external_ip" {
+  name         = "movie-guru-ip"
+  address_type = "EXTERNAL"
+  region       = var.region
+  project = var.project_id
+    depends_on = [ google_project_service.enable_apis ]
+
 }
 
 resource "google_container_cluster" "primary" {
@@ -36,6 +48,10 @@ resource "google_container_cluster" "primary" {
     }
   }
 
+  gateway_api_config {
+   channel = "CHANNEL_STANDARD" 
+  }
+  
   binary_authorization {
     evaluation_mode = "PROJECT_SINGLETON_POLICY_ENFORCE"
   }
@@ -75,5 +91,6 @@ resource "google_container_cluster" "primary" {
 
   node_pool_defaults {
   }
+  depends_on = [ google_project_service.enable_apis ]
 
 }

@@ -16,7 +16,31 @@ timeout: 7200s # 2hr
 tags:
   - ci
 steps:
+- name: "gcr.io/${_PROJECT_ID}/helm"
+  id: "build-helm-chart"
+  entrypoint: bash
+  dir: deploy/app/helm 
+  args:
+    - "-c"
+    - |
+      helm package movieguru --app-version ${_SHORT_SHA} && \
+      helm push movieguru-*.tgz \
+        oci://${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/charts
 - name: 'gcr.io/cloud-builders/docker'
+  id: "build-server-image"
+  dir: './pgvector'
+  entrypoint: "sh"
+  args:
+    - -xe 
+    - -c
+    - |
+      docker build \
+         -t "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/db:${_SHORT_SHA}" \
+         -t "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/db:latest" \
+         --cache-from "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/db:latest" \
+         .
+- name: 'gcr.io/cloud-builders/docker'
+  id: "build-server-image"
   dir: './chat_server_go'
   entrypoint: "sh"
   args:
@@ -28,8 +52,8 @@ steps:
          -t "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/chatserver:latest" \
          --cache-from "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/chatserver:latest" \
          .
-
 - name: 'gcr.io/cloud-builders/docker'
+  id: "build-flows-image"
   dir: './js/flows'
   entrypoint: "sh"
   args:
@@ -41,8 +65,22 @@ steps:
          -t "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/flows:latest" \
          --cache-from "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/flows:latest" \
          .
+- name: 'gcr.io/cloud-builders/docker'
+  id: "build-db-image"
+  dir: './pgvector'
+  entrypoint: "sh"
+  args:
+    - -xe 
+    - -c
+    - |
+      docker build \
+         -t "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/db:${_SHORT_SHA}" \
+         -t "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/db:latest" \
+         --cache-from "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/db:latest" \
+         .
 
 - name: 'gcr.io/cloud-builders/docker'
+  id: "push-server-image"
   entrypoint: "sh"
   args:
     - -xe 
@@ -51,6 +89,7 @@ steps:
       docker push '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/chatserver:${_SHORT_SHA}'
 
 - name: 'gcr.io/cloud-builders/docker'
+  id: "push-flows-image"
   entrypoint: "sh"
   args:
     - -xe 
@@ -58,3 +97,28 @@ steps:
     - |
       docker push '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/flows:${_SHORT_SHA}'
 
+- name: 'gcr.io/cloud-builders/docker'
+  id: "push-db-image"
+  entrypoint: "sh"
+  args:
+    - -xe 
+    - -c
+    - |
+      docker push '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/db:${_SHORT_SHA}'
+
+- name: gcr.io/cloud-builders/gcloud
+  id: "deploy-to-app-cluster"
+  dir: "deploy/app"
+  entrypoint: bash
+  args:
+    - -c
+    - |
+      echo -e "_PROJECT_ID is ${_PROJECT_ID}"
+      echo -e "_SHORT_SHA is ${_SHORT_SHA}"
+      echo -e "_PIPELINE_LOCATION is ${_REGION}"
+
+      gcloud deploy releases create rel-${_SHORT_SHA} \
+      --delivery-pipeline ${_SERVICE}-pipeline \
+      --region ${_REGION} \
+      --skaffold-file=./skaffold_workload_clusters.yaml \
+      --parameters=PROJECT_ID=${_PROJECT_ID},_REGION=${_REGION},_SHORT_SHA=${_SHORT_SHA}
