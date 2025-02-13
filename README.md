@@ -4,7 +4,7 @@
 [![Movie Guru](https://img.youtube.com/vi/l_KhN3RJ8qA/0.jpg)](https://youtu.be/l_KhN3RJ8qA)
 
 
-**NOTE**: the repo is still in development.
+**NOTE**: This branch is using an older version of Genkit. We recommened either using **cloud-movieguru** or **local-movieguru** for a more recent version of Genkit.
 
 ## Description
 
@@ -33,11 +33,13 @@ The application follows a standard client-server model:
     * Connects to the VectorDB (CloudSQL with pgvector) to search for movies and information about movies.
 
 ## Deployment
+
 * **Frontend**: The frontend is deployed on Firebase Hosting for easy deployment and scalability.
 * **Backend Hosting:** The backend is deployed on Cloud Run for serverless execution and auto-scaling.
 * **Caching:** Memorystore for Redis is used as a cache to improve performance and reduce latency for frequently accessed data.
 
 ## Agents
+
 There are 3 agents used in this repo and are part of the backend. While they differ slightly in configuration from each backend type, they are mostly similar. All agents use a Gemini model through VertexAI APIs. 
 
 This describes how the Go-Genkit backend agents works.
@@ -47,11 +49,13 @@ This describes how the Go-Genkit backend agents works.
 
 
 ## Data
+
 * The data about the movies is stored in CloudSQL pgVector database. There are around 600 movies, with a plot, list of actors, director, rating, genre, and poster link. The posters are stored in a cloud storage bucket.
 * The user's conversation history is stored in memory store for Redis. Only the most recent 10 messages are stored. This number is configurable. The session info for the webserver is also stored in memory store.
 * The user's profile data (their likes and dislikes) are stored in the CloudSQL database.
 
 ## CloudSQL
+
 There are 3 tables:
 * *fake-movies-table*: This contains the information about the fake movies and their embeddings. The data for the table is found in dataset/movies_with_posters.csv. If you choose to host your own posters, replace the links in this file.
 
@@ -63,9 +67,11 @@ There are 3 tables:
 ## Getting Started
  
 Set project ID
+
 ```sh
 export PROJECT_ID=<set project id>
 ```
+
 If you are using Langchain, go to Langsmith, create an account and get an API key. Set the following environment variables. You can also choose to not use langsmith. 
 In case set LANGCHAIN_TRACING_V2 to false.
 You can skip this step if you are using GenKIT.
@@ -86,15 +92,19 @@ cd movie-guru
 ```
 
 ### Steps for the backend infra
+
 Start the Deploy
+
 ```sh
 ./deploy/deploy.sh --skipapp --backend genkit-go  # or --backend langchain or --backend genkit-js (WIP)
 ```
+
 We add --skipapp to make sure we wait for the db and the data are created before we deploy the application. 
 
 # Create and populate the database
 
 ## Create tables
+
 Connect to the sql db through the cloud sql studio (the db is running on a private IP and hence cannot be reached directly without the use of cloudsql proxy). The [CloudSQL studio](https://cloud.google.com/sql/docs/mysql/manage-data-using-studio) is the is the easiest way to connect to it. Another option while testing locally is to set [Authorized Networks](https://cloud.google.com/sql/docs/mysql/authorize-networks) and allow list the IP address of the machine you are working on. 
 For ease of use, the terraform script when creating the db allows all IPs to access the db. **Make sure** you delete that setting after you finish inserting data.
 
@@ -144,6 +154,7 @@ CREATE TABLE IF NOT EXISTS app_metadata (
 );
 
 ```
+
 ## Insert data into the tables
 
 Insert some data into the tables. Make changes and add the right values where required. You can play around with the values. 
@@ -192,13 +203,9 @@ SELECT COUNT(*)
 FROM "movies";
 ```
 
-### GENKIT JS ###
-WIP
-### LANGCHAIN ###
-WIP
-
 
 **IMPORTANT**: The terraform script allows the postgres DB access from all IPs 0.0.0.0/0. This is bad practice in production. So, after inserting the data, make sure you remove the aurthorized networks portion in the definition of the postgresdb (deploy/terraform/go-server-infra/postgres.tf or deploy/terraform/langchain-server-infra/postgres.tf). Remove the section below and rerun the deploy pipeline. Or you can also remove this setting from the DB from google cloud console.
+
 ```tf
 authorized_networks {
         name            = "All Networks"
@@ -215,7 +222,9 @@ authorized_networks {
 ```
 
 ### Steps for the frontend hosted on firebase
+
 Create a firebase project. And create a webapp. Navigate to the project settings and find the firebase configuration variables. You should see something that looks like this:
+
 ```sh
   apiKey: "abcdefghijklmnkopqrstuvwxyz12345890",
   authDomain: "<firebase project name>.firebaseapp.com",
@@ -224,6 +233,7 @@ Create a firebase project. And create a webapp. Navigate to the project settings
   messagingSenderId: "1234567890",
   appId: "1:234567890:web:1234567890"
 ```
+
 Navigate to **chat_client_vue/movie-agent** and create a **.env** file.
 Create the following env variables to the file.
 
@@ -238,6 +248,11 @@ VITE_CHAT_SERVER_URL=<address
 
 ```
 
+From the same folder run the following command
+
+```sh
+firebase deploy
+```
 
 ## License
 
