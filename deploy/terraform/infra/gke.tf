@@ -12,12 +12,13 @@ resource "google_container_cluster" "primary" {
   }
 
   gateway_api_config {
-   channel = "CHANNEL_STANDARD"
+    channel = "CHANNEL_STANDARD"
   }
-  
+
   binary_authorization {
     evaluation_mode = "PROJECT_SINGLETON_POLICY_ENFORCE"
   }
+
   enable_autopilot = true
 
   addons_config {
@@ -33,12 +34,23 @@ resource "google_container_cluster" "primary" {
       enabled = false
     }
 
+    gke_backup_agent_config {
+      enabled = true
+    }
+
   }
+
+  workload_identity_config {
+    workload_pool = "${var.project_id}.svc.id.goog"
+  }
+
   networking_mode = "VPC_NATIVE"
+
   security_posture_config {
     mode               = "DISABLED"
     vulnerability_mode = "VULNERABILITY_DISABLED"
   }
+
   ip_allocation_policy {
     cluster_secondary_range_name  = "pod-ranges"
     services_secondary_range_name = "services-range"
@@ -54,6 +66,28 @@ resource "google_container_cluster" "primary" {
 
   node_pool_defaults {
   }
-  depends_on = [ google_project_service.enable_apis ]
 
+  depends_on = [google_project_service.enable_apis]
+
+}
+
+resource "google_gke_backup_backup_plan" "primary" {
+  name     = "movie-guru-cluster-plan"
+  cluster  = google_container_cluster.primary.id
+  location = var.region
+
+  retention_policy {
+    backup_delete_lock_days = 30
+    backup_retain_days      = 180
+  }
+
+  backup_schedule {
+    cron_schedule = "0 0 * * *"
+  }
+
+  backup_config {
+    include_volume_data = true
+    include_secrets     = true
+    all_namespaces      = true
+  }
 }

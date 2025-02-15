@@ -15,8 +15,7 @@
 timeout: 7200s # 2hr
 tags:
   - infra-create
-substitutions:
-  _HELM_VERSION: 3.15.4
+  
 steps:
 - name: "hashicorp/terraform:1.8.2"
   id: "create-infra"
@@ -32,10 +31,20 @@ steps:
 - name: 'gcr.io/cloud-builders/docker'
   id: "build-helm-deployer"
   dir: "deploy/helm-builder"
-  args: ['build', '--tag=gcr.io/${_PROJECT_ID}/helm:${_HELM_VERSION}', '--tag=gcr.io/${_PROJECT_ID}/helm:latest', '--build-arg', 'HELM_VERSION=v${_HELM_VERSION}', '.']
+  args: ['build', '--tag=${_REGION}-docker.pkg.dev/${_PROJECT_ID}/${_REPO}/helm:${_HELM_VERSION}', '--tag=${_REGION}-docker.pkg.dev/${_PROJECT_ID}/${_REPO}/helm:latest', '--build-arg', 'HELM_VERSION=v${_HELM_VERSION}', '.']
 - name: 'gcr.io/cloud-builders/docker'
   id: "push-helm-deployer"
   args: [
       'push',
-      'gcr.io/${_PROJECT_ID}/helm:latest'
+      '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/${_REPO}/helm:latest'
     ]
+
+substitutions:
+  _HELM_VERSION: 3.15.4
+  _REPO: "movie-guru"
+
+options:
+  machineType: E2_HIGHCPU_8
+  logging: CLOUD_LOGGING_ONLY
+  substitution_option: ALLOW_LOOSE
+  dynamic_substitutions: true

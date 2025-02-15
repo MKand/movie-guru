@@ -159,3 +159,9 @@ steps:
 #         --set PROJECT_ID=${_PROJECT_ID} \
 #         --set IMAGE.TAG=${_SHORT_SHA} \
 #         --set REGION=${_REGION}
+
+options:
+  machineType: E2_HIGHCPU_8
+  logging: CLOUD_LOGGING_ONLY
+  substitution_option: ALLOW_LOOSE
+  dynamic_substitutions: true

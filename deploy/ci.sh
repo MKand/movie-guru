@@ -15,7 +15,7 @@
 # limitations under the License.
 
 # Default region
-REGION="europe-west4"
+#REGION="europe-west4"
 
 # Check if PROJECT_ID is set
 if [[ -z "$PROJECT_ID" ]]; then

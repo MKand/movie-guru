@@ -17,8 +17,7 @@ spec:
       containers:
         - name: server
           image: "{{ .Values.REGION }}-docker.pkg.dev/{{ .Values.PROJECT_ID }}/movie-guru/chatserver:{{ .Values.IMAGE.TAG }}"
-          command:
-            - /app/webserver
+          imagePullPolicy: Always
           ports:
             - containerPort: 8080
           env:

@@ -17,6 +17,7 @@ spec:
       containers:
         - name: flows
           image: "{{ .Values.REGION }}-docker.pkg.dev/{{ .Values.PROJECT_ID }}/movie-guru/flows:{{ .Values.IMAGE.TAG }}"
+          imagePullPolicy: Always
           ports:
             - containerPort: 3400
           env:
