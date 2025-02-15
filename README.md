@@ -114,6 +114,8 @@ Run the following script to deploy the infrastructure using Cloud Build:
 
 This will trigger a pipeline that creates the required infrastructure on GCP. The process will take approximately **10-15 minutes** to complete.
 
+**Note**: The setup of the Identity Platform and Firebase Auth through Terraform is a bit fragile. You might need to manually reconfigure it if the deployed application is creating auth issues.
+
 ## Step 3: Get Firebase Web app Configuration
 
 Once the infrastructure setup is complete, go to the **Firebase Console**:
