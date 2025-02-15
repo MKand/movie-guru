@@ -14,8 +14,42 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Verify that the script is running on Linux (not macOS)
+if [[ $OSTYPE != "linux-gnu" ]]; then
+    echo -e "\e[91mERROR: This script has only been tested on Linux. Currently, only Linux (Debian) is supported. Please run in Cloud Shell or in a VM running Linux.\e[0m"
+    exit 1
+fi
+
+# Export a SCRIPT_DIR var and make all links relative to SCRIPT_DIR
+export SCRIPT_DIR=$(dirname "$(readlink -f "$0" 2>/dev/null)" 2>/dev/null || echo "${PWD}/$(dirname "$0")")
+
 # Default region
-REGION="europe-west4"
+DEFAULT_REGION="europe-west4"
+REGION="$DEFAULT_REGION"
+
+# Usage function
+usage() {
+   echo ""
+   echo "Usage: $0 [--region <region>]"
+   echo -e "\t--region, -r : Specify a region (default: europe-west4)"
+   echo -e "\tExample: ./ci.sh --region us-central1"
+   exit 1
+}
+
+# Parse command-line arguments
+while [ "$1" != "" ]; do
+    case $1 in
+        --region | -r ) shift
+                        REGION=$1
+                        ;;
+        --help | -h )   usage
+                        ;;
+        * )             echo -e "\e[91mUnknown parameter: $1\e[0m"
+                        usage
+                        ;;
+    esac
+    shift
+done
 
 # Check if PROJECT_ID is set
 if [[ -z "$PROJECT_ID" ]]; then
@@ -37,8 +71,6 @@ echo -e "\e[95mGenerated SHORT_SHA: $SHORT_SHA\e[0m"
 echo -e "\e[95mSubstituting env variables in init.sql\e[0m"
 
 envsubst < pgvector/init.sql > pgvector/init_substituted.sql
-
-
 
 # Start Cloud Build
 echo -e "\e[95mStarting Cloud Build...\e[0m"
