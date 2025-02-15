@@ -67,6 +67,16 @@ resource "google_container_cluster" "primary" {
   node_pool_defaults {
   }
 
+  secret_manager_config {
+    enabled = true
+  }
+
+  maintenance_policy {
+    daily_maintenance_window {
+      start_time = "02:00"
+    }
+  }
+
   depends_on = [google_project_service.enable_apis]
 
 }

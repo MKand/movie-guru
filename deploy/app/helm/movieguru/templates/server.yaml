@@ -47,7 +47,17 @@ spec:
               value: "my_redis_pwd"
             - name: ENABLE_METRICS
               value: "false"
-
+          tty: true
+          volumeMounts:
+            - mountPath: "/var/secrets"
+              name: pgsecret
+      volumes:
+      - name: pgsecret
+        csi:
+          driver: secrets-store-gke.csi.k8s.io
+          readOnly: true
+          volumeAttributes:
+            secretProviderClass: gcp-secret-provider
 ---
 apiVersion: v1
 kind: Service

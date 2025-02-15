@@ -30,5 +30,4 @@ module "apphub" {
       email        = "charlie@google.com"
     }
   }
-
 }

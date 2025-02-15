@@ -144,6 +144,31 @@ steps:
       docker push '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/db:${_SHORT_SHA}' && \
       docker push '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/db:latest'
 
+- name: 'gcr.io/cloud-builders/docker'
+  id: "build-db-init-image"
+  dir: './pgvector'
+  entrypoint: "sh"
+  args:
+    - -xe 
+    - -c
+    - |
+      docker build \
+         -t "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/db-init:${_SHORT_SHA}" \
+         -t "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/db-init:latest" \
+         --cache-from "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/db-init:latest" \
+         -f Dockerfile.init \
+         .
+
+- name: 'gcr.io/cloud-builders/docker'
+  id: "push-db-init-image"
+  entrypoint: "sh"
+  args:
+    - -xe 
+    - -c
+    - |
+      docker push '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/db-init:${_SHORT_SHA}' && \
+      docker push '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/db-init:latest'
+
 # update from here https://github.com/GoogleCloudPlatform/cloud-builders-community/tree/master/helm
 # - name: "gcr.io/${_PROJECT_ID}/helm"
 #   id: "deploy-helm-chart"

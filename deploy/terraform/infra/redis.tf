@@ -1,5 +1,5 @@
 resource "google_redis_cluster" "cache" {
-  name        = var.app_name
+  name        = "${var.app_name}-cache"
   shard_count = 3
 
 
@@ -8,7 +8,7 @@ resource "google_redis_cluster" "cache" {
   }
 
   region                  = var.region
-  replica_count           = 0
+  replica_count           = 1
   node_type               = "REDIS_SHARED_CORE_NANO"
   transit_encryption_mode = "TRANSIT_ENCRYPTION_MODE_DISABLED"
   authorization_mode      = "AUTH_MODE_DISABLED"

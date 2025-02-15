@@ -21,7 +21,7 @@ DB_NAME = os.getenv("DB_NAME")
 DB_PASS = os.getenv("DB_PASS")
 APP_USER = os.getenv("APP_USER")
 
-sql_file_path = "init.sql"
+sql_file_path = "init_substituted.sql"
 
 
 async def main():

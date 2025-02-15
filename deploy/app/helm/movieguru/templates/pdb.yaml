@@ -1,0 +1,49 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: frontend-pdb
+spec:
+  minAvailable: 0
+  selector:
+    matchLabels:
+      app: frontend
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: cache-pdb
+spec:
+  minAvailable: 0
+  selector:
+    matchLabels:
+      app: cache
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: db-pdb
+spec:
+  minAvailable: 0
+  selector:
+    matchLabels:
+      app: db
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: flows-pdb
+spec:
+  minAvailable: 0
+  selector:
+    matchLabels:
+      app: flows
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: server-pdb
+spec:
+  minAvailable: 0
+  selector:
+    matchLabels:
+      app: server

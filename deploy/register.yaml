@@ -1,4 +1,4 @@
-# Copyright 2024 Google LLC
+# Copyright 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,10 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM python:3.12-slim
-WORKDIR /code
-COPY requirements.txt /code/requirements.txt
-COPY init_substituted.sql /code/init_substituted.sql
-RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
-COPY main.py /code/main.py
-CMD ["python", "main.py"]
+timeout: 7200s # 2hr
+tags:
+  - register-apphub
+  
+steps:
+- name: "hashicorp/terraform:1.8.2"
+  id: "register-services"
+  entrypoint: "sh"
+  dir: "deploy/terraform/services"
+  args:
+    - -xe
+    - -c
+    - |
+      terraform init -backend-config="bucket=${_PROJECT_ID}"
+      terraform apply -var="project_id=${_PROJECT_ID}" -var="region=${_REGION}" --auto-approve

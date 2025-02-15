@@ -19,3 +19,16 @@ spec:
   addresses:
     - type: NamedAddress
       value: movie-guru-external-ip
+---
+apiVersion: networking.gke.io/v1
+kind: GCPGatewayPolicy
+metadata:
+  name: movie-guru-gateway-policy
+  namespace: movieguru
+spec:
+  default:
+    sslPolicy: movie-guru-ssl-policy
+  targetRef:
+    group: gateway.networking.k8s.io
+    kind: Gateway
+    name: movieguru-gateway

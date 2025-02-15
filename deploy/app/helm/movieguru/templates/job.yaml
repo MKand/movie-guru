@@ -1,0 +1,28 @@
+# apiVersion: batch/v1
+# kind: Job
+# metadata:
+#   name: db-init
+#   namespace: movieguru
+# spec:
+#   template:
+#     spec:
+#       serviceAccountName: movieguru-sa
+#       containers:
+#       - name: db-init
+#         image: "{{ .Values.REGION }}-docker.pkg.dev/{{ .Values.PROJECT_ID }}/movie-guru/db-init:{{ .Values.IMAGE.TAG }}"
+#         imagePullPolicy: Always
+#         env:
+#           - name: POSTGRES_HOST
+#             value: "{{ .Values.SQL_HOST }}"
+#           - name: POSTGRES_DB_USER_PASSWORD
+#             value: "minimal"
+#           - name: POSTGRES_DB_USER
+#             value: "minimal-user"
+#           - name: TABLE_NAME
+#             value: "movies"
+#           - name: POSTGRES_DB_NAME
+#             value: "fake-movies-db"
+#           - name: APP_VERSION
+#             value: "v1"
+#       restartPolicy: Never
+#   backoffLimit: 3
