@@ -101,12 +101,15 @@ func getDependencies(ctx context.Context, metadata *db.Metadata, db *db.MovieDB,
 		slog.ErrorContext(ctx, "error setting up responseQualityFlowClient client")
 	}
 
+	chatFlowClient, err := wrappers.CreateChatFlowClient(url)
+
 	deps := &web.Dependencies{
 		QueryTransformFlowClient:  queryTransformFlowClient,
 		UserProfileFlowClient:     userProfileFlowClient,
 		MovieFlowClient:           movieFlowClient,
 		MovieRetrieverFlowClient:  movieRetrieverFlowClient,
 		ResponseQualityFlowClient: responseQualityFlowClient,
+		ChatFlowClient:            chatFlowClient,
 		DB:                        db,
 	}
 	return deps

@@ -66,7 +66,7 @@ func createChatHandler(deps *Dependencies, meters *m.ChatMeters, metadata *db.Me
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
-			agentResp := chat(ctx, deps, metadata, ch, user, chatRequest.Content, meters)
+			agentResp := chatSingleFlow(ctx, deps, metadata, ch, user, chatRequest.Content, meters)
 			updateSuccessChatMeters(ctx, agentResp, meters)
 
 			saveHistory(ctx, ch, user, metadata)

@@ -163,7 +163,7 @@ resource "google_monitoring_dashboard" "chat_dashboard" {
             "dataSets": [
               {
                 "timeSeriesQuery": {
-                  "prometheusQuery": "histogram_quantile(0.1, sum(rate(movieguru_chat_latency_milliseconds_bucket[$${__interval}])) by (le))\n",
+                  "prometheusQuery": "histogram_quantile(0.1, sum(rate(movieguru_chat_latency_bucket[$${__interval}])) by (le))\n",
                   "unitOverride": "ms",
                   "outputFullDuration": false
                 },
@@ -176,7 +176,7 @@ resource "google_monitoring_dashboard" "chat_dashboard" {
               },
               {
                 "timeSeriesQuery": {
-                  "prometheusQuery": "histogram_quantile(0.5, sum(rate(movieguru_chat_latency_milliseconds_bucket[$${__interval}])) by (le))\n",
+                  "prometheusQuery": "histogram_quantile(0.5, sum(rate(movieguru_chat_latency_bucket[$${__interval}])) by (le))\n",
                   "unitOverride": "ms",
                   "outputFullDuration": false
                 },
@@ -189,7 +189,7 @@ resource "google_monitoring_dashboard" "chat_dashboard" {
               },
               {
                 "timeSeriesQuery": {
-                  "prometheusQuery": "histogram_quantile(0.9, sum(rate(movieguru_chat_latency_milliseconds_bucket[$${__interval}])) by (le))\n",
+                  "prometheusQuery": "histogram_quantile(0.9, sum(rate(movieguru_chat_latency_bucket[$${__interval}])) by (le))\n",
                   "unitOverride": "ms",
                   "outputFullDuration": false
                 },
@@ -202,7 +202,7 @@ resource "google_monitoring_dashboard" "chat_dashboard" {
               },
               {
                 "timeSeriesQuery": {
-                  "prometheusQuery": "histogram_quantile(0.95, sum(rate(movieguru_chat_latency_milliseconds_bucket[$${__interval}])) by (le))\n",
+                  "prometheusQuery": "histogram_quantile(0.95, sum(rate(movieguru_chat_latency_bucket[$${__interval}])) by (le))\n",
                   "unitOverride": "ms",
                   "outputFullDuration": false
                 },
@@ -215,7 +215,7 @@ resource "google_monitoring_dashboard" "chat_dashboard" {
               },
               {
                 "timeSeriesQuery": {
-                  "prometheusQuery": "histogram_quantile(0.99, sum(rate(movieguru_chat_latency_milliseconds_bucket[$${__interval}])) by (le))\n",
+                  "prometheusQuery": "histogram_quantile(0.99, sum(rate(movieguru_chat_latency_bucket[$${__interval}])) by (le))\n",
                   "unitOverride": "ms",
                   "outputFullDuration": false
                 },

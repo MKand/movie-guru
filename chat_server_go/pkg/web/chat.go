@@ -107,6 +107,81 @@ func chat(ctx context.Context, deps *Dependencies, metadata *db.Metadata, h *typ
 	return mAgentResp
 }
 
+func chatSingleFlow(ctx context.Context, deps *Dependencies, metadata *db.Metadata, h *types.ChatHistory, user string, userMessage string, meters *m.ChatMeters) *types.AgentResponse {
+	h.AddUserMessage(userMessage)
+
+	userProfile, err := deps.DB.GetCurrentProfile(ctx, user)
+	if err != nil {
+		slog.ErrorContext(ctx, "Unable to get profile info for user", err.Error(), err)
+	}
+
+	simpleHistory, err := types.ParseRecentHistory(h.GetHistory(), metadata.HistoryLength)
+	if err != nil {
+		return types.NewErrorAgentResponse(fmt.Sprintf("Error getting user history: %w", err))
+	}
+
+	var wg sync.WaitGroup
+
+	userProfileChan := make(chan *types.UserProfileOutput, 1)
+	errChanProfile := make(chan error, 1)
+
+	// Launch the goroutines
+	// Independant goroutine with seperate context
+	go func() {
+		qualityContext := context.Background()
+		qualityResp, err := deps.ResponseQualityFlowClient.Run(qualityContext, simpleHistory, user)
+		if qualityResp != nil {
+			updateChatQualityMeters(qualityContext, meters, qualityResp)
+		}
+		if err != nil {
+			slog.ErrorContext(qualityContext, "Error updating quality meters", err.Error(), err)
+		}
+	}()
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		pResp, err := deps.UserProfileFlowClient.Run(ctx, h, user, userProfile)
+		if err != nil {
+			errChanProfile <- err
+			close(errChanProfile)
+			return
+		}
+		userProfileChan <- pResp
+		close(userProfileChan)
+	}()
+
+	// This is in the main thread, not async
+	agentResp := types.NewAgentResponse()
+	chatResp, err := deps.ChatFlowClient.Run(simpleHistory, userProfile)
+	if agentResp, shouldReturn := processFlowOutput(chatResp.ModelOutputMetadata, err, h, "chatFlow"); shouldReturn {
+		return agentResp
+	}
+
+	relevantMovies := make([]string, 0, len(chatResp.RelevantMoviesTitles))
+	for _, r := range chatResp.RelevantMoviesTitles {
+		relevantMovies = append(relevantMovies, r.Title)
+	}
+	h.AddAgentMessage(chatResp.Answer)
+	agentResp.Answer = chatResp.Answer
+	agentResp.RelevantMovies = relevantMovies
+	agentResp.Context = chatResp.ContextDocuments
+	agentResp.Result = types.SUCCESS
+
+	// Wait for goroutines to complete
+	wg.Wait()
+
+	select {
+	case userProfileOutput := <-userProfileChan:
+		agentResp.Preferences = userProfileOutput.UserProfile
+		// Finished processing
+	case err := <-errChanProfile:
+		slog.ErrorContext(ctx, "UserProfileFlowClient failed", err.Error(), err)
+	}
+
+	return agentResp
+}
+
 func processFlowOutput(metadata *types.ModelOutputMetadata, err error, h *types.ChatHistory, caller string) (*types.AgentResponse, bool) {
 	if err != nil {
 		h.RemoveLastMessage()
@@ -121,7 +196,7 @@ func processFlowOutput(metadata *types.ModelOutputMetadata, err error, h *types.
 		h.RemoveLastMessage()
 		return types.NewQuotaIssueAgentResponse(), true
 	}
-	return nil, false
+	return types.NewAgentResponse(), false
 }
 
 func updateChatQualityMeters(ctx context.Context, meters *m.ChatMeters, respQuality *types.ResponseQualityOutput) {

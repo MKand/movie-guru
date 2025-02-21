@@ -44,5 +44,6 @@ type Dependencies struct {
 	MovieFlowClient           *wrappers.MovieFlowClient
 	MovieRetrieverFlowClient  *wrappers.MovieRetrieverFlowClient
 	ResponseQualityFlowClient *wrappers.ResponseQualityFlowClient
+	ChatFlowClient            *wrappers.ChatFlowClient
 	DB                        *db.MovieDB
 }

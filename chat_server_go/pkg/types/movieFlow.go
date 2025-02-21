@@ -28,6 +28,14 @@ type MovieFlowOutput struct {
 	*ModelOutputMetadata `json:"modelOutputMetadata"`
 }
 
+type ExtendedMovieFlowOutput struct {
+	Answer               string           `json:"answer"`
+	RelevantMoviesTitles []*RelevantMovie `json:"relevantMovies"`
+	WrongQuery           bool             `json:"wrongQuery,omitempty" `
+	ContextDocuments     []*MovieContext  `json:"contextDocuments"`
+	*ModelOutputMetadata `json:"modelOutputMetadata"`
+}
+
 type RelevantMovie struct {
 	Title  string `json:"title"`
 	Reason string `json:"reason"`

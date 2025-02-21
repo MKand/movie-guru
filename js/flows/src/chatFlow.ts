@@ -12,7 +12,7 @@ import { MovieFlow } from './movieFlow';
 
 export const ChatFlow = ai.defineFlow(
     {
-        name: "ChatFlow",
+        name: "chatFlow",
         inputSchema: ChatFlowInputSchema,
         outputSchema: ChatOutputSchema,
     },
