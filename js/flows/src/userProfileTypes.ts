@@ -15,7 +15,7 @@
  */
 
 import { z } from 'genkit';
-import { ModelOutputMetadata, ModelOutputMetadataSchema } from './modelOutputMetadataTypes';
+import { ModelOutputMetadataSchema } from './modelOutputMetadataTypes';
 
 // Enums as Zod Enums
 const MovieFeatureCategory = z.enum(['OTHER', 'ACTOR', 'DIRECTOR', 'GENRE']);

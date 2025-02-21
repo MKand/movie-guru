@@ -16,10 +16,10 @@
 
 import {
   USERINTENT,
-  ChatFlowInputSchema,
   QueryTransformFlowOutputSchema,
   QueryTransformFlowOutput
 } from './queryTransformTypes';
+import { ChatFlowInputSchema } from './chatFlowTypes';
 import { QueryTransformPromptText } from './prompts';
 import { ai, safetySettings } from './genkitConfig';
 import { GenerationBlockedError } from 'genkit';

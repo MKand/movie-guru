@@ -1,14 +1,12 @@
 import {
     USERINTENT,
-    ChatFlowInputSchema,
-    QueryTransformFlowOutputSchema,
     QueryTransformFlowOutput
   } from './queryTransformTypes';
-import { ChatFlowOutputSchema, ChatFlowOutput, MovieContextSchema, MovieContext } from './movieFlowTypes';
+import { ChatFlowInputSchema, ChatFlowOutput, ChatOutputSchema } from './chatFlowTypes';
+import { MovieContext, RelevantMovie, RelevantMovieSchema } from './movieFlowTypes';
 
-import { ai, safetySettings } from './genkitConfig';
-import { GenerationBlockedError } from 'genkit';
-import { QueryTransformFlow, QueryTransformPrompt } from './queryTransformFlow';
+import { ai } from './genkitConfig';
+import { QueryTransformFlow } from './queryTransformFlow';
 import { MovieDocFlow } from './docRetriever';
 import { MovieFlow } from './movieFlow';
 
@@ -16,26 +14,34 @@ export const ChatFlow = ai.defineFlow(
     {
         name: "ChatFlow",
         inputSchema: ChatFlowInputSchema,
-        outputSchema: ChatFlowOutputSchema,
+        outputSchema: ChatOutputSchema,
     },
     async(input) => {
         try{
-            var chatResponse: ChatFlowOutput = ChatFlowOutputSchema.parse({})
+            const chatResponse: ChatFlowOutput = ChatOutputSchema.parse({})
             const qtResponse: QueryTransformFlowOutput = await QueryTransformFlow(input)
             if (qtResponse.modelOutputMetadata.safetyIssue || qtResponse.modelOutputMetadata.quotaIssue){
                  chatResponse.modelOutputMetadata = qtResponse.modelOutputMetadata
                  return chatResponse
             }
             var movieContexts: MovieContext[] = []
-            if (qtResponse.userIntent=="REQUEST" || qtResponse.userIntent=="RESPONSE"){
+            if (qtResponse.userIntent==USERINTENT.parse("REQUEST" ) || qtResponse.userIntent==USERINTENT.parse("RESPONSE")){
                  movieContexts = await MovieDocFlow( {query: qtResponse.transformedQuery})
             }
-            chatResponse = await MovieFlow({
+            const movieFlowResponse = await MovieFlow({
                 history: input.history,
                 userPreferences: input.userPreferences,
                 contextDocuments: movieContexts,
                 userMessage: input.userMessage
             })
+            
+            chatResponse.answer = movieFlowResponse.answer;
+            chatResponse.modelOutputMetadata = movieFlowResponse.modelOutputMetadata
+            chatResponse.relevantMovies = movieFlowResponse.relevantMovies
+            chatResponse.wrongQuery = movieFlowResponse.wrongQuery
+            chatResponse.relevantMovies = movieFlowResponse.relevantMovies
+            chatResponse.contextDocuments = parseContexts(movieFlowResponse.relevantMovies, movieContexts)
+            
             return chatResponse
         }
         catch (error) {
@@ -44,3 +50,16 @@ export const ChatFlow = ai.defineFlow(
         }
     }
 )
+
+function parseContexts(relevantMovies: RelevantMovie [], movieContexts:MovieContext[]): MovieContext[]{
+   const relevantContext: MovieContext[] = []
+   for (const r of relevantMovies){
+        for(const c of movieContexts){
+            if(r.title  == c.title){
+                relevantContext.push(c)
+            }
+        }
+   }
+   return relevantContext
+
+}

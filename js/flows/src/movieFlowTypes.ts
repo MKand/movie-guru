@@ -45,17 +45,16 @@ export type MovieContext = z.infer<typeof MovieContextSchema>
 export const MovieFlowInputSchema = z.object({
   history: z.array(SimpleMessageSchema),
   userPreferences: UserProfileSchema.optional().default(UserProfileSchema.parse({})),
-  contextDocuments: z.array(MovieContextSchema),
+  contextDocuments: z.array(MovieContextSchema).optional().default([]),
   userMessage: z.string(),
 });
 export type MovieFlowInput = z.infer<typeof MovieFlowInputSchema>
 
 
 // MovieFlowOutput schema
-export const ChatFlowOutputSchema = z.strictObject({
+export const MovieFlowOutputSchema = z.strictObject({
   answer: z.string().optional().default(""),
   relevantMovies: z.array(RelevantMovieSchema).optional().default([]), // Changed to 'relevantMovies' for clarity
   wrongQuery: z.boolean().optional().default(false),
   modelOutputMetadata: ModelOutputMetadataSchema.default(ModelOutputMetadataSchema.parse({}))
 });
-export type ChatFlowOutput = z.infer<typeof ChatFlowOutputSchema>

@@ -16,7 +16,7 @@
 
 import { z } from 'genkit';
 import { ModelOutputMetadata, ModelOutputMetadataSchema } from './modelOutputMetadataTypes';
-
+import { ChatFlowInputSchema } from './chatFlowTypes';
 // USERINTENT as Zod Enum
 export const USERINTENT = z.enum([
   'UNCLEAR',
@@ -57,12 +57,6 @@ export const SimpleMessageSchema = z.object({
 export type SimpleMessage = z.infer<typeof SimpleMessageSchema>
 
 
-// QueryTransformFlowInput schema
-export const ChatFlowInputSchema = z.object({
-  history: z.array(SimpleMessageSchema),
-  userPreferences: UserProfileSchema.optional().default(UserProfileSchema.parse({})),
-  userMessage: z.string(),
-});
 
 export type QueryTransformFlowInput = z.infer<typeof ChatFlowInputSchema>
 
