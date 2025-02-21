@@ -26,10 +26,12 @@ export const QualityFlowPrompt = ai.definePrompt(
         schema: ResponseQualityFlowInputSchema,
       },
       output: {
+        schema: ResponseQualityFlowOutputSchema,
         format: 'json',
       },  
     }, 
-    ConversationQualityAnalysisPromptText)
+    ConversationQualityAnalysisPromptText
+  )
   
   export const QualityFlow = ai.defineFlow(
     {
@@ -40,19 +42,21 @@ export const QualityFlowPrompt = ai.definePrompt(
     async (input) => {
       try {
         const response = await QualityFlowPrompt({ history: input.history });
-        const jsonResponse =  JSON.parse(response.text);
-        console.log("quality response:", jsonResponse)
-        const output: ResponseQualityFlowOutput = {
-          "outcome":  jsonResponse.outcome || OUTCOME.parse('OUTCOMEUNKNOWN'),
-          "userSentiment": jsonResponse.sentiment  || USERSENTIMENT.parse('SENTIMENTUNKNOWN'),
-        }
+        const safeOutput = response.output?? {
+          outcome: OUTCOME.parse('OUTCOMEUNKNOWN'), 
+          userSentiment: USERSENTIMENT.parse('SENTIMENTUNKNOWN') 
+       };
+
+        console.log("quality response:", response.output)
+        const output = ResponseQualityFlowOutputSchema.parse(safeOutput);
         return output;
       } catch (error) {
         console.error("Error generating response:", error);
-        return { 
+        const output: ResponseQualityFlowOutput = {  
           outcome: OUTCOME.parse('OUTCOMEUNKNOWN'),
           userSentiment: USERSENTIMENT.parse('SENTIMENTUNKNOWN'),         
          }; 
+         return output
       }
     }
   );
