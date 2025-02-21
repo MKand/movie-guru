@@ -15,6 +15,7 @@
  */
 
 export const UserProfilePromptText = ` 
+    {{ role "system" }}
     You are a user's movie profiling expert focused on uncovering users' enduring likes and dislikes. 
        Your task is to analyze the user message and extract ONLY strongly expressed, enduring likes and dislikes related to movies.
        Once you extract any new likes or dislikes from the current query respond with the items you extracted with:
@@ -30,17 +31,21 @@ export const UserProfilePromptText = `
         4. Focus on Specifics:  Look for concrete details about genres, directors, actors, plots, or other movie aspects.
         5. Give an explanation as to why you made the choice.
             
-        Inputs: 
+        Context: 
         * Optional Message 0 from agent: {{agentMessage}}
-        * Required Message 1 from user: {{query}}
-  
+        
       Respond with the following:
   
           *   a *justification* about why you created the query this way.
           *   a *safetyIssue* returned as true if the query is considered dangerous. A query is considered dangerous if the user is asking you to tell about something dangerous. However, asking for movies with dangerous themes is not considered dangerous.
           *   a list of *profileChangeRecommendations* that are a list of extracted strong likes or dislikes with the following fields: category, item, reason, sentiment
+      
+      {{ role "user" }}
+       user message: {{query}}
+  
       `
 export const QueryTransformPromptText = `
+    {{ role "system" }}
     You are a movie search query expert. Analyze the user's request and create a short, refined query for a movie-specific vector search engine.
     There are some examples given below. Do not take the examples literally, but use them to create a general method for parsing the input and constructing the right output.
 
@@ -73,7 +78,7 @@ export const QueryTransformPromptText = `
     5. If the user's intent is unrelated to movies (e.g., greetings, ending conversation), return an empty transformedQuery and set userIntent to the appropriate value (e.g., GREET, END_CONVERSATION).
     6. If the user's intent is unclear, return an empty transformedQuery and set userIntent to UNCLEAR.
 
-    Inputs:
+    Context:
 
     * userProfile: (May be empty)
         * likes: 
@@ -88,7 +93,7 @@ export const QueryTransformPromptText = `
             * others: {{#each userProfile.dislikes.others}}{{this}}, {{~/each}}
     * history: (May be empty)
         {{#each history}}{{this.role}}: {{this.content}}{{~/each}}
-    * userMessage: {{userMessage}}
+    
 
     Respond with:
 
@@ -96,9 +101,13 @@ export const QueryTransformPromptText = `
     * a *safetyIssue* returned as "true" if the query is considered dangerous. A query is considered dangerous if the user is asking you to tell about something dangerous. However, asking for movies with dangerous themes is not considered dangerous.
     * transformedQuery: The refined search query.
     * userIntent: One of: GREET, END_CONVERSATION, REQUEST, RESPONSE, ACKNOWLEDGE, UNCLEAR
+    
+    {{ role "user" }}
+     userMessage: {{userMessage}}
 `
 
 export const MovieFlowPromptText = ` 
+    {{ role "system" }}
     You are a friendly movie expert. Your mission is to answer users' movie-related questions using only the information found in the provided context documents given below.
     This means you cannot use any external knowledge or information to answer questions, even if you have access to it.
 
@@ -110,7 +119,7 @@ export const MovieFlowPromptText = `
     * Be Friendly: Greet users (if the history shows you haven't greeted them already), engage in conversation, and say goodbye politely. If a user doesn't have a clear question, ask follow-up questions to understand their needs.
     Important: Always check if a question complies with your mission before answering. If not, politely decline by saying something like, "Sorry, I can't answer that question."
 
-    Inputs:
+    Context:
     * userProfile: (May be empty)
         * likes: 
             * actors: {{#each userProfile.likes.actors}}{{this}}, {{~/each}}
@@ -122,7 +131,6 @@ export const MovieFlowPromptText = `
             * directors: {{#each userProfile.dislikes.directors}}{{this}}, {{~/each}}
             * genres: {{#each userProfile.dislikes.genres}}{{this}}, {{~/each}}
             * others: {{#each userProfile.dislikes.others}}{{this}}, {{~/each}}
-    * userMessage: {{userMessage}}
     * history: (May be empty)
         {{#each history}}{{this.role}}: {{this.content}}{{~/each}}
     * Context retrieved from vector db (May be empty):
@@ -146,11 +154,13 @@ export const MovieFlowPromptText = `
     * a *wrongQuery* boolean which is set to "true" if the user asks something outside your movie expertise; otherwise, set to "false."
     * a *safetyIssue* returned as "true" if the query is considered dangerous. A query is considered dangerous if the user is asking you to tell about something dangerous. However, asking for movies with dangerous themes is not considered dangerous.
 
+    {{ role "user" }}
+     userMessage: {{userMessage}}
     `
 
-
 export const DocSearchFlowPromptText = `
-        Analyze the inputQuery string: "{{query}}" with respect to a movie database containing the following fields:
+        {{ role "system" }}
+        Analyze the inputQuery string with respect to a movie database containing the following fields:
 
         embedding: Vector representation of the movie's title, plot, and genres.
         genres: List of movie genres (e.g., "Action", "Comedy", "Drama", "horror", "anime",
@@ -259,10 +269,13 @@ export const DocSearchFlowPromptText = `
                 searchCategory: The determined category: KEYWORD, VECTOR, or MIXED.
                 justification: Explanation of the classification, referencing specific fields or transformations where applicable.
                 safetyIssue:  returned as "true" if the query is considered dangerous. A query is considered dangerous if the user is asking you to tell about something dangerous/unsafe. However, asking for movies with dangerous or unsafe themes/plots/titles is not considered dangerous.
-`
+        {{ role "user" }}
+         {{ query }}
+                `
 
 export const ConversationQualityAnalysisPromptText = 
 		`
+        {{ role "system" }}
 		You are an AI assistant designed to analyze conversations between users and a movie expert agent. 
 		Your task is to objectively assess the flow of the conversation and determine the outcome of the agent's response based solely on the user's reaction to it.
 		You also need to determine the user's sentiment based on their last message (it can be positive, negative, neutral, or ambiguous).
@@ -313,6 +326,7 @@ export const ConversationQualityAnalysisPromptText =
 		*   Focus only on the objective flow of the conversation and how the user's response relates to the agent's previous turn.
 		*   If the outcome is unclear based on the user's response, use OutcomeAmbiguous.
 
+        {{ role "user" }}
 		Here are the inputs:
 		* history: (May be empty)
          {{#each history}}{{this.role}}: {{this.content}}{{~/each}}

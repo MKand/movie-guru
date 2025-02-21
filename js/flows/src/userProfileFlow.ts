@@ -50,7 +50,6 @@ export const UserProfileFlowPrompt = ai.definePrompt(
           agentMessage: input.agentMessage });
         const safeOutput =  response.output?? defaultOutput
         const output = UserProfileFlowOutputSchema.parse(safeOutput)
-        console.log("UserProfileDFlow: ", output)
         return output
         
         } catch (error) {

@@ -17,18 +17,14 @@
 import { startFlowServer } from '@genkit-ai/express';
 
 import { UserProfileFlow } from './userProfileFlow'
-export { UserProfileFlowPrompt } from './userProfileFlow'
 
 import { QueryTransformFlow } from './queryTransformFlow'
-export { QueryTransformPrompt } from './queryTransformFlow'
 
 import { MovieDocFlow } from './docRetriever'
 
 import { MovieFlow } from './movieFlow'
-export { MovieFlowPrompt } from './movieFlow'
 
 import { QualityFlow } from './verifyQualityFlow'
-export {QualityFlowPrompt} from './verifyQualityFlow'
 
 
 export function parseBooleanfromField(field: string|null|undefined): boolean{
