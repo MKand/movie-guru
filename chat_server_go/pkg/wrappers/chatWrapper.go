@@ -22,7 +22,6 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
-	"os"
 
 	types "github.com/movie-guru/pkg/types"
 	utils "github.com/movie-guru/pkg/utils"
@@ -45,29 +44,12 @@ func (flowClient *ChatFlowClient) Run(history []*types.SimpleMessage, preference
 		return nil, err
 	}
 
-	err = flowClient.AddPosterURLs(resp)
+	err = utils.AddPosterURLs(resp.ContextDocuments)
 	if err != nil {
 		return nil, err
 	}
 
 	return resp, nil
-}
-
-func (flowClient *ChatFlowClient) AddPosterURLs(chatOutput *types.ExtendedMovieFlowOutput) error {
-	// make this defensive
-	projectId := os.Getenv("PROJECT_ID")
-	for _, c := range chatOutput.ContextDocuments {
-		c.Poster = fmt.Sprintf("https://storage.googleapis.com/%s_posters/%s", projectId, c.Poster)
-		if os.Getenv("USE_SIGNED_URL") != "" {
-			var err error
-			c.Poster, err = utils.GetSignedURL(c.Poster)
-			if err != nil {
-				return err
-			}
-		}
-	}
-
-	return nil
 }
 
 func (flowClient *ChatFlowClient) runFlow(input *types.QueryTransformFlowInput) (*types.ExtendedMovieFlowOutput, error) {

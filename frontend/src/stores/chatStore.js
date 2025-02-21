@@ -30,7 +30,7 @@ export const store = {
           state.movies = []
           movies.forEach(element => {
             if (element.poster=="") {
-              element.poster="../assets/notfound.png"
+              element.poster= new URL("../assets/movie-guru.png", import.meta.url)
             }
             state.movies.push(element)
           });
@@ -40,7 +40,7 @@ export const store = {
           state.placeHolderMovies = []
           movies.forEach(element => {
             if (element.poster=="") {
-              element.poster="../assets/notfound.png"
+              element.poster=new URL("../assets/movie-guru.png", import.meta.url)
             }
             state.placeHolderMovies.push(element)
           });
