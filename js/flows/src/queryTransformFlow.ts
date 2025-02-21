@@ -57,6 +57,7 @@ export const QueryTransformFlow = ai.defineFlow(
       });
 
       const jsonResponse = JSON.parse(response.text);
+      console.log("QTFlow: ", jsonResponse);
       const qtOutput: QueryTransformFlowOutput = {
         transformedQuery: jsonResponse.transformedQuery || "",
         userIntent: USERINTENT.parse(jsonResponse.userIntent) || USERINTENT.parse('UNCLEAR'),

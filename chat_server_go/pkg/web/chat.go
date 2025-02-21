@@ -33,7 +33,7 @@ func chat(ctx context.Context, deps *Dependencies, metadata *db.Metadata, h *typ
 
 	userProfile, err := deps.DB.GetCurrentProfile(ctx, user)
 	if err != nil {
-		slog.ErrorContext(ctx, "Unable to get profile info for user", err)
+		slog.ErrorContext(ctx, "Unable to get profile info for user", err.Error(), err)
 	}
 
 	simpleHistory, err := types.ParseRecentHistory(h.GetHistory(), metadata.HistoryLength)
@@ -55,7 +55,7 @@ func chat(ctx context.Context, deps *Dependencies, metadata *db.Metadata, h *typ
 			updateChatQualityMeters(qualityContext, meters, qualityResp)
 		}
 		if err != nil {
-			slog.ErrorContext(qualityContext, "error updating quality meters", err)
+			slog.ErrorContext(qualityContext, "Error updating quality meters", err.Error(), err)
 		}
 	}()
 
@@ -74,20 +74,20 @@ func chat(ctx context.Context, deps *Dependencies, metadata *db.Metadata, h *typ
 
 	// This is in the main thread, not async
 	qResp, err := deps.QueryTransformFlowClient.Run(simpleHistory, userProfile)
-	if agentResp, shouldReturn := processFlowOutput(qResp.ModelOutputMetadata, err, h); shouldReturn {
+	if agentResp, shouldReturn := processFlowOutput(qResp.ModelOutputMetadata, err, h, "QTFlow"); shouldReturn {
 		return agentResp
 	}
 
 	movieContext := []*types.MovieContext{}
 	if qResp.Intent == types.USERINTENT(types.REQUEST) || qResp.Intent == types.USERINTENT(types.RESPONSE) {
 		movieContext, err = deps.MovieRetrieverFlowClient.RetriveDocuments(ctx, qResp.TransformedQuery)
-		if agentResp, shouldReturn := processFlowOutput(nil, err, h); shouldReturn {
+		if agentResp, shouldReturn := processFlowOutput(nil, err, h, "MovieRetFlow"); shouldReturn {
 			return agentResp
 		}
 	}
 
 	mAgentResp, err := deps.MovieFlowClient.Run(movieContext, simpleHistory, userProfile)
-	if agentResp, shouldReturn := processFlowOutput(nil, err, h); shouldReturn {
+	if agentResp, shouldReturn := processFlowOutput(nil, err, h, "MovieQAFlow"); shouldReturn {
 		return agentResp
 	}
 
@@ -107,10 +107,10 @@ func chat(ctx context.Context, deps *Dependencies, metadata *db.Metadata, h *typ
 	return mAgentResp
 }
 
-func processFlowOutput(metadata *types.ModelOutputMetadata, err error, h *types.ChatHistory) (*types.AgentResponse, bool) {
+func processFlowOutput(metadata *types.ModelOutputMetadata, err error, h *types.ChatHistory, caller string) (*types.AgentResponse, bool) {
 	if err != nil {
 		h.RemoveLastMessage()
-		slog.ErrorContext(context.Background(), err.Error(), err)
+		slog.ErrorContext(context.Background(), fmt.Sprintf("Error from Genkit Server: %s", caller), err.Error(), err)
 		return types.NewErrorAgentResponse(err.Error()), true
 	}
 	if metadata != nil && metadata.SafetyIssue {
