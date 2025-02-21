@@ -15,7 +15,7 @@
  */
 
 import { ai, safetySettings } from './genkitConfig'
-import { MovieFlowInputSchema, MovieFlowOutputSchema, MovieFlowOutput } from './movieFlowTypes'
+import { MovieFlowInputSchema, ChatFlowOutputSchema, ChatFlowOutput } from './movieFlowTypes'
 import { MovieFlowPromptText } from './prompts';
 import { GenerationBlockedError } from 'genkit';
 
@@ -26,7 +26,7 @@ export const MovieFlowPrompt = ai.definePrompt(
       schema: MovieFlowInputSchema,
     },
     output: {
-      schema: MovieFlowOutputSchema,
+      schema: ChatFlowOutputSchema,
       format: 'json',
     },  
     config:{
@@ -39,14 +39,14 @@ export const MovieFlow = ai.defineFlow(
   {
     name: 'movieQAFlow',
     inputSchema: MovieFlowInputSchema,
-    outputSchema: MovieFlowOutputSchema
+    outputSchema: ChatFlowOutputSchema
   },
   async (input) => {
-    const defaultOutput = MovieFlowOutputSchema.parse({})
+    const defaultOutput = ChatFlowOutputSchema.parse({})
     try {
       const response = await MovieFlowPrompt({ history: input.history, userPreferences: input.userPreferences, userMessage: input.userMessage, contextDocuments: input.contextDocuments });
       const safeOutput = response.output ?? defaultOutput;
-      const output = MovieFlowOutputSchema.parse(safeOutput);
+      const output = ChatFlowOutputSchema.parse(safeOutput);
       return output
     } catch (error) {
       if(error instanceof GenerationBlockedError){

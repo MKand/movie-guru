@@ -16,20 +16,19 @@
 
 import {
   USERINTENT,
-  QueryTransformFlowInputSchema,
+  ChatFlowInputSchema,
   QueryTransformFlowOutputSchema,
   QueryTransformFlowOutput
 } from './queryTransformTypes';
 import { QueryTransformPromptText } from './prompts';
 import { ai, safetySettings } from './genkitConfig';
 import { GenerationBlockedError } from 'genkit';
-import { parseBooleanfromField } from '.';
 
 export const QueryTransformPrompt = ai.definePrompt(
   {
     name: 'queryTransformFlowPrompt',
     input: {
-      schema: QueryTransformFlowInputSchema,
+      schema: ChatFlowInputSchema,
     },
     output: {
       schema: QueryTransformFlowOutputSchema,
@@ -46,7 +45,7 @@ export const QueryTransformPrompt = ai.definePrompt(
 export const QueryTransformFlow = ai.defineFlow(
   {
     name: 'queryTransformFlow',
-    inputSchema: QueryTransformFlowInputSchema,
+    inputSchema: ChatFlowInputSchema,
     outputSchema: QueryTransformFlowOutputSchema,
   },
   async (input) => {
@@ -55,7 +54,7 @@ export const QueryTransformFlow = ai.defineFlow(
       const response = await QueryTransformPrompt({
         history: input.history,
         userMessage: input.userMessage,
-        userProfile: input.userProfile,
+        userPreferences: input.userPreferences,
       });
       const safeOutput = response.output?? defaultOutput;
       const output = QueryTransformFlowOutputSchema.parse(safeOutput)

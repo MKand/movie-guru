@@ -58,13 +58,13 @@ export type SimpleMessage = z.infer<typeof SimpleMessageSchema>
 
 
 // QueryTransformFlowInput schema
-export const QueryTransformFlowInputSchema = z.object({
+export const ChatFlowInputSchema = z.object({
   history: z.array(SimpleMessageSchema),
-  userProfile: UserProfileSchema.optional(),
+  userPreferences: UserProfileSchema.optional().default(UserProfileSchema.parse({})),
   userMessage: z.string(),
 });
 
-export type QueryTransformFlowInput = z.infer<typeof QueryTransformFlowInputSchema>
+export type QueryTransformFlowInput = z.infer<typeof ChatFlowInputSchema>
 
 
 // QueryTransformFlowOutput schema

@@ -20,6 +20,7 @@ let sql: postgres.Sql<{}> | null = null; // Initialize sql as null
 
 export async function openDB(): Promise<postgres.Sql<{}> | null> {
   if (sql) {
+    console.log("Returning opened sql connection ", sql!=null)
     return sql; // Return existing connection if already opened
   }
   const POSTGRES_DB_USER = process.env.POSTGRES_DB_USER || "minimal-user";
