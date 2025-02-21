@@ -27,6 +27,7 @@ export const UserProfileFlowPrompt = ai.definePrompt(
       schema: UserProfileFlowInputSchema,
     },
     output: {
+      schema: UserProfileFlowOutputSchema,
       format: 'json',
     },
     config: {
@@ -42,39 +43,25 @@ export const UserProfileFlowPrompt = ai.definePrompt(
       outputSchema: UserProfileFlowOutputSchema
     },
     async (input) => {
+      const defaultOutput = UserProfileFlowOutputSchema.parse({})
       try {
         const response = await UserProfileFlowPrompt({ query: input.query, agentMessage: input.agentMessage });
-        const jsonResponse =  JSON.parse(response.text);
-
-        const output: UserProfileFlowOutput = {
-          profileChangeRecommendations:  jsonResponse.profileChangeRecommendations,
-          modelOutputMetadata: {
-            justification: jsonResponse.justification,
-            safetyIssue: parseBooleanfromField(jsonResponse.safetyIssue)
-          }
-        }
+        const safeOutput =  response.output?? defaultOutput
+        const output = UserProfileFlowOutputSchema.parse(safeOutput)
+        console.log("UserProfileDFlow: ", output)
         return output
-      } catch (error) {
+        
+        } catch (error) {
+        
         if(error instanceof GenerationBlockedError){
           console.error("UserProfileFlow: GenerationBlockedError generating response:", error.message);
-          return { 
-            profileChangeRecommendations: [],
-            modelOutputMetadata: {
-              justification: "",
-              safetyIssue: true,
-            }
-           }; 
+          defaultOutput.modelOutputMetadata.safetyIssue = true;
+          return defaultOutput;
         }
         else if(error instanceof Error && (error.message.includes('429') || error.message.includes('RESOURCE_EXHAUSTED'))){
           console.error("UserProfileFlow: There is a quota issue:", error.message);
-          return { 
-            profileChangeRecommendations: [],
-            modelOutputMetadata: {
-              justification: "",
-              safetyIssue: false,
-              quotaIssue: true
-            }
-           };
+          defaultOutput.modelOutputMetadata.quotaIssue = true;
+          return defaultOutput;
           }
         else{
           console.error("UserProfileFlow: Error generating response:", error);

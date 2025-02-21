@@ -40,9 +40,9 @@ export const UserProfileFlowInputSchema = z.object({
 export type UserProfileFlowInput = z.infer<typeof UserProfileFlowInputSchema>
 
 // UserProfileFlowOutput schema
-export const UserProfileFlowOutputSchema = z.object({
-  profileChangeRecommendations: z.array(ProfileChangeRecommendationSchema),
-  modelOutputMetadata: ModelOutputMetadataSchema
+export const UserProfileFlowOutputSchema = z.strictObject({
+  profileChangeRecommendations: z.array(ProfileChangeRecommendationSchema).optional().default([]),
+  modelOutputMetadata: ModelOutputMetadataSchema.default(ModelOutputMetadataSchema.parse({}))
 });
 
 export type UserProfileFlowOutput = z.infer<typeof UserProfileFlowOutputSchema>

@@ -43,9 +43,9 @@ export const ResponseQualityFlowInputSchema = z.object({
 export type ResponseQualityFlowInput = z.infer<typeof ResponseQualityFlowInputSchema>
 
 // ResponseQualityFlowOutput represents the output of the response quality analysis flow.
-export const ResponseQualityFlowOutputSchema = z.object({
-	outcome: OUTCOME,
-	userSentiment: USERSENTIMENT,
+export const ResponseQualityFlowOutputSchema = z.strictObject({
+	outcome: OUTCOME.default('OUTCOMEUNKNOWN'),
+	userSentiment: USERSENTIMENT.default('SENTIMENTUNKNOWN'),
 })
 
 export type ResponseQualityFlowOutput = z.infer<typeof ResponseQualityFlowOutputSchema>

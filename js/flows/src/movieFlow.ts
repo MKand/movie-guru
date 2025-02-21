@@ -52,7 +52,8 @@ export const MovieFlow = ai.defineFlow(
         wrongQuery:  parseBooleanfromField(jsonResponse.wrongQuery),
         modelOutputMetadata: {
           justification: jsonResponse.justification || "",
-          safetyIssue: parseBooleanfromField(jsonResponse.safetyIssue)
+          safetyIssue: parseBooleanfromField(jsonResponse.safetyIssue),
+          quotaIssue: false
         }
       }
 
@@ -69,6 +70,7 @@ export const MovieFlow = ai.defineFlow(
           modelOutputMetadata: {
             justification: "",
             safetyIssue: true,
+            quotaIssue: false
           }
          }; 
       }

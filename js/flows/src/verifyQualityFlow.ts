@@ -40,23 +40,17 @@ export const QualityFlowPrompt = ai.definePrompt(
       outputSchema: ResponseQualityFlowOutputSchema
     },
     async (input) => {
+      const defaultOutput = ResponseQualityFlowOutputSchema.parse({})
       try {
         const response = await QualityFlowPrompt({ history: input.history });
-        const safeOutput = response.output?? {
-          outcome: OUTCOME.parse('OUTCOMEUNKNOWN'), 
-          userSentiment: USERSENTIMENT.parse('SENTIMENTUNKNOWN') 
-       };
+        const safeOutput = response.output?? defaultOutput
 
         console.log("quality response:", response.output)
         const output = ResponseQualityFlowOutputSchema.parse(safeOutput);
-        return output;
+        return output
       } catch (error) {
-        console.error("Error generating response:", error);
-        const output: ResponseQualityFlowOutput = {  
-          outcome: OUTCOME.parse('OUTCOMEUNKNOWN'),
-          userSentiment: USERSENTIMENT.parse('SENTIMENTUNKNOWN'),         
-         }; 
-         return output
+        console.error("Quality Flow: Error generating response:", error);
+        return defaultOutput
       }
     }
   );

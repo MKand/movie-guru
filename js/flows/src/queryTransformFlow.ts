@@ -63,7 +63,8 @@ export const QueryTransformFlow = ai.defineFlow(
         userIntent: USERINTENT.parse(jsonResponse.userIntent) || USERINTENT.parse('UNCLEAR'),
         modelOutputMetadata: {
           justification: jsonResponse.justification || "",
-          safetyIssue: parseBooleanfromField(jsonResponse.safetyIssue)
+          safetyIssue: parseBooleanfromField(jsonResponse.safetyIssue),
+          quotaIssue: false
         },
       };
 
@@ -82,6 +83,7 @@ export const QueryTransformFlow = ai.defineFlow(
           modelOutputMetadata: {
             justification: '',
             safetyIssue: true,
+            quotaIssue: false,
           },
         };
       }
