@@ -18,7 +18,6 @@ import { ai, safetySettings } from './genkitConfig'
 import { MovieFlowInputSchema, MovieFlowOutputSchema, MovieFlowOutput } from './movieFlowTypes'
 import { MovieFlowPromptText } from './prompts';
 import { GenerationBlockedError } from 'genkit';
-import { parseBooleanfromField } from '.';
 
 export const MovieFlowPrompt = ai.definePrompt(
   {
@@ -27,6 +26,7 @@ export const MovieFlowPrompt = ai.definePrompt(
       schema: MovieFlowInputSchema,
     },
     output: {
+      schema: MovieFlowOutputSchema,
       format: 'json',
     },  
     config:{
@@ -42,49 +42,23 @@ export const MovieFlow = ai.defineFlow(
     outputSchema: MovieFlowOutputSchema
   },
   async (input) => {
+    const defaultOutput = MovieFlowOutputSchema.parse({})
     try {
       const response = await MovieFlowPrompt({ history: input.history, userPreferences: input.userPreferences, userMessage: input.userMessage, contextDocuments: input.contextDocuments });
-      const jsonResponse =  JSON.parse(response.text);
-
-      const output: MovieFlowOutput = {
-        answer:  jsonResponse.answer || "",
-        relevantMovies : jsonResponse.relevantMovies || [],
-        wrongQuery:  parseBooleanfromField(jsonResponse.wrongQuery),
-        modelOutputMetadata: {
-          justification: jsonResponse.justification || "",
-          safetyIssue: parseBooleanfromField(jsonResponse.safetyIssue),
-          quotaIssue: false
-        }
-      }
-
-      if(output.wrongQuery){
-        console.log("wrong query found")
-      }
+      const safeOutput = response.output ?? defaultOutput;
+      const output = MovieFlowOutputSchema.parse(safeOutput);
       return output
     } catch (error) {
       if(error instanceof GenerationBlockedError){
         console.error("MovieFlow: GenerationBlockedError generating response:", error.message);
-        return { 
-          relevantMovies: [],
-          answer: "",
-          modelOutputMetadata: {
-            justification: "",
-            safetyIssue: true,
-            quotaIssue: false
-          }
-         }; 
+        defaultOutput.modelOutputMetadata.safetyIssue = true;
+        return defaultOutput; 
       }
       else if(error instanceof Error && (error.message.includes('429') || error.message.includes('RESOURCE_EXHAUSTED'))){
         console.error("MovieFlow: There is a quota issue:", error.message);
-        return { 
-          relevantMovies: [],
-          answer: "",
-          modelOutputMetadata: {
-            justification: "",
-            safetyIssue: false,
-            quotaIssue: true
-          }
-         };}
+        defaultOutput.modelOutputMetadata.quotaIssue = true;
+        return defaultOutput;
+        }
         else {
         console.error("MovieFlow: Error generating response:", error);
         throw error;

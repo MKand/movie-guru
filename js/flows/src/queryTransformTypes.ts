@@ -68,10 +68,10 @@ export type QueryTransformFlowInput = z.infer<typeof QueryTransformFlowInputSche
 
 
 // QueryTransformFlowOutput schema
-export const QueryTransformFlowOutputSchema = z.object({
-  transformedQuery: z.string(),
-  userIntent: USERINTENT,
-  modelOutputMetadata: ModelOutputMetadataSchema,
+export const QueryTransformFlowOutputSchema = z.strictObject({
+  transformedQuery: z.string().optional().default(""),
+  userIntent: USERINTENT.default("UNCLEAR"),
+  modelOutputMetadata: ModelOutputMetadataSchema.default(ModelOutputMetadataSchema.parse({})),
 });
 
 export type QueryTransformFlowOutput = z.infer<typeof QueryTransformFlowOutputSchema>

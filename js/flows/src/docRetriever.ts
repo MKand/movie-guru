@@ -40,11 +40,11 @@ export const QuerySchema = z.object({
   query: z.string(),
 });
 
-export const SearchFlowOutputSchema = z.object({
-  keywordQuery: z.string().optional(),
-  vectorQuery: z.string().optional(),
-  searchCategory: SearchTypeCategory,
-  modelOutputMetadata: ModelOutputMetadataSchema,
+export const SearchFlowOutputSchema = z.strictObject({
+  keywordQuery: z.string().optional().default(""),
+  vectorQuery: z.string().optional().default(""),
+  searchCategory: SearchTypeCategory.default("NONE"),
+  modelOutputMetadata: ModelOutputMetadataSchema.default(ModelOutputMetadataSchema.parse({})),
 });
 
 export const SearchFlowPrompt = ai.definePrompt(
@@ -71,39 +71,8 @@ export const MovieDocFlow = ai.defineFlow(
     outputSchema: z.array(MovieContextSchema),
   },
   async (input) => {
-    let searchFlowOutput= {
-      searchCategory: SearchTypeCategory.parse("NONE"), // Initialize with "NONE"
-      keywordQuery: "",
-      vectorQuery: "",
-      modelOutputMetadata: {
-        justification: "",
-        safetyIssue: false
-      }
-    };
     const movieContexts: MovieContext[] = [];
-
-  try{
-    const response = await SearchFlowPrompt( {
-      query: input.query
-    })
-    const jsonResponse = JSON.parse(response.text)
-
-    searchFlowOutput = {
-      vectorQuery: jsonResponse.vectorQuery || "",
-      keywordQuery: jsonResponse.keywordQuery || "",
-      searchCategory: jsonResponse.searchCategory || SearchTypeCategory.parse("NONE"),
-      modelOutputMetadata: {
-        justification: jsonResponse.justification || "",
-        safetyIssue: parseBooleanfromField(jsonResponse.safetyIssue),
-      },
-    }
-  }
-  catch (error){
-    console.error('MovieDocFlow: Error generating response:', {
-      error,
-      input,
-    });
-  }
+    const searchFlowOutput = await createSearchObject(input);
   try{
     if (searchFlowOutput.searchCategory == "NONE"){
       return movieContexts;
@@ -226,3 +195,22 @@ export const sqlRetriever = ai.defineRetriever(
     };
   }
 );
+async function createSearchObject(input: { query: string; }) {
+  const defaultOutput = SearchFlowOutputSchema.parse({});
+  try {
+    const response = await SearchFlowPrompt({
+      query: input.query
+    });
+    const safeOutput = response.output ?? SearchFlowOutputSchema.parse({});
+    return SearchFlowOutputSchema.parse(safeOutput);
+
+  }
+  catch (error) {
+    console.error('MovieDocFlow: Error generating response:', {
+      error,
+      input,
+    });
+    return defaultOutput;
+  }
+}
+

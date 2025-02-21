@@ -45,7 +45,9 @@ export const UserProfileFlowPrompt = ai.definePrompt(
     async (input) => {
       const defaultOutput = UserProfileFlowOutputSchema.parse({})
       try {
-        const response = await UserProfileFlowPrompt({ query: input.query, agentMessage: input.agentMessage });
+        const response = await UserProfileFlowPrompt({ 
+          query: input.query, 
+          agentMessage: input.agentMessage });
         const safeOutput =  response.output?? defaultOutput
         const output = UserProfileFlowOutputSchema.parse(safeOutput)
         console.log("UserProfileDFlow: ", output)

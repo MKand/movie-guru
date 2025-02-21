@@ -50,26 +50,26 @@ export const QueryTransformPromptText = `
         * Include strong likes and dislikes to narrow the request
             Example Vague queries:
                 1. User asks: "show me a movie to watch tonight"
-                    UserProfile: likes dramas
+                    UserProfile: { likes: {genres: [dramas]}}
                     transformedQuery: "drama movies"
                 2. User asks: "i feel like watching something"
-                userProfile: empty
-                transformedQuery: "movies"
+                    userProfile: {}
+                    transformedQuery: "movies"
                 3. User asks: "what recommendations do you have for me"
-                userProfile: likes horror, dislikes romance
-                transformedQuery: "horror movies without romance"
+                    userProfile:  { likes: {genres: [horror]}, dislikes: {genres:[romance]}}
+                    transformedQuery: "horror movies without romance"
     3. Prioritize the user's current request.
     4. Keep the query concise and specific to movies. Retain descriptives like short, long, great, terrible etc. If the query is specific, don't add any extra information from the profile.
         Example specific queries:
                 1. User asks: "show me action films. I don't have much time today so I cant be too long"
-                    UserProfile: likes dramas, dislikes action
+                    UserProfile:  { likes: {genres: [horror]}, dislikes: {genres:[action]}}
                     transformedQuery: "short action movies"
                 2. User asks: "I want to know more about the movie The Bee Movie"
-                userProfile: likes actress "Jane Doe", 
-                transformedQuery: "title The Bee Movie"
+                    userProfile:  { likes: {actors: [Jane Doe]}}, 
+                    transformedQuery: "title The Bee Movie"
                 3. User asks: "do you have other movies like The Bee Movie"
-                userProfile: likes horror, dislikes romance
-                transformedQuery: "movies like The Bee Movie"
+                    userProfile:  { likes: {genres: [horror]}, dislikes: {genres:[romance]}}
+                    transformedQuery: "movies like The Bee Movie"
     5. If the user's intent is unrelated to movies (e.g., greetings, ending conversation), return an empty transformedQuery and set userIntent to the appropriate value (e.g., GREET, END_CONVERSATION).
     6. If the user's intent is unclear, return an empty transformedQuery and set userIntent to UNCLEAR.
 
@@ -234,6 +234,11 @@ export const DocSearchFlowPromptText = `
                 searchCategory: VECTOR
                 KeywordQuery: ""
                 VectorQuery: "romance"
+            Input: "movies with anime"
+            Output:  
+                searchCategory: VECTOR
+                KeywordQuery: ""
+                VectorQuery: "anime"
 
         3. MIXED search: Queries that require both KEYWORD and VECTOR search: Use when part of the query relates to structured fields (KEYWORD search), while another part involves semantic understanding (VECTOR search).
         Example:

@@ -32,6 +32,7 @@ export const QueryTransformPrompt = ai.definePrompt(
       schema: QueryTransformFlowInputSchema,
     },
     output: {
+      schema: QueryTransformFlowOutputSchema,
       format: 'json',
     },
     config:{
@@ -49,55 +50,27 @@ export const QueryTransformFlow = ai.defineFlow(
     outputSchema: QueryTransformFlowOutputSchema,
   },
   async (input) => {
+    const defaultOutput = QueryTransformFlowOutputSchema.parse({})
     try {
       const response = await QueryTransformPrompt({
         history: input.history,
         userMessage: input.userMessage,
         userProfile: input.userProfile,
       });
-
-      const jsonResponse = JSON.parse(response.text);
-      console.log("QTFlow: ", jsonResponse);
-      const qtOutput: QueryTransformFlowOutput = {
-        transformedQuery: jsonResponse.transformedQuery || "",
-        userIntent: USERINTENT.parse(jsonResponse.userIntent) || USERINTENT.parse('UNCLEAR'),
-        modelOutputMetadata: {
-          justification: jsonResponse.justification || "",
-          safetyIssue: parseBooleanfromField(jsonResponse.safetyIssue),
-          quotaIssue: false
-        },
-      };
-
-      return qtOutput;
+      const safeOutput = response.output?? defaultOutput;
+      const output = QueryTransformFlowOutputSchema.parse(safeOutput)
+      return output;
     } catch (error) {
-      console.error('QTFlow: Error generating response:', {
-        error,
-        input,
-      });
       if (error instanceof GenerationBlockedError){
         
         console.error("QTFlow: GenerationBlockedError generating response:", error.message);
-        return {
-          transformedQuery: input.userMessage,
-          userIntent: USERINTENT.parse('UNCLEAR'),
-          modelOutputMetadata: {
-            justification: '',
-            safetyIssue: true,
-            quotaIssue: false,
-          },
-        };
+        defaultOutput.modelOutputMetadata.safetyIssue = true;
+        return defaultOutput;
       }
       else if(error instanceof Error && (error.message.includes('429') || error.message.includes('RESOURCE_EXHAUSTED'))){
         console.error("QTFlow: There is a quota issue:", error.message);
-        return { 
-          transformedQuery: "",
-          userIntent: USERINTENT.parse('UNCLEAR'),
-          modelOutputMetadata: {
-            justification: "",
-            safetyIssue: false,
-            quotaIssue: true
-          }
-         };
+        defaultOutput.modelOutputMetadata.quotaIssue = true;
+        return defaultOutput;
         }
         else {
         console.error("QTFlow: Error generating response:", error);
