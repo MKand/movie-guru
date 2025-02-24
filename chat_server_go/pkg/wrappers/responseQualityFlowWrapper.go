@@ -46,7 +46,6 @@ func (flowClient *ResponseQualityFlowClient) Run(ctx context.Context, history []
 }
 
 func (flowClient *ResponseQualityFlowClient) runFlow(input *types.ResponseQualityFlowInput) (*types.ResponseQualityOutput, error) {
-
 	ctx := context.Background()
 
 	// Marshal the input struct to JSON

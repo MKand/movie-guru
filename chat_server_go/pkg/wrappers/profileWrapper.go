@@ -103,6 +103,8 @@ func (flowClient *UserProfileFlowClient) runFlow(input *types.UserProfileFlowInp
 	client := &http.Client{}
 	ctx := context.Background()
 	resp, err := client.Do(req)
+	ctx := context.Background()
+
 	if err != nil {
 		slog.ErrorContext(ctx, "QualityFlow: Error sending request to Flows", err.Error(), err)
 		return nil, err

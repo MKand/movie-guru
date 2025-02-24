@@ -89,6 +89,10 @@ func (flowClient *MovieRetrieverFlowClient) runFlow(input string) ([]*types.Movi
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		slog.ErrorContext(ctx, "QualityFlow: Genkit returned an Error", "errorCode", resp.StatusCode)
+<<<<<<< HEAD
+=======
+		return nil, fmt.Errorf("genkit server returned error: %s (%d)", http.StatusText(resp.StatusCode), resp.StatusCode)
+>>>>>>> 595bd35667b94dcde937f56ed5109138aa810e8a
 	}
 
 	var result struct {
