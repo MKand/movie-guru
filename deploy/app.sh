@@ -61,6 +61,7 @@ if [[ -z "$REGION" ]]; then
     exit 1
 fi
 
+
 echo -e "\e[95mUsing PROJECT_ID: $PROJECT_ID\e[0m"
 echo -e "\e[95mUsing REGION: $REGION\e[0m"
 

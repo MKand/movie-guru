@@ -17,10 +17,10 @@
   - [Step 3: Get Firebase Web app Configuration](#step-3-get-firebase-web-app-configuration)
   - [Step 4: Update Environment Variables](#step-4-update-environment-variables)
   - [Step 5: Build and Push Containers](#step-5-build-and-push-containers)
-  - [Step 6: Run the Cloud Run Job](#step-6-run-the-cloud-run-job)
+  - [Step 6: Run the Cloud Run Job \[If using CloudSQL. Skip if running a containerised pgvector instance on GKE\]](#step-6-run-the-cloud-run-job-if-using-cloudsql-skip-if-running-a-containerised-pgvector-instance-on-gke)
   - [Step 7: Connect to GKE Cluster](#step-7-connect-to-gke-cluster)
   - [Step 8: Deploy Application Using Helm](#step-8-deploy-application-using-helm)
-  - [Step 9: Register Workloads and Services with App Hub](#step-9-register-workloads-and-services-with-app-hub)
+  - [Step 9: \[OPTIONAL\] Register Workloads and Services with App Hub](#step-9-optional-register-workloads-and-services-with-app-hub)
   - [Final Step: Verify Deployment](#final-step-verify-deployment)
   - [Appendix](#appendix)
     - [Original repo](#original-repo)
@@ -159,7 +159,7 @@ source ./deploy/ci.sh --region $REGION
 
 This should take around 10 minutes
 
-## Step 6: Run the Cloud Run Job
+## Step 6: Run the Cloud Run Job [If using CloudSQL. Skip if running a containerised pgvector instance on GKE]
 
 ```bash
 gcloud run job execute movie-guru-db-init --region $REGION --project $PROJECT_ID
@@ -177,13 +177,17 @@ gcloud container clusters get-credentials movie-guru-cluster --region ${REGION} 
 
 Deploy the application to GKE using Helm:
 
-Update the [helm](./deploy/app/helm/movieguru/values.yaml) file with values obtained in the previous step. Ensure the (helm)(./deploy/app.sh#L90) file has the right file
+Ensure the (helm)(./deploy/app.sh#L90) file has is using the right values file in the helm deployment.
+
+- For a full GKE-only deployment use  **./deploy/app/helm/movieguru/values.simple.yaml** .
+- For a deployment with app containers on GKE and CLoudSQL + MemoryStore  **./deploy/app/helm/movieguru/values.full.yaml** .
+- For more customised deployment, update the [helm](./deploy/app/helm/movieguru/values.yaml) file with values obtained in the previous step. 
 
 ```bash
 ./deploy/app.sh --region $REGION
 ```
 
-## Step 9: Register Workloads and Services with App Hub
+## Step 9: [OPTIONAL] Register Workloads and Services with App Hub
 
 ```bash
 ./deploy/register.sh --region $REGION
