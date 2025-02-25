@@ -1,9 +1,22 @@
+// Copyright 2025 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package web
 
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"log/slog"
 	"net/http"
 	"strings"
@@ -37,6 +50,32 @@ func NewUserLoginHandler(tokenAudience string, db *db.MovieDB) *UserLoginHandler
 	}
 }
 
+func (ulh *UserLoginHandler) HandleAPILogin(ctx context.Context, authHeader, inviteCode string) (string, error) {
+	token := ulh.getToken(authHeader)
+	user, err := ulh.verifyGoogleToken(token)
+	if err != nil {
+		return "", err
+	}
+
+	if ulh.db.CheckUser(ctx, user) {
+		return user, nil
+	}
+
+	inviteCodes, err := ulh.db.GetInviteCodes()
+	if err != nil {
+		return "", err
+	}
+
+	if utils.Contains(inviteCodes, inviteCode) {
+		if err := ulh.db.CreateUser(user); err != nil {
+			return "", err
+		}
+		return user, nil
+	}
+
+	return "", &AuthorizationError{"Invalid invite code"}
+}
+
 func (ulh *UserLoginHandler) HandleLogin(ctx context.Context, authHeader, inviteCode string) (string, error) {
 	token := ulh.getToken(authHeader)
 	user, err := ulh.verifyGoogleToken(token)
@@ -61,6 +100,14 @@ func (ulh *UserLoginHandler) HandleLogin(ctx context.Context, authHeader, invite
 	}
 
 	return "", &AuthorizationError{"Invalid invite code"}
+}
+
+func (ulh *UserLoginHandler) HandleApiKeyLogin(ctx context.Context, apiKey, user string) (string, error) {
+	// simple implementation for now
+	if user == "" {
+		return "", &AuthorizationError{"Invalid invite code"}
+	}
+	return user, nil
 }
 
 // verify_google_token verifies the Google token and extracts the user email
@@ -106,7 +153,10 @@ func createLoginHandler(ulh *UserLoginHandler, meters *m.LoginMeters, metadata *
 			meters.LoginCounter.Add(ctx, 1)
 
 			authHeader := r.Header.Get("Authorization")
-			if authHeader == "" {
+			apiKey := r.Header.Get("ApiKey")
+			user := r.Header.Get("User")
+
+			if authHeader == "" && apiKey == "" {
 				slog.InfoContext(ctx, "No auth header")
 				http.Error(w, "Unauthorized", http.StatusUnauthorized)
 				return
@@ -119,8 +169,13 @@ func createLoginHandler(ulh *UserLoginHandler, meters *m.LoginMeters, metadata *
 				http.Error(w, err.Error(), http.StatusBadRequest)
 				return
 			}
+			if authHeader != "" {
+				user, err = ulh.HandleLogin(ctx, authHeader, loginBody.InviteCode)
+			}
+			if apiKey != "" {
+				user, err = ulh.HandleApiKeyLogin(ctx, apiKey, user)
+			}
 
-			user, err := ulh.HandleLogin(ctx, authHeader, loginBody.InviteCode)
 			if err != nil {
 				if _, ok := err.(*AuthorizationError); ok {
 					slog.InfoContext(ctx, "Unauthorized")
@@ -149,8 +204,15 @@ func createLoginHandler(ulh *UserLoginHandler, meters *m.LoginMeters, metadata *
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 			}
 			meters.LoginSuccessCounter.Add(ctx, 1)
-			setCookieHeader := fmt.Sprintf("movie-guru-sid=%s; HttpOnly; SameSite=Lax; Path=/; Domain=%s; Max-Age=86400", sessionID, metadata.ServerDomain)
-			w.Header().Set("Set-Cookie", setCookieHeader)
+			cookie := http.Cookie{
+				Name:     "movie-guru-sid",
+				Value:    sessionID,
+				Path:     "/",
+				MaxAge:   86400,
+				HttpOnly: true,
+				SameSite: http.SameSiteLaxMode,
+			}
+			http.SetCookie(w, &cookie)
 			w.Header().Set("Vary", "Cookie, Origin")
 			json.NewEncoder(w).Encode(map[string]string{"login": "success"})
 		}

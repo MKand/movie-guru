@@ -10,7 +10,7 @@ services:
         VITE_FIREBASE_STORAGE_BUCKET: ${FIREBASE_STORAGE_BUCKET}
         VITE_FIREBASE_MESSAGING_SENDERID: ${FIREBASE_MESSAGING_SENDERID}
         VITE_FIREBASE_APPID: ${FIREBASE_APPID}
-        VITE_CHAT_SERVER_URL: http://localhost:8081
+        VITE_CHAT_SERVER_URL: http://localhost:8084
     ports:
       - "4001:4000"
   cache:
@@ -18,7 +18,7 @@ services:
     restart: always
     ports:
       - 6379:6379
-    command: redis-server --save 20 1 --loglevel warning --requirepass my_redis_pwd
+    command: redis-server --save 20 1 --loglevel warning
   flows:
     build: ./js/flows
     ports:
@@ -31,17 +31,21 @@ services:
       - POSTGRES_DB_USER=minimal-user
       - TABLE_NAME=movies
       - POSTGRES_DB_NAME=fake-movies-db
-      - APP_VERSION=v1_local
       - GOOGLE_APPLICATION_CREDENTIALS=/key.json
-      - LOCATION=europe-west4
-      - LOCAL=true
+      - LOCATION=us-west1
+      - FIREBASE_API_KEY=$FIREBASE_API_KEY
+      - FIREBASE_STORAGE_BUCKET=$FIREBASE_STORAGE_BUCKET
+      - FIREBASE_MESSAGING_SENDERID=$FIREBASE_MESSAGING_SENDERID
+      - FIREBASE_APPID=$FIREBASE_APPID
+      - USEGEMINIFLASH2=false
     volumes:
-      - ./.key.json:/key.json  
+      - ./.key.json:/key.json:ro
   server:
     build: ./chat_server_go
     command: /app/webserver
+    restart: always
     ports:
-      - 8081:8080
+      - 8084:8080
     environment:
       - POSTGRES_HOST=db
       - PROJECT_ID=$PROJECT_ID
@@ -50,8 +54,7 @@ services:
       - POSTGRES_DB_NAME=fake-movies-db
       - TABLE_NAME=movies
       - APP_VERSION=v1_local
-      - LOCATION=europe-west4
-      - LOCAL=true
+      - LOCATION=$REGION
       - FLOWS_URL=http://flows:3400
       - REDIS_HOST=cache
       - REDIS_PORT=6379
@@ -60,18 +63,51 @@ services:
       - cache 
       - db
   db:
-    build: ./pgvector
+    image: pgvector/pgvector:pg17
     ports: 
       - "5432:5432"
     environment:
       POSTGRES_PASSWORD: main
       restart: always
+    volumes:
+      - ./pgvector/init_substituted.sql:/docker-entrypoint-initdb.d/init_substituted.sql:ro
   adminer:
     image: adminer
     restart: always
     ports:
-      - 8082:8080
+      - 8085:8080
+  mock:
+    build: ./js/mock-user
+    ports:
+      - "3402:3400"
+      - "4002:4000"
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/key.json
+      - LOCATION=us-west1
+      - PROJECT_ID=$PROJECT_ID
+      - FIREBASE_API_KEY=$FIREBASE_API_KEY
+      - FIREBASE_STORAGE_BUCKET=$FIREBASE_STORAGE_BUCKET
+      - FIREBASE_MESSAGING_SENDERID=$FIREBASE_MESSAGING_SENDERID
+      - FIREBASE_APPID=$FIREBASE_APPID
+    volumes:
+      - ./.key.json:/key.json
 
-
+  locust-master:
+    image: locustio/locust
+    ports:
+     - "8090:8089"
+    volumes:
+      - ./locust:/mnt/locust
+    command: -f /mnt/locust/locustfile.py --master -H http://server:8080
+    environment:
+      - MOCK_URL=http://mock:3400/mockUserFlow
+  locust-worker:
+    image: locustio/locust
+    volumes:
+      - ./locust:/mnt/locust
+    command: -f /mnt/locust/locustfile.py --worker --master-host locust-master
+    environment:
+      - MOCK_URL=http://mock:3400/mockUserFlow
+  
 
   

@@ -47,6 +47,13 @@ CREATE TABLE invite_codes (
     PRIMARY KEY ("code")
 );
 
+CREATE TABLE apiKeys (
+    "key" VARCHAR(255) NOT NULL,
+    valid boolean NOT NULL,
+    "user" VARCHAR(255) NOT NULL,
+    PRIMARY KEY ("key")
+);
+
 CREATE TABLE app_metadata (
     AppVersion VARCHAR(255) NOT NULL,
     TokenAudience VARCHAR(255) NOT NULL,
@@ -75,7 +82,7 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON user_logins TO "minimal-user";
 GRANT SELECT, INSERT, UPDATE, DELETE ON user_preferences TO "minimal-user";
 
 INSERT INTO "app_metadata" ("appversion", "tokenaudience", "historylength", "maxusermessagelen", "corsorigin", "retrieverlength", "googlechatmodelname", "googleembeddingmodelname", "serverdomain") VALUES
-('v1', '${PROJECT_ID}', 100, 500, '${SERVER_URL}', 10, '', '', '${SERVER_URL}/server');
+('v1', '${PROJECT_ID}', 100, 500, 'movie-guru.endpoints.${PROJECT_ID}.cloud.goog,locust.locust.svc.cluster.local', 10, '', '', 'https://movie-guru.endpoints.${PROJECT_ID}.cloud.goog/server');
 
 INSERT INTO "app_metadata" ("appversion", "tokenaudience", "historylength", "maxusermessagelen", "corsorigin", "retrieverlength", "googlechatmodelname", "googleembeddingmodelname", "serverdomain") VALUES
 ('v1_local', '${PROJECT_ID}', 100, 500, 'http://localhost:4001', 10, '', '', 'http://localhost:8081');

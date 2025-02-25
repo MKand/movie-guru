@@ -1,3 +1,17 @@
+// Copyright 2025 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package metrics
 
 import (
@@ -13,7 +27,9 @@ type ChatMeters struct {
 	CSentimentCounter   metric.Int64Counter
 	COutcomeCounter     metric.Int64Counter
 	CSafetyIssueCounter metric.Int64Counter
-	CLatencyHistogram   metric.Int64Histogram
+	CQuotaLimitCounter  metric.Int64Counter
+
+	CLatencyHistogram metric.Int64Histogram
 }
 
 func NewChatMeters() *ChatMeters {
@@ -41,6 +57,10 @@ func NewChatMeters() *ChatMeters {
 	if err != nil {
 		log.Printf("Error creating safety issue counter: %v", err)
 	}
+	cQuotaLimitCounter, err := meter.Int64Counter("movieguru_chat_quotaissue_counter", metric.WithDescription("Quota issue counter"))
+	if err != nil {
+		log.Printf("Error creating quota issue counter: %v", err)
+	}
 	cLatencyHistogram, err := meter.Int64Histogram("movieguru_chat_latency", metric.WithDescription("Histogram of chat request latency"))
 	if err != nil {
 		log.Printf("Error creating login latency histogram: %v", err)
@@ -52,5 +72,6 @@ func NewChatMeters() *ChatMeters {
 		CSafetyIssueCounter: cSafetyIssueCounter,
 		CSentimentCounter:   cSentimentCounter,
 		COutcomeCounter:     cOutcomeCounter,
+		CQuotaLimitCounter:  cQuotaLimitCounter,
 	}
 }

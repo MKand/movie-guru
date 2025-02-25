@@ -1,8 +1,24 @@
+// Copyright 2025 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package web
 
 import (
+	"context"
 	"encoding/json"
 	"log/slog"
+	"math"
 	"math/rand"
 	"net/http"
 
@@ -11,7 +27,7 @@ import (
 
 func randomisedFeaturedFilmsQuery() string {
 	queries := []string{
-		"great films", "cool films", "best films", "new films", "high rated films", "classic films",
+		"great films", "best films", "new films", "high rated films",
 	}
 	return queries[rand.Intn(len(queries))]
 
@@ -44,7 +60,7 @@ func createStartupHandler(deps *Dependencies) http.HandlerFunc {
 				return
 			}
 			agentResp := types.NewAgentResponse()
-			agentResp.Context = context[0:5]
+			agentResp.Context = truncateContext(ctx, context)
 			agentResp.Preferences = pref
 			agentResp.Result = types.SUCCESS
 
@@ -53,4 +69,12 @@ func createStartupHandler(deps *Dependencies) http.HandlerFunc {
 
 		}
 	}
+}
+
+func truncateContext(ctx context.Context, context []*types.MovieContext) []*types.MovieContext {
+	if len(context) == 0 {
+		slog.InfoContext(ctx, "0 context documents recieved at startup")
+		return context
+	}
+	return context[:int(math.Min(float64(len(context)), 5))]
 }

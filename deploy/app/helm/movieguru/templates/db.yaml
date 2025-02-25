@@ -4,7 +4,7 @@ metadata:
   name: db
   namespace: movieguru
 spec:
-  replicas: 1
+  replicas: {{ .Values.Db.replicas }}
   selector:
     matchLabels:
       app: db
@@ -13,14 +13,31 @@ spec:
       labels:
         app: db
     spec:
+      serviceAccountName: movieguru-sa
+      initContainers:
+      - name: download-sql
+        image: google/cloud-sdk:alpine
+        command:
+          - "sh"
+          - "-c"
+          - "gsutil cp gs://fb-webapp-{{ .Values.projectID}}/sql/init.sql /docker-entrypoint-initdb.d/init.sql"
+        volumeMounts:
+          - mountPath: /docker-entrypoint-initdb.d
+            name: sql-volume
       containers:
         - name: db
-          image: "{{ .Values.REGION }}-docker.pkg.dev/{{ .Values.PROJECT_ID }}/movie-guru/db:{{ .Values.IMAGE.TAG }}"
+          image: pgvector/pgvector:pg17
           ports:
             - containerPort: 5432
           env:
             - name: POSTGRES_PASSWORD
-              value: "mainpassword"
+              value: "main"
+          volumeMounts:
+            - mountPath: /docker-entrypoint-initdb.d/
+              name: sql-volume
+      volumes:
+        - name: sql-volume
+          emptyDir: {}
 ---
 apiVersion: v1
 kind: Service
@@ -72,6 +89,5 @@ spec:
       port: 8080
       targetPort: 8080
   type: ClusterIP
-
 
 

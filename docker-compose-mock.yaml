@@ -1,0 +1,23 @@
+
+services:
+  mock:
+    build: ./js/mock-user
+    ports:
+      - "3402:3400"
+      - "4002:4000"
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/key.json
+      - LOCATION=us-west1
+    volumes:
+      - ./.key.json:/key.json  
+  flows:
+    build: ./js/flows
+    ports:
+      - "3403:3400"
+      - "4003:4000"
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/key.json
+      - LOCATION=us-west1
+    volumes:
+      - ./.key.json:/key.json  
+  

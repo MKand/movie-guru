@@ -1,3 +1,17 @@
+# Copyright 2025 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -15,11 +29,17 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: "{{ .Values.REGION }}-docker.pkg.dev/{{ .Values.PROJECT_ID }}/movie-guru/frontend:{{ .Values.IMAGE.TAG }}"
+          image: "{{ .Values.region }}-docker.pkg.dev/{{ .Values.projectID }}/movie-guru/frontend:{{ .Values.Image.tag }}"
+          imagePullPolicy: Always
           ports:
             - containerPort: 4000
-
-
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "512Mi"
+            limits:
+              cpu: "750m"
+              memory: "2Gi"
 ---
 apiVersion: v1
 kind: Service
@@ -35,7 +55,26 @@ spec:
       targetPort: 4000
   type: ClusterIP
 ---
-
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: frontend
+  namespace: movieguru
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: frontend
+  minReplicas: 1
+  maxReplicas: 25
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 50
+---
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
@@ -50,12 +89,6 @@ spec:
         - path:
             type: PathPrefix
             value: "/"
-      # filters:
-      #   - type: URLRewrite
-      #     urlRewrite:
-      #       path:
-      #         type: ReplacePrefixMatch
-      #         replacePrefixMatch: "/"
       backendRefs:
         - name: frontend
           port: 4000

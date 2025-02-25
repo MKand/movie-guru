@@ -15,13 +15,18 @@
   - [Step 1: Set Environment Variables](#step-1-set-environment-variables)
   - [Step 2: Deploy Infrastructure](#step-2-deploy-infrastructure)
   - [Step 3: Get Firebase Web app Configuration](#step-3-get-firebase-web-app-configuration)
-  - [Step 4: Retrieve External IP Address](#step-4-retrieve-external-ip-address)
-  - [Step 5: Update Environment Variables](#step-5-update-environment-variables)
-  - [Step 6: Build and Push Containers](#step-6-build-and-push-containers)
+  - [Step 4: Update Environment Variables](#step-4-update-environment-variables)
+  - [Step 5: Build and Push Containers](#step-5-build-and-push-containers)
+  - [Step 6: Run the Cloud Run Job](#step-6-run-the-cloud-run-job)
   - [Step 7: Connect to GKE Cluster](#step-7-connect-to-gke-cluster)
   - [Step 8: Deploy Application Using Helm](#step-8-deploy-application-using-helm)
+  - [Step 9: Register Workloads and Services with App Hub](#step-9-register-workloads-and-services-with-app-hub)
   - [Final Step: Verify Deployment](#final-step-verify-deployment)
-  - [\[OPTIONAL\] Steps to run app locally for testing](#optional-steps-to-run-app-locally-for-testing)
+  - [Appendix](#appendix)
+    - [Original repo](#original-repo)
+    - [Indexer](#indexer)
+    - [Support](#support)
+  - [License](#license)
 
 ## Movie Guru
 
@@ -29,17 +34,10 @@
 
 [![Movie Guru](https://img.youtube.com/vi/l_KhN3RJ8qA/0.jpg)](https://youtu.be/l_KhN3RJ8qA)
 
- This version is a *minimal version* of the frontend and backend that doesn't have complex login logic like the version in **main**. It is meant to be run fully locally while using VertexAI APIs.
-
 ## Description
 
 Movie Guru is a website that helps users find movies to watch through an RAG powered chatbot. The movies are all fictional and are generated using GenAI.
 The goal of this repo is to explore the best practices when building AI powered applications.
-
-This demo is *NOT* endorsed by Google or Google Cloud.  
-The repo is intended for educational/hobbyists use only.
-
-Refer to the readme in the **main** branch for more information.
 
 ## Overall Architecture
 
@@ -58,8 +56,8 @@ Refer to the readme in the **main** branch for more information.
 - **Frontend:** Vue.js application.
 - **Web Backend:** Go-based API server.
 - **Flows Backend:** Node.js-based AI task orchestrator.
-- **Cache:** Redis for caching chat history and sessions.
-- **Database:** Postgres with `pgvector`.
+- **Cache:** Cloud Memorystore for Redis for caching chat history and sessions.
+- **Database:** Cloud SQL with `pgvector` extension.
 
 ## Flows
 
@@ -88,11 +86,11 @@ There are multiple tables:
 
 Ensure you have the following installed and configured before proceeding:
 
-- **Google Cloud SDK**: https://cloud.google.com/sdk/docs/install
-- **Helm**: https://helm.sh/docs/intro/install/
-- **Firebase Account**: Access to Firebase Console https://console.firebase.google.com/
+- **Google Cloud SDK**: <https://cloud.google.com/sdk/docs/install>
+- **Helm**: <https://helm.sh/docs/intro/install/>
+- **Firebase Account**: Access to Firebase Console <https://console.firebase.google.com/>
 - **GCP Account** with necessary permissions to create and manage GKE, Cloud Build, and IAM resources.
-- [Optional for debugging] **kubectl**: https://kubernetes.io/docs/tasks/tools/install-kubectl/
+- [Optional for debugging] **kubectl**: <https://kubernetes.io/docs/tasks/tools/install-kubectl/>
 
 ## Step 1: Set Environment Variables
 
@@ -109,7 +107,7 @@ export REGION=<your-desired-gcp-region>
 Run the following script to deploy the infrastructure using Cloud Build:
 
 ```bash
-./deploy/deploy.sh --region $REGION
+./deploy/infra.sh --region $REGION
 ```
 
 This will trigger a pipeline that creates the required infrastructure on GCP. The process will take approximately **10-15 minutes** to complete.
@@ -118,92 +116,109 @@ This will trigger a pipeline that creates the required infrastructure on GCP. Th
 
 ## Step 3: Get Firebase Web app Configuration
 
-Once the infrastructure setup is complete, go to the **Firebase Console**:
+Once the infrastructure setup is complete,
+
+1. Perform the steps [here](./firebase-setup/README.md)
+2. Go to the **Firebase Console**:
 
 - A new project with the **Display Name: "Movie Guru App"** should be created.
+- Navigate to the **Authentication** section and **enable Google Auth** for the web app.
 
 Next, **copy the Firebase configuration parameters** (e.g., API key, auth domain, etc.) from the Firebase web app settings. You will need these values in the next step.
 
-## Step 4: Retrieve External IP Address
+## Step 4: Update Environment Variables
 
-Go to the **GCP Console** and search for **"IP addresses"**:
+Create a file **`set_env_vars.sh`** and **replace the placeholder values** with the Firebase parameters and the external IP address obtained in the previous steps.
 
-- Look for an IP address labeled **"movie-guru-external-ip"**.
-- Copy this IP address for use in the environment variables setup.
-
-## Step 5: Update Environment Variables
-
-Open the file **`set_env_vars.sh`** and **replace the placeholder values** with the Firebase parameters and the external IP address obtained in the previous steps.
+```bash
+export REGION="us-central1"
+export PROJECT_ID="change"
+export FIREBASE_API_KEY=""
+export FIREBASE_AUTH_DOMAIN=""
+export FIREBASE_GCP_ID=""
+export FIREBASE_STORAGE_BUCKET=""
+export FIREBASE_MESSAGING_SENDERID=""
+export FIREBASE_APPID=""
+export GATEWAY_ADDRESS="movie-guru.endpoints.${PROJECT_ID}$.cloud.goog"
+export SERVER_URL="https://${GATEWAY_ADDRESS}"
+```
 
 After updating the file, run the script to apply the environment variables:
 
 ```bash
-./set_env_vars.sh
+source set_env_vars.sh
 ```
 
-## Step 6: Build and Push Containers
+## Step 5: Build and Push Containers
 
 Run the following script to build and push the application containers using Cloud Build:
 
 ```bash
-./deploy/ci.sh --region $REGION
+source ./deploy/ci.sh --region $REGION
 ```
 
 This should take around 10 minutes
+
+## Step 6: Run the Cloud Run Job
+
+```bash
+gcloud run job execute movie-guru-db-init --region $REGION --project $PROJECT_ID
+```
 
 ## Step 7: Connect to GKE Cluster
 
 Go to the **GKE page** in the **GCP Console** and find the connection string for your cluster.
 
-- Copy the connection string.
-- Run the command in your terminal to connect to the cluster.
+```bash
+gcloud container clusters get-credentials movie-guru-cluster --region ${REGION} --project ${PROJECT_ID}
+```
 
 ## Step 8: Deploy Application Using Helm
 
 Deploy the application to GKE using Helm:
 
+Update the [helm](./deploy/app/helm/movieguru/values.yaml) file with values obtained in the previous step. Ensure the (helm)(./deploy/app.sh#L90) file has the right file
+
 ```bash
-helm upgrade --install movieguru \
-./deploy/app/helm/movieguru \
---namespace movieguru \
---create-namespace \
---set PROJECT_ID=${PROJECT_ID} \
---set IMAGE.TAG=latest \
---set REGION=${REGION}
+./deploy/app.sh --region $REGION
+```
+
+## Step 9: Register Workloads and Services with App Hub
+
+```bash
+./deploy/register.sh --region $REGION
 ```
 
 ## Final Step: Verify Deployment
 
 Once the Helm deployment is complete, verify that the application is running correctly on your GKE cluster.
-You can go to http://$GATEWAY_IP to interact with the app
-Make sure you use the invite code **0000** the first time you log into the app with your Google credentials. If you plan to leave the app running on the cloud for longer, make sure you change this value in the **invite_codes** table in the database. You can port forward Adminer to localhost and use the credentials **username: main, password: main** to login the database through Adminer.
+You can go to `https://movie-guru.endpoints.${PROJECT_ID}.cloud.goog` to interact with the app
 
-## [OPTIONAL] Steps to run app locally for testing
+___
 
-- Make sure you've run **/deploy/deploy.sh** (to enable apis and create service accounts) and **/deploy/ci.sh** (to upload posters).
-- Make sure you have substituted the environment variables in **set_env_vars.sh**
+## Appendix
 
-- Create the **pgvector/init_substituted.sql** file.
+### Original repo
 
-  ```bash
-  ./set_env_vars.sh
-  envsubst < pgvector/init.sql > pgvector/init_substituted.sql
-  ```
+This repo is a fork the original [repo](https://github.com/MKand/movie-guru)
 
-- Download the service account key for movie-guru-chat-server-sa and store it as **.key.json** at the project root.
+### Indexer
 
-- Run the docker compose file
+The index loads data in the database through a cloud run job. The dataset CSV must be modified and embedded. To embed the file, run the following steps:
 
-  ```bash
-  docker compose up --build 
-  ```
+1. Update the CSV file as needed
+2. Run the command `cd indexer && go-bindata  -o pkg/dataset/dataset.go ../dataset`
+3. Fix the package name in  `pkg/dataset/dataset.go`
+4. Re-run `./deploy/ci.sh --region $REGION`
+5. Re-run `./deploy/deploy.sh --region $REGION` to deploy the cloud run job (if not already done)
 
-**Note**: If the server exits prematurely, it is because it is waiting for the db table to be populated with the necessary data. There is a race condition. Kill the container and re-run **docker compose up**
+**NOTE**: Get `go-bindata` by running the command `go install -a -v github.com/go-bindata/go-bindata/...@latest`
 
-- The frontend is running at http://localhost:4001
+### Support
 
-- After teardown, run this to delete the temporary sql file
+This demo is *NOT* endorsed by Google or Google Cloud.  
+The repo is intended for educational/hobbyists use only.
 
-  ```bash
-  rm pgvector/init_substituted.sql
-  ```
+## License
+
+The AI generated movie data and posters in the repo are licensed under the Creative Commons Attribution 4.0 International License. To view a copy of this license, visit <http://creativecommons.org/licenses/by/4.0/>

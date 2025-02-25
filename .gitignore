@@ -1,9 +1,11 @@
 .* 
 !.gitignore
 !.dockerignore
+!.github
 /var
 key.json
 
+posters/
 tfplan
 __pycache__
 
@@ -19,7 +21,13 @@ pgdata
 *.tfstate
 *.tfstate.*
 
+set_env_vars.sh
+
+# # substituted db init.sql file
+# init_substituted.sql
 # # substituted db init.sql file
 # init_substituted.sql
 
 posters_small/
+
+*set_env_vars.sh

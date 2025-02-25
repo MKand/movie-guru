@@ -1,10 +1,24 @@
+# Copyright 2025 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: server
   namespace: movieguru
 spec:
-  replicas: 1
+  replicas: {{ .Values.Server.replicas }}
   selector:
     matchLabels:
       app: server
@@ -16,16 +30,22 @@ spec:
       serviceAccountName: movieguru-sa
       containers:
         - name: server
-          image: "{{ .Values.REGION }}-docker.pkg.dev/{{ .Values.PROJECT_ID }}/movie-guru/chatserver:{{ .Values.IMAGE.TAG }}"
-          command:
-            - /app/webserver
+          image: "{{ .Values.region }}-docker.pkg.dev/{{ .Values.projectID }}/movie-guru/chatserver:{{ .Values.Image.tag }}"
+          imagePullPolicy: Always
           ports:
             - containerPort: 8080
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "512Mi"
+            limits:
+              cpu: "750m"
+              memory: "2Gi"          
           env:
             - name: POSTGRES_HOST
-              value: "db.movieguru.svc.cluster.local"
+              value: {{ .Values.Hosts.postgres }}
             - name: PROJECT_ID
-              value: {{ .Values.PROJECT_ID }}
+              value: {{ .Values.projectID }}
             - name: POSTGRES_DB_USER_PASSWORD
               value: "minimal"
             - name: POSTGRES_DB_USER
@@ -35,19 +55,23 @@ spec:
             - name: POSTGRES_DB_NAME
               value: "fake-movies-db"
             - name: APP_VERSION
-              value: "v1"
+              value: {{ .Values.Server.version }}
             - name: LOCATION
-              value: "{{ .Values.REGION }}"
+              value: "{{ .Values.region }}"
             - name: FLOWS_URL
               value: "http://flows.movieguru.svc.cluster.local:3400"
             - name: REDIS_HOST
-              value: "cache.movieguru.svc.cluster.local"
+              value: {{ .Values.Hosts.redis }}
             - name: REDIS_PORT
               value: "6379"
-            - name: REDIS_PASSWORD
-              value: "my_redis_pwd"
+            - name: REDIS_MODE
+              value: {{ .Values.Hosts.redisMode }}
             - name: ENABLE_METRICS
-              value: "false"
+              value: "{{ .Values.Server.enableMetrics }}"
+            - name: OTEL_EXPORTER_OTLP_INSECURE
+              value: "true"
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: http://otel-collector.otel-collector.svc.cluster.local:4318
 
 ---
 apiVersion: v1
@@ -63,7 +87,26 @@ spec:
       port: 8080
       targetPort: 8080
   type: ClusterIP
-
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: server
+  namespace: movieguru
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: server
+  minReplicas: 1
+  maxReplicas: 25
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 50
 ---
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute

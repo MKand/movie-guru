@@ -1,3 +1,17 @@
+// Copyright 2025 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package web
 
 import (
@@ -9,6 +23,7 @@ import (
 
 	"github.com/movie-guru/pkg/db"
 	metrics "github.com/movie-guru/pkg/metrics"
+	"golang.org/x/exp/slog"
 )
 
 func enableCORS(allowedOrigins []string, next http.Handler) http.Handler {
@@ -30,7 +45,7 @@ func enableCORS(allowedOrigins []string, next http.Handler) http.Handler {
 
 		// Set other CORS headers
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, ApiKey, User")
 		w.Header().Set("Access-Control-Allow-Credentials", "true")
 		// Handle preflight requests
 		if r.Method == http.MethodOptions {
@@ -49,6 +64,8 @@ func StartServer(ctx context.Context, ulh *UserLoginHandler, metadata *db.Metada
 	corsOrigins := strings.Split(metadata.CorsOrigin, ",")
 	for i := range corsOrigins {
 		corsOrigins[i] = strings.TrimSpace(corsOrigins[i])
+		slog.InfoContext(ctx, "Setting cors origin", slog.Any("origin", corsOrigins[i]))
+
 	}
 
 	loginMeters := metrics.NewLoginMeters()
