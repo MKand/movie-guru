@@ -13,11 +13,11 @@
   - [Getting Started](#getting-started)
     - [Prerequisites](#prerequisites)
     - [Environment setup](#environment-setup)
+    - [Firebase setup](#firebase-setup)
     - [Database Setup](#database-setup)
       - [Run the database service](#run-the-database-service)
       - [Populate the database (Optional)](#populate-the-database-optional)
     - [Run the Application](#run-the-application)
-    - [Create a Firebase project to view AI monitoring (Optional)](#create-a-firebase-project-to-view-ai-monitoring-optional)
     - [Clean up](#clean-up)
 
 ## About Movie Guru
@@ -74,7 +74,7 @@ Refer to the readme in the **main** branch for more information.
 
 #### Postgres
 
-There are 2 tables:
+There are 2 important tables:
 
 - *movies*: This contains the information about the AI Generated movies and their embeddings. The data for the table is found in dataset/movies_with_posters.csv. If you choose to host your own posters, replace the links in this file.
 - *user_preferences*: This contains the user's long term preferences profile information.
@@ -122,6 +122,11 @@ There are 2 tables:
 
 This enables the required APIs and creates the necessary service account with roles.
 
+### Firebase setup
+
+1. Go to the firebase console. Follow the steps [here](https://firebase.google.com/docs/projects/use-firebase-with-existing-cloud-project#how-to-add-firebase_console).
+1. Create a new firebase web app and copy the firebase config variables into **set_env_vars.sh**.
+
 ### Database Setup
 
 #### Run the database service
@@ -132,7 +137,7 @@ This enables the required APIs and creates the necessary service account with ro
     docker network create db-shared-network
     ```
 
-2. Setup local DB
+1. Setup local DB
 We'll setup a local *pgvector* db and an *Adminer* instance
 
     ```sh
@@ -156,7 +161,7 @@ Skipping ahead will save you approx. 20 minutes of the setup time.
     export LOCATION=<YOUR_DESIRED_GCLOUD_REGION> # defaults to us-central1 if this is not set
     ```
 
-2. Run the javascript indexer so it can add movies data into the database. The database comes pre-populated with the required data, but you can choose to re-add the data. The execution of this intentionally slowed down to stay below the rate-limits.
+1. Run the javascript indexer so it can add movies data into the database. The database comes pre-populated with the required data, but you can choose to re-add the data. The execution of this intentionally slowed down to stay below the rate-limits.
 
     ```sh
     docker compose -f docker-compose-indexer.yaml up --build -d 
@@ -164,13 +169,13 @@ Skipping ahead will save you approx. 20 minutes of the setup time.
 
     This takes about 10-15 minutes to run, so be patient. The embedding creation process is slowed down intentionally to ensure we stay under the rate limit.
 
-3. Shut down the indexer container.
+1. Shut down the indexer container.
 
     ```sh
     docker compose -f docker-compose-indexer.yaml down
     ```
 
-4. Verify the number of entries in the DB.
+1. Verify the number of entries in the DB.
 There should be **652** entries in the movies table.
 
     ```sql
@@ -197,12 +202,6 @@ Once all the required data is added, it is time to run the application that cons
     ```
 
 1. Access the Application Open http://localhost:5173 in your browser.
-
-### Create a Firebase project to view AI monitoring (Optional)
-
-To view the traces of the application Genkit flows, you will need to add firebase to the Project.
-Follow the steps [here](https://firebase.google.com/docs/projects/use-firebase-with-existing-cloud-project#how-to-add-firebase_console) and use the value of the PROJECT_ID of the Google Cloud project.
-Once created, you can navigate to the Genkit section of the firebase console to view the traces of your AI flows in the application.
 
 ### Clean up
 

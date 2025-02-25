@@ -4,10 +4,10 @@ services:
     ports: 
       - "5432:5432"
     environment:
-      POSTGRES_PASSWORD: mainpassword
+      POSTGRES_PASSWORD: main
       restart: always
     volumes:
-      - ./pgvector/init/:/docker-entrypoint-initdb.d/
+      - ./pgvector/init_substituted.sql:/docker-entrypoint-initdb.d/init_substituted.sql:ro
     networks:
       - db-shared-network
   adminer:
