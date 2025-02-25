@@ -211,4 +211,5 @@ Run the following commands:
   docker compose down
   docker compose -f docker-compose-pgvector.yaml down
   docker network rm db-shared-network
+  rm pgvector/init_substituted.sql
 ```
