@@ -1,8 +1,9 @@
-export POSTGRES_DB_USER_PASSWORD="minimalpassword"
-export POSTGRES_DB_MAIN_USER_PASSWORD="mainpassword"
-export POSTGRES_HOST="db"
-export POSTGRES_DB_USER="minimal-user"
-export TABLE_NAME="movies"
-export POSTGRES_DB_NAME="fake-movies-db"
-export LOCAL="true"
+export PROJECT_ID=<the project id> # Change add add project id
+export REGION="us-west2" # Change region as required
+export FIREBASE_API_KEY="some value"
+export FIREBASE_AUTH_DOMAIN="some value"
+export FIREBASE_GCP_ID="some value"
+export FIREBASE_STORAGE_BUCKET="some value"
+export FIREBASE_MESSAGING_SENDERID="some value"
+export FIREBASE_APPID="some value"
 
