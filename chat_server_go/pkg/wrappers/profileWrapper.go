@@ -1,3 +1,17 @@
+// Copyright 2025 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package wrappers
 
 import (
@@ -5,6 +19,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
+	"log/slog"
 	"net/http"
 
 	db "github.com/movie-guru/pkg/db"
@@ -24,8 +40,7 @@ func CreateUserProfileFlowClient(db *db.MovieDB, URL string) (*UserProfileFlowCl
 	}, nil
 }
 
-func (flowClient *UserProfileFlowClient) Run(ctx context.Context, history *types.ChatHistory, user string) (*types.UserProfileOutput, error) {
-	userProfile, err := flowClient.MovieDB.GetCurrentProfile(ctx, user)
+func (flowClient *UserProfileFlowClient) Run(ctx context.Context, history *types.ChatHistory, user string, userProfile *types.UserProfile) (*types.UserProfileOutput, error) {
 	userProfileOutput := &types.UserProfileOutput{
 		UserProfile: userProfile,
 		ModelOutputMetadata: &types.ModelOutputMetadata{
@@ -33,9 +48,7 @@ func (flowClient *UserProfileFlowClient) Run(ctx context.Context, history *types
 			Justification: "",
 		},
 	}
-	if err != nil {
-		return nil, err
-	}
+
 	agentMessage := ""
 	if len(history.History) > 1 {
 		agentMessage = history.History[len(history.History)-2].Content[0].Text
@@ -48,10 +61,11 @@ func (flowClient *UserProfileFlowClient) Run(ctx context.Context, history *types
 	userProfileFlowInput := types.UserProfileFlowInput{Query: lastUserMessage, AgentMessage: agentMessage}
 	resp, err := flowClient.runFlow(&userProfileFlowInput)
 	if err != nil {
-		return userProfileOutput, err
+		return nil, err
 	}
 	userProfileOutput.ModelOutputMetadata.Justification = resp.ModelOutputMetadata.Justification
 	userProfileOutput.ModelOutputMetadata.SafetyIssue = resp.ModelOutputMetadata.SafetyIssue
+	userProfileOutput.ModelOutputMetadata.QuotaIssue = resp.ModelOutputMetadata.QuotaIssue
 
 	if len(resp.ProfileChangeRecommendations) > 0 {
 		updatedProfile, err := utils.ProcessProfileChanges(userProfile, resp.ProfileChangeRecommendations)
@@ -60,6 +74,7 @@ func (flowClient *UserProfileFlowClient) Run(ctx context.Context, history *types
 		}
 		err = flowClient.MovieDB.UpdateProfile(ctx, updatedProfile, user)
 		if err != nil {
+			slog.ErrorContext(ctx, "DB Update error", err.Error(), err)
 			return userProfileOutput, err
 		}
 		userProfileOutput.UserProfile = updatedProfile
@@ -80,28 +95,44 @@ func (flowClient *UserProfileFlowClient) runFlow(input *types.UserProfileFlowInp
 
 	req, err := http.NewRequest("POST", flowClient.URL, bytes.NewBuffer(inputJSON))
 	if err != nil {
-		fmt.Println("Error creating request:", err)
+		slog.Log(context.Background(), slog.LevelError, "Error creating request", "error", err)
 		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
+	ctx := context.Background()
+
 	if err != nil {
-		fmt.Println("Error sending request:", err)
+		slog.ErrorContext(ctx, "QualityFlow: Error sending request to Flows", err.Error(), err)
 		return nil, err
 	}
-
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		slog.ErrorContext(ctx, "QualityFlow: Genkit returned an Error", "errorCode", resp.StatusCode)
+		return nil, fmt.Errorf("genkit server returned error: %s (%d)", http.StatusText(resp.StatusCode), resp.StatusCode)
+	}
 	var result struct {
 		Result *types.UserProfileFlowOutput `json:"result"`
 	}
 	defer resp.Body.Close()
 
-	err = json.NewDecoder(resp.Body).Decode(&result)
+	b, _ := io.ReadAll(resp.Body)
+
+	err = json.Unmarshal(b, &result)
 	if err != nil {
-		fmt.Println("Error decoding JSON response:", err)
+		slog.Log(context.Background(), slog.LevelError, "Error unmarshaling JSON response", "error", err)
 		return nil, err
 	}
+
+	/*b = bytes.TrimSpace(b)
+	resp.Body = ioutil.NopCloser(bytes.NewReader(b))
+
+	err = json.NewDecoder(resp.Body).Decode(&result)
+	if err != nil {
+		slog.Log(context.Background(), slog.LevelError, "Error decoding JSON response", "error", err)
+		return nil, err
+	}*/
 
 	return result.Result, nil
 }

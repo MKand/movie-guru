@@ -4,7 +4,7 @@ services:
     restart: always
     ports:
       - 6379:6379
-    command: redis-server --save 20 1 --loglevel warning --requirepass my_redis_pwd
+    command: redis-server --save 20 1 --loglevel warning 
     networks:
       - db-shared-network
   flows:
@@ -15,7 +15,7 @@ services:
     environment:
       - POSTGRES_HOST=db
       - PROJECT_ID=$PROJECT_ID
-      - POSTGRES_DB_USER_PASSWORD=minimalpassword
+      - POSTGRES_DB_USER_PASSWORD=minimal
       - POSTGRES_DB_USER=minimal-user
       - TABLE_NAME=movies
       - POSTGRES_DB_NAME=fake-movies-db
@@ -29,17 +29,19 @@ services:
       - db-shared-network    
   server:
     build: ./chat_server_go
+    restart: always
     command: /app/webserver
     ports:
       - 8081:8080
     environment:
       - POSTGRES_HOST=db
       - PROJECT_ID=$PROJECT_ID
-      - POSTGRES_DB_USER_PASSWORD=minimalpassword
+      - POSTGRES_DB_USER_PASSWORD=minimal
       - POSTGRES_DB_USER=minimal-user
       - POSTGRES_DB_NAME=fake-movies-db
       - TABLE_NAME=movies
-      - APP_VERSION=v1
+      - APP_VERSION=v1_local
+      - USE_AUTH=false
       - LOCATION=europe-west4
       - LOCAL=true
       - FLOWS_URL=http://flows:3400
@@ -57,11 +59,18 @@ services:
       - movie-guru
       - db-shared-network
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      args:
+        VITE_FIREBASE_API_KEY: ${FIREBASE_API_KEY}
+        VITE_FIREBASE_AUTH_DOMAIN: ${FIREBASE_AUTH_DOMAIN}
+        VITE_GCP_PROJECT_ID: ${PROJECT_ID}
+        VITE_FIREBASE_STORAGE_BUCKET: ${FIREBASE_STORAGE_BUCKET}
+        VITE_FIREBASE_MESSAGING_SENDERID: ${FIREBASE_MESSAGING_SENDERID}
+        VITE_FIREBASE_APPID: ${FIREBASE_APPID}
+        VITE_CHAT_SERVER_URL: http://localhost:8081
     ports:
-      -  5173:5173
-    environment:
-      - VITE_CHAT_SERVER_URL=http://localhost:8081
+      - "4001:4000"
     networks:
       - movie-guru
   otelcol:
@@ -77,7 +86,24 @@ services:
       - GOOGLE_APPLICATION_CREDENTIALS=/key.json
     networks:
       - movie-guru
-
+  db:
+    image: pgvector/pgvector:pg17
+    ports: 
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: main
+      restart: always
+    volumes:
+      - ./pgvector/init_substituted.sql:/docker-entrypoint-initdb.d/init_substituted.sql:ro
+    networks:
+      - db-shared-network
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8082:8080
+    networks:
+      - db-shared-network
 networks:
   db-shared-network:
     external: true

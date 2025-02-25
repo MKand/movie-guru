@@ -1,68 +1,81 @@
-import { gemini15Flash } from '@genkit-ai/vertexai';
+/**
+ * Copyright 2025 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import {
   USERINTENT,
-  QueryTransformFlowInputSchema,
   QueryTransformFlowOutputSchema,
+  QueryTransformFlowOutput
 } from './queryTransformTypes';
+import { ChatFlowInputSchema } from './chatFlowTypes';
 import { QueryTransformPromptText } from './prompts';
-import { ai } from './genkitConfig';
+import { ai, safetySettings } from './genkitConfig';
+import { GenerationBlockedError } from 'genkit';
 
 export const QueryTransformPrompt = ai.definePrompt(
   {
     name: 'queryTransformFlowPrompt',
-    model: gemini15Flash,
     input: {
-      schema: QueryTransformFlowInputSchema,
+      schema: ChatFlowInputSchema,
     },
     output: {
+      schema: QueryTransformFlowOutputSchema,
       format: 'json',
     },
+    config:{
+      safetySettings: safetySettings
+      }
   },
+  
   QueryTransformPromptText
 );
 
 export const QueryTransformFlow = ai.defineFlow(
   {
     name: 'queryTransformFlow',
-    inputSchema: QueryTransformFlowInputSchema,
+    inputSchema: ChatFlowInputSchema,
     outputSchema: QueryTransformFlowOutputSchema,
   },
   async (input) => {
+    const defaultOutput = QueryTransformFlowOutputSchema.parse({})
     try {
       const response = await QueryTransformPrompt({
         history: input.history,
         userMessage: input.userMessage,
-        userProfile: input.userProfile,
+        userPreferences: input.userPreferences,
       });
-
-      if (typeof response.text !== 'string') {
-        throw new Error('Invalid response format: text property is not a string.');
-      }
-
-      const jsonResponse = JSON.parse(response.text)
-      return {
-        transformedQuery: jsonResponse.transformedQuery || "",
-        userIntent: jsonResponse.userIntent || 'UNCLEAR',
-        modelOutputMetadata: {
-          justification: jsonResponse.justification || "",
-          safetyIssue: jsonResponse.safetyIssue || false,
-        },
-      };
+      const safeOutput = response.output?? defaultOutput;
+      const output = QueryTransformFlowOutputSchema.parse(safeOutput)
+      return output;
     } catch (error) {
-      console.error('Error generating response:', {
-        error,
-        input,
-      });
-
-      // Return fallback response
-      return {
-        transformedQuery: '',
-        userIntent: 'UNCLEAR',
-        modelOutputMetadata: {
-          justification: '',
-          safetyIssue: false,
-        },
-      };
+      if (error instanceof GenerationBlockedError){
+        
+        console.error("QTFlow: GenerationBlockedError generating response:", error.message);
+        defaultOutput.modelOutputMetadata.safetyIssue = true;
+        return defaultOutput;
+      }
+      else if(error instanceof Error && (error.message.includes('429') || error.message.includes('RESOURCE_EXHAUSTED'))){
+        console.error("QTFlow: There is a quota issue:", error.message);
+        defaultOutput.modelOutputMetadata.quotaIssue = true;
+        return defaultOutput;
+        }
+        else {
+        console.error("QTFlow: Error generating response:", error);
+        throw error;
+      }
+      
     }
   }
 );

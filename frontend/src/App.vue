@@ -10,16 +10,18 @@
 
 <script>
 import Header from './components/Header.vue';
-import MoviePosters from './components/MoviePosters.vue';
+import RequestedMovies from './components/RequestedMovies.vue';
+import FeaturedMovies from './components/FeaturedMovies.vue';
 import ChatWindow from './components/ChatWindow.vue';
 import Footer from './components/Footer.vue';
 
 export default {
   components: {
     Header,
-    MoviePosters,
+    RequestedMovies,
     ChatWindow,
     Footer,
+    FeaturedMovies,
   },
 };
 </script>

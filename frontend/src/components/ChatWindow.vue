@@ -48,7 +48,7 @@
             >
             <img src="../assets/movie-guru.png" class="w-12 h-12 pb-2 object-contain" />
 
-            <div id="error_message" class="text-base font-bold "> Oops! Something went wrong. Try again.</div>
+            <div id="error_message" class="text-base font-bold "> {{this.errorMessage }}</div>
           </div>
       </div>
       <div class="mt-4 mx-2">
@@ -68,14 +68,14 @@
   import store  from '../stores';
   import ChatClientService from '../services/ChatClientService';
   import { marked } from 'marked';
-  import { ref } from 'vue';
 
   export default {
     data(){
       return {
         store: store,
-        processingRequest: ref(false),
-        errorOccured: ref(false),
+        processingRequest: ChatClientService.processingRequest,
+        errorOccured: ChatClientService.errorOccured,
+        errorMessage: ChatClientService.errorMessage,
         newMessage: "",
       }
     },
@@ -111,42 +111,17 @@
         }, 1);
     },
       addUserMessage(){
-        this.errorOccured = false;
         let message = document.querySelector('input[type="text"]').value;
-        store.commit('chat/add', {"message":message, "sender":"user"})
         this.newMessage = "";
-        this.processingRequest = true;
         this.scrollToBottom();
-        ChatClientService.send(message).then((response) => {
-          let result = response["result"]
-          if(result == "SUCCESS"){
-            let answer = response["answer"]
-            let context = response["context"]
-            if(response["preferences"]){
-            store.commit('preferences/update', response["preferences"])
-          }
-            store.commit('chat/add',{"message":answer, "sender":"agent", "result":result});
-            store.commit('chat/addMovies', context)
-          }
-          else if (result == "ERROR"){
-            this.errorOccured = true;
-          }
-          else if (result == "UNSAFE"){
-            store.commit('chat/add',{"message":"That was a naughty query. I cannot answer that question.", "sender":"agent", "result":result});
-
-          }
-          this.processingRequest = false;
-          this.scrollToBottom();
-
-         
+        ChatClientService.send(message).then(() => {
+            this.scrollToBottom();
         }).catch((error) => {
             console.log("Error sending chat message:", error);
-            this.processingRequest = false;
-            this.errorOccured = true;
           });
       },
+
       clearHistory(){
-        this.errorOccured = false;
         ChatClientService.clearHistory().then(() => {
           store.commit('chat/clear')
         }

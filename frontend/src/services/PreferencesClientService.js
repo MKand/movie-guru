@@ -5,7 +5,7 @@ class PreferencesClientService {
   async get(){
     const requestOptions = {
         method: 'GET',
-        headers: { 'Content-Type': 'application/json', 'user': store.getters["user/email"]},
+        headers: { 'Content-Type': 'application/json'},
         credentials: 'include'
     };
     const response = await fetchPolyfill(import.meta.env.VITE_CHAT_SERVER_URL + '/preferences', requestOptions)
@@ -23,7 +23,7 @@ class PreferencesClientService {
     async update(){
       const requestOptions = {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'user': store.getters["user/email"]},
+          headers: { 'Content-Type': 'application/json'},
           body: JSON.stringify({ content: store.getters['preferences/preferences'] }),
           credentials: 'include'
       };

@@ -1,13 +1,28 @@
+/**
+ * Copyright 2025 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import { Document } from '@genkit-ai/ai/retriever';
 import { textEmbedding004 } from '@genkit-ai/vertexai';
 import { toSql } from 'pgvector';
 import { openDB } from './db';
-import { ai } from './genkitConfig'
+import { ai, safetySettings } from './genkitConfig'
 import { z } from 'genkit';
 import { MovieContextSchema, MovieContext } from './movieFlowTypes';
-import { gemini15Flash } from '@genkit-ai/vertexai';
 import { DocSearchFlowPromptText } from './prompts';
-import { ModelOutputMetadata, ModelOutputMetadataSchema } from './modelOutputMetadataTypes';
+import {  ModelOutputMetadataSchema } from './modelOutputMetadataTypes';
 
 const SearchTypeCategory = z.enum(['KEYWORD', 'VECTOR', 'MIXED', 'NONE']);
 
@@ -24,17 +39,16 @@ export const QuerySchema = z.object({
   query: z.string(),
 });
 
-export const SearchFlowOutputSchema = z.object({
-  keywordQuery: z.string().optional(),
-  vectorQuery: z.string().optional(),
-  searchCategory: SearchTypeCategory,
-  modelOutputMetadata: ModelOutputMetadataSchema,
+export const SearchFlowOutputSchema = z.strictObject({
+  keywordQuery: z.string().optional().default(""),
+  vectorQuery: z.string().optional().default(""),
+  searchCategory: SearchTypeCategory.default("NONE"),
+  modelOutputMetadata: ModelOutputMetadataSchema.default(ModelOutputMetadataSchema.parse({})),
 });
 
 export const SearchFlowPrompt = ai.definePrompt(
   {
     name: 'MixedSearchFlowPrompt',
-    model: gemini15Flash,
     input: {
       schema: QuerySchema,
     },
@@ -42,6 +56,9 @@ export const SearchFlowPrompt = ai.definePrompt(
       format: 'json',
       schema: SearchFlowOutputSchema,
     },  
+    config: {
+      safetySettings: safetySettings
+    }
   }, 
   DocSearchFlowPromptText
 )
@@ -50,26 +67,15 @@ export const MovieDocFlow = ai.defineFlow(
   {
     name: 'movieDocFlow',
     inputSchema: QuerySchema,
-    outputSchema: z.array(MovieContextSchema), // Array of MovieContextSchema
+    outputSchema: z.array(MovieContextSchema),
   },
   async (input) => {
-    const response = await SearchFlowPrompt( {
-      query: input.query
-    })
-    if (typeof response.text !== 'string') {
-      throw new Error('Invalid response format: text property is not a string.');
+    const movieContexts: MovieContext[] = [];
+    const searchFlowOutput = await createSearchObject(input);
+  try{
+    if (searchFlowOutput.searchCategory == "NONE"){
+      return movieContexts;
     }
-    const jsonResponse = JSON.parse(response.text)
-    const searchFlowOutput = {
-      vectorQuery: jsonResponse.vectorQuery || "",
-      keywordQuery: jsonResponse.keywordQuery || "",
-      searchCategory: jsonResponse.searchCategory || 'NONE',
-      modelOutputMetadata: {
-        justification: jsonResponse.justification || "",
-        safetyIssue: jsonResponse.safetyIssue || false,
-      },
-    }
-
     const docs = await ai.retrieve({
       retriever: sqlRetriever,
       query: {
@@ -82,7 +88,6 @@ export const MovieDocFlow = ai.defineFlow(
         vectorQuery: searchFlowOutput.vectorQuery
       },
     });
-    const movieContexts: MovieContext[] = [];
 
     for (const doc of docs) {
       if (doc.metadata) {
@@ -105,6 +110,11 @@ export const MovieDocFlow = ai.defineFlow(
     }
     return movieContexts;
   }
+  catch(e){
+    console.error(`Retriever: Unable to get documents: ${e instanceof Error ? e.message : e}`)
+    return movieContexts;
+  }
+  }
 );
 
 export const sqlRetriever = ai.defineRetriever(
@@ -119,7 +129,6 @@ export const sqlRetriever = ai.defineRetriever(
     }
 
     let results;
-
     if(options.searchCategory == "KEYWORD"){
       results =  await db`SELECT content, title, poster, released, runtime_mins, rating, genres, director, actors, plot, tconst
       FROM movies
@@ -136,7 +145,7 @@ export const sqlRetriever = ai.defineRetriever(
         results = await db`
         SELECT content, title, poster, released, runtime_mins, rating, genres, director, actors, plot, tconst
        FROM movies
-          ORDER BY embedding <#> ${toSql(embedding)}
+          ORDER BY embedding <#> ${toSql(embedding[0].embedding)}
           LIMIT ${options.k ?? 10}
         ;`
     }
@@ -172,7 +181,6 @@ export const sqlRetriever = ai.defineRetriever(
         LIMIT 
           ${options.k ?? 10}
       ;`;
-    
     }
 
     if (!results) {
@@ -186,4 +194,22 @@ export const sqlRetriever = ai.defineRetriever(
     };
   }
 );
+async function createSearchObject(input: { query: string; }) {
+  const defaultOutput = SearchFlowOutputSchema.parse({});
+  try {
+    const response = await SearchFlowPrompt({
+      query: input.query
+    });
+    const safeOutput = response.output ?? SearchFlowOutputSchema.parse({});
+    return SearchFlowOutputSchema.parse(safeOutput);
+
+  }
+  catch (error) {
+    console.error('MovieDocFlow: Error generating response:', {
+      error,
+      input,
+    });
+    return defaultOutput;
+  }
+}
 
