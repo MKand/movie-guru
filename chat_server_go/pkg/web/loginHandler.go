@@ -50,32 +50,6 @@ func NewUserLoginHandler(tokenAudience string, db *db.MovieDB) *UserLoginHandler
 	}
 }
 
-func (ulh *UserLoginHandler) HandleAPILogin(ctx context.Context, authHeader, inviteCode string) (string, error) {
-	token := ulh.getToken(authHeader)
-	user, err := ulh.verifyGoogleToken(token)
-	if err != nil {
-		return "", err
-	}
-
-	if ulh.db.CheckUser(ctx, user) {
-		return user, nil
-	}
-
-	inviteCodes, err := ulh.db.GetInviteCodes()
-	if err != nil {
-		return "", err
-	}
-
-	if utils.Contains(inviteCodes, inviteCode) {
-		if err := ulh.db.CreateUser(user); err != nil {
-			return "", err
-		}
-		return user, nil
-	}
-
-	return "", &AuthorizationError{"Invalid invite code"}
-}
-
 func (ulh *UserLoginHandler) HandleLogin(ctx context.Context, authHeader, inviteCode string) (string, error) {
 	token := ulh.getToken(authHeader)
 	user, err := ulh.verifyGoogleToken(token)
