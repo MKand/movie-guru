@@ -81,9 +81,8 @@ envsubst < pgvector/py_init.sql > pgvector/py_init_substituted.sql
 
 # Start Cloud Build
 echo -e "\e[95mStarting Cloud Build...\e[0m"
-gcloud builds submit --config=deploy/ci.yaml --region=${REGION} --async --ignore-file=.gcloudignore --worker-pool="projects/${PROJECT_ID}/locations/${REGION}/workerPools/movie-guru" --project=${PROJECT_ID} \
-  --substitutions=_PROJECT_ID=$PROJECT_ID,_SHORT_SHA=$SHORT_SHA,_REGION=$REGION,_VITE_FIREBASE_API_KEY=$FIREBASE_API_KEY,_VITE_FIREBASE_AUTH_DOMAIN=$FIREBASE_AUTH_DOMAIN,_VITE_GCP_PROJECT_ID=$PROJECT_ID,_VITE_FIREBASE_STORAGE_BUCKET=$FIREBASE_STORAGE_BUCKET,_VITE_FIREBASE_MESSAGING_SENDERID=$FIREBASE_MESSAGING_SENDERID,_VITE_FIREBASE_APPID=$FIREBASE_APPID,_VITE_CHAT_SERVER_URL="https://movie-guru.endpoints.${PROJECT_ID}.cloud.goog/server"
-
+gcloud builds submit --config=deploy/ci.yaml --region=${REGION} --async --ignore-file=.gcloudignore \
+    --substitutions=_PROJECT_ID=$PROJECT_ID,_SHORT_SHA=$SHORT_SHA,_REGION=$REGION,_VITE_FIREBASE_API_KEY=$FIREBASE_API_KEY,_VITE_FIREBASE_AUTH_DOMAIN=$FIREBASE_AUTH_DOMAIN,_VITE_GCP_PROJECT_ID=$PROJECT_ID,_VITE_FIREBASE_STORAGE_BUCKET=$FIREBASE_STORAGE_BUCKET,_VITE_FIREBASE_MESSAGING_SENDERID=$FIREBASE_MESSAGING_SENDERID,_VITE_FIREBASE_APPID=$FIREBASE_APPID,_VITE_CHAT_SERVER_URL="https://movie-guru.endpoints.${PROJECT_ID}.cloud.goog/server" 
 # Check if SKIP_GCS is set
 if [[ -n "$SKIP_GCS" ]]; then
     exit 0
