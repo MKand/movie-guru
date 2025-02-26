@@ -16,10 +16,10 @@ region: us-west2
 projectID: ""
 
 Cache:
-  replicas: 1
+  replicas: 0
 
 Db:
-  replicas: 1
+  replicas: 0
 
 Hosts:
   postgres: ""
@@ -30,6 +30,9 @@ Server:
   replicas: 3
   version: v1
   enableMetrics: true
+
+Gemma: 
+  replicas: 1
 
 Flows:
   replicas: 5

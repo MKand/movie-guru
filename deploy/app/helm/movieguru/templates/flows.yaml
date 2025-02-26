@@ -18,7 +18,7 @@ metadata:
   name: flows
   namespace: movieguru
 spec:
-  replicas: 5 # {{ .Values.Flows.replicas }}
+  replicas: {{ .Values.Flows.replicas }}
   selector:
     matchLabels:
       app: flows

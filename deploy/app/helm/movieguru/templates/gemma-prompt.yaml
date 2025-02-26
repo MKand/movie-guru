@@ -18,7 +18,7 @@ metadata:
   name: gemma-prompt
   namespace: movieguru
 spec:
-  replicas: 1
+  replicas: {{ .Values.Gemma.replicas }}
   selector:
     matchLabels:
       app: gemma-prompt

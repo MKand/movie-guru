@@ -31,6 +31,8 @@ Server:
   version: v1
   enableMetrics: true
 
+gemma: 
+  replicas: 0
 Flows:
   replicas: 5
   modelLocation: us-central1

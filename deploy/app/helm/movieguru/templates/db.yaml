@@ -60,7 +60,7 @@ metadata:
   name: adminer
   namespace: movieguru
 spec:
-  replicas: 1
+  replicas: {{ .Values.Db.replicas }}
   selector:
     matchLabels:
       app: adminer

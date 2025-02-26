@@ -104,7 +104,7 @@ echo -e "\e[92mUploading posters to bucket and deleting local posters\e[0m"
 # Delete zip file
 rm dataset/posters_small.zip
 
-gcloud storage cp ./dataset/posters_small/* "gs://${PROJECT_ID}_posters/"
+gcloud storage cp ./dataset/posters_small/* "gs://${PROJECT_ID}_posters/" > /dev/null 2>&1
 
 rm -rf dataset/posters_small
 

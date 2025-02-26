@@ -26,6 +26,9 @@ Hosts:
   redis: cache.movieguru.svc.cluster.local
   redisMode: SINGLE
 
+Gemma: 
+  replicas: 0
+
 Server:
   replicas: 3
   version: v1

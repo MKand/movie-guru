@@ -18,7 +18,7 @@ metadata:
   name: vllm-gemma-deployment
   namespace: movieguru
 spec:
-  replicas: 1
+  replicas:  {{ .Values.Gemma.replicas }}
   selector:
     matchLabels:
       app: gemma-server

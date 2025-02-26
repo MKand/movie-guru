@@ -37,6 +37,9 @@ while [ "$1" != "" ]; do
         --region | -r ) shift
                         REGION=$1
                         ;;
+        --deployment_type | -t ) shift
+                        DEPLOYMENT_TYPE=$1
+                        ;;
         --help | -h )   usage
                         ;;
         * )             echo -e "\e[91mUnknown parameter: $1\e[0m"
@@ -61,7 +64,22 @@ if [[ -z "$REGION" ]]; then
     exit 1
 fi
 
+# Check if DEPLOYMENT_TYPE is set
+if [[ -z "$DEPLOYMENT_TYPE" ]]; then
+    echo -e "\e[91mWARNING: DEPLOYMENT_TYPE environment not set. Defaulting to simple \e[0m"
+    DEPLOYMENT_TYPE="simple"
+fi
 
+if [[ "$DEPLOYMENT_TYPE" == "simple" ]]; then
+  VALUES="./deploy/app/helm/movieguru/values.simple.yaml"
+elif [[ "$DEPLOYMENT_TYPE" == "full" ]]; then
+  VALUES="./deploy/app/helm/movieguru/values.full.yaml"
+elif [[ "$DEPLOYMENT_TYPE" == "custom" ]]; then
+  VALUES="./deploy/app/helm/movieguru/values.yaml"
+  echo -e "\e[91mWARNING: Using the default values.yaml file for MovieGuru. Make sure you have edited it to suit your environment.\e[0m"
+fi
+
+echo -e "Using Values file $VALUES\e[0m"
 echo -e "\e[95mUsing PROJECT_ID: $PROJECT_ID\e[0m"
 echo -e "\e[95mUsing REGION: $REGION\e[0m"
 
@@ -92,7 +110,7 @@ helm upgrade --install movieguru \
 ./deploy/app/helm/movieguru \
 --namespace movieguru \
 --create-namespace \
--f ./deploy/app/helm/movieguru/values.simple.yaml \
+-f $VALUES \
 --set projectID=${PROJECT_ID} \
 --set Image.tag=$SHORT_SHA \
 --set region=${REGION}

@@ -17,7 +17,7 @@
   - [Step 3: Get Firebase Web app Configuration](#step-3-get-firebase-web-app-configuration)
   - [Step 4: Update Environment Variables](#step-4-update-environment-variables)
   - [Step 5: Build and Push Containers](#step-5-build-and-push-containers)
-  - [Step 6: Run the Cloud Run Job \[If using CloudSQL. Skip if running a containerised pgvector instance on GKE\]](#step-6-run-the-cloud-run-job-if-using-cloudsql-skip-if-running-a-containerised-pgvector-instance-on-gke)
+  - [Step 6: Run the Cloud Run Job \[\]](#step-6-run-the-cloud-run-job-)
   - [Step 7: Connect to GKE Cluster](#step-7-connect-to-gke-cluster)
   - [Step 8: Deploy Application Using Helm](#step-8-deploy-application-using-helm)
   - [Step 9: \[OPTIONAL\] Register Workloads and Services with App Hub](#step-9-optional-register-workloads-and-services-with-app-hub)
@@ -159,7 +159,9 @@ source ./deploy/ci.sh --region $REGION
 
 This should take around 10 minutes
 
-## Step 6: Run the Cloud Run Job [If using CloudSQL. Skip if running a containerised pgvector instance on GKE]
+## Step 6: Run the Cloud Run Job []
+
+You need this only if using CloudSQL and MemoryStore. Skip if running a containerised pgvector instance and cache instance on GKE
 
 ```bash
 gcloud run job execute movie-guru-db-init --region $REGION --project $PROJECT_ID
@@ -184,7 +186,7 @@ Ensure the (helm)(./deploy/app.sh#L90) file has is using the right values file i
 - For more customised deployment, update the [helm](./deploy/app/helm/movieguru/values.yaml) file with values obtained in the previous step. 
 
 ```bash
-./deploy/app.sh --region $REGION
+./deploy/app.sh --region $REGION --deployment_type simple
 ```
 
 ## Step 9: [OPTIONAL] Register Workloads and Services with App Hub
