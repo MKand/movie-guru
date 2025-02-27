@@ -72,8 +72,8 @@ spec:
               value: "true"
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
               value: http://otel-collector.otel-collector.svc.cluster.local:4318
-            # - name: FEEDBACK_URL
-            #   value: https://{{ .Values.feedbackLocation }}-{{ .Values.projectID }}.cloudfunctions.net/ext-firebase-ai-user-engagement-collectEngagement
+            - name: FEEDBACK_URL
+              value: https://{{ .Values.feedbackLocation }}-{{ .Values.projectID }}.cloudfunctions.net/ext-firebase-ai-user-engagement-collectEngagement
 
 
 ---
