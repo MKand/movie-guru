@@ -17,6 +17,7 @@ package web
 import (
 	"context"
 	"encoding/json"
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -24,7 +25,6 @@ import (
 
 	m "github.com/movie-guru/pkg/metrics"
 	"github.com/movie-guru/pkg/types"
-	"golang.org/x/exp/slog"
 )
 
 func createChatHandler(deps *Dependencies, meters *m.ChatMeters, metadata *db.Metadata) http.HandlerFunc {

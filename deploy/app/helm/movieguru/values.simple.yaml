@@ -14,6 +14,7 @@
 
 region: us-west2
 projectID: ""
+feedbackLocation: us-west2
 
 Cache:
   replicas: 1

@@ -17,9 +17,8 @@ package web
 import (
 	"bytes"
 	"encoding/json"
+	"log/slog"
 	"net/http"
-
-	"golang.org/x/exp/slog"
 )
 
 type Feedback struct {
@@ -34,6 +33,13 @@ func createFeedbackHandler(URL string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "POST" {
 			ctx := r.Context()
+
+			if URL == "" {
+				slog.InfoContext(ctx, "No Feedback URL found. Not forwarding feedback to Genkit")
+
+				json.NewEncoder(w).Encode("No Feedback URL found. Not forwarding feedback to Genkit")
+				return
+			}
 			feedback := &Feedback{}
 			err := json.NewDecoder(r.Body).Decode(feedback)
 			if err != nil {

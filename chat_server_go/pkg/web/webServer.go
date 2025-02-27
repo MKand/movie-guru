@@ -16,6 +16,7 @@ package web
 
 import (
 	"context"
+	"log/slog"
 	"os"
 
 	"net/http"
@@ -24,7 +25,6 @@ import (
 
 	"github.com/movie-guru/pkg/db"
 	metrics "github.com/movie-guru/pkg/metrics"
-	"golang.org/x/exp/slog"
 )
 
 func enableCORS(allowedOrigins []string, next http.Handler) http.Handler {
