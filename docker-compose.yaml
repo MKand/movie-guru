@@ -59,7 +59,7 @@ services:
       - FLOWS_URL=http://flows:3400
       - REDIS_HOST=cache
       - REDIS_PORT=6379
-      - FEEDBACK_URL=
+      - FEEDBACK_URL=https://us-west4-${PROJECT_ID}.cloudfunctions.net/ext-firebase-ai-user-engagement-collectEngagement
     depends_on:
       - cache 
       - db

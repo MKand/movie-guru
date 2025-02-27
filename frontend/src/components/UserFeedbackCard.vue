@@ -1,20 +1,23 @@
 <template>
-    <div class="flex justify-end">
-      <button
-        ref="thumbsUp"
-        @click="submitFeedback('positive', $event)"
-        class="p-2 m-2 bg-none text-xl rounded-md hover:bg-green-300 transform transition-transform duration-300"
-        :class="{ 'scale-125': isExpanding }"
-      >
-        👍
-      </button>
-      <button
-        @click="submitFeedback('negative', $event)"
-        class="p-2 m-2 bg-none text-xl rounded-md hover:bg-red-200"
-        :class="{ shake: isShaking }"
-      >
-        👎
-      </button>
+    <div class="flex justify-start"> 
+      <div class="flex bg-accent rounded-lg px-2"> 
+        <h1 class="text-text font-bold align-middle leading-none pt-5">Was my response useful?</h1>
+        <button
+          ref="thumbsUp"
+          @click="submitFeedback('positive', $event)"
+          class="p-2 m-1 bg-none text-xl rounded-md hover:bg-green-300 transform transition-transform duration-300"
+          :class="{ 'scale-125': isExpanding }"
+        >
+          👍
+        </button>
+        <button
+          @click="submitFeedback('negative', $event)"
+          class="p-2 m-1 bg-none text-xl rounded-md hover:bg-red-200"
+          :class="{ shake: isShaking }"
+        >
+          👎
+        </button>
+      </div>
     </div>
   </template>
   

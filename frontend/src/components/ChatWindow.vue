@@ -14,7 +14,6 @@
 
         <div v-if="m.sender == 'agent'" class="shadow-lg p-2 m-1 rounded-lg bg-accent text-text self-start">
           <img src="../assets/movie-guru.png" class="w-12 h-12 pb-2 object-contain" />
-
           <div v-html="renderedMarkdown(m.message)"></div>
         </div>
 
@@ -35,7 +34,9 @@
 
         <div id="error_message" class="text-base font-bold "> {{ this.errorMessage }}</div>
       </div>
-      <UserFeedbackCard v-if="traceId && spanId" :traceId="traceId" :spanId="spanId"></UserFeedbackCard>
+      <div v-if="traceId && spanId" class="p-2" >
+          <UserFeedbackCard :traceId="traceId" :spanId="spanId"></UserFeedbackCard>
+      </div>
     </div>
     <div class="mt-4 mx-2">
       <input type="text" v-model="this.newUserMessage" v-on:keyup.enter="addUserMessage"

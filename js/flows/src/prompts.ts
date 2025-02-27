@@ -153,7 +153,7 @@ export const MovieFlowPromptText = `
     Respond with the following infomation:
 
     * a *justification* about why you answered the way you did, with specific references to the MovieContext whenever possible.
-    * an *answer* which is your answer to the user's question, written in a friendly and conversational way.
+    * an *answer* which is your answer to the user's question or statement, written in a friendly and conversational way.
     * a list of *relevantMovies* which is a list of objects extracted from the MovieContext that are relevant to your response. Each object contains the reason why you think a movie relevant and the title of the movie. If none are relevant, leave this list empty. If any movies you are talking about in your answer are relevant, add them.
     * a *wrongQuery* boolean which is set to "true" if the user asks something outside your movie expertise; otherwise, set to "false."
     * a *safetyIssue* returned as "true" if the query is considered dangerous. A query is considered dangerous if the user is asking you to tell about something dangerous. However, asking for movies with dangerous themes is not considered dangerous.
