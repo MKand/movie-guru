@@ -3,14 +3,14 @@ import { ref } from 'vue';
 import store  from '../stores';
 
 class ChatClientService {
-  processingRequest = ref(false);
-  errorOccured = ref(false);
-  errorMessage = ref("");
+
+  handleAddedUserMessage = null;
+  handleAgentMessage = null;
+  handleErrorMessage = null;
 
   async send(message){
-    this.errorMessage.value = ""
-    this.errorOccured.value = false;
-    this.processingRequest.value = true
+   this.handleAddedUserMessage();
+    
     store.commit('chat/add', {"message":message, "sender":"user"})
 
     const requestOptions = {
@@ -19,7 +19,7 @@ class ChatClientService {
         body: JSON.stringify({ content: message }),
         credentials: 'include'
     };
-    const response = await fetchPolyfill(import.meta.env.VITE_CHAT_SERVER_URL + '/chat', requestOptions)
+    const response = await fetch(import.meta.env.VITE_CHAT_SERVER_URL + '/chat', requestOptions)
     
     if (!response.ok) {
         throw new Error(`Response status: ${response.status}`);
@@ -27,25 +27,19 @@ class ChatClientService {
       const json = await response.json();
       const result = json["result"];
       if(result == "SUCCESS"){
-        let answer = json["answer"]
-        let context = json["context"]
-        store.commit('chat/add',{"message":answer, "sender":"agent", "result":result});
-        store.commit('chat/addMovies', context)
-        store.commit('chat/updateTraceSpanIds', json["traceId"], json["spanId"])
+        store.commit('chat/add',{"message":json["answer"], "sender":"agent", "result":result});
+        store.commit('chat/addMovies', json["context"])
+        this.handleAgentMessage(json["traceId"], json["spanId"])
       }
       else if (result == "ERROR" || result == "QUOTALIMIT" || result == "UNSAFE"){
-        this.errorOccured.value = true;
-        this.errorMessage.value = json["answer"]
+        this.handleErrorMessage(json["answer"])
       }
-
       if(json["preferences"]){
         store.commit('preferences/update', json["preferences"])
       }
-      this.processingRequest.value = false;
       return json
     } catch (error) {
-      this.errorOccured = true;
-      console.error(error.message);
+      this.handleErrorMessage("I've had trouble connecting to the server. Try again.")
       throw error;
     }
     
