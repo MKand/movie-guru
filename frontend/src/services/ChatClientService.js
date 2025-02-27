@@ -1,5 +1,4 @@
-import {fetch as fetchPolyfill} from 'whatwg-fetch'
-import { ref } from 'vue';
+import {fetch} from 'whatwg-fetch'
 import store  from '../stores';
 
 class ChatClientService {
@@ -7,6 +6,7 @@ class ChatClientService {
   handleAddedUserMessage = null;
   handleAgentMessage = null;
   handleErrorMessage = null;
+  handleSubmittedFeedback = null;
 
   async send(message){
    this.handleAddedUserMessage();
@@ -49,7 +49,7 @@ class ChatClientService {
         headers: { 'Content-Type': 'application/json'},
         credentials: 'include'
     };
-    const response = await fetchPolyfill(import.meta.env.VITE_CHAT_SERVER_URL + '/startup', requestOptions)
+    const response = await fetch(import.meta.env.VITE_CHAT_SERVER_URL + '/startup', requestOptions)
    
     if (!response.ok) {
         throw new Error(`Response status: ${response.status}`);
@@ -92,10 +92,11 @@ class ChatClientService {
             body: JSON.stringify({traceId: traceId, spanId: spanId,  name: "chatFlow", feedbackExperience: valueString}),
         };
         const response = await fetch(import.meta.env.VITE_CHAT_SERVER_URL + '/feedback', requestOptions)
-        
+
         if (!response.ok) {
             throw new Error(`Response status: ${response.status}`);
         }
+          this.handleSubmittedFeedback();
           const json = await response.json();
           return json
         } catch (error) {
@@ -110,7 +111,7 @@ class ChatClientService {
           headers: { 'Content-Type': 'application/json'},
           credentials: 'include'
       };
-      const response = await fetchPolyfill(import.meta.env.VITE_CHAT_SERVER_URL + '/history', requestOptions)
+      const response = await fetch(import.meta.env.VITE_CHAT_SERVER_URL + '/history', requestOptions)
       
       if (!response.ok) {
           throw new Error(`Response status: ${response.status}`);

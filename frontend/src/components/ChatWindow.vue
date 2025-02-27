@@ -35,7 +35,7 @@
 
         <div id="error_message" class="text-base font-bold "> {{ this.errorMessage }}</div>
       </div>
-      <UserFeedbackCard v-if="traceId != '' && spanId != ''" :traceId="traceId" :spanId="spanId"></UserFeedbackCard>
+      <UserFeedbackCard v-if="traceId && spanId" :traceId="traceId" :spanId="spanId"></UserFeedbackCard>
     </div>
     <div class="mt-4 mx-2">
       <input type="text" v-model="this.newUserMessage" v-on:keyup.enter="addUserMessage"
@@ -62,8 +62,8 @@ export default {
       errorOccured: "",
       errorMessage: "",
       newUserMessage: "",
-      traceId: "",
-      spanId: "",
+      traceId: null,
+      spanId: null,
     }
   },
   created() {
@@ -102,8 +102,8 @@ export default {
     },
 
     clearTraceIds() {
-      this.traceId = "";
-      this.spanId = "";
+      this.traceId = null;
+      this.spanId = null;
     },
 
     handleAddedUserMessage(){
@@ -161,6 +161,7 @@ export default {
     ChatClientService.handleAddedUserMessage = this.handleAddedUserMessage;
     ChatClientService.handleAgentMessage = this.handleAgentMessage;
     ChatClientService.handleErrorMessage = this.handleErrorMessage;
+    ChatClientService.handleSubmittedFeedback = this.clearTraceIds;
   },
 
   mounted() {

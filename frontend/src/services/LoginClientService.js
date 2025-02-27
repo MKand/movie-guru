@@ -1,5 +1,4 @@
-import {fetch as fetchPolyfill} from 'whatwg-fetch'
-import store  from '../stores';
+import {fetch} from 'whatwg-fetch'
 
 class LoginClientService {
   async login(user, inviteCode) {
@@ -37,7 +36,7 @@ class LoginClientService {
           headers: { 'Content-Type': 'application/json'},
           credentials: 'include'
         };
-      const response = await fetchPolyfill(import.meta.env.VITE_CHAT_SERVER_URL + '/logout', requestOptions)
+      const response = await fetch(import.meta.env.VITE_CHAT_SERVER_URL + '/logout', requestOptions)
       if (!response.ok) {
           throw new Error(`Response status: ${response.status}`);
         }

@@ -41,7 +41,6 @@
 <script>
   import store  from '../stores';
   import LoginClientService from '../services/LoginClientService';
-  import { getAuth } from "firebase/auth";
   import PreferencesClientService from '../services/PreferencesClientService';
   import {ref } from 'vue';
 
