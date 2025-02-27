@@ -63,6 +63,20 @@ export const SearchFlowPrompt = ai.definePrompt(
   DocSearchFlowPromptText
 )
 
+export const MovieSearchPromptFlow = ai.defineFlow(
+  {
+    name: 'MovieSearchPromptFlow',
+    inputSchema: QuerySchema,
+    outputSchema: SearchFlowOutputSchema,
+  },
+  async (input) => {
+    const searchFlowOutput = await createSearchObject(input);
+    return SearchFlowOutputSchema.parse(searchFlowOutput);
+  
+  }
+
+);
+
 export const MovieDocFlow = ai.defineFlow(
   {
     name: 'movieDocFlow',

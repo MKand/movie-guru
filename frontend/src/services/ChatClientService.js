@@ -92,18 +92,16 @@ class ChatClientService {
             method: 'POST',
             headers: { 'Content-Type': 'application/json'},
             body: JSON.stringify({traceId: traceId, spanId: spanId,  name: "chatFlow", feedbackExperience: valueString}),
+         
         };
         const response = await fetch(import.meta.env.VITE_CHAT_SERVER_URL + '/feedback', requestOptions)
 
         if (!response.ok) {
-            throw new Error(`Response status: ${response.status}`);
+          throw new Error(`Response status: ${response.status}`);
         }
           // this.handleSubmittedFeedback();
           const json = await response.json();
           return json
-        } catch (error) {
-          console.error(error.message);
-          throw error;
         }
   
 

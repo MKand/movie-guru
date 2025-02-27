@@ -7,14 +7,19 @@
     </div>
     <div id="chat-container"
       class="m-2 flex-1 bg-stars1 bg-cover bg-no-repeat bg-center p-4 rounded-lg min-h-[560px] max-h-[560px] shadow-inner overflow-anchor-none overflow-y-auto scrollbar-thin scrollbar-thumb-primary scrollbar-track-accent">
-      <div v-for="m in store.getters['chat/messages']" :key="m.id" class="flex flex-col justify-center">
+      <div v-for="(m,index) in store.getters['chat/messages']" :key="m.id" class="flex flex-col justify-center">
         <div v-if="m.sender == 'user'" class="shadow-lg m-1 p-2 rounded-lg bg-secondary text-primary self-end">
           <div v-html="renderedMarkdown(m.message)"></div>
+         
         </div>
 
         <div v-if="m.sender == 'agent'" class="shadow-lg p-2 m-1 rounded-lg bg-accent text-text self-start">
           <img src="../assets/movie-guru.png" class="w-12 h-12 pb-2 object-contain" />
           <div v-html="renderedMarkdown(m.message)"></div>
+          <div v-if="index == store.getters['chat/messages'].length - 1" class="mt-2"> 
+            <UserFeedbackCard :traceId="traceId" :spanId="spanId"></UserFeedbackCard>
+
+            </div>
         </div>
 
         <div v-if="m.sender == 'system'" class="shadow-lg p-2 m-1 rounded-lg bg-accent text-text font-bold">
@@ -34,9 +39,9 @@
 
         <div id="error_message" class="text-base font-bold "> {{ this.errorMessage }}</div>
       </div>
-      <div v-if="traceId && spanId" class="p-2" >
+      <!-- <div v-if="traceId && spanId" class="p-2" >
           <UserFeedbackCard :traceId="traceId" :spanId="spanId"></UserFeedbackCard>
-      </div>
+      </div> -->
     </div>
     <div class="mt-4 mx-2">
       <input type="text" v-model="this.newUserMessage" v-on:keyup.enter="addUserMessage"
