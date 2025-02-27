@@ -31,6 +31,7 @@ class ChatClientService {
         let context = json["context"]
         store.commit('chat/add',{"message":answer, "sender":"agent", "result":result});
         store.commit('chat/addMovies', context)
+        store.commit('chat/updateTraceSpanIds', json["traceId"], json["spanId"])
       }
       else if (result == "ERROR" || result == "QUOTALIMIT" || result == "UNSAFE"){
         this.errorOccured.value = true;
@@ -78,7 +79,7 @@ class ChatClientService {
           headers: { 'Content-Type': 'application/json'},
           credentials: 'include'
       };
-      const response = await fetchPolyfill(import.meta.env.VITE_CHAT_SERVER_URL + '/history', requestOptions)
+      const response = await fetch(import.meta.env.VITE_CHAT_SERVER_URL + '/history', requestOptions)
       
       if (!response.ok) {
           throw new Error(`Response status: ${response.status}`);
@@ -89,6 +90,25 @@ class ChatClientService {
         console.error(error.message);
         throw error;
       }
+
+      async submitFeedback(traceId, spanId, valueString){
+        const requestOptions = {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json'},
+            body: JSON.stringify({traceId: traceId, spanId: spanId,  name: "chatFlow", feedbackExperience: valueString}),
+        };
+        const response = await fetch(import.meta.env.VITE_CHAT_SERVER_URL + '/feedback', requestOptions)
+        
+        if (!response.ok) {
+            throw new Error(`Response status: ${response.status}`);
+        }
+          const json = await response.json();
+          return json
+        } catch (error) {
+          console.error(error.message);
+          throw error;
+        }
+  
 
       async clearHistory(){
       const requestOptions = {

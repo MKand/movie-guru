@@ -79,7 +79,7 @@ func (ulh *UserLoginHandler) HandleLogin(ctx context.Context, authHeader, invite
 func (ulh *UserLoginHandler) HandleApiKeyLogin(ctx context.Context, apiKey, user string) (string, error) {
 	// simple implementation for now
 	if user == "" {
-		return "", &AuthorizationError{"Invalid invite code"}
+		return "", &AuthorizationError{"Invalid/Missing User Header"}
 	}
 	return user, nil
 }

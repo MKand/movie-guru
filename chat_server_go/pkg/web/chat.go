@@ -167,6 +167,8 @@ func chatSingleFlow(ctx context.Context, deps *Dependencies, metadata *db.Metada
 	agentResp.RelevantMovies = relevantMovies
 	agentResp.Context = chatResp.ContextDocuments
 	agentResp.Result = types.SUCCESS
+	agentResp.TraceId = chatResp.TraceId
+	agentResp.SpanId = chatResp.SpanId
 
 	// Wait for goroutines to complete
 	wg.Wait()

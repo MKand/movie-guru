@@ -39,6 +39,8 @@ type AgentResponse struct {
 	ErrorMessage   string          `json:"error_message"`
 	Result         RESULT          `json:"result"`
 	Preferences    *UserProfile    `json:"preferences"`
+	TraceId        string          `json:"traceId"`
+	SpanId         string          `json:"spanId"`
 }
 
 func NewAgentResponse() *AgentResponse {
@@ -47,6 +49,8 @@ func NewAgentResponse() *AgentResponse {
 		Context:        make([]*MovieContext, 0),
 		Preferences:    NewUserProfile(),
 		Result:         UNDEFINED,
+		TraceId:        "",
+		SpanId:         "",
 	}
 }
 

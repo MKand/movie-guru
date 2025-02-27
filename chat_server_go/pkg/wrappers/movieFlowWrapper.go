@@ -110,14 +110,5 @@ func (flowClient *MovieFlowClient) runFlow(input *types.MovieFlowInput) (*types.
 		return nil, err
 	}
 
-	/*b = bytes.TrimSpace(b)
-	resp.Body = ioutil.NopCloser(bytes.NewReader(b))
-
-	err = json.NewDecoder(resp.Body).Decode(&result)
-	if err != nil {
-		slog.Log(context.Background(), slog.LevelError, "Error decoding JSON response", "error", err)
-		return nil, err
-	}*/
-
 	return result.Result, nil
 }

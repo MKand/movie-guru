@@ -33,6 +33,8 @@ type ExtendedMovieFlowOutput struct {
 	RelevantMoviesTitles []*RelevantMovie `json:"relevantMovies"`
 	WrongQuery           bool             `json:"wrongQuery,omitempty" `
 	ContextDocuments     []*MovieContext  `json:"contextDocuments"`
+	TraceId              string
+	SpanId               string
 	*ModelOutputMetadata `json:"modelOutputMetadata"`
 }
 

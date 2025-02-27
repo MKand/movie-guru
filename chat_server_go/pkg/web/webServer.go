@@ -16,6 +16,7 @@ package web
 
 import (
 	"context"
+	"os"
 
 	"net/http"
 
@@ -68,6 +69,7 @@ func StartServer(ctx context.Context, ulh *UserLoginHandler, metadata *db.Metada
 
 	}
 
+	FEEDBACK_URL := os.Getenv("FEEDBACK_URL")
 	loginMeters := metrics.NewLoginMeters()
 	hcMeters := metrics.NewHCMeters()
 	chatMeters := metrics.NewChatMeters()
@@ -76,6 +78,7 @@ func StartServer(ctx context.Context, ulh *UserLoginHandler, metadata *db.Metada
 
 	mux.HandleFunc("/", createHealthCheckHandler(deps, hcMeters))
 	mux.HandleFunc("/chat", createChatHandler(deps, chatMeters, metadata))
+	mux.HandleFunc("/feedback", createFeedbackHandler(FEEDBACK_URL))
 	mux.HandleFunc("/history", createHistoryHandler(metadata))
 	mux.HandleFunc("/preferences", createPreferencesHandler(deps.DB))
 	mux.HandleFunc("/startup", createStartupHandler(deps))

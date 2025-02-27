@@ -4,6 +4,8 @@ export const store = {
         chatMessageHistory:[],
         movies: [],
         placeHolderMovies: [],
+        traceId: "",
+        spanId: ""
     },
     getters: {
       messages (state) {
@@ -15,12 +17,21 @@ export const store = {
       placeHolderMovies (state) {
         return state.placeHolderMovies
       },
+      traceAndSpanIds (state) {
+        return state.traceId, state.spanId
+      },
     },
     mutations: {
         add(state, message) {
           // mutate state
           state.chatMessageHistory.push(message)
         },
+        updateTraceSpanIds(state, traceId, spanId) {
+          // mutate state
+          state.traceId=traceId
+          state.spanId= spanId
+        },
+
         clear(state) {
           // mutate state
           state.chatMessageHistory = []

@@ -42,15 +42,15 @@ export default {
 <template>
   <div class="w-full h-screen flex flex-col justify-center items-center align-middle">
     <div
-      class="flex flex-col md:h-1/2 md:w-1/2 lg:h-1/3 lg:w-1/3 xl:h-1/4 xl:w-1/4 w-full justify-center items-center align-middle bg-stars1 bg-cover bg-no-repeat bg-center p-20">
+      class="flex flex-col  justify-center items-center align-middle bg-stars1 bg-cover bg-no-repeat bg-center p-20">
       <input type="text" v-if="loginFailed == true"
-        class="text-bold placeholder-accent  p-2 m-2 w-full rounded-lg   bg-gray-300 text-primary border-2 border-negative text-center"
+        class="text-bold placeholder-accent p-2 m-2 sm:w-3/4 md:w-3/4 lg:w-1/2 rounded-lg  bg-gray-300 text-primary border-2 border-negative text-center"
         placeholder="Something went wrong... Enter your email and try again.">
       <label v-else class="block text-text text-center text-bold mb-2">
           Enter your Invite Code here if this is your first time on Movie Guru
           <input 
               type="text" 
-              class="text-bold p-2 m-2 w-full rounded-lg bg-gray-300 placeholder-accent text-primary text-center"
+              class="text-bold p-2 m-2 sm:w-full w-1/2 rounded-lg bg-gray-300 placeholder-accent text-primary text-center"
               placeholder="Invite Code"
           >
       </label>

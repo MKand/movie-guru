@@ -50,6 +50,7 @@
 
             <div id="error_message" class="text-base font-bold "> {{this.errorMessage }}</div>
           </div>
+          <UserFeedbackCard v-if="traceId != '' && spanId != ''"  :traceId="traceId" :spanId="spanId"></UserFeedbackCard>
       </div>
       <div class="mt-4 mx-2">
         <input
@@ -67,9 +68,12 @@
   <script>
   import store  from '../stores';
   import ChatClientService from '../services/ChatClientService';
+  import UserFeedbackCard from './UserFeedbackCard.vue';
   import { marked } from 'marked';
 
   export default {
+    components: {UserFeedbackCard},
+
     data(){
       return {
         store: store,
@@ -77,6 +81,8 @@
         errorOccured: ChatClientService.errorOccured,
         errorMessage: ChatClientService.errorMessage,
         newMessage: "",
+        traceId: "",
+        spanId: "",
       }
     },
     created(){
@@ -113,8 +119,12 @@
       addUserMessage(){
         let message = document.querySelector('input[type="text"]').value;
         this.newMessage = "";
+        this.traceId="";
+        this.spanId="";
         this.scrollToBottom();
-        ChatClientService.send(message).then(() => {
+        ChatClientService.send(message).then((result) => {
+            this.traceId = result["traceId"];
+            this.spanId = result["spanId"];
             this.scrollToBottom();
         }).catch((error) => {
             console.log("Error sending chat message:", error);
