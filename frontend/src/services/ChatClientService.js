@@ -96,7 +96,7 @@ class ChatClientService {
         if (!response.ok) {
             throw new Error(`Response status: ${response.status}`);
         }
-          this.handleSubmittedFeedback();
+          // this.handleSubmittedFeedback();
           const json = await response.json();
           return json
         } catch (error) {
