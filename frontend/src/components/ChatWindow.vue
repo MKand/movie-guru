@@ -18,7 +18,6 @@
           <div v-html="renderedMarkdown(m.message)"></div>
           <div v-if="index == store.getters['chat/messages'].length - 1 && traceId && spanId" class=""> 
             <UserFeedbackCard :traceId="traceId" :spanId="spanId"></UserFeedbackCard>
-
             </div>
         </div>
 
@@ -65,8 +64,8 @@ export default {
       errorOccured: "",
       errorMessage: "",
       newUserMessage: "",
-      traceId: null,
-      spanId: null,
+      traceId: ChatClientService.traceId,
+      spanId: ChatClientService.spanId,
     }
   },
   created() {
@@ -104,34 +103,27 @@ export default {
       }, 1);
     },
 
-    clearTraceIds() {
-      this.traceId = null;
-      this.spanId = null;
-    },
+
 
     handleAddedUserMessage(){
       this.newUserMessage = "";
-      this.clearTraceIds();
       this.scrollToBottom();
       this.errorMessage = ""
       this.errorMessage = false;
       this.processingRequest = true;
     },
 
-    handleAgentMessage(traceId, spanId){
+    handleAgentMessage(){
       this.newUserMessage = "";
       this.scrollToBottom();
       this.errorMessage = ""
       this.errorMessage = false;
       this.processingRequest = false;
-      this.traceId = traceId;
-      this.spanId = spanId;
     },
 
 
     handleErrorMessage(errorMessage){
       this.newUserMessage = "";
-      this.clearTraceIds();
       this.scrollToBottom();
       this.errorMessage = errorMessage;
       this.errorOccured = true;
@@ -147,7 +139,6 @@ export default {
     },
 
     clearHistory() {
-      this.clearTraceIds();
       ChatClientService.clearHistory().then(() => {
         store.commit('chat/clear')
       }
@@ -164,7 +155,6 @@ export default {
     ChatClientService.handleAddedUserMessage = this.handleAddedUserMessage;
     ChatClientService.handleAgentMessage = this.handleAgentMessage;
     ChatClientService.handleErrorMessage = this.handleErrorMessage;
-    ChatClientService.handleSubmittedFeedback = this.clearTraceIds;
   },
 
   mounted() {

@@ -79,6 +79,8 @@ func StartServer(ctx context.Context, ulh *UserLoginHandler, metadata *db.Metada
 	mux.HandleFunc("/", createHealthCheckHandler(deps, hcMeters))
 	mux.HandleFunc("/chat", createChatHandler(deps, chatMeters, metadata))
 	mux.HandleFunc("/feedback", createFeedbackHandler(FEEDBACK_URL))
+	mux.HandleFunc("/acceptance", createAcceptanceHandler(FEEDBACK_URL))
+
 	mux.HandleFunc("/history", createHistoryHandler(metadata))
 	mux.HandleFunc("/preferences", createPreferencesHandler(deps.DB))
 	mux.HandleFunc("/startup", createStartupHandler(deps))

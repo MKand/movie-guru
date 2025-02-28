@@ -29,6 +29,12 @@ type Feedback struct {
 	FeedbackText       string `json:"feedbackText" omitempty`
 }
 
+type Acceptance struct {
+	Name    string `json:"name"`
+	TraceId string `json:"traceId"`
+	SpanId  string `json:"spanId"`
+}
+
 func createFeedbackHandler(URL string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "POST" {
@@ -54,6 +60,65 @@ func createFeedbackHandler(URL string) http.HandlerFunc {
 				"feedback": map[string]interface{}{
 					"value": feedback.FeedbackExperience,
 				},
+			}
+			jsonData, err := json.Marshal(inputJSON)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+
+			req, err := http.NewRequest("POST", URL, bytes.NewBuffer(jsonData))
+			if err != nil {
+				slog.ErrorContext(ctx, "Feedback: Error sending request to Feedback server", err.Error(), err)
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			req.Header.Set("Content-Type", "application/json")
+			client := &http.Client{}
+			resp, err := client.Do(req)
+
+			if err != nil {
+				slog.ErrorContext(ctx, "Feedback: Error sending request to Feedback server", err.Error(), err)
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+				slog.ErrorContext(ctx, "Feedback: Genkit returned an Error", "errorCode", resp.StatusCode)
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			json.NewEncoder(w).Encode("OK")
+			return
+		}
+	}
+}
+
+func createAcceptanceHandler(URL string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == "POST" {
+			ctx := r.Context()
+
+			if URL == "" {
+				slog.InfoContext(ctx, "No Feedback URL found. Not forwarding feedback to Genkit")
+
+				json.NewEncoder(w).Encode("No Feedback URL found. Not forwarding feedback to Genkit")
+				return
+			}
+			acceptance := &Acceptance{}
+			err := json.NewDecoder(r.Body).Decode(acceptance)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+
+			inputJSON := map[string]interface{}{
+				"name":       acceptance.Name,
+				"traceId":    acceptance.TraceId,
+				"spanId":     acceptance.SpanId,
+				"acceptance": map[string]interface{}{"value": "accepted"},
 			}
 			jsonData, err := json.Marshal(inputJSON)
 			if err != nil {
