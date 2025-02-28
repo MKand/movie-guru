@@ -10,7 +10,7 @@
       @mouseleave="hideButtons(m.title)"
     >
       <div class="bg-gray-800 rounded-t-lg py-2">
-        <p class="text-center text-text font-bold mb-2 text-xl truncate">
+        <p class="text-center text-text font-bold font-serif mb-2 text-xl truncate">
           {{ m.title }}
         </p>
       </div>
