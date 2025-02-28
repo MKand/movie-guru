@@ -7,12 +7,12 @@ export const store = {
             "genres":[],
             "actors":[],
             "director":[],
-            "other":[]
+            "others":[]
         }, "dislikes":{
             "genres":[],
             "actors":[],
             "director":[],
-            "other":[]
+            "others":[]
         }},
     },
     getters: {
@@ -21,7 +21,7 @@ export const store = {
       },
       
       checkMovieExists: (state) => (value) => {
-        let ls= state.preferences["likes"]["other"]
+        let ls= state.preferences["likes"]["others"]
         if(ls){
           return ls.includes(value)
         }
@@ -43,13 +43,6 @@ export const store = {
           }
           state.preferences[target.type][target.key].push(target.value)
 
-        },
-        checkMovieExists (state, value) {
-          let ls= state.preferences["likes"]["other"]
-          if(ls){
-            return ls.includes(value)
-          }
-          return false
         },
 
         delete(state, target) {

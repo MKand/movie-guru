@@ -1,6 +1,6 @@
 <template>
   <div
-    class="relative flex flex-row overflow-y-auto flex-wrap justify-center items-start scrollbar-thin scrollbar-thumb-primary scrollbar-track-accent"
+    class="relative flex flex-row overflow-y-auto flex-wrap justify-center items-center scrollbar-thin scrollbar-thumb-primary scrollbar-track-accent"
   >
     <div 
       v-for="m in movies"
@@ -88,13 +88,13 @@ export default {
     },
     selectedMovie(title) {
       if(this.checkMovieExists(title)){
-        this.store.commit('preferences/delete', {"type" : "likes", "key": "other", "value":title})
+        this.store.commit('preferences/delete', {"type" : "likes", "key": "others", "value":title})
       }
       else{
         if(this.traceId && this.spanId){
         ChatClientService.submitFeatureAcceptance(this.traceId, this.spanId, 'accepted')
       }
-      this.store.commit('preferences/add', {"type" : "likes", "key": "other", "value":title})
+      this.store.commit('preferences/add', {"type" : "likes", "key": "others", "value":title})
       }
      
       PreferencesClientService.update(this.store.getters['preferences/preferences'])      
