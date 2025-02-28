@@ -1,18 +1,18 @@
 <template>
-    <div class=""> 
+    <div class="flex justify-end"> 
       <div class="flex bg-accent rounded-lg"> 
-        <h1 class="text-text font-bold pt-4">Is my response useful?</h1>
+        <h1 class="text-text text-sm italic pt-3">Is my response useful?</h1>
         <button
           ref="thumbsUp"
           @click="submitFeedback('positive', $event)"
-          class="p-2 m-1 bg-none text-xl rounded-md hover:bg-green-300 transform transition-transform duration-300"
+          class="p-1 m-1 bg-none text-xl rounded-md hover:bg-green-300 transform transition-transform duration-300"
           :class="{ 'scale-125': isExpanding }"
         >
-        <ThumbsUp class="w-8 h-6 text-green-500 opacity-56" />
+        <ThumbsUp class="w-6 h-6 text-green-500 opacity-56" />
         </button>
         <button
           @click="submitFeedback('negative', $event)"
-          class="p-2 m-1 bg-none text-xl rounded-md hover:bg-red-200"
+          class="p-1 m-1 bg-none text-xl rounded-md hover:bg-red-200"
           :class="{ shake: isShaking }"
         >
         <ThumbsDown class="w-6 h-6 text-red-400 opacity-70" />

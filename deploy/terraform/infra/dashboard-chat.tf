@@ -55,6 +55,41 @@ resource "google_monitoring_dashboard" "chat_dashboard" {
           "id": ""
         }
       },
+            {
+        "width": 24,
+        "height": 16,
+        "widget": {
+          "xyChart": {
+            "dataSets": [
+              {
+                "timeSeriesQuery": {
+                  "prometheusQuery": "(sum(rate(movieguru_chat_quotaissue_counter_total[$${__interval}])) / sum(rate(movieguru_chat_calls_total[$${__interval}]))) * 100",
+                  "unitOverride": "%",
+                  "outputFullDuration": false
+                },
+                "plotType": "LINE",
+                "legendTemplate": "",
+                "targetAxis": "Y1",
+                "dimensions": [],
+                "measures": [],
+                "breakdowns": []
+              }
+            ],
+            "thresholds": [],
+            "yAxis": {
+              "label": "",
+              "scale": "LINEAR"
+            },
+            "chartOptions": {
+              "mode": "COLOR",
+              "showLegend": false,
+              "displayHorizontal": false
+            }
+          },
+          "title": "Chat Quota Issues Rate",
+          "id": ""
+        }
+      },
       {
         "xPos": 24,
         "width": 24,
