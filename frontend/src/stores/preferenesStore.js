@@ -19,7 +19,14 @@ export const store = {
       preferences (state) {
         return state.preferences
       },
-    
+      
+      checkMovieExists: (state) => (value) => {
+        let ls= state.preferences["likes"]["other"]
+        if(ls){
+          return ls.includes(value)
+        }
+        return false
+      },
     },
     mutations: {
         update(state, preferences) {
@@ -28,7 +35,21 @@ export const store = {
         },
 
         add(state, target) {
+          if(!state.preferences[target.type]){
+            state.preferences[target.type] = {};
+          }
+          if(!state.preferences[target.type][target.key]){
+            state.preferences[target.type][target.key] = [];
+          }
           state.preferences[target.type][target.key].push(target.value)
+
+        },
+        checkMovieExists (state, value) {
+          let ls= state.preferences["likes"]["other"]
+          if(ls){
+            return ls.includes(value)
+          }
+          return false
         },
 
         delete(state, target) {

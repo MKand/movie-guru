@@ -30,23 +30,29 @@
           <Info class="w-6 h-6" /></button>
         <button
           class="bg-green-500 text-white hover:bg-green-600 font-semibold py-2 px-4 rounded-lg m-2 shadow-md transition-colors duration-300 hover:scale-105 flex items-center"
-          @click="wantToWatch(m.title,m.poster)"
+          @click="selectedMovie(m.title)"
+          
         >
-          <Play class="w-6 h-6" /></button>
+          <MinusCircle v-if="this.checkMovieExists(m.title)" class="w-6 h-6" />
+          <PlusCircle v-else class="w-6 h-6" /></button>
+
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import { Play, Info } from "lucide-vue-next";
+import { PlusCircle, MinusCircle, Info } from "lucide-vue-next";
 import ChatClientService from "@/services/ChatClientService";
-import PlayerService from "@/services/PlayerService";
+import PreferencesClientService from "@/services/PreferencesClientService";
+import store from "@/stores";
+import { mapGetters } from "vuex";
 
 export default {
   components: {
-    Play,
+    PlusCircle,
     Info,
+    MinusCircle
   },
   props: {
     movies: {
@@ -62,8 +68,15 @@ export default {
   data() {
     return {
       buttonsToShow: {},
+      store
     };
   },
+
+  computed: {
+    ...mapGetters({
+      checkMovieExists: "preferences/checkMovieExists" 
+    })
+    },
   methods: {
     tellMeMore(title) {
       const message = "Tell me more about the movie: " + title;
@@ -73,13 +86,18 @@ export default {
           console.log("Error sending chat message:", error);
         });
     },
-    wantToWatch(title, poster) {
-      console.log(`Want to watch: ${title}`);
-      if(this.traceId && this.spanId){
+    selectedMovie(title) {
+      if(this.checkMovieExists(title)){
+        this.store.commit('preferences/delete', {"type" : "likes", "key": "other", "value":title})
+      }
+      else{
+        if(this.traceId && this.spanId){
         ChatClientService.submitFeatureAcceptance(this.traceId, this.spanId, 'accepted')
       }
-      console.log("Current value", PlayerService.playMovie)
-      PlayerService.setPoster(poster);
+      this.store.commit('preferences/add', {"type" : "likes", "key": "other", "value":title})
+      }
+     
+      PreferencesClientService.update(this.store.getters['preferences/preferences'])      
     },
     showButtons(title) {
       this.buttonsToShow[title] = true;
