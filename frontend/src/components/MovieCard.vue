@@ -76,7 +76,7 @@ export default {
     wantToWatch(title, poster) {
       console.log(`Want to watch: ${title}`);
       if(this.traceId && this.spanId){
-        ChatClientService.pickedFilm(this.traceId, this.spanId)
+        ChatClientService.submitFeatureAcceptance(this.traceId, this.spanId, 'accepted')
       }
       console.log("Current value", PlayerService.playMovie)
       PlayerService.setPoster(poster);

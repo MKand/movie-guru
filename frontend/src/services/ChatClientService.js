@@ -1,6 +1,7 @@
 import { fetch } from 'whatwg-fetch'
 import store from '../stores';
 import { ref } from 'vue';
+
 class ChatClientService {
 
   handleAddedUserMessage = null;
@@ -9,6 +10,7 @@ class ChatClientService {
   handleSubmittedFeedback = null;
   traceId = ref(null);
   spanId = ref(null);
+  featureAccepted = ref(false)
 
   clearTraceIds() {
     this.traceId.value = null;
@@ -22,6 +24,7 @@ class ChatClientService {
 
   async send(message) {
     this.handleAddedUserMessage();
+
 
     store.commit('chat/add', { "message": message, "sender": "user" })
     this.clearTraceIds();
@@ -45,6 +48,12 @@ class ChatClientService {
         store.commit('chat/addMovies', json["context"])
         this.setTraceIds(json["traceId"], json["spanId"])
         this.handleAgentMessage();
+        if(this.traceId.value && this.spanId.value){
+          // Setting acceptance as rejected by default
+          if(json["context"] != []){
+            this.submitFeatureAcceptance(this.traceId.valueString, this.spanId.valueString, "unknown")
+          }
+        }
       }
       else if (result == "ERROR" || result == "QUOTALIMIT" || result == "UNSAFE") {
         this.handleErrorMessage(json["answer"]|| "unknown error occurred")
@@ -52,6 +61,7 @@ class ChatClientService {
       if (json["preferences"]) {
         store.commit('preferences/update', json["preferences"])
       }
+
       return json
     } catch (error) {
       this.handleErrorMessage("I've had trouble connecting to the server. Try again.")
@@ -79,10 +89,7 @@ class ChatClientService {
       store.commit('chat/addPlaceHolderMovies', context)
       store.commit('preferences/update', preferences)
     }
-  } catch(error) {
-    console.error(error.message);
-    throw error;
-  }
+  } 
 
   async getHistory() {
     const requestOptions = {
@@ -97,10 +104,7 @@ class ChatClientService {
     }
     const json = await response.json();
     return json
-  } catch(error) {
-    console.error(error.message);
-    throw error;
-  }
+  } 
 
   async submitFeedback(traceId, spanId, valueString) {
     const requestOptions = {
@@ -119,11 +123,11 @@ class ChatClientService {
     return json
   }
 
-  async pickedFilm(traceId, spanId) {
+  async submitFeatureAcceptance(traceId, spanId, accepted) {
     const requestOptions = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ traceId: traceId, spanId: spanId, name: "chatFlow" }),
+      body: JSON.stringify({ traceId: traceId, spanId: spanId, name: "chatFlow", accepted: accepted }),
 
     };
     const response = await fetch(import.meta.env.VITE_CHAT_SERVER_URL + '/acceptance', requestOptions)

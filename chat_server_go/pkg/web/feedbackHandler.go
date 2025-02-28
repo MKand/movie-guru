@@ -30,9 +30,10 @@ type Feedback struct {
 }
 
 type Acceptance struct {
-	Name    string `json:"name"`
-	TraceId string `json:"traceId"`
-	SpanId  string `json:"spanId"`
+	Name     string `json:"name"`
+	TraceId  string `json:"traceId"`
+	SpanId   string `json:"spanId"`
+	Accepted string `json:"accepted"`
 }
 
 func createFeedbackHandler(URL string) http.HandlerFunc {
@@ -118,7 +119,7 @@ func createAcceptanceHandler(URL string) http.HandlerFunc {
 				"name":       acceptance.Name,
 				"traceId":    acceptance.TraceId,
 				"spanId":     acceptance.SpanId,
-				"acceptance": map[string]interface{}{"value": "accepted"},
+				"acceptance": map[string]interface{}{"value": acceptance.Accepted},
 			}
 			jsonData, err := json.Marshal(inputJSON)
 			if err != nil {

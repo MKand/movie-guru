@@ -8,14 +8,17 @@
           class="p-1 m-1 bg-none text-xl rounded-md hover:bg-green-300 transform transition-transform duration-300"
           :class="{ 'scale-125': isExpanding }"
         >
-        <ThumbsUp class="w-6 h-6 text-green-500 opacity-56" />
+        <ThumbsUp v-if="positiveSelected" fill="#39ff14"  class="w-6 h-6 text-green-500 opacity-100" />
+        <ThumbsUp v-else class="w-6 h-6 text-green-500 opacity-56" />
+
         </button>
         <button
           @click="submitFeedback('negative', $event)"
           class="p-1 m-1 bg-none text-xl rounded-md hover:bg-red-200"
-          :class="{ shake: isShaking }"
+          :class="{ shake: isShaking}"
         >
-        <ThumbsDown class="w-6 h-6 text-red-400 opacity-70" />
+        <ThumbsDown fill="red" v-if="negativeSelected" class=" w-6 h-6 text-red-400 opacity-100" />
+        <ThumbsDown v-else class="w-6 h-6 text-red-400 opacity-70" />
 
         </button>
       </div>
@@ -45,6 +48,8 @@
       return {
         isShaking: false,
         isExpanding: false,
+        positiveSelected: false,
+        negativeSelected: false
       };
     },
     methods: {
@@ -54,9 +59,14 @@
           setTimeout(() => {
             ChatClientService.submitFeedback(this.traceId, this.spanId, valueString);
           }, 600);
+          this.positiveSelected = true;
+          this.negativeSelected = false;
+
         } else {
           this.triggerShake();
           ChatClientService.submitFeedback(this.traceId, this.spanId, valueString);
+          this.negativeSelected = true;
+          this.positiveSelected = false;
         }
       },
       triggerShake() {

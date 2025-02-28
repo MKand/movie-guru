@@ -6,7 +6,6 @@ import FeaturedMovies from '@/components/FeaturedMovies.vue';
 import PlayerWindow from '@/components/PlayerWindow.vue';
 import store from '@/stores';
 import PlayerService from '@/services/PlayerService';
-import ChatClientService from '@/services/ChatClientService';
 
 export default {
   
