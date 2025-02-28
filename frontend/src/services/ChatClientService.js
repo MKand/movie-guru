@@ -51,7 +51,7 @@ class ChatClientService {
         if(this.traceId.value && this.spanId.value){
           // Setting acceptance as rejected by default
           if(json["context"] != []){
-            this.submitFeatureAcceptance(this.traceId.valueString, this.spanId.valueString, "unknown")
+            this.submitFeatureAcceptance(this.traceId.value, this.spanId.value, "rejected")
           }
         }
       }
@@ -65,7 +65,6 @@ class ChatClientService {
       return json
     } catch (error) {
       this.handleErrorMessage("I've had trouble connecting to the server. Try again.")
-      throw error;
     }
   }
 
