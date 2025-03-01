@@ -31,7 +31,7 @@
         <button
           class="bg-green-500 text-white hover:bg-green-600 font-semibold py-2 px-4 rounded-lg m-2 shadow-md transition-colors duration-300 hover:scale-105 flex items-center"
           @click="selectedMovie(m.title)"
-          
+          :class="{'bg-red-400':checkMovieExists(m.title)}"
         >
           <MinusCircle v-if="this.checkMovieExists(m.title)" class="w-6 h-6" />
           <PlusCircle v-else class="w-6 h-6" /></button>

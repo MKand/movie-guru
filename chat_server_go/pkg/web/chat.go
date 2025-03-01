@@ -169,7 +169,10 @@ func chatSingleFlow(ctx context.Context, deps *Dependencies, metadata *db.Metada
 	agentResp.Result = types.SUCCESS
 	agentResp.TraceId = chatResp.TraceId
 	agentResp.SpanId = chatResp.SpanId
-
+	// If the user made a bad query, update it
+	if chatResp.WrongQuery {
+		agentResp.Result = types.BAD_QUERY
+	}
 	// Wait for goroutines to complete
 	wg.Wait()
 
@@ -181,6 +184,7 @@ func chatSingleFlow(ctx context.Context, deps *Dependencies, metadata *db.Metada
 		slog.ErrorContext(ctx, "UserProfileFlowClient failed", err.Error(), err)
 	}
 
+	updateSuccessChatMeters(ctx, agentResp, meters)
 	return agentResp
 }
 
@@ -223,5 +227,20 @@ func updateChatQualityMeters(ctx context.Context, meters *m.ChatMeters, respQual
 		meters.COutcomeCounter.Add(ctx, 1, metric.WithAttributes(attribute.String("Outcome", "Rejected")))
 	default:
 		meters.COutcomeCounter.Add(ctx, 1, metric.WithAttributes(attribute.String("Outcome", "Unclassified")))
+	}
+}
+
+func updateSuccessChatMeters(ctx context.Context, agentResp *types.AgentResponse, meters *m.ChatMeters) {
+	if agentResp.Result == types.UNSAFE {
+		meters.CSafetyIssueCounter.Add(ctx, 1)
+	}
+	if agentResp.Result == types.SUCCESS {
+		meters.CSuccessCounter.Add(ctx, 1)
+	}
+	if agentResp.Result == types.QUOTALIMIT {
+		meters.CQuotaLimitCounter.Add(ctx, 1)
+	}
+	if agentResp.Result == types.BAD_QUERY {
+		meters.CWrongQueryCounter.Add(ctx, 1)
 	}
 }
