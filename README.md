@@ -27,6 +27,7 @@
     - [Indexer](#indexer)
     - [Support](#support)
   - [License](#license)
+  - [Known Issues](#known-issues)
 
 ## Movie Guru
 
@@ -228,3 +229,8 @@ The repo is intended for educational/hobbyists use only.
 ## License
 
 The AI generated movie data and posters in the repo are licensed under the Creative Commons Attribution 4.0 International License. To view a copy of this license, visit <http://creativecommons.org/licenses/by/4.0/>
+
+## Known Issues
+
+- Cannot handle movie names with apostrophes. This clashes with ILIKE query construction.
+- Cannot find directors even if present in context.

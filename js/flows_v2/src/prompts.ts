@@ -68,7 +68,7 @@ Determine the appropriate search category for the query: KEYWORD, VECTOR, or MIX
     * Queries about movie quality, length, or release year, or specific actors or directors, or exact titles can often be transformed for KEYWORD search.
     * If the query contains text searches, make them case-insensitive using ILIKE.
     * When the search is based on titles or names, *always* use the ILIKE operator to circumvent potential spelling and punctuation mismatches. Use the format ILIKE "'%<search_term>%'".
-    * Remove all special characters (e.g., ', @, #, $, %, etc.) from the names or titles before using ILIKE, leaving only letters, numbers, and spaces.
+    * **IMPORTANT**: Remove all special characters (e.g., ', @, #, $,%, etc.) from the names or titles before using ILIKE, leaving only letters, numbers, and spaces. Remove any apostrophes in titles
     * **Crucially, when the query asks for a specific detail *of* a movie (e.g., "director of X," "plot of Y"), prioritize identifying the movie using "title ILIKE '%<movietitle>%'" as the primary KEYWORD query. Then, if necessary, add further filtering for other details (e.g., actor, director).**
     * When searching for a director or actor in general (e.g., "movies with Tom Hanks"), ensure the "ILIKE ANY" operator is used correctly to match against the "director" or "actors" fields, respectively. The search term should be enclosed in single quotes.
     * There are some examples given below. Do not take the examples literally, but use them to create a general method for parsing the input and constructing the right output.
@@ -89,6 +89,7 @@ Determine the appropriate search category for the query: KEYWORD, VECTOR, or MIX
             Old: released < 2005
 
     Examples of transformed KEYWORD queries:
+    * IMPORTANT: Remove all special characters (e.g.: @, #, $,%,', etc.) from the names or titles before using ILIKE, leaving only letters, numbers, and spaces. Pay special care that you remove apostrophes from titles.
 
     -   Input: "great movie that is short"
         Output:
@@ -132,12 +133,12 @@ Determine the appropriate search category for the query: KEYWORD, VECTOR, or MIX
             VectorQuery: "movies like The Matrix"
             justification: "The query asks for movies similar to the Matrix and includes a KEYWORD filter ('released after 2000')."
 
-    -   Input: "Is the rating of the Matrix good?"
+    -   Input: "Is the rating of The Mummy's Revenge good?"
         Output:
             searchCategory: KEYWORD
-            KeywordQuery: "title ILIKE '%The Matrix%'"
+            KeywordQuery: "title ILIKE '%The Mummys Revenge%'" (removed apostrophe from title)
             VectorQuery: ""
-            justification: "The query asks about a specific detail ('rating') of a specific movie ('The Matrix'). We prioritize finding the movie using 'title ILIKE'."
+            justification: "The query asks about a specific detail ('rating') of a specific movie ('The Mummmys Revenge'). I removed the apostrophe from the title. We prioritize finding the movie using 'title ILIKE'."
      -  Input: "What is the plot of The Matrix?"
         Output:
             searchCategory: KEYWORD

@@ -77,7 +77,7 @@ steps:
 - name: 'gcr.io/cloud-builders/docker'
   id: "build-flows-image"
   waitFor: ['-']
-  dir: './js/flows'
+  dir: './js/flows_v2'
   entrypoint: "sh"
   args:
     - -xe 
