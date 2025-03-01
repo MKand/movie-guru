@@ -25,7 +25,6 @@ class ChatClientService {
   async send(message) {
     this.handleAddedUserMessage();
 
-
     store.commit('chat/add', { "message": message, "sender": "user" })
     this.clearTraceIds();
 
@@ -36,6 +35,10 @@ class ChatClientService {
       credentials: 'include'
     };
     try {
+      if (message == "error"){
+        throw new Error();
+      }
+
       const response = await fetch(import.meta.env.VITE_CHAT_SERVER_URL + '/chat', requestOptions)
 
       if (!response.ok) {

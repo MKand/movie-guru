@@ -108,7 +108,7 @@ export default {
       this.newUserMessage = "";
       this.scrollToBottom();
       this.errorMessage = ""
-      this.errorMessage = false;
+      this.errorOccured = false;
       this.processingRequest = true;
     },
 
@@ -116,7 +116,7 @@ export default {
       this.newUserMessage = "";
       this.scrollToBottom();
       this.errorMessage = ""
-      this.errorMessage = false;
+      this.errorOccured = false;
       this.processingRequest = false;
     },
 
