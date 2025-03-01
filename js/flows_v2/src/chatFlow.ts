@@ -19,6 +19,8 @@ import { ai } from './genkitConfig';
 import { GenerationBlockedError } from 'genkit';
 
 import {  SafetyTransformPrompt, SafetyPromptOutputSchema } from './safetyFlow';
+import { QueryTransformPrompt } from './queryTransformFlow';
+import { QueryTransformFlowOutputSchema } from './queryTransformTypes';
 
 export const ChatFlow = ai.defineFlow(
     {
@@ -32,15 +34,22 @@ export const ChatFlow = ai.defineFlow(
             const safetyRawOutput =  await SafetyTransformPrompt({
                 userMessage: input.userMessage,
               });
-              const safeOutput = safetyRawOutput.output ??  SafetyPromptOutputSchema.parse({});
-              const safetyOutput = SafetyPromptOutputSchema.parse(safeOutput);
+              const defaultSafetyOutput = safetyRawOutput.output ??  SafetyPromptOutputSchema.parse({});
+              const safetyOutput = SafetyPromptOutputSchema.parse(defaultSafetyOutput);
+            
             if(safetyOutput.safetyIssue == true || safetyOutput.wrongQuery == true){
                 chatResponse.modelOutputMetadata.safetyIssue = safetyOutput.safetyIssue;
                 chatResponse.wrongQuery = safetyOutput.wrongQuery
                 return chatResponse;
             }
-
-
+            const qtRawOutput = await QueryTransformPrompt({
+                history: input.history,
+                userPreferences: input.userPreferences,
+                userMessage: input.userMessage
+            })
+            const defaultQTOutput = qtRawOutput.output ??  QueryTransformFlowOutputSchema.parse({});
+            const qtOutput = QueryTransformFlowOutputSchema.parse(defaultQTOutput);
+            
             return chatResponse
         }
         catch (error) {

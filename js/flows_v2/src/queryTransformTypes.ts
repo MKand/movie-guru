@@ -16,7 +16,8 @@
 
 import { z } from 'genkit';
 import { ChatFlowInputSchema } from './chatFlowTypes';
-// USERINTENT as Zod Enum
+
+// FOLLOWUP_ACTION as Zod Enum
 export const FOLLOWUP_ACTION = z.enum([
   'SEARCH_REQUIRED',
   'SEARCH_NOT_REQUIRED',
