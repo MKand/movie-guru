@@ -21,6 +21,9 @@ import { GenerationBlockedError } from 'genkit';
 import {  SafetyTransformPrompt, SafetyPromptOutputSchema } from './safetyFlow';
 import { QueryTransformPrompt } from './queryTransformFlow';
 import { QueryTransformFlowOutputSchema } from './queryTransformTypes';
+import { MovieDocFlow } from './docRetriever';
+import { MovieFlowPrompt } from './movieFlow';
+import { MovieFlowOutputSchema } from './movieFlowTypes';
 
 export const ChatFlow = ai.defineFlow(
     {
@@ -31,6 +34,8 @@ export const ChatFlow = ai.defineFlow(
     async(input) => {
             const chatResponse: ChatFlowOutput = ChatOutputSchema.parse({});
             try{
+            
+            // Initial safety check
             const safetyRawOutput =  await SafetyTransformPrompt({
                 userMessage: input.userMessage,
               });
@@ -42,6 +47,9 @@ export const ChatFlow = ai.defineFlow(
                 chatResponse.wrongQuery = safetyOutput.wrongQuery
                 return chatResponse;
             }
+            
+            // Search Required Check
+
             const qtRawOutput = await QueryTransformPrompt({
                 history: input.history,
                 userPreferences: input.userPreferences,
@@ -49,7 +57,29 @@ export const ChatFlow = ai.defineFlow(
             })
             const defaultQTOutput = qtRawOutput.output ??  QueryTransformFlowOutputSchema.parse({});
             const qtOutput = QueryTransformFlowOutputSchema.parse(defaultQTOutput);
+
+            // Search if required
+            var movieContexts: MovieContext[] = []
+            if(qtOutput.followupAction == "SEARCH_REQUIRED"){
+                movieContexts = await MovieDocFlow( {query: qtOutput.searchQuery})
+            }
             
+            // Final RAG
+            const movieFlowRawOutput = await MovieFlowPrompt({
+                history: input.history,
+                userPreferences: input.userPreferences,
+                contextDocuments: movieContexts,
+                userMessage: input.userMessage
+            })
+            const defaultMovieQOutput = movieFlowRawOutput.output ??  MovieFlowOutputSchema.parse({});
+            const movieQAOutput = MovieFlowOutputSchema.parse(defaultMovieQOutput);
+
+            // Transform into chat Response
+            chatResponse.answer = movieQAOutput.response;
+            chatResponse.relevantMovies = movieQAOutput.relevantMovies;
+            chatResponse.contextDocuments = parseContexts(movieQAOutput.relevantMovies, movieContexts);
+            chatResponse.modelOutputMetadata.justification = movieQAOutput.justification;
+
             return chatResponse
         }
         catch (error) {

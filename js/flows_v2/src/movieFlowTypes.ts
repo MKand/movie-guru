@@ -53,8 +53,7 @@ export type MovieFlowInput = z.infer<typeof MovieFlowInputSchema>
 
 // MovieFlowOutput schema
 export const MovieFlowOutputSchema = z.strictObject({
-  answer: z.string().default(""),
+  response: z.string().default(""),
   relevantMovies: z.array(RelevantMovieSchema).optional().default([]), // Changed to 'relevantMovies' for clarity
-  wrongQuery: z.boolean().optional().default(false),
-  modelOutputMetadata: ModelOutputMetadataSchema.default(ModelOutputMetadataSchema.parse({}))
+  justification: z.string().default("No justification provided")
 });

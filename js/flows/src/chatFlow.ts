@@ -53,7 +53,6 @@ export const ChatFlow = ai.defineFlow(
             chatResponse.modelOutputMetadata = movieFlowResponse.modelOutputMetadata
             chatResponse.relevantMovies = movieFlowResponse.relevantMovies
             chatResponse.wrongQuery = movieFlowResponse.wrongQuery
-            chatResponse.relevantMovies = movieFlowResponse.relevantMovies
             chatResponse.contextDocuments = parseContexts(movieFlowResponse.relevantMovies, movieContexts)
             
             return chatResponse
