@@ -58,7 +58,7 @@ class ChatClientService {
           }
         }
       }
-      else if (result == "ERROR" || result == "QUOTALIMIT" || result == "UNSAFE") {
+      else if (result == "ERROR" || result == "QUOTALIMIT" || result == "UNSAFE" || result == "BAD_QUERY") {
         this.handleErrorMessage(json["answer"]|| "unknown error occurred")
       }
       if (json["preferences"]) {

@@ -172,6 +172,7 @@ func chatSingleFlow(ctx context.Context, deps *Dependencies, metadata *db.Metada
 	// If the user made a bad query, update it
 	if chatResp.WrongQuery {
 		agentResp.Result = types.BAD_QUERY
+		agentResp.Answer = "I cannot answer that question. Please ask me about movies or movie related information."
 	}
 	// Wait for goroutines to complete
 	wg.Wait()
