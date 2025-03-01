@@ -15,16 +15,12 @@
  */
 
 import { z } from 'genkit';
-import { ModelOutputMetadata, ModelOutputMetadataSchema } from './modelOutputMetadataTypes';
 import { ChatFlowInputSchema } from './chatFlowTypes';
-// USERINTENT as Zod Enum
-export const USERINTENT = z.enum([
-  'UNCLEAR',
-  'GREET',
-  'END_CONVERSATION',
-  'REQUEST',
-  'RESPONSE',
-  'ACKNOWLEDGE',
+
+// FOLLOWUP_ACTION as Zod Enum
+export const FOLLOWUP_ACTION = z.enum([
+  'SEARCH_REQUIRED',
+  'SEARCH_NOT_REQUIRED',
 ]);
 
 
@@ -56,16 +52,14 @@ export const SimpleMessageSchema = z.object({
 
 export type SimpleMessage = z.infer<typeof SimpleMessageSchema>
 
-
-
 export type QueryTransformFlowInput = z.infer<typeof ChatFlowInputSchema>
 
 
 // QueryTransformFlowOutput schema
 export const QueryTransformFlowOutputSchema = z.strictObject({
-  transformedQuery: z.string().optional().default(""),
-  userIntent: USERINTENT.default("UNCLEAR"),
-  modelOutputMetadata: ModelOutputMetadataSchema.default(ModelOutputMetadataSchema.parse({})),
+  searchQuery: z.string().optional().default(""),
+  followupAction: FOLLOWUP_ACTION.default("SEARCH_NOT_REQUIRED"),
+  justification: z.string().default("No justification provided")
 });
 
 export type QueryTransformFlowOutput = z.infer<typeof QueryTransformFlowOutputSchema>

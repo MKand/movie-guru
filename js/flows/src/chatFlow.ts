@@ -12,17 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-    USERINTENT,
-    QueryTransformFlowOutput
-  } from './queryTransformTypes';
 import { ChatFlowInputSchema, ChatFlowOutput, ChatOutputSchema } from './chatFlowTypes';
 import { MovieContext, RelevantMovie } from './movieFlowTypes';
 
 import { ai } from './genkitConfig';
-import { QueryTransformFlow } from './queryTransformFlow';
+import { GenerationBlockedError } from 'genkit';
+
+import {  SafetyTransformPrompt, SafetyPromptOutputSchema } from './safetyFlow';
+import { QueryTransformPrompt } from './queryTransformFlow';
+import { QueryTransformFlowOutputSchema } from './queryTransformTypes';
 import { MovieDocFlow } from './docRetriever';
-import { MovieFlow } from './movieFlow';
+import { MovieFlowPrompt } from './movieFlow';
+import { MovieFlowOutputSchema } from './movieFlowTypes';
 
 export const ChatFlow = ai.defineFlow(
     {
@@ -31,36 +32,72 @@ export const ChatFlow = ai.defineFlow(
         outputSchema: ChatOutputSchema,
     },
     async(input) => {
-        try{
-            const chatResponse: ChatFlowOutput = ChatOutputSchema.parse({})
-            const qtResponse: QueryTransformFlowOutput = await QueryTransformFlow(input)
-            if (qtResponse.modelOutputMetadata.safetyIssue || qtResponse.modelOutputMetadata.quotaIssue){
-                 chatResponse.modelOutputMetadata = qtResponse.modelOutputMetadata
-                 return chatResponse
+            const chatResponse: ChatFlowOutput = ChatOutputSchema.parse({});
+            try{
+            
+            // Initial safety check
+            const safetyRawOutput =  await SafetyTransformPrompt({
+                userMessage: input.userMessage,
+              });
+              const defaultSafetyOutput = safetyRawOutput.output ??  SafetyPromptOutputSchema.parse({});
+              const safetyOutput = SafetyPromptOutputSchema.parse(defaultSafetyOutput);
+            
+            if(safetyOutput.safetyIssue == true || safetyOutput.wrongQuery == true){
+                chatResponse.modelOutputMetadata.safetyIssue = safetyOutput.safetyIssue;
+                chatResponse.wrongQuery = safetyOutput.wrongQuery
+                return chatResponse;
             }
+            
+            // Search Required Check
+
+            const qtRawOutput = await QueryTransformPrompt({
+                history: input.history,
+                userPreferences: input.userPreferences,
+                userMessage: input.userMessage
+            })
+            const defaultQTOutput = qtRawOutput.output ??  QueryTransformFlowOutputSchema.parse({});
+            const qtOutput = QueryTransformFlowOutputSchema.parse(defaultQTOutput);
+
+            // Search if required
             var movieContexts: MovieContext[] = []
-            if (qtResponse.userIntent==USERINTENT.parse("REQUEST" ) || qtResponse.userIntent==USERINTENT.parse("RESPONSE")){
-                 movieContexts = await MovieDocFlow( {query: qtResponse.transformedQuery})
+            if(qtOutput.followupAction == "SEARCH_REQUIRED"){
+                movieContexts = await MovieDocFlow( {query: qtOutput.searchQuery})
             }
-            const movieFlowResponse = await MovieFlow({
+            
+            // Final RAG
+            const movieFlowRawOutput = await MovieFlowPrompt({
                 history: input.history,
                 userPreferences: input.userPreferences,
                 contextDocuments: movieContexts,
                 userMessage: input.userMessage
             })
-            
-            chatResponse.answer = movieFlowResponse.answer;
-            chatResponse.modelOutputMetadata = movieFlowResponse.modelOutputMetadata
-            chatResponse.relevantMovies = movieFlowResponse.relevantMovies
-            chatResponse.wrongQuery = movieFlowResponse.wrongQuery
-            chatResponse.relevantMovies = movieFlowResponse.relevantMovies
-            chatResponse.contextDocuments = parseContexts(movieFlowResponse.relevantMovies, movieContexts)
-            
+            const defaultMovieQOutput = movieFlowRawOutput.output ??  MovieFlowOutputSchema.parse({});
+            const movieQAOutput = MovieFlowOutputSchema.parse(defaultMovieQOutput);
+
+            // Transform into chat Response
+            chatResponse.answer = movieQAOutput.response;
+            chatResponse.relevantMovies = movieQAOutput.relevantMovies;
+            chatResponse.contextDocuments = parseContexts(movieQAOutput.relevantMovies, movieContexts);
+            chatResponse.modelOutputMetadata.justification = movieQAOutput.justification;
+
             return chatResponse
         }
         catch (error) {
-            console.error("ChatFlow: Error generating response:", error);
-            throw error;
+            if (error instanceof GenerationBlockedError){
+        
+                console.error("ChatFlow: GenerationBlockedError generating response:", error.message);
+                chatResponse.modelOutputMetadata.safetyIssue = true;
+                return chatResponse;
+              }
+              else if(error instanceof Error && (error.message.includes('429') || error.message.includes('RESOURCE_EXHAUSTED'))){
+                console.error("ChatFlow: There is a quota issue:", error.message);
+                chatResponse.modelOutputMetadata.quotaIssue = true;
+                return chatResponse;
+                }
+                else {
+                console.error("ChatFlow: Error generating response:", error);
+                throw error;
+              }
         }
     }
 )

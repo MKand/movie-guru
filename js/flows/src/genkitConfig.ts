@@ -31,7 +31,9 @@ if(gemini20){
   model = gemini20Flash001
 }
 
-enableFirebaseTelemetry();
+enableFirebaseTelemetry({
+  "forceDevExport": true
+});
 
 
 initializeApp({

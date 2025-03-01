@@ -16,6 +16,7 @@ package web
 
 import (
 	"context"
+	"log/slog"
 	"os"
 	"strconv"
 
@@ -25,7 +26,6 @@ import (
 
 	"github.com/movie-guru/pkg/db"
 	metrics "github.com/movie-guru/pkg/metrics"
-	"golang.org/x/exp/slog"
 )
 
 func enableCORS(allowedOrigins []string, next http.Handler) http.Handler {
@@ -70,19 +70,20 @@ func StartServer(ctx context.Context, ulh *UserLoginHandler, metadata *db.Metada
 
 	}
 
+	FEEDBACK_URL := os.Getenv("FEEDBACK_URL")
+	loginMeters := metrics.NewLoginMeters()
+	hcMeters := metrics.NewHCMeters()
+	chatMeters := metrics.NewChatMeters()
 	useAuth, err := strconv.ParseBool(os.Getenv("USE_AUTH"))
 	if err != nil {
 		useAuth = false
 	}
-
-	loginMeters := metrics.NewLoginMeters()
-	hcMeters := metrics.NewHCMeters()
-	chatMeters := metrics.NewChatMeters()
-
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/", createHealthCheckHandler(deps, hcMeters))
 	mux.HandleFunc("/chat", createChatHandler(deps, chatMeters, metadata))
+	mux.HandleFunc("/feedback", createFeedbackHandler(FEEDBACK_URL))
+	mux.HandleFunc("/acceptance", createAcceptanceHandler(FEEDBACK_URL))
 	mux.HandleFunc("/history", createHistoryHandler(metadata))
 	mux.HandleFunc("/preferences", createPreferencesHandler(deps.DB))
 	mux.HandleFunc("/startup", createStartupHandler(deps))

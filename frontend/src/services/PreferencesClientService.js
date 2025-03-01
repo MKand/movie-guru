@@ -1,4 +1,4 @@
-import {fetch as fetchPolyfill} from 'whatwg-fetch'
+import {fetch} from 'whatwg-fetch'
 import store  from '../stores';
 
 class PreferencesClientService {
@@ -8,7 +8,7 @@ class PreferencesClientService {
         headers: { 'Content-Type': 'application/json'},
         credentials: 'include'
     };
-    const response = await fetchPolyfill(import.meta.env.VITE_CHAT_SERVER_URL + '/preferences', requestOptions)
+    const response = await fetch(import.meta.env.VITE_CHAT_SERVER_URL + '/preferences', requestOptions)
     if (!response.ok) {
         throw new Error(`Response status: ${response.status}`);
       }
@@ -27,7 +27,7 @@ class PreferencesClientService {
           body: JSON.stringify({ content: store.getters['preferences/preferences'] }),
           credentials: 'include'
       };
-      const response = await fetchPolyfill(import.meta.env.VITE_CHAT_SERVER_URL + '/preferences', requestOptions)
+      const response = await fetch(import.meta.env.VITE_CHAT_SERVER_URL + '/preferences', requestOptions)
       if (!response.ok) {
           throw new Error(`Response status: ${response.status}`);
         }

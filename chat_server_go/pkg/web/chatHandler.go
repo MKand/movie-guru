@@ -15,16 +15,14 @@
 package web
 
 import (
-	"context"
 	"encoding/json"
+	"log/slog"
 	"net/http"
 	"time"
 
 	"github.com/movie-guru/pkg/db"
 
 	m "github.com/movie-guru/pkg/metrics"
-	"github.com/movie-guru/pkg/types"
-	"golang.org/x/exp/slog"
 )
 
 func createChatHandler(deps *Dependencies, meters *m.ChatMeters, metadata *db.Metadata) http.HandlerFunc {
@@ -67,7 +65,6 @@ func createChatHandler(deps *Dependencies, meters *m.ChatMeters, metadata *db.Me
 				return
 			}
 			agentResp := chatSingleFlow(ctx, deps, metadata, ch, user, chatRequest.Content, meters)
-			updateSuccessChatMeters(ctx, agentResp, meters)
 
 			saveHistory(ctx, ch, user, metadata)
 			w.WriteHeader(http.StatusOK)
@@ -75,17 +72,5 @@ func createChatHandler(deps *Dependencies, meters *m.ChatMeters, metadata *db.Me
 			return
 
 		}
-	}
-}
-
-func updateSuccessChatMeters(ctx context.Context, agentResp *types.AgentResponse, meters *m.ChatMeters) {
-	if agentResp.Result == types.UNSAFE {
-		meters.CSafetyIssueCounter.Add(ctx, 1)
-	}
-	if agentResp.Result == types.SUCCESS {
-		meters.CSuccessCounter.Add(ctx, 1)
-	}
-	if agentResp.Result == types.QUOTALIMIT {
-		meters.CQuotaLimitCounter.Add(ctx, 1)
 	}
 }

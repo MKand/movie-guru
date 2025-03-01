@@ -72,26 +72,39 @@ func (flowClient *ChatFlowClient) runFlow(input *types.QueryTransformFlowInput) 
 	client := &http.Client{}
 	ctx := context.Background()
 	resp, err := client.Do(req)
+
 	if err != nil {
 		slog.ErrorContext(ctx, "ChatFlow: Error sending request to Flows", err.Error(), err)
 		return nil, err
 	}
+	defer resp.Body.Close()
+	b, _ := io.ReadAll(resp.Body)
+
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		slog.ErrorContext(ctx, "QualityFlow: Genkit returned an Error", "errorCode", resp.StatusCode)
+		slog.ErrorContext(ctx, "QualityFlow: Genkit returned an Error", "errorCode", resp.StatusCode, "error: ", string(b))
 		return nil, fmt.Errorf("genkit server returned error: %s (%d)", http.StatusText(resp.StatusCode), resp.StatusCode)
 	}
+
+	traceId := ""
+	spanId := ""
+
+	traceId = resp.Header.Get("x-genkit-trace-id")
+	spanId = resp.Header.Get("x-genkit-span-id")
+
+	slog.InfoContext(ctx, fmt.Sprintf("trace id: %s, span id: %s", traceId, spanId))
+
 	var result struct {
 		Result *types.ExtendedMovieFlowOutput `json:"result"`
 	}
-	defer resp.Body.Close()
-
-	b, _ := io.ReadAll(resp.Body)
 
 	err = json.Unmarshal(b, &result)
 	if err != nil {
 		slog.Log(context.Background(), slog.LevelError, "Error unmarshaling JSON response", "error", err)
 		return nil, err
 	}
+
+	result.Result.TraceId = traceId
+	result.Result.SpanId = spanId
 
 	return result.Result, nil
 }
