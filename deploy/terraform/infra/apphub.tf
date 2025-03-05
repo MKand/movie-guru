@@ -16,6 +16,7 @@ locals {
   global_location = "global"
 }
 module "apphub" {
+  count              = var.use_app_hub ? 1 : 0
   source             = "GoogleCloudPlatform/apphub/google"
   version            = "~> 0.2.0"
   project_id         = var.project_id

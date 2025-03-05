@@ -42,17 +42,3 @@ data "google_firebase_web_app_config" "basic" {
   project    = var.project_id
 }
 
-resource "google_storage_bucket_object" "default" {
-  bucket = google_storage_bucket.default.name
-  name   = "app-config.json"
-  content = jsonencode({
-    gatewayIP         = google_compute_global_address.external_ip.address
-    appId             = google_firebase_web_app.movieguru-web.app_id
-    apiKey            = data.google_firebase_web_app_config.basic.api_key
-    authDomain        = data.google_firebase_web_app_config.basic.auth_domain
-    databaseURL       = lookup(data.google_firebase_web_app_config.basic, "database_url", "")
-    storageBucket     = lookup(data.google_firebase_web_app_config.basic, "storage_bucket", "")
-    messagingSenderId = lookup(data.google_firebase_web_app_config.basic, "messaging_sender_id", "")
-    measurementId     = lookup(data.google_firebase_web_app_config.basic, "measurement_id", "")
-  })
-}

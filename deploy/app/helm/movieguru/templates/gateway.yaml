@@ -26,13 +26,13 @@ spec:
     tls:
       mode: Terminate
       options:
-        networking.gke.io/pre-shared-certs: movie-guru-certificate
+        networking.gke.io/pre-shared-certs: {{ .Values.Gateway.certificate }}
     allowedRoutes:
       kinds:
       - kind: HTTPRoute
   addresses:
     - type: NamedAddress
-      value: movie-guru-external-ip
+      value: {{ .Values.Gateway.IP }}
 ---
 apiVersion: networking.gke.io/v1
 kind: GCPGatewayPolicy

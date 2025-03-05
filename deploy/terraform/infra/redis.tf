@@ -13,9 +13,9 @@
 # limitations under the License.
 
 resource "google_redis_cluster" "cache" {
+  count       = var.use_cloud_infra ? 1 : 0
   name        = var.app_name
   shard_count = 3
-
 
   psc_configs {
     network = google_compute_network.custom.id

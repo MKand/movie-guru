@@ -13,6 +13,7 @@
 # limitations under the License.
 
 locals {
+  count = var.use_cloud_infra ? 1 : 0
   read_replica_ip_configuration = {
     ipv4_enabled                  = false
     ssl_mode                      = "ENCRYPTED_ONLY"
@@ -22,6 +23,7 @@ locals {
 }
 
 resource "random_password" "postgres_password" {
+  count            = var.use_cloud_infra ? 1 : 0
   length           = 16   # Adjust the length as needed
   special          = true # Include special characters (safe ones)
   override_special = "!@#$%^&*()-_"
@@ -30,6 +32,7 @@ resource "random_password" "postgres_password" {
 }
 
 resource "random_password" "postgres_user_password" {
+  count            = var.use_cloud_infra ? 1 : 0
   length           = 16   # Adjust the length as needed
   special          = true # Include special characters (safe ones)
   override_special = "!@#$%^&*()-_"
@@ -38,12 +41,13 @@ resource "random_password" "postgres_user_password" {
 }
 
 module "pg" {
+  count            = var.use_cloud_infra ? 1 : 0
   source           = "terraform-google-modules/sql-db/google//modules/postgresql"
   version          = "~> 23.0"
   name             = var.app_name
   project_id       = var.project_id
   database_version = "POSTGRES_15"
-  root_password    = random_password.postgres_password.result
+  root_password    = random_password.postgres_password[0].result
   region           = var.region
   edition          = "ENTERPRISE_PLUS"
   // Master configurations
@@ -108,23 +112,25 @@ module "pg" {
 }
 
 resource "google_sql_user" "users" {
+  count    = var.use_cloud_infra ? 1 : 0
   name     = "main"
-  instance = module.pg.instance_name
-  password = random_password.postgres_user_password.result
+  instance = module.pg[0].instance_name
+  password = random_password.postgres_user_password[0].result
 }
 
 module "secret-manager" {
+  count      = var.use_cloud_infra ? 1 : 0
   source     = "GoogleCloudPlatform/secret-manager/google"
   version    = "~> 0.4"
   project_id = var.project_id
   secrets = [
     {
       name        = "postgres-main-user-secret"
-      secret_data = random_password.postgres_user_password.result
+      secret_data = random_password.postgres_user_password[0].result
     },
     {
       name        = "postgres-root-password-secret"
-      secret_data = random_password.postgres_password.result
+      secret_data = random_password.postgres_password[0].result
     }
   ]
 }

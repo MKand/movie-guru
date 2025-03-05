@@ -31,6 +31,16 @@ variable "app_name" {
   default     = "movie-guru"
 }
 
+variable "use_cloud_infra" {
+  description = "Use managed CloudSQL, REDIS. Defaults to false"
+  default     = false
+}
+
+variable "use_app_hub" {
+  description = "Use managed App hub. Defaults to false"
+  default     = false
+}
+
 variable "db_name" {
   description = "Database name. Defaults to fake-movies-db"
   default     = "fake-movies-db"

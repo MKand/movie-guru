@@ -155,6 +155,7 @@ func chatSingleFlow(ctx context.Context, deps *Dependencies, metadata *db.Metada
 	agentResp := types.NewAgentResponse()
 	chatResp, err := deps.ChatFlowClient.Run(simpleHistory, userProfile)
 	if agentResp, shouldReturn := processFlowOutput(chatResp.ModelOutputMetadata, err, h, "chatFlow"); shouldReturn {
+		updateSuccessChatMeters(ctx, agentResp, meters)
 		return agentResp
 	}
 
@@ -174,6 +175,8 @@ func chatSingleFlow(ctx context.Context, deps *Dependencies, metadata *db.Metada
 		agentResp.Result = types.BAD_QUERY
 		agentResp.Answer = "I cannot answer that question. Please ask me about movies or movie related information."
 	}
+	updateSuccessChatMeters(ctx, agentResp, meters)
+
 	// Wait for goroutines to complete
 	wg.Wait()
 
@@ -185,7 +188,6 @@ func chatSingleFlow(ctx context.Context, deps *Dependencies, metadata *db.Metada
 		slog.ErrorContext(ctx, "UserProfileFlowClient failed", err.Error(), err)
 	}
 
-	updateSuccessChatMeters(ctx, agentResp, meters)
 	return agentResp
 }
 
@@ -232,16 +234,20 @@ func updateChatQualityMeters(ctx context.Context, meters *m.ChatMeters, respQual
 }
 
 func updateSuccessChatMeters(ctx context.Context, agentResp *types.AgentResponse, meters *m.ChatMeters) {
+
 	if agentResp.Result == types.UNSAFE {
+		slog.InfoContext(ctx, "Updating UNSAFE counter")
 		meters.CSafetyIssueCounter.Add(ctx, 1)
 	}
 	if agentResp.Result == types.SUCCESS {
 		meters.CSuccessCounter.Add(ctx, 1)
 	}
 	if agentResp.Result == types.QUOTALIMIT {
+		slog.InfoContext(ctx, "Updating QUOTALIMIT counter")
 		meters.CQuotaLimitCounter.Add(ctx, 1)
 	}
 	if agentResp.Result == types.BAD_QUERY {
+		slog.InfoContext(ctx, "Updating BADQUERY counter")
 		meters.CWrongQueryCounter.Add(ctx, 1)
 	}
 }

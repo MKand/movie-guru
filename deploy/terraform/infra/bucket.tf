@@ -13,7 +13,7 @@
 # limitations under the License.
 
 resource "google_storage_bucket" "public_bucket" {
-  name          = "${var.project_id}_posters"
+  name          = "${var.project_id}_${var.region}_posters"
   location      = var.region
   force_destroy = true
 
