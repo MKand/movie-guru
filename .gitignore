@@ -23,10 +23,10 @@ pgdata
 
 set_env_vars.sh
 
-# # substituted db init.sql file
-# init_substituted.sql
-# # substituted db init.sql file
-# init_substituted.sql
+# substituted db init.sql file
+init_substituted.sql
+# substituted db init.sql file
+py_init_substituted.sql
 
 posters_small/
 
