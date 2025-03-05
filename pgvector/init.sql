@@ -87,6 +87,8 @@ INSERT INTO "app_metadata" ("appversion", "tokenaudience", "historylength", "max
 INSERT INTO "app_metadata" ("appversion", "tokenaudience", "historylength", "maxusermessagelen", "corsorigin", "retrieverlength", "googlechatmodelname", "googleembeddingmodelname", "serverdomain") VALUES
 ('v1_local', '${PROJECT_ID}', 100, 500, 'http://localhost:4001', 10, '', '', 'http://localhost:8081');
 
+INSERT INTO "app_metadata" ("appversion", "tokenaudience", "historylength", "maxusermessagelen", "corsorigin", "retrieverlength", "googlechatmodelname", "googleembeddingmodelname", "serverdomain") VALUES
+('v1_eu', '${PROJECT_ID}', 100, 500, 'movie-guru-eu.endpoints.${PROJECT_ID}.cloud.goog,locust.locust.svc.cluster.local', 10, '', '', 'https://movie-guru-eu.endpoints.${PROJECT_ID}.cloud.goog/server');
 
 INSERT INTO "invite_codes" ("code", "valid") VALUES
 ('0000',	't');

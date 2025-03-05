@@ -104,13 +104,14 @@ echo -e "\e[92mUploading posters to bucket and deleting local posters\e[0m"
 # Delete zip file
 rm dataset/posters_small.zip
 
-gcloud storage cp ./dataset/posters_small/* "gs://${PROJECT_ID}_posters/" > /dev/null 2>&1
+BUCKET_NAME=${PROJECT_ID}_${REGION}_posters
+gcloud storage cp ./dataset/posters_small/* "gs://${BUCKET_NAME}/" > /dev/null 2>&1
 
 rm -rf dataset/posters_small
 
 echo -e "\e[ Making posters publicly readable\e[0m"
 
-gcloud storage buckets add-iam-policy-binding "gs://${PROJECT_ID}_posters/" \
+gcloud storage buckets add-iam-policy-binding "gs://${BUCKET_NAME}/" \
   --member="allUsers" \
   --role="roles/storage.objectViewer"
 
