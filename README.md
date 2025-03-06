@@ -201,7 +201,7 @@ Once all the required data is added, it is time to run the application that cons
     docker compose up --build
     ```
 
-1. Access the Application Open http://localhost:5173 in your browser.
+1. Access the Application Open http://localhost:4001 in your browser.
 
 ### Clean up
 
