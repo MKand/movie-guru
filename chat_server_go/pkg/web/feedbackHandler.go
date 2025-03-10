@@ -19,6 +19,10 @@ import (
 	"encoding/json"
 	"log/slog"
 	"net/http"
+
+	m "github.com/movie-guru/pkg/metrics"
+	"go.opentelemetry.io/otel/attribute"
+	metric "go.opentelemetry.io/otel/metric"
 )
 
 type Feedback struct {
@@ -36,7 +40,7 @@ type Acceptance struct {
 	Accepted string `json:"accepted"`
 }
 
-func createFeedbackHandler(URL string) http.HandlerFunc {
+func createFeedbackHandler(URL string, meters *m.ChatMeters) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "POST" {
 			ctx := r.Context()
@@ -62,6 +66,8 @@ func createFeedbackHandler(URL string) http.HandlerFunc {
 					"value": feedback.FeedbackExperience,
 				},
 			}
+			meters.CFeedbackCounter.Add(ctx, 1, metric.WithAttributes(attribute.String("Feeback", feedback.FeedbackExperience)))
+
 			jsonData, err := json.Marshal(inputJSON)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusBadRequest)
@@ -97,7 +103,7 @@ func createFeedbackHandler(URL string) http.HandlerFunc {
 	}
 }
 
-func createAcceptanceHandler(URL string) http.HandlerFunc {
+func createAcceptanceHandler(URL string, meters *m.ChatMeters) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "POST" {
 			ctx := r.Context()
@@ -114,6 +120,7 @@ func createAcceptanceHandler(URL string) http.HandlerFunc {
 				http.Error(w, err.Error(), http.StatusBadRequest)
 				return
 			}
+			meters.CAcceptanceCounter.Add(ctx, 1)
 
 			inputJSON := map[string]interface{}{
 				"name":       acceptance.Name,
@@ -129,7 +136,7 @@ func createAcceptanceHandler(URL string) http.HandlerFunc {
 
 			req, err := http.NewRequest("POST", URL, bytes.NewBuffer(jsonData))
 			if err != nil {
-				slog.ErrorContext(ctx, "Feedback: Error sending request to Feedback server", err.Error(), err)
+				slog.ErrorContext(ctx, "Acceptance: Error sending request to Acceptance server", err.Error(), err)
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
@@ -139,13 +146,13 @@ func createAcceptanceHandler(URL string) http.HandlerFunc {
 			resp, err := client.Do(req)
 
 			if err != nil {
-				slog.ErrorContext(ctx, "Feedback: Error sending request to Feedback server", err.Error(), err)
+				slog.ErrorContext(ctx, "Acceptance: Error sending request to Acceptance server", err.Error(), err)
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
 
 			if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-				slog.ErrorContext(ctx, "Feedback: Genkit returned an Error", "errorCode", resp.StatusCode)
+				slog.ErrorContext(ctx, "Acceptance: Genkit returned an Error", "errorCode", resp.StatusCode)
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}

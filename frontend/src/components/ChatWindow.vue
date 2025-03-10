@@ -8,14 +8,14 @@
     <div id="chat-container"
       class="m-2 flex-1 bg-stars1 bg-cover bg-no-repeat bg-center p-4 rounded-lg min-h-[560px] max-h-[560px] shadow-inner overflow-anchor-none overflow-y-auto scrollbar-thin scrollbar-thumb-primary scrollbar-track-accent">
       <div v-for="(m,index) in store.getters['chat/messages']" :key="m.id" class="flex flex-col justify-center">
-        <div v-if="m.sender == 'user'" class="shadow-lg m-1 p-2 rounded-lg bg-secondary text-primary self-end">
+        <div v-if="m.sender == 'user'" class="shadow-lg m-1 p-2 rounded-lg bg-secondary text-primary self-end text-xl">
           <div v-html="renderedMarkdown(m.message)"></div>
          
         </div>
 
         <div v-if="m.sender == 'agent'" class="shadow-lg p-2 m-1 rounded-lg bg-accent text-text self-start">
           <img src="../assets/movie-guru.png" class="w-12 h-12 pb-2 object-contain" />
-          <div v-html="renderedMarkdown(m.message)"></div>
+          <div v-html="renderedMarkdown(m.message)" class="text-xl"></div>
           <div v-if="index == store.getters['chat/messages'].length - 1 && traceId && spanId" class=""> 
             <UserFeedbackCard :traceId="traceId" :spanId="spanId"></UserFeedbackCard>
             </div>
@@ -24,7 +24,7 @@
         <div v-if="m.sender == 'system'" class="shadow-lg p-2 m-1 rounded-lg bg-accent text-text font-bold">
           <img src="../assets/reel-2.jpeg" class="w-12 h-12 pb-2 object-contain" />
 
-          <div v-html="renderedMarkdown(m.message)" class="text-center"></div>
+          <div v-html="renderedMarkdown(m.message)" class="text-center text-xl"></div>
         </div>
       </div>
       <div v-if="this.processingRequest == true" class="shadow-lg p-2 m-1 rounded-lg bg-accent text-text  self-start">
@@ -36,7 +36,7 @@
         class="shadow-lg p-2 m-1 rounded-lg border-4 border-negative bg-accent text-text self-start">
         <img src="../assets/movie-guru.png" class="w-12 h-12 pb-2 object-contain" />
 
-        <div id="error_message" class="text-base font-bold "> {{ this.errorMessage }}</div>
+        <div id="error_message" class="font-bold text-xl"> {{ this.errorMessage }}</div>
       </div>
     </div>
     <div class="mt-4 mx-2">
@@ -138,6 +138,8 @@ export default {
     },
 
     clearHistory() {
+      this.errorMessage = "";
+      this.errorOccured = false;
       ChatClientService.clearHistory().then(() => {
         store.commit('chat/clear')
       }

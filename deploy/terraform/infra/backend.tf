@@ -16,6 +16,6 @@
 
 terraform {
   backend "gcs" {
-    prefix = "tfstate/infra_eu"
+    prefix = "tfstate/infra"
   }
 }

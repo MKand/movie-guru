@@ -27,6 +27,9 @@ class ChatUser(HttpUser):
 
 
     def on_stop(self):
+        self.client.delete(
+                        "/history",
+                    )
         self.client.post("/logout")
 
     def on_start(self):
@@ -58,16 +61,17 @@ class ChatUser(HttpUser):
 
     @task(1)
     def healthcheck(self):
-
         response = self.client.get("/")
 
-    @task(4)
+    @task(8)
     def chat_with_mock(self):
         endConv = False
         history_response = self.client.delete(
                         "/history",
                     )
         chat_answer = "Hi. How can I help you today?"
+        max_turns = 4
+        turns = 0
         while(endConv == False):
             response_type = random.choice(self.RESPONSE_TYPE)
             response_mood = random.choice(self.MOODS)
@@ -89,11 +93,38 @@ class ChatUser(HttpUser):
                         "/chat",
                         json={"content":mock_response_answer}
                     )
-            chat_answer = chat_response.json()["answer"]
+            if (response_mood == "POSITIVE"):
+                self.client.post(
+                        "/feedback",
+                        json={"traceId":chat_response.traceId, "spanId": chat_response.spanId, feedbackExperience:"positive"}
+                    )
             
-            if(response_type == "END_CONVERSATION"): 
+            if (response_mood == "NEGATIVE"):
+                self.client.post(
+                        "/feedback",
+                        json={"traceId":chat_response.traceId, "spanId": chat_response.spanId, feedbackExperience:"negative"}
+                    )
+            
+            if (response_type == "CONTINUE"):
+                self.client.post(
+                        "/acceptance",
+                        json={"traceId":chat_response.traceId, "spanId": chat_response.spanId, accepted:"accepted"}
+                    )
+            
+            if(chat_response.json()["status"] == "SUCCESS"):
+                chat_answer = chat_response.json()["answer"]
+            
+            else:
+                chat_answer = "Sorry, can you repeat that?"
+            
+            turns +=1
+            
+            if(response_type == "END_CONVERSATION" or turns == max_turns): 
                 endConv = True
                 print("--- END CONVERSATION ---")
+                self.client.delete(
+                        "/history",
+                    )
 
     @task(1)
     def chat_unsafe(self):
@@ -104,9 +135,11 @@ class ChatUser(HttpUser):
                     "/chat",
                     json={"content":question}
                 )
-    
+        self.client.delete(
+                        "/history",
+                    )
 
-    @task(1)
+    @task(2)
     def chat_badQuery(self):
         # Post BAD outofscope to movie guru
         question = random.choice(self.BAD_QUESTIONS)
@@ -115,6 +148,9 @@ class ChatUser(HttpUser):
                     "/chat",
                     json={"content":question}
                 )
+        self.client.delete(
+                        "/history",
+                    )
 
 # @task(1)
     # def startup(self):

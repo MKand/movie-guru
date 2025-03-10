@@ -21,6 +21,7 @@ import (
 	"time"
 
 	"github.com/movie-guru/pkg/db"
+	"github.com/movie-guru/pkg/types"
 
 	m "github.com/movie-guru/pkg/metrics"
 )
@@ -55,7 +56,9 @@ func createChatHandler(deps *Dependencies, meters *m.ChatMeters, metadata *db.Me
 			}
 			if len(chatRequest.Content) > metadata.MaxUserMessageLen {
 				slog.InfoContext(ctx, "Input message too long", slog.String("user", user), slog.Any("error", err.Error()))
-				http.Error(w, "Message too long", http.StatusBadRequest)
+				agentResp := types.NewErrorAgentResponse("Input message too long")
+				agentResp.Answer = "Sorry, I cannot process that. The message was too long."
+				meters.CWrongQueryCounter.Add(ctx, 1)
 				return
 			}
 			ch, err := getHistory(ctx, user)

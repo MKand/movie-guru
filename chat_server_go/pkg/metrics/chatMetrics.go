@@ -28,8 +28,9 @@ type ChatMeters struct {
 	COutcomeCounter     metric.Int64Counter
 	CSafetyIssueCounter metric.Int64Counter
 	CWrongQueryCounter  metric.Int64Counter
-
-	CQuotaLimitCounter metric.Int64Counter
+	CFeedbackCounter    metric.Int64Counter
+	CAcceptanceCounter  metric.Int64Counter
+	CQuotaLimitCounter  metric.Int64Counter
 
 	CLatencyHistogram metric.Int64Histogram
 }
@@ -54,7 +55,14 @@ func NewChatMeters() *ChatMeters {
 	if err != nil {
 		log.Printf("Error creating bucketed outcome counter: %v", err)
 	}
-
+	cFeedbackCounter, err := meter.Int64Counter("movieguru_chat_feedback_counter", metric.WithDescription("Bucketed Feedback counter"))
+	if err != nil {
+		log.Printf("Error creating bucketed feedback counter: %v", err)
+	}
+	cAcceptanceCounter, err := meter.Int64Counter("movieguru_chat_acceptance_counter", metric.WithDescription("Bucketed Acceptance counter"))
+	if err != nil {
+		log.Printf("Error creating bucketed feedback counter: %v", err)
+	}
 	cSafetyIssueCounter, err := meter.Int64Counter("movieguru_chat_safetyissue_counter", metric.WithDescription("Safety issue counter"))
 	if err != nil {
 		log.Printf("Error creating safety issue counter: %v", err)
@@ -81,5 +89,7 @@ func NewChatMeters() *ChatMeters {
 		COutcomeCounter:     cOutcomeCounter,
 		CQuotaLimitCounter:  cQuotaLimitCounter,
 		CWrongQueryCounter:  cWrongQueryCounter,
+		CFeedbackCounter:    cFeedbackCounter,
+		CAcceptanceCounter:  cAcceptanceCounter,
 	}
 }

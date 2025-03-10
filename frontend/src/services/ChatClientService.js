@@ -23,22 +23,24 @@ class ChatClientService {
   }
 
   async send(message) {
-    this.handleAddedUserMessage();
+    var requestOptions = {}
+    try{
+      this.handleAddedUserMessage();
+      this.clearTraceIds();
+      requestOptions = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: message }),
+        credentials: 'include'
+      };
+      store.commit('chat/add', { "message": message, "sender": "user" })
 
-    store.commit('chat/add', { "message": message, "sender": "user" })
-    this.clearTraceIds();
+    }
+    catch (error) {
+      this.handleErrorMessage("I've had trouble sending your message. Try again.")
+    }
 
-    const requestOptions = {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ content: message }),
-      credentials: 'include'
-    };
     try {
-      if (message == "error"){
-        throw new Error();
-      }
-
       const response = await fetch(import.meta.env.VITE_CHAT_SERVER_URL + '/chat', requestOptions)
 
       if (!response.ok) {
@@ -53,9 +55,9 @@ class ChatClientService {
         this.handleAgentMessage();
         if(this.traceId.value && this.spanId.value){
           // Setting acceptance as rejected by default
-          if(json["context"] != []){
-            this.submitFeatureAcceptance(this.traceId.value, this.spanId.value, "rejected")
-          }
+          // if(json["context"] != []){
+          //   this.submitFeatureAcceptance(this.traceId.value, this.spanId.value, "rejected")
+          // }
         }
       }
       else if (result == "ERROR" || result == "QUOTALIMIT" || result == "UNSAFE" || result == "BAD_QUERY") {
