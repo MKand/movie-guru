@@ -28,85 +28,6 @@ import (
 	metric "go.opentelemetry.io/otel/metric"
 )
 
-func chat(ctx context.Context, deps *Dependencies, metadata *db.Metadata, h *types.ChatHistory, user string, userMessage string, meters *m.ChatMeters) *types.AgentResponse {
-	h.AddUserMessage(userMessage)
-
-	userProfile, err := deps.DB.GetCurrentProfile(ctx, user)
-	if err != nil {
-		slog.ErrorContext(ctx, "Unable to get profile info for user", err.Error(), err)
-	}
-
-	simpleHistory, err := types.ParseRecentHistory(h.GetHistory(), metadata.HistoryLength)
-	if err != nil {
-		return types.NewErrorAgentResponse(fmt.Sprintf("Error getting user history: %w", err))
-	}
-
-	var wg sync.WaitGroup
-
-	userProfileChan := make(chan *types.UserProfileOutput, 1)
-	errChanProfile := make(chan error, 1)
-
-	// Launch the goroutines
-	// Independant goroutine with seperate context
-	go func() {
-		qualityContext := context.Background()
-		qualityResp, err := deps.ResponseQualityFlowClient.Run(qualityContext, simpleHistory, user)
-		if qualityResp != nil {
-			updateChatQualityMeters(qualityContext, meters, qualityResp)
-		}
-		if err != nil {
-			slog.ErrorContext(qualityContext, "Error updating quality meters", err.Error(), err)
-		}
-	}()
-
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		pResp, err := deps.UserProfileFlowClient.Run(ctx, h, user, userProfile)
-		if err != nil {
-			errChanProfile <- err
-			close(errChanProfile)
-			return
-		}
-		userProfileChan <- pResp
-		close(userProfileChan)
-	}()
-
-	// This is in the main thread, not async
-	qResp, err := deps.QueryTransformFlowClient.Run(simpleHistory, userProfile)
-	if agentResp, shouldReturn := processFlowOutput(qResp.ModelOutputMetadata, err, h, "QTFlow"); shouldReturn {
-		return agentResp
-	}
-
-	movieContext := []*types.MovieContext{}
-	if qResp.Intent == types.USERINTENT(types.REQUEST) || qResp.Intent == types.USERINTENT(types.RESPONSE) {
-		movieContext, err = deps.MovieRetrieverFlowClient.RetriveDocuments(ctx, qResp.TransformedQuery)
-		if agentResp, shouldReturn := processFlowOutput(nil, err, h, "MovieRetFlow"); shouldReturn {
-			return agentResp
-		}
-	}
-
-	mAgentResp, err := deps.MovieFlowClient.Run(movieContext, simpleHistory, userProfile)
-	if agentResp, shouldReturn := processFlowOutput(nil, err, h, "MovieQAFlow"); shouldReturn {
-		return agentResp
-	}
-
-	h.AddAgentMessage(mAgentResp.Answer)
-
-	// Wait for goroutines to complete
-	wg.Wait()
-
-	select {
-	case userProfileOutput := <-userProfileChan:
-		mAgentResp.Preferences = userProfileOutput.UserProfile
-		// Finished processing
-	case err := <-errChanProfile:
-		slog.ErrorContext(ctx, "UserProfileFlowClient failed", err.Error(), err)
-	}
-
-	return mAgentResp
-}
-
 func chatSingleFlow(ctx context.Context, deps *Dependencies, metadata *db.Metadata, h *types.ChatHistory, user string, userMessage string, meters *m.ChatMeters) *types.AgentResponse {
 	h.AddUserMessage(userMessage)
 
@@ -154,28 +75,40 @@ func chatSingleFlow(ctx context.Context, deps *Dependencies, metadata *db.Metada
 	// This is in the main thread, not async
 	agentResp := types.NewAgentResponse()
 	chatResp, err := deps.ChatFlowClient.Run(simpleHistory, userProfile)
+
+	// Process anamolous responses such as quota issues, bad queries, safety issues etc.
 	if agentResp, shouldReturn := processFlowOutput(chatResp.ModelOutputMetadata, err, h, "chatFlow"); shouldReturn {
-		updateSuccessChatMeters(ctx, agentResp, meters)
+		agentResp.TraceId = chatResp.TraceId
+		agentResp.SpanId = chatResp.SpanId
+		updateAnamolyChatMeters(ctx, agentResp, meters)
+		if agentResp.Result == types.UNSAFE { // Unsafe is still a response indicating a successful flow
+			updateSuccessMeter(ctx, meters, agentResp.Result, agentResp.TraceId)
+		} else {
+			slog.InfoContext(ctx, fmt.Sprintf("NOT updating success meter, result: %s, traceId: %s", agentResp.Result, agentResp.TraceId))
+		}
+		return agentResp
+	}
+	if chatResp.WrongQuery {
+		agentResp.Result = types.BAD_QUERY
+		updateSuccessMeter(ctx, meters, agentResp.Result, agentResp.TraceId)
+		updateAnamolyChatMeters(ctx, agentResp, meters)
+		h.RemoveLastMessage()
+		agentResp.Answer = "I cannot answer that question. Please ask me about movies or movie related information."
 		return agentResp
 	}
 
+	// Response is successful
 	relevantMovies := make([]string, 0, len(chatResp.RelevantMoviesTitles))
 	for _, r := range chatResp.RelevantMoviesTitles {
 		relevantMovies = append(relevantMovies, r.Title)
 	}
-	h.AddAgentMessage(chatResp.Answer)
 	agentResp.Answer = chatResp.Answer
 	agentResp.RelevantMovies = relevantMovies
 	agentResp.Context = chatResp.ContextDocuments
 	agentResp.Result = types.SUCCESS
 	agentResp.TraceId = chatResp.TraceId
 	agentResp.SpanId = chatResp.SpanId
-	// If the user made a bad query, update it
-	if chatResp.WrongQuery {
-		agentResp.Result = types.BAD_QUERY
-		agentResp.Answer = "I cannot answer that question. Please ask me about movies or movie related information."
-	}
-	updateSuccessChatMeters(ctx, agentResp, meters)
+	h.AddAgentMessage(chatResp.Answer)
 
 	// Wait for goroutines to complete
 	wg.Wait()
@@ -187,8 +120,14 @@ func chatSingleFlow(ctx context.Context, deps *Dependencies, metadata *db.Metada
 	case err := <-errChanProfile:
 		slog.ErrorContext(ctx, "UserProfileFlowClient failed", err.Error(), err)
 	}
-
+	updateSuccessMeter(ctx, meters, agentResp.Result, agentResp.TraceId)
 	return agentResp
+}
+
+func updateSuccessMeter(ctx context.Context, meters *m.ChatMeters, result types.RESULT, traceId string) {
+	slog.InfoContext(ctx, fmt.Sprintf("Updating success meter, result: %s, traceId: %s", result, traceId))
+	meters.CSuccessCounter.Add(ctx, 1) // The agent behaved as expected.
+
 }
 
 func processFlowOutput(metadata *types.ModelOutputMetadata, err error, h *types.ChatHistory, caller string) (*types.AgentResponse, bool) {
@@ -233,14 +172,11 @@ func updateChatQualityMeters(ctx context.Context, meters *m.ChatMeters, respQual
 	}
 }
 
-func updateSuccessChatMeters(ctx context.Context, agentResp *types.AgentResponse, meters *m.ChatMeters) {
+func updateAnamolyChatMeters(ctx context.Context, agentResp *types.AgentResponse, meters *m.ChatMeters) {
 
 	if agentResp.Result == types.UNSAFE {
 		slog.InfoContext(ctx, "Updating UNSAFE counter")
 		meters.CSafetyIssueCounter.Add(ctx, 1)
-	}
-	if agentResp.Result == types.SUCCESS {
-		meters.CSuccessCounter.Add(ctx, 1)
 	}
 	if agentResp.Result == types.QUOTALIMIT {
 		slog.InfoContext(ctx, "Updating QUOTALIMIT counter")

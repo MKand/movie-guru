@@ -66,7 +66,7 @@ func createFeedbackHandler(URL string, meters *m.ChatMeters) http.HandlerFunc {
 					"value": feedback.FeedbackExperience,
 				},
 			}
-			meters.CFeedbackCounter.Add(ctx, 1, metric.WithAttributes(attribute.String("Feeback", feedback.FeedbackExperience)))
+			meters.CFeedbackCounter.Add(ctx, 1, metric.WithAttributes(attribute.String("Feedback", feedback.FeedbackExperience)))
 
 			jsonData, err := json.Marshal(inputJSON)
 			if err != nil {
