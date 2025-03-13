@@ -15,200 +15,218 @@
 resource "google_monitoring_dashboard" "chat_quality_dashboard" {
   project    = var.project_id
   dashboard_json = jsonencode({
-    "displayName" : "MovieGuru-ChatQualityMetrics-Dashboard",
-    "mosaicLayout" : {
-      "columns" : 48,
-      "tiles" : [
-        {
-           "xPos" : 0,
-          "yPos" : 0,
-          "width" : 24,
-          "height" : 16,
-          "widget" : {
-            "xyChart" : {
-              "dataSets" : [
-                {
-                  "timeSeriesQuery" : {
-                    "prometheusQuery" : "label_replace((sum(rate(movieguru_chat_outcome_counter_total{Outcome=~\"Engaged\"}[$${__interval}])) / sum(rate(movieguru_chat_outcome_counter_total[$${__interval}]))) * 100, \"legend\", \"Engaged\", \"\", \"\")",
-                    "unitOverride" : "%",
-                    "outputFullDuration" : false
-                  },
-                  "plotType" : "LINE",
-                  "legendTemplate" : "",
-                  "targetAxis" : "Y1",
-                  "dimensions" : [],
-                  "measures" : [],
-                  "breakdowns" : []
-                }
-              ],
-              "thresholds" : [],
-              "yAxis" : {
-                "label" : "",
-                "scale" : "LINEAR"
-              },
-              "chartOptions" : {
-                "mode" : "COLOR",
-                "showLegend" : false,
-                "displayHorizontal" : false
-              }
+  "displayName": "MovieGuru-ChatQualityMetrics-Dashboard",
+  "dashboardFilters": [
+    {
+      "filterType": "",
+      "labelKey": "undefined",
+      "stringValue": "",
+      "valueType": "STRING"
+    }
+  ],
+  "mosaicLayout": {
+    "columns": 48,
+    "tiles": [
+      {
+        "height": 16,
+        "width": 24,
+        "widget": {
+          "title": "Implicit User Sentiment: Positive",
+          "scorecard": {
+            "gaugeView": {
+              "lowerBound": 0,
+              "upperBound": 100
             },
-            "title" : "Implicit User Engagement",
-            "id" : ""
-          }
-        },
-        {
-           "xPos" : 24,
-          "yPos" : 0,
-          "width" : 24,
-          "height" : 16,
-          "widget" : {
-            "xyChart" : {
-              "dataSets" : [
-                {
-                  "timeSeriesQuery" : {
-                    "prometheusQuery" : "label_replace((sum(rate(movieguru_chat_acceptance_counter_total[$${__interval}])) / sum(rate(movieguru_chat_calls_total[$${__interval}]))) * 100, \"legend\", \"Accepted\", \"\", \"\")",
-                    "unitOverride" : "%",
-                    "outputFullDuration" : false
-                  },
-                  "plotType" : "LINE",
-                  "legendTemplate" : "",
-                  "targetAxis" : "Y1",
-                  "dimensions" : [],
-                  "measures" : [],
-                  "breakdowns" : []
-                },
-              ],
-              "thresholds" : [],
-              "yAxis" : {
-                "label" : "",
-                "scale" : "LINEAR"
+            "thresholds": [
+              {
+                "color": "YELLOW",
+                "direction": "BELOW",
+                "targetAxis": "Y1",
+                "value": 60
               },
-              "chartOptions" : {
-                "mode" : "COLOR",
-                "showLegend" : false,
-                "displayHorizontal" : false
+              {
+                "color": "RED",
+                "direction": "BELOW",
+                "targetAxis": "Y1",
+                "value": 30
               }
-            },
-            "title" : "Explicit User Acceptance from Genkit",
-            "id" : ""
+            ],
+            "timeSeriesQuery": {
+              "outputFullDuration": true,
+              "prometheusQuery": "label_replace((sum(rate(movieguru_chat_sentiment_counter_total{Sentiment=\"Positive\"}[${__interval}])) / sum(rate(movieguru_chat_sentiment_counter_total[${__interval}]))) * 100, \"legend\", \"Positive\", \"\", \"\")",
+              "unitOverride": "%"
+            }
           }
-        },
-        {
-          "xPos" : 0,
-          "yPos" : 16,
-          "width" : 24,
-          "height" : 16,
-          "widget" : {
-            "xyChart" : {
-              "dataSets" : [
-                {
-                  "timeSeriesQuery" : {
-                    "prometheusQuery" : "label_replace((sum(rate(movieguru_chat_sentiment_counter_total{Sentiment=\"Positive\"}[$${__interval}])) / sum(rate(movieguru_chat_sentiment_counter_total[$${__interval}]))) * 100, \"legend\", \"Positive\", \"\", \"\")",
-                    "unitOverride" : "%",
-                    "outputFullDuration" : false
-                  },
-                  "plotType" : "LINE",
-                  "legendTemplate" : "",
-                  "targetAxis" : "Y1",
-                  "dimensions" : [],
-                  "measures" : [],
-                  "breakdowns" : []
-                },
-                {
-                  "timeSeriesQuery" : {
-                    "prometheusQuery" : "label_replace((sum(rate(movieguru_chat_sentiment_counter_total{Sentiment=\"Negative\"}[$${__interval}])) / sum(rate(movieguru_chat_sentiment_counter_total[$${__interval}]))) * 100, \"legend\", \"Negative\", \"\", \"\")",
-                    "unitOverride" : "%",
-                    "outputFullDuration" : false
-                  },
-                  "plotType" : "LINE",
-                  "legendTemplate" : "",
-                  "targetAxis" : "Y1",
-                  "dimensions" : [],
-                  "measures" : [],
-                  "breakdowns" : []
-                },
-                {
-                  "timeSeriesQuery" : {
-                    "prometheusQuery" : "label_replace((sum(rate(movieguru_chat_sentiment_counter_total{Sentiment=\"Neutral\"}[$${__interval}])) / sum(rate(movieguru_chat_sentiment_counter_total[$${__interval}]))) * 100, \"legend\", \"Neutral\", \"\", \"\")",
-                    "unitOverride" : "%",
-                    "outputFullDuration" : false
-                  },
-                  "plotType" : "LINE",
-                  "legendTemplate" : "",
-                  "targetAxis" : "Y1",
-                  "dimensions" : [],
-                  "measures" : [],
-                  "breakdowns" : []
-                }
-              ],
-              "thresholds" : [],
-              "yAxis" : {
-                "label" : "",
-                "scale" : "LINEAR"
+        }
+      },
+      {
+        "xPos": 24,
+        "height": 16,
+        "width": 24,
+        "widget": {
+          "title": "Implicit User Sentiment: Negative",
+          "scorecard": {
+            "gaugeView": {
+              "lowerBound": 0,
+              "upperBound": 100
+            },
+            "thresholds": [
+              {
+                "color": "YELLOW",
+                "direction": "ABOVE",
+                "targetAxis": "Y1",
+                "value": 20
               },
-              "chartOptions" : {
-                "mode" : "COLOR",
-                "showLegend" : false,
-                "displayHorizontal" : false
+              {
+                "color": "RED",
+                "direction": "ABOVE",
+                "targetAxis": "Y1",
+                "value": 30
               }
-            },
-            "title" : "Implicit User Sentiment",
-            "id" : ""
+            ],
+            "timeSeriesQuery": {
+              "outputFullDuration": true,
+              "prometheusQuery": "label_replace((sum(rate(movieguru_chat_sentiment_counter_total{Sentiment=\"Negative\"}[${__interval}])) / sum(rate(movieguru_chat_sentiment_counter_total[${__interval}]))) * 100, \"legend\", \"Negative\", \"\", \"\")",
+              "unitOverride": "%"
+            }
           }
-        },
-        {
-           "xPos": 24,
-          "yPos" : 16,
-          "width" : 24,
-          "height" : 16,
-          "widget" : {
-            "xyChart" : {
-              "dataSets" : [
-                {
-                  "timeSeriesQuery" : {
-                    "prometheusQuery" : "label_replace((sum(rate(movieguru_chat_feedback_counter_total{Feedback=~\"positive\"}[$${__interval}])) / sum(rate(movieguru_chat_calls_total[$${__interval}]))) * 100, \"legend\", \"Positive\", \"\", \"\")",
-                    "unitOverride" : "%",
-                    "outputFullDuration" : false
-                  },
-                  "plotType" : "LINE",
-                  "legendTemplate" : "",
-                  "targetAxis" : "Y1",
-                  "dimensions" : [],
-                  "measures" : [],
-                  "breakdowns" : []
-                },
-                 {
-                  "timeSeriesQuery" : {
-                    "prometheusQuery" : "label_replace((sum(rate(movieguru_chat_feedback_counter_total{Feedback=~\"negative\"}[$${__interval}])) / sum(rate(movieguru_chat_calls_total[$${__interval}]))) * 100, \"legend\", \"Negative\", \"\", \"\")",
-                    "unitOverride" : "%",
-                    "outputFullDuration" : false
-                  },
-                  "plotType" : "LINE",
-                  "legendTemplate" : "",
-                  "targetAxis" : "Y1",
-                  "dimensions" : [],
-                  "measures" : [],
-                  "breakdowns" : []
-                },
-              ],
-              "thresholds" : [],
-              "yAxis" : {
-                "label" : "",
-                "scale" : "LINEAR"
+        }
+      },
+      {
+        "yPos": 16,
+        "height": 16,
+        "width": 24,
+        "widget": {
+          "title": "Explicit Positive User Feedback from Genkit",
+          "scorecard": {
+            "gaugeView": {
+              "lowerBound": 0,
+              "upperBound": 100
+            },
+            "thresholds": [
+              {
+                "color": "YELLOW",
+                "direction": "BELOW",
+                "targetAxis": "Y1",
+                "value": 30
               },
-              "chartOptions" : {
-                "mode" : "COLOR",
-                "showLegend" : false,
-                "displayHorizontal" : false
+              {
+                "color": "RED",
+                "direction": "BELOW",
+                "targetAxis": "Y1",
+                "value": 15
               }
-            },
-            "title" : "Explicit User Feedback from Genkit",
-            "id" : ""
+            ],
+            "timeSeriesQuery": {
+              "outputFullDuration": true,
+              "prometheusQuery": "label_replace((sum(rate(movieguru_chat_feedback_counter_total{Feedback=~\"positive\"}[${__interval}])) / sum(rate(movieguru_chat_calls_total[${__interval}]))) * 100, \"legend\", \"Positive\", \"\", \"\")",
+              "unitOverride": "%"
+            }
           }
-        },
-      ]
-    },
-    "dashboardFilters" : [],
-    "labels" : {}
-    })
+        }
+      },
+      {
+        "yPos": 16,
+        "xPos": 24,
+        "height": 16,
+        "width": 24,
+        "widget": {
+          "title": "Explicit User Negative Feedback from Genkit",
+          "scorecard": {
+            "gaugeView": {
+              "lowerBound": 0,
+              "upperBound": 100
+            },
+            "thresholds": [
+              {
+                "color": "YELLOW",
+                "direction": "ABOVE",
+                "targetAxis": "Y1",
+                "value": 20
+              },
+              {
+                "color": "RED",
+                "direction": "ABOVE",
+                "targetAxis": "Y1",
+                "value": 40
+              }
+            ],
+            "timeSeriesQuery": {
+              "outputFullDuration": true,
+              "prometheusQuery": "label_replace((sum(rate(movieguru_chat_feedback_counter_total{Feedback=~\"negative\"}[${__interval}])) / sum(rate(movieguru_chat_calls_total[${__interval}]))) * 100, \"legend\", \"Negative\", \"\", \"\")",
+              "unitOverride": "%"
+            }
+          }
+        }
+      },
+      {
+        "yPos": 32,
+        "height": 16,
+        "width": 24,
+        "widget": {
+          "title": "Implicit User Engagement",
+          "scorecard": {
+            "gaugeView": {
+              "lowerBound": 0,
+              "upperBound": 100
+            },
+            "thresholds": [
+              {
+                "color": "YELLOW",
+                "direction": "BELOW",
+                "targetAxis": "Y1",
+                "value": 60
+              },
+              {
+                "color": "RED",
+                "direction": "BELOW",
+                "targetAxis": "Y1",
+                "value": 30
+              }
+            ],
+            "timeSeriesQuery": {
+              "outputFullDuration": true,
+              "prometheusQuery": "label_replace((sum(rate(movieguru_chat_outcome_counter_total{Outcome=~\"Engaged\"}[${__interval}])) / sum(rate(movieguru_chat_outcome_counter_total[${__interval}]))) * 100, \"legend\", \"Engaged\", \"\", \"\")",
+              "unitOverride": "%"
+            }
+          }
+        }
+      },
+      {
+        "yPos": 32,
+        "xPos": 24,
+        "height": 16,
+        "width": 24,
+        "widget": {
+          "title": "Explicit User Acceptance from Genkit",
+          "scorecard": {
+            "gaugeView": {
+              "lowerBound": 0,
+              "upperBound": 100
+            },
+            "thresholds": [
+              {
+                "color": "RED",
+                "direction": "BELOW",
+                "targetAxis": "Y1",
+                "value": 10
+              },
+              {
+                "color": "YELLOW",
+                "direction": "BELOW",
+                "targetAxis": "Y1",
+                "value": 30
+              }
+            ],
+            "timeSeriesQuery": {
+              "outputFullDuration": true,
+              "prometheusQuery": "label_replace((sum(rate(movieguru_chat_acceptance_counter_total[${__interval}])) / sum(rate(movieguru_chat_calls_total[${__interval}]))) * 100, \"legend\", \"Accepted\", \"\", \"\")",
+              "unitOverride": "%"
+            }
+          }
+        }
+      }
+    ]
+  }
+})
 }

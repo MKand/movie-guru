@@ -96,22 +96,22 @@ class ChatUser(HttpUser):
             if (response_mood == "POSITIVE"):
                 self.client.post(
                         "/feedback",
-                        json={"traceId":chat_response.traceId, "spanId": chat_response.spanId, feedbackExperience:"positive"}
+                        json={"traceId":chat_response.json()["traceId"], "spanId": chat_response.json()["spanId"], "feedbackExperience":"positive"}
                     )
             
             if (response_mood == "NEGATIVE"):
                 self.client.post(
                         "/feedback",
-                        json={"traceId":chat_response.traceId, "spanId": chat_response.spanId, feedbackExperience:"negative"}
+                        json={"traceId":chat_response.json()["traceId"], "spanId": chat_response.json()["spanId"], "feedbackExperience":"negative"}
                     )
             
             if (response_type == "CONTINUE"):
                 self.client.post(
                         "/acceptance",
-                        json={"traceId":chat_response.traceId, "spanId": chat_response.spanId, accepted:"accepted"}
+                        json={"traceId":chat_response.json()["traceId"], "spanId": chat_response.json()["spanId"], "accepted":"accepted"}
                     )
             
-            if(chat_response.json()["status"] == "SUCCESS"):
+            if(chat_response.json()["result"] == "SUCCESS"):
                 chat_answer = chat_response.json()["answer"]
             
             else:
