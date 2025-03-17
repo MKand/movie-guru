@@ -17,6 +17,7 @@
 import { ai, safetySettings } from './genkitConfig'
 import { MovieFlowInputSchema, MovieFlowOutputSchema } from './movieFlowTypes'
 import { GenerationBlockedError } from 'genkit';
+import { gemini15Flash } from '@genkit-ai/vertexai';
 
 export const MovieFlowPromptText = ` 
      {{ role "system" }}
@@ -248,6 +249,7 @@ export const MovieFlowPromptText = `
 export const MovieFlowPrompt = ai.definePrompt(
   {
     name: 'movieFlowPrompt',
+    model: gemini15Flash,
     input: {
       schema: MovieFlowInputSchema,
     },
@@ -265,7 +267,9 @@ export const MovieFlow = ai.defineFlow(
   {
     name: 'movieQAFlow',
     inputSchema: MovieFlowInputSchema,
-    outputSchema: MovieFlowOutputSchema
+    outputSchema: MovieFlowOutputSchema,
+    
+
   },
   async (input) => {
     const defaultOutput = MovieFlowOutputSchema.parse({})

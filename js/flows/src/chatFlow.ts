@@ -33,6 +33,7 @@ export const ChatFlow = ai.defineFlow(
     },
     async(input) => {
             const chatResponse: ChatFlowOutput = ChatOutputSchema.parse({});
+            
             try{
             
             // Initial safety check

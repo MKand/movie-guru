@@ -14,7 +14,7 @@ services:
       - "4000:4000"
     environment:
       - PROJECT_ID=$PROJECT_ID
-      - LOCATION=us-west1
+      - LOCATION=$REGION
       - POSTGRES_HOST=db
       - POSTGRES_DB_USER=minimal-user
       - POSTGRES_DB_USER_PASSWORD=minimal
