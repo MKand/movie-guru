@@ -19,6 +19,7 @@ import { MovieFlowInputSchema, MovieFlowOutputSchema } from './movieFlowTypes'
 import { GenerationBlockedError } from 'genkit';
 import { gemini15Flash } from '@genkit-ai/vertexai';
 
+//Gigantic prompt text
 export const MovieFlowPromptText = ` 
      {{ role "system" }}
 
@@ -244,7 +245,7 @@ export const MovieFlowPromptText = `
                 {{/each}}
             * userMessage: {{userMessage}}
 
-            `
+    `
 
 export const MovieFlowPrompt = ai.definePrompt(
   {
@@ -261,7 +262,7 @@ export const MovieFlowPrompt = ai.definePrompt(
       safetySettings: safetySettings
       }
   }, 
- MovieFlowPromptText
+ MovieFlowPromptText // Prompt text inserted here
 )
 export const MovieFlow = ai.defineFlow(
   {

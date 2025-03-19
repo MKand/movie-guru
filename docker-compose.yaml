@@ -10,7 +10,6 @@ services:
   flows:
     build: ./js/flows
     ports:
-      - "3400:3400"
       - "4000:4000"
     environment:
       - PROJECT_ID=$PROJECT_ID
@@ -21,6 +20,8 @@ services:
       - TABLE_NAME=movies
       - POSTGRES_DB_NAME=fake-movies-db
       - GOOGLE_APPLICATION_CREDENTIALS=/key.json
+      - GRPC_TRACE=all
+      - GRPC_VERBOSITY=DEBUG
     volumes:
       - ./.key.json:/key.json
     networks:

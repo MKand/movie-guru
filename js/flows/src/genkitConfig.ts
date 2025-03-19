@@ -16,6 +16,8 @@
 
 import { gemini20Flash001, gemini15Flash, vertexAI } from '@genkit-ai/vertexai';
 import { enableFirebaseTelemetry } from '@genkit-ai/firebase';
+import { genkitEval, GenkitMetric } from "@genkit-ai/evaluator";
+
 import { initializeApp } from 'firebase-admin/app';
 import { HarmCategory, HarmBlockThreshold } from '@google-cloud/vertexai';
 import { parseBooleanfromField } from '.';
@@ -51,6 +53,11 @@ export const safetySettings = [
 
 console.log("Using model", model.name)
 export const ai = genkit({
-  plugins: [vertexAI({ location: LOCATION, projectId: PROJECT_ID })],
+  plugins: [vertexAI({ location: LOCATION, projectId: PROJECT_ID }),
+    genkitEval({
+      judge: gemini15Flash,
+      metrics: [GenkitMetric.MALICIOUSNESS, GenkitMetric.FAITHFULNESS],
+    }),
+  ],
   model: model, // set default model
 });
