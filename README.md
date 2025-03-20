@@ -110,7 +110,7 @@ There are 2 important tables:
 
     ```sh
     export PROJECT_ID=<YOUR_PROJECT_ID>
-    export LOCATION=<YOUR_DESIRED_GCLOUD_REGION> # defaults to us-central1 if this is not set
+    export REGION=<YOUR_DESIRED_GCLOUD_REGION> # defaults to us-central1 if this is not set
     ```
 
 1. Run setup script.
@@ -192,7 +192,7 @@ Once all the required data is added, it is time to run the application that cons
     ```sh
     source set_env_vars.sh
     export PROJECT_ID=<YOUR_PROJECT_ID>
-    export LOCATION=<YOUR_DESIRED_GCLOUD_REGION> # defaults to us-central1 if this is not set
+    export REGION=<YOUR_DESIRED_GCLOUD_REGION> 
     ```
 
 1. Start the application services.
