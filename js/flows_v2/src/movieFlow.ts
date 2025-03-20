@@ -258,7 +258,8 @@ export const MovieFlowPrompt = ai.definePrompt(
       format: 'json',
     },  
     config:{
-      safetySettings: safetySettings
+      safetySettings: safetySettings,
+      maxOutputTokens: 350
       }
   }, 
  MovieFlowPromptText

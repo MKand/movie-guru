@@ -28,7 +28,10 @@ export const QualityFlowPrompt = ai.definePrompt(
       output: {
         schema: ResponseQualityFlowOutputSchema,
         format: 'json',
-      },  
+      }, 
+      config:{
+        maxOutputTokens: 100
+        } 
     }, 
     ConversationQualityAnalysisPromptText
   )
