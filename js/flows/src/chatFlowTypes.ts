@@ -23,7 +23,7 @@ import { ModelOutputMetadataSchema } from './modelOutputMetadataTypes';
 
 
 // ChatFlowInput schema
-export const ChatFlowInputSchema = z.strictObject({
+export const ChatFlowInputSchema = z.object({
     history: z.array(SimpleMessageSchema),
     userPreferences: UserProfileSchema.optional().default(UserProfileSchema.parse({})),
     userMessage: z.string(),
