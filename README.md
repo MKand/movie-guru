@@ -117,7 +117,7 @@ There are 2 important tables:
 
     ```sh
     chmod +x setup_local.sh
-    ./setup_local.sh
+    ./setup_local.sh --skip-infra #gHack creates the infra for you
     ```
 
 This enables the required APIs and creates the necessary service account with roles.
