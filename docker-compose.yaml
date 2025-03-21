@@ -43,7 +43,7 @@ services:
       - TABLE_NAME=movies
       - APP_VERSION=v1_local
       - USE_AUTH=false
-      - FORCE_CORS=true
+      - DISABLE_CORS=true # allows any origin to get through
       - FLOWS_URL=http://flows:3400
       - REDIS_HOST=cache
       - REDIS_PORT=6379

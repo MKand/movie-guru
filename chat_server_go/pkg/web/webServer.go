@@ -32,13 +32,13 @@ func enableCORS(allowedOrigins []string, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		origin := r.Header.Get("Origin")
 
-		// FORCE CORS
-		forceCors := os.Getenv("FORCE_CORS") == "true"
-		slog.Info("Force CORS", slog.Bool("forceCors", forceCors))
+		// DISABLE CORS
+		disableCors := os.Getenv("DISABLE_CORS") == "true"
+		slog.Info("Force CORS", slog.Bool("forceCors", disableCors))
 
 		// Check if the origin is in the allowed list
 		isAllowed := false
-		if !forceCors {
+		if !disableCors {
 			for _, allowedOrigin := range allowedOrigins {
 				if origin == allowedOrigin {
 					isAllowed = true
