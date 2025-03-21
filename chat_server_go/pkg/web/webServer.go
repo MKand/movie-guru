@@ -28,13 +28,9 @@ import (
 	metrics "github.com/movie-guru/pkg/metrics"
 )
 
-func enableCORS(allowedOrigins []string, next http.Handler) http.Handler {
+func enableCORS(allowedOrigins []string, next http.Handler, disableCors bool) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		origin := r.Header.Get("Origin")
-
-		// DISABLE CORS
-		disableCors := os.Getenv("DISABLE_CORS") == "true"
-		slog.Info("Force CORS", slog.Bool("forceCors", disableCors))
 
 		// Check if the origin is in the allowed list
 		isAllowed := false
@@ -86,6 +82,15 @@ func StartServer(ctx context.Context, ulh *UserLoginHandler, metadata *db.Metada
 	if err != nil {
 		useAuth = false
 	}
+	slog.Info("USE AUTH?", slog.Bool("useAuth", useAuth))
+
+	// DISABLE CORS
+	disableCors, err := strconv.ParseBool(os.Getenv("DISABLE_CORS"))
+	if err != nil {
+		disableCors = false
+	}
+	slog.Info("DISABLE CORS?", slog.Bool("disableCors", disableCors))
+
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/", createHealthCheckHandler(deps, hcMeters))
@@ -97,5 +102,5 @@ func StartServer(ctx context.Context, ulh *UserLoginHandler, metadata *db.Metada
 	mux.HandleFunc("/startup", createStartupHandler(deps))
 	mux.HandleFunc("/login", createLoginHandler(ulh, loginMeters, metadata, useAuth))
 	mux.HandleFunc("/logout", logoutHandler)
-	return http.ListenAndServe(":8080", enableCORS(corsOrigins, mux))
+	return http.ListenAndServe(":8080", enableCORS(corsOrigins, mux, disableCors))
 }
