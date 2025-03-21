@@ -11,6 +11,7 @@ services:
     build: ./js/flows
     ports:
       - "4000:4000"
+      - "3400:3400"
     environment:
       - PROJECT_ID=$PROJECT_ID
       - LOCATION=$REGION
@@ -46,42 +47,25 @@ services:
       - FLOWS_URL=http://flows:3400
       - REDIS_HOST=cache
       - REDIS_PORT=6379
-      - OTEL_EXPORTER_OTLP_INSECURE=true
-      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otelcol:4318
-      - OTEL_SERVICE_NAME=movieguru-backend
-      - OTEL_GO_X_EXEMPLAR=true
+      - FEEDBACK_URL=https://${GENKIT_FEEDBACK_REGION}-${PROJECT_ID}.cloudfunctions.net/ext-firebase-ai-user-engagement-collectEngagement
+
     depends_on:
       - cache 
-      - otelcol
     networks:
       - movie-guru
       - db-shared-network
   frontend:
-    build:
-      context: ./frontend
-      args:
-        VITE_FIREBASE_API_KEY: ${FIREBASE_API_KEY}
-        VITE_FIREBASE_AUTH_DOMAIN: ${FIREBASE_AUTH_DOMAIN}
-        VITE_GCP_PROJECT_ID: ${PROJECT_ID}
-        VITE_FIREBASE_STORAGE_BUCKET: ${FIREBASE_STORAGE_BUCKET}
-        VITE_FIREBASE_MESSAGING_SENDERID: ${FIREBASE_MESSAGING_SENDERID}
-        VITE_FIREBASE_APPID: ${FIREBASE_APPID}
-        VITE_CHAT_SERVER_URL: http://localhost:8081
+    build: ./frontend
     ports:
-      - "4001:4000"
-    networks:
-      - movie-guru
-  otelcol:
-    image: otel/opentelemetry-collector-contrib:0.105.0
-    ports:
-      - 4318:4318
-      - 8888:8888
-    volumes:
-      - ./metrics/otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml:ro
-      - ./.key.json:/key.json
+      -  4001:4001
     environment:
-      - PROJECT_ID=$PROJECT_ID
-      - GOOGLE_APPLICATION_CREDENTIALS=/key.json
+      - VITE_FIREBASE_API_KEY=${FIREBASE_API_KEY}
+      - VITE_FIREBASE_AUTH_DOMAIN=${FIREBASE_AUTH_DOMAIN}
+      - VITE_GCP_PROJECT_ID=${PROJECT_ID}
+      - VITE_FIREBASE_STORAGE_BUCKET=${FIREBASE_STORAGE_BUCKET}
+      - VITE_FIREBASE_MESSAGING_SENDERID=${FIREBASE_MESSAGING_SENDERID}
+      - VITE_FIREBASE_APPID=${FIREBASE_APPID}
+      - VITE_CHAT_SERVER_URL=http://localhost:8081
     networks:
       - movie-guru
 networks:
