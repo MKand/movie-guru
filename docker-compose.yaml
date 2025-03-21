@@ -2,16 +2,11 @@ services:
   cache:
     image: redis:6.2-alpine
     restart: always
-    ports:
-      - 6379:6379
     command: redis-server --save 20 1 --loglevel warning 
     networks:
       - db-shared-network
   flows:
     build: ./js/flows
-    ports:
-      - "4000:4000"
-      - "3400:3400"
     environment:
       - PROJECT_ID=$PROJECT_ID
       - LOCATION=$REGION
@@ -31,8 +26,6 @@ services:
     build: ./chat_server_go
     restart: always
     command: /app/webserver
-    ports:
-      - 8081:8080
     environment:
       - PROJECT_ID=$PROJECT_ID      
       - LOCATION=$REGION
@@ -56,8 +49,6 @@ services:
       - db-shared-network
   frontend:
     build: ./frontend
-    ports:
-      -  4001:4001
     environment:
       - VITE_FIREBASE_API_KEY=${FIREBASE_API_KEY}
       - VITE_FIREBASE_AUTH_DOMAIN=${FIREBASE_AUTH_DOMAIN}
