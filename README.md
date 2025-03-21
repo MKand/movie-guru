@@ -156,9 +156,8 @@ Skipping ahead will save you approx. 20 minutes of the setup time.
 1. Populate the movie table
 
     ```sh
-    source set_env_vars.sh
     export PROJECT_ID=<YOUR_PROJECT_ID>
-    export LOCATION=<YOUR_DESIRED_GCLOUD_REGION> # defaults to us-central1 if this is not set
+    export LOCATION=<YOUR_DESIRED_GCLOUD_REGION> 
     ```
 
 1. Run the javascript indexer so it can add movies data into the database. The database comes pre-populated with the required data, but you can choose to re-add the data. The execution of this intentionally slowed down to stay below the rate-limits.
@@ -191,17 +190,15 @@ Once all the required data is added, it is time to run the application that cons
 
     ```sh
     source set_env_vars.sh
-    export PROJECT_ID=<YOUR_PROJECT_ID>
-    export REGION=<YOUR_DESIRED_GCLOUD_REGION> 
     ```
 
-1. Start the application services.
+2. Start the application services. This can take upto 10 minutes are we are building many docker images for all the application containers (frontend, webserver, genkit flows).
 
     ```sh
     docker compose up --build
     ```
 
-1. Access the Application Open http://localhost:5173 in your browser.
+3. Access the Frontend Application Open http://localhost:4001 in your browser.
 
 ### Clean up
 
