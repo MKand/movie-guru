@@ -198,7 +198,7 @@ Once all the required data is added, it is time to run the application that cons
     docker compose up --build
     ```
 
-3. Access the Frontend Application Open http://localhost:4001 in your browser.
+3. Access the Frontend Application Open http://localhost:8080 in your browser.
 
 ### Clean up
 
