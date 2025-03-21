@@ -28,11 +28,26 @@ import (
 	metrics "github.com/movie-guru/pkg/metrics"
 )
 
-func enableCORS(allowedOrigins []string, next http.Handler, disableCors bool) http.Handler {
+func enableCORS(allowedOrigins []string, next http.Handler, corsStrict bool) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		origin := r.Header.Get("Origin")
 
-		w.Header().Set("Access-Control-Allow-Origin", origin)
+		if corsStrict {
+			isAllowed := false
+			for _, allowedOrigin := range allowedOrigins {
+				if origin == allowedOrigin {
+					isAllowed = true
+					break
+				}
+			}
+
+			if isAllowed {
+				w.Header().Set("Access-Control-Allow-Origin", origin)
+			}
+		} else {
+			w.Header().Set("Access-Control-Allow-Origin", origin)
+		}
+
 		// Set other CORS headers
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, ApiKey, User")
@@ -68,12 +83,12 @@ func StartServer(ctx context.Context, ulh *UserLoginHandler, metadata *db.Metada
 	}
 	slog.Info("USE AUTH?", slog.Bool("useAuth", useAuth))
 
-	// DISABLE CORS
-	disableCors, err := strconv.ParseBool(os.Getenv("DISABLE_CORS"))
+	// STRICT CORS
+	corsStrict, err := strconv.ParseBool(os.Getenv("CORS_STRICT"))
 	if err != nil {
-		disableCors = false
+		corsStrict = false
 	}
-	slog.Info("DISABLE CORS?", slog.Bool("disableCors", disableCors))
+	slog.Info("STRICT CORS?", slog.Bool("STRICTCORS", corsStrict))
 
 	mux := http.NewServeMux()
 
@@ -86,5 +101,5 @@ func StartServer(ctx context.Context, ulh *UserLoginHandler, metadata *db.Metada
 	mux.HandleFunc("/startup", createStartupHandler(deps))
 	mux.HandleFunc("/login", createLoginHandler(ulh, loginMeters, metadata, useAuth))
 	mux.HandleFunc("/logout", logoutHandler)
-	return http.ListenAndServe(":8080", enableCORS(corsOrigins, mux, disableCors))
+	return http.ListenAndServe(":8080", enableCORS(corsOrigins, mux, corsStrict))
 }
