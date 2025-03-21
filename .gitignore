@@ -19,3 +19,5 @@ dist
 
 *.tfstate
 *.tfstate.*
+
+pgvector/init_substituted.sql

@@ -27,16 +27,14 @@
 [![Movie Guru](https://img.youtube.com/vi/l_KhN3RJ8qA/0.jpg)](https://youtu.be/l_KhN3RJ8qA)
 
  This version is a *minimal version* of the frontend and backend that doesn't have complex login logic like the version in **cloud-movieguru**. It is meant to be run fully locally while using VertexAI APIs.
+ If you want to run this demo entirely in the cloud use the **cloud-movieguru** branch.
 
 ## Description
 
 Movie Guru is a website that helps users find movies to watch through an RAG powered chatbot. The movies are all fictional and are generated using GenAI.
 The goal of this repo is to explore the best practices when building AI powered applications.
 
-This demo is *NOT* endorsed by Google or Google Cloud.  
 The repo is intended for educational/hobbyists use only.
-
-Refer to the readme in the **main** branch for more information.
 
 ### Overall Architecture
 
