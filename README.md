@@ -149,8 +149,8 @@ Make sure you set `System` as `PostgresSQL` and `Server` as `db`, and `Database`
 
 #### Populate the database (Optional)
 
-At this stage, there will be 2 tables, with data pre-loaded.
-You can either choose to either reload the data into the table again or skip ahead to the [Run the application](#run-the-application) step.
+At this stage, there will be a few tables, with data pre-loaded.
+You can either choose to either reload the movies data into the table again or skip ahead to the [Run the application](#run-the-application) step.
 Skipping ahead will save you approx. 20 minutes of the setup time.
 
 1. Populate the movie table
