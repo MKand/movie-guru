@@ -32,23 +32,7 @@ func enableCORS(allowedOrigins []string, next http.Handler, disableCors bool) ht
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		origin := r.Header.Get("Origin")
 
-		// Check if the origin is in the allowed list
-		isAllowed := false
-		if !disableCors {
-			for _, allowedOrigin := range allowedOrigins {
-				if origin == allowedOrigin {
-					isAllowed = true
-					break
-				}
-			}
-		} else {
-			isAllowed = true
-		}
-
-		if isAllowed {
-			w.Header().Set("Access-Control-Allow-Origin", origin)
-		}
-
+		w.Header().Set("Access-Control-Allow-Origin", origin)
 		// Set other CORS headers
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, ApiKey, User")
