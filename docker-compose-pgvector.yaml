@@ -1,0 +1,24 @@
+services:
+  db:
+    image: pgvector/pgvector:pg17
+    ports: 
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: main
+      restart: always
+    volumes:
+      - ./pgvector/init_substituted.sql:/docker-entrypoint-initdb.d/init_substituted.sql:ro
+    networks:
+      - db-shared-network
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8082:8080
+    networks:
+      - db-shared-network
+networks:
+  db-shared-network:
+    external: true
+
+  
