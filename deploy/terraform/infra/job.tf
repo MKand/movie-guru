@@ -13,6 +13,7 @@
 # limitations under the License.
 
 resource "google_cloud_run_v2_job" "db-init" {
+  count               = var.use_cloud_infra ? 1 : 0
   name                = "db-init-job"
   location            = var.region
   project             = var.project_id
@@ -28,14 +29,14 @@ resource "google_cloud_run_v2_job" "db-init" {
           name = "DB_PASS"
           value_source {
             secret_key_ref {
-              secret  = module.secret-manager.secret_names[1]
+              secret  = module.secret-manager[0].secret_names[1]
               version = "latest" # module.secret-manager.secret_versions[0]
             }
           }
         }
         env {
           name  = "DB_HOST"
-          value = google_compute_address.cloudsql.address #module.pg.dns_name
+          value = google_compute_address.cloudsql[0].address #module.pg.dns_name
         }
         env {
           name  = "DB_NAME"
@@ -91,7 +92,7 @@ resource "google_cloud_run_v2_job" "indexer" {
         }
         env {
           name  = "DB_HOST"
-          value = google_compute_address.cloudsql.address #module.pg.dns_name
+          value = google_compute_address.cloudsql[0].address #module.pg.dns_name
         }
         env {
           name  = "DB_NAME"
@@ -105,7 +106,7 @@ resource "google_cloud_run_v2_job" "indexer" {
           name = "DB_PASS"
           value_source {
             secret_key_ref {
-              secret  = module.secret-manager.secret_names[1]
+              secret  = module.secret-manager[0].secret_names[1]
               version = "latest" # module.secret-manager.secret_versions[0]
             }
           }

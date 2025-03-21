@@ -84,7 +84,8 @@ export const SafetyTransformPrompt = ai.definePrompt(
         format: 'json',
       },
       config:{
-        safetySettings: safetySettings
+        safetySettings: safetySettings,
+        maxOutputTokens: 100
         }
     },
     

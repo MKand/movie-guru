@@ -13,6 +13,7 @@
 # limitations under the License.
 
 resource "google_compute_address" "cloudsql" {
+  count        = var.use_cloud_infra ? 1 : 0
   name         = "cloudsql-address"
   subnetwork   = google_compute_subnetwork.custom.id
   address_type = "INTERNAL"
@@ -21,11 +22,12 @@ resource "google_compute_address" "cloudsql" {
 
 // Forwarding rule for VPC private service connect
 resource "google_compute_forwarding_rule" "default" {
+  count                   = var.use_cloud_infra ? 1 : 0
   name                    = "cloud-sql-endpoint"
   region                  = var.region
   load_balancing_scheme   = ""
-  target                  = module.pg.instance_psc_attachment
+  target                  = module.pg[0].instance_psc_attachment
   network                 = google_compute_network.custom.id
-  ip_address              = google_compute_address.cloudsql.id
+  ip_address              = google_compute_address.cloudsql[0].id
   allow_psc_global_access = true
 }

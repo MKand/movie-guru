@@ -56,17 +56,6 @@ resource "google_compute_subnetwork" "producer_subnet" {
   ip_cidr_range = "10.3.0.0/16"
 }
 
-# regional ip
-
-# resource "google_compute_address" "external_ip" {
-#   name         = "movie-guru-external-ip"
-#   address_type = "EXTERNAL"
-#   region       = var.region
-#   project      = var.project_id
-#   network_tier = "STANDARD"
-#   depends_on   = [google_project_service.enable_apis]
-# }
-
 # use global ip instead
 resource "google_compute_global_address" "external_ip" {
   name         = "movie-guru-external-ip"

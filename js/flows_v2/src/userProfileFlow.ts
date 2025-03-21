@@ -30,9 +30,10 @@ export const UserProfileFlowPrompt = ai.definePrompt(
       schema: UserProfileFlowOutputSchema,
       format: 'json',
     },
-    config: {
-      safetySettings: safetySettings
-    }
+    config:{
+      safetySettings: safetySettings,
+      maxOutputTokens: 100
+      }
   },
   UserProfilePromptText)
 

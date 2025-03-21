@@ -103,7 +103,7 @@ rm pgvector/init_substituted.sql
 
 
 echo -e "\e[95mConnecting to GKE cluster\e[0m"
-gcloud container clusters get-credentials movie-guru-cluster --region $REGION --project $PROJECT_ID
+gcloud container clusters get-credentials movie-guru-eu-cluster --region $REGION --project $PROJECT_ID
 echo -e "\e[95m Starting Helm deploy for app...\e[0m"
 
 helm upgrade --install movieguru \
@@ -113,7 +113,12 @@ helm upgrade --install movieguru \
 -f $VALUES \
 --set projectID=${PROJECT_ID} \
 --set Image.tag=$SHORT_SHA \
---set region=${REGION}
+--set region=${REGION} \
+--set Flows.modelLocation=${MODEL_REGION} \
+--set Gateway.IP=movie-guru-external-ip \
+--set Gateway.certificate=movie-guru-certificate \
+--set Server.version=v1
+
 
 
 echo -e "\e[95m Creating ns and configmap for locust.\e[0m"

@@ -43,3 +43,8 @@ Flows:
     
 Image:
   tag: latest
+
+Values:
+  Gateway:
+    certificate: movie-guru-certificate
+    IP: movie-guru-external-ip
