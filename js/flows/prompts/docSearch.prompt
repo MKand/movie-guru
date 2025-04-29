@@ -1,0 +1,118 @@
+---
+model: vertexai/gemini-1.5-flash
+config:
+  safetySettings:
+    - category: HARM_CATEGORY_HARASSMENT
+      threshold: BLOCK_MEDIUM_AND_ABOVE
+    - category: HARM_CATEGORY_HATE_SPEECH
+      threshold: BLOCK_MEDIUM_AND_ABOVE
+    - category: HARM_CATEGORY_SEXUALLY_EXPLICIT
+      threshold: BLOCK_ONLY_HIGH
+    - category: HARM_CATEGORY_DANGEROUS_CONTENT
+      threshold: BLOCK_NONE
+input:
+  schema: QuerySchema
+output:
+  format: "json"
+  schema: SearchFlowOutputSchema
+---
+
+{{ role "system" }}
+
+Analyze the inputQuery string with respect to a movie database containing the following fields:
+
+embedding: Vector representation of the movie's title, plot, and genres.
+genres: List of movie genres (e.g., "Action", "Comedy", "Drama", "horror", "anime", "classic", "romance", "romcom" etc).
+title: Title of the movie.
+plot: A textual summary of the movie's plot.
+runtime_mins: Duration of the movie in minutes.
+released: Release year of the movie.
+actors: List of actors in the movie.
+director: Director of the movie.
+rating: Numerical rating from 1 to 5.
+
+Task:
+
+Determine the appropriate search category for the inputQuery. The categories are "NONE" or "VECTOR".
+
+1.  **NONE**: Use this category if the inputQuery does not require a search of the movie database. This includes:
+    * Greetings (e.g., "hello", "how are you?").
+    * Off-topic questions or statements not related to movies or the database content (e.g., "what's the weather?", "tell me a joke").
+    * Queries that are too vague to be actionable as a movie search without further clarification, or queries that are nonsensical in the context of finding a movie.
+
+2.  **VECTOR**: Use this category if the inputQuery is asking about movies, requesting movie recommendations, looking for specific movie details (like plot, actors, director of a named movie), or filtering movies based on any criteria (like genre, themes, actors, director, runtime, release year, rating, or semantic similarity). For this category, the vectorQuery field in the output should be the original inputQuery.
+
+Examples:
+
+    -   Input: "great movie that is short"
+        Output:
+            searchCategory: VECTOR
+            keywordQuery: ""
+            vectorQuery: "great movie that is short"
+            justification: "The query asks for movie recommendations based on descriptive criteria."
+
+    -   Input: "movies released after 2000"
+        Output:
+            searchCategory: VECTOR
+            keywordQuery: ""
+            vectorQuery: "movies released after 2000"
+            justification: "The query is seeking movies based on a release year criterion."
+
+    -   Input: "The Bee movie"
+        Output:
+            searchCategory: VECTOR
+            keywordQuery: ""
+            vectorQuery: "The Bee movie"
+            justification: "The query is trying to find a specific movie by its title."
+
+    -   Input: "director of The Matrix"
+        Output:
+            searchCategory: VECTOR
+            keywordQuery: ""
+            vectorQuery: "director of The Matrix"
+            justification: "The query asks for a specific detail (director) of a particular movie."
+
+    -   Input: "movies like The Matrix"
+        Output:
+            searchCategory: VECTOR
+            keywordQuery: ""
+            vectorQuery: "movies like The Matrix"
+            justification: "The query requires semantic understanding for movie recommendations based on similarity."
+
+    -   Input: "romantic films"
+        Output:
+            searchCategory: VECTOR
+            keywordQuery: ""
+            vectorQuery: "romantic films"
+            justification: "The query is asking for movies based on a genre."
+
+    -   Input: "What's the weather like today?"
+        Output:
+            searchCategory: NONE
+            keywordQuery: ""
+            vectorQuery: ""
+            justification: "The query is off-topic and not related to the movie database."
+
+    -   Input: "Hello"
+        Output:
+            searchCategory: NONE
+            keywordQuery: ""
+            vectorQuery: ""
+            justification: "The query is a greeting and does not require a movie database search."
+
+    -   Input: "movies"
+        Output:
+            searchCategory: VECTOR
+            keywordQuery: ""
+            vectorQuery: "movies"
+            justification: "The query is a general request for movies, suitable for a vector search."
+
+
+Respond with the following:
+vectorQuery: A concise representation of the query, empty if needed.
+searchCategory: The determined category: NONE, VECTOR.
+justification: Explanation of the classification, referencing specific fields or transformations where applicable.
+
+{{ role "user" }}
+
+{{ query }}

@@ -15,6 +15,7 @@
  */
 
 import { z } from 'genkit';
+import { ai } from './genkitConfig';
 import { SimpleMessageSchema } from './queryTransformTypes';
 import { UserProfileSchema } from './queryTransformTypes';
 import { RelevantMovieSchema } from './movieFlowTypes';
@@ -29,14 +30,19 @@ export const ChatFlowInputSchema = z.object({
     userMessage: z.string(),
   });
 
+ai.defineSchema('ChatFlowInputSchema', ChatFlowInputSchema);
+
 
 // ChatFlowOutput schema
 export const ChatOutputSchema = z.strictObject({
-    answer: z.string().optional().default(""),
-    relevantMovies: z.array(RelevantMovieSchema).optional().default([]), // Changed to 'relevantMovies' for clarity
-    wrongQuery: z.boolean().optional().default(false),
-    contextDocuments: z.array(MovieContextSchema).optional().default([]),
-    modelOutputMetadata: ModelOutputMetadataSchema.default(ModelOutputMetadataSchema.parse({}))
-  });
-  export type ChatFlowOutput = z.infer<typeof ChatOutputSchema>
+  answer: z.string().optional().default(""),
+  relevantMovies: z.array(RelevantMovieSchema).optional().default([]), // Changed to 'relevantMovies' for clarity
+  wrongQuery: z.boolean().optional().default(false),
+  contextDocuments: z.array(MovieContextSchema).optional().default([]),
+  modelOutputMetadata: ModelOutputMetadataSchema.default(ModelOutputMetadataSchema.parse({}))
+});
+
+export type ChatFlowOutput = z.infer<typeof ChatOutputSchema>;
+ai.defineSchema('ChatOutputSchema', ChatOutputSchema);
+
   

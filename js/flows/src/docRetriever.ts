@@ -18,7 +18,7 @@ import { Document } from '@genkit-ai/ai/retriever';
 import { textEmbedding004 } from '@genkit-ai/vertexai';
 import { toSql } from 'pgvector';
 import { openDB } from './db';
-import { ai, safetySettings } from './genkitConfig'
+import { ai } from './genkitConfig'
 import { z } from 'genkit';
 import { MovieContextSchema, MovieContext } from './movieFlowTypes';
 import { DocSearchFlowPromptText } from './prompts';
@@ -26,18 +26,18 @@ import {  ModelOutputMetadataSchema } from './modelOutputMetadataTypes';
 
 const SearchTypeCategory = z.enum(['KEYWORD', 'VECTOR', 'MIXED', 'NONE']);
 
-
 export const RetrieverOptionsSchema = z.object({
   k: z.number().optional().default(10),
   searchCategory: SearchTypeCategory.optional().default("VECTOR"),
   keywordQuery: z.string().default(""),
   vectorQuery: z.string().default(""),
-
 });
 
 export const QuerySchema = z.object({
   query: z.string(),
 });
+
+ai.defineSchema('QuerySchema', QuerySchema);
 
 export const SearchFlowOutputSchema = z.strictObject({
   keywordQuery: z.string().optional().default(""),
@@ -46,22 +46,11 @@ export const SearchFlowOutputSchema = z.strictObject({
   modelOutputMetadata: ModelOutputMetadataSchema.default(ModelOutputMetadataSchema.parse({})),
 });
 
-export const SearchFlowPrompt = ai.definePrompt(
-  {
-    name: 'MixedSearchFlowPrompt',
-    input: {
-      schema: QuerySchema,
-    },
-    output: {
-      format: 'json',
-      schema: SearchFlowOutputSchema,
-    },  
-    config: {
-      safetySettings: safetySettings
-    }
-  }, 
-  DocSearchFlowPromptText
-)
+ai.defineSchema('SearchFlowOutputSchema', SearchFlowOutputSchema);
+
+// Defined in js/flows/prompts/docSearch.prompt
+// This has two variants. For more about how to use variants, see https://firebase.google.com/docs/genkit/dotprompt#prompt_variants
+export const SearchFlowPrompt = ai.prompt('docSearch');
 
 export const MovieSearchPromptFlow = ai.defineFlow(
   {

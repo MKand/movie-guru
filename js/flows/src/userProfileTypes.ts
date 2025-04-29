@@ -15,6 +15,7 @@
  */
 
 import { z } from 'genkit';
+import { ai } from './genkitConfig'
 import { ModelOutputMetadataSchema } from './modelOutputMetadataTypes';
 
 // Enums as Zod Enums
@@ -39,6 +40,8 @@ export const UserProfileFlowInputSchema = z.object({
 
 export type UserProfileFlowInput = z.infer<typeof UserProfileFlowInputSchema>
 
+ai.defineSchema('UserProfileFlowInputSchema', UserProfileFlowInputSchema);
+
 // UserProfileFlowOutput schema
 export const UserProfileFlowOutputSchema = z.strictObject({
   profileChangeRecommendations: z.array(ProfileChangeRecommendationSchema).optional().default([]),
@@ -46,3 +49,6 @@ export const UserProfileFlowOutputSchema = z.strictObject({
 });
 
 export type UserProfileFlowOutput = z.infer<typeof UserProfileFlowOutputSchema>
+
+ai.defineSchema('UserProfileFlowOutputSchema', UserProfileFlowOutputSchema);
+

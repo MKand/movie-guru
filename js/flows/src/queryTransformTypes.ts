@@ -15,6 +15,7 @@
  */
 
 import { z } from 'genkit';
+import { ai } from './genkitConfig';
 import { ChatFlowInputSchema } from './chatFlowTypes';
 
 // FOLLOWUP_ACTION as Zod Enum
@@ -34,6 +35,7 @@ const ProfileCategoriesSchema = z.object({
 
 export type ProfileCategories = z.infer<typeof ProfileCategoriesSchema>
 
+ai.defineSchema('ProfileCategoriesSchema', ProfileCategoriesSchema);
 
 // UserProfile schema
 export const UserProfileSchema = z.object({
@@ -43,6 +45,7 @@ export const UserProfileSchema = z.object({
 
 export type UserProfile = z.infer<typeof UserProfileSchema>
 
+ai.defineSchema('UserProfileSchema', UserProfileSchema);
 
 // SimpleMessage schema
 export const SimpleMessageSchema = z.object({
@@ -52,8 +55,9 @@ export const SimpleMessageSchema = z.object({
 
 export type SimpleMessage = z.infer<typeof SimpleMessageSchema>
 
-export type QueryTransformFlowInput = z.infer<typeof ChatFlowInputSchema>
+ai.defineSchema('SimpleMessageSchema', SimpleMessageSchema);
 
+export type QueryTransformFlowInput = z.infer<typeof ChatFlowInputSchema>
 
 // QueryTransformFlowOutput schema
 export const QueryTransformFlowOutputSchema = z.strictObject({
@@ -63,3 +67,6 @@ export const QueryTransformFlowOutputSchema = z.strictObject({
 });
 
 export type QueryTransformFlowOutput = z.infer<typeof QueryTransformFlowOutputSchema>
+
+ai.defineSchema('QueryTransformFlowOutputSchema', QueryTransformFlowOutputSchema);
+

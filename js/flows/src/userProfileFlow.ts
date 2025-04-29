@@ -14,57 +14,45 @@
  * limitations under the License.
  */
 
-import { UserProfileFlowOutput, UserProfileFlowInputSchema, UserProfileFlowOutputSchema } from './userProfileTypes'
-import { UserProfilePromptText_v1, UserProfilePromptText_v2 } from './prompts';
-import { ai, safetySettings } from './genkitConfig'
+import { UserProfileFlowInputSchema, UserProfileFlowOutputSchema } from './userProfileTypes'
+import { ai } from './genkitConfig'
 import { GenerationBlockedError } from 'genkit';
 
-export const UserProfileFlowPrompt = ai.definePrompt(
-  {
-    name: 'userProfileFlowPrompt',
-    input: {
-      schema: UserProfileFlowInputSchema,
-    },
-    output: {
-    },
-    config: {
-      safetySettings: safetySettings
-    }
-  },
-  UserProfilePromptText_v1)
+// Defined in js/flows/prompts/findUserPreferences.prompt
+export const userProfilePrompt = ai.prompt('userProfile');
 
-  export const UserProfileFlow = ai.defineFlow(
-    {
-      name: 'userProfileFlow',
-      inputSchema: UserProfileFlowInputSchema,
-      outputSchema: UserProfileFlowOutputSchema
-    },
-    async (input) => {
-      const defaultOutput = UserProfileFlowOutputSchema.parse({})
-      try {
-        const response = await UserProfileFlowPrompt({ 
-          query: input.query, 
-          agentMessage: input.agentMessage });
-        const output = UserProfileFlowOutputSchema.parse(response.output)
-        return output
-        
-        } catch (error) {
-        
-        if(error instanceof GenerationBlockedError){
-          console.error("UserProfileFlow: GenerationBlockedError generating response:", error.message);
-          defaultOutput.modelOutputMetadata.safetyIssue = true;
-          return defaultOutput;
-        }
-        else if(error instanceof Error && (error.message.includes('429') || error.message.includes('RESOURCE_EXHAUSTED'))){
-          console.error("UserProfileFlow: There is a quota issue:", error.message);
-          defaultOutput.modelOutputMetadata.quotaIssue = true;
-          return defaultOutput;
-          }
-        else{
-          console.error("UserProfileFlow: Error generating response:", error);
-          throw error;
-        }
+export const UserProfileFlow = ai.defineFlow(
+  {
+    name: 'userProfileFlow',
+    inputSchema: UserProfileFlowInputSchema,
+    outputSchema: UserProfileFlowOutputSchema
+  },
+  async (input) => {
+    const defaultOutput = UserProfileFlowOutputSchema.parse({})
+    try {
+      const response = await userProfilePrompt({ 
+        query: input.query, 
+        agentMessage: input.agentMessage });
+      const output = UserProfileFlowOutputSchema.parse(response.output)
+      return output
+      
+    } catch (error) {
+    
+      if(error instanceof GenerationBlockedError){
+        console.error("UserProfileFlow: GenerationBlockedError generating response:", error.message);
+        defaultOutput.modelOutputMetadata.safetyIssue = true;
+        return defaultOutput;
       }
-    } 
+      else if(error instanceof Error && (error.message.includes('429') || error.message.includes('RESOURCE_EXHAUSTED'))){
+        console.error("UserProfileFlow: There is a quota issue:", error.message);
+        defaultOutput.modelOutputMetadata.quotaIssue = true;
+        return defaultOutput;
+        }
+      else{
+        console.error("UserProfileFlow: Error generating response:", error);
+        throw error;
+      }
+    }
+  }
 );
 

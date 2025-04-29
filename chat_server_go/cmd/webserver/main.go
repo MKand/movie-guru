@@ -35,7 +35,7 @@ func main() {
 	metricsEnabled, err := strconv.ParseBool(os.Getenv("ENABLE_METRICS"))
 
 	if err != nil {
-		slog.ErrorContext(ctx, "Error getting ENABLE_METRICS", slog.Any("error", err))
+		slog.WarnContext(ctx, "Error getting ENABLE_METRICS, setting to false.", slog.Any("error", err))
 		metricsEnabled = false
 	}
 	// Set up database

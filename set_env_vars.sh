@@ -8,4 +8,3 @@ export FIREBASE_GCP_ID="some value"
 export FIREBASE_STORAGE_BUCKET="some value"
 export FIREBASE_MESSAGING_SENDERID="some value"
 export FIREBASE_APPID="some value"
-
