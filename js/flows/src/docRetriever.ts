@@ -21,7 +21,6 @@ import { openDB } from './db';
 import { ai } from './genkitConfig'
 import { z } from 'genkit';
 import { MovieContextSchema, MovieContext } from './movieFlowTypes';
-import { DocSearchFlowPromptText } from './prompts';
 import {  ModelOutputMetadataSchema } from './modelOutputMetadataTypes';
 
 const SearchTypeCategory = z.enum(['KEYWORD', 'VECTOR', 'MIXED', 'NONE']);
