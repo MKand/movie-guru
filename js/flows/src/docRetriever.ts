@@ -216,7 +216,6 @@ async function createSearchObject(input: { query: string; }) {
     });
     const safeOutput = response.output ?? SearchFlowOutputSchema.parse({});
     return SearchFlowOutputSchema.parse(safeOutput);
-
   }
   catch (error) {
     console.error('MovieDocFlow: Error generating response:', {

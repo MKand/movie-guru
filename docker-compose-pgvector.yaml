@@ -3,7 +3,9 @@ services:
     image: pgvector/pgvector:pg17
     environment:
       POSTGRES_PASSWORD: main
-      restart: always
+    restart: always
+    ports:
+      - 5432:5432
     volumes:
       - ./pgvector/init_substituted.sql:/docker-entrypoint-initdb.d/init_substituted.sql:ro
     networks:
