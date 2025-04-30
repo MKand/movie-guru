@@ -89,28 +89,26 @@ There are 2 important tables:
   - Docker and Docker Compose
 - Required APIs enabled (will be performed in `setup_local.sh`).
 
+### Clone the Repository
+
+```sh
+git clone https://github.com/MKand/movie-guru.git
+cd movie-guru
+git checkout <current-branch> # Replace with branch name
+```
+
+### Firebase setup
+
+1. Go to the firebase console. Follow the steps [here](https://firebase.google.com/docs/projects/use-firebase-with-existing-cloud-project#how-to-add-firebase_console).
+1. Create a new firebase web app and copy the firebase config variables into **set_env_vars.sh**. (FIREBASE_GCP_ID is the project ID)
+
 ### Environment setup
 
-1. **Clone the Repository**
-
-   ```sh
-   git clone https://github.com/MKand/movie-guru.git
-   cd movie-guru
-   git checkout <current-branch> # Replace with branch name
-   ```
-
-1. Authenticate with Google Cloud
+1. Authenticate with Google Cloud (unnecessary if running from Cloud Shell)
 
     ```sh
     gcloud auth login
     gcloud config set project <YOUR_PROJECT_ID>
-    ```
-
-1. Set the require environment variables
-
-    ```sh
-    export PROJECT_ID=<YOUR_PROJECT_ID>
-    export REGION=<YOUR_DESIRED_GCLOUD_REGION> # defaults to us-central1 if this is not set
     ```
 
 1. Run setup script.
@@ -121,11 +119,6 @@ There are 2 important tables:
     ```
 
 This enables the required APIs and creates the necessary service account with roles.
-
-### Firebase setup
-
-1. Go to the firebase console. Follow the steps [here](https://firebase.google.com/docs/projects/use-firebase-with-existing-cloud-project#how-to-add-firebase_console).
-1. Create a new firebase web app and copy the firebase config variables into **set_env_vars.sh**.
 
 ### Database Setup
 

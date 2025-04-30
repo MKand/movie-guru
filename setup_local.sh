@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# Set environment variables
+source set_env_vars.sh
+
 # Verify that the script is being run on Linux
 if [[ $OSTYPE != "linux-gnu" ]]; then
     echo -e "\e[91mERROR: This script is supported only on Linux. Please run it in a Linux environment.\e[0m"
