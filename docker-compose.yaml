@@ -17,7 +17,7 @@ services:
       - POSTGRES_DB_NAME=fake-movies-db
       - GOOGLE_APPLICATION_CREDENTIALS=/key.json
       - GRPC_TRACE=all
-      # - GRPC_VERBOSITY=DEBUG
+      - GRPC_VERBOSITY=ERROR
     volumes:
       - ./.key.json:/key.json
     networks:

@@ -15,10 +15,9 @@
  */
 
 import { UserProfileFlowOutput, UserProfileFlowInputSchema, UserProfileFlowOutputSchema } from './userProfileTypes'
-import { UserProfilePromptText } from './prompts';
+import { UserProfilePromptText_v1, UserProfilePromptText_v2 } from './prompts';
 import { ai, safetySettings } from './genkitConfig'
 import { GenerationBlockedError } from 'genkit';
-import { parseBooleanfromField } from '.';
 
 export const UserProfileFlowPrompt = ai.definePrompt(
   {
@@ -27,14 +26,12 @@ export const UserProfileFlowPrompt = ai.definePrompt(
       schema: UserProfileFlowInputSchema,
     },
     output: {
-      schema: UserProfileFlowOutputSchema,
-      format: 'json',
     },
     config: {
       safetySettings: safetySettings
     }
   },
-  UserProfilePromptText)
+  UserProfilePromptText_v1)
 
   export const UserProfileFlow = ai.defineFlow(
     {
@@ -48,8 +45,7 @@ export const UserProfileFlowPrompt = ai.definePrompt(
         const response = await UserProfileFlowPrompt({ 
           query: input.query, 
           agentMessage: input.agentMessage });
-        const safeOutput =  response.output?? defaultOutput
-        const output = UserProfileFlowOutputSchema.parse(safeOutput)
+        const output = UserProfileFlowOutputSchema.parse(response.output)
         return output
         
         } catch (error) {
