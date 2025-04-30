@@ -4,6 +4,7 @@
 /var
 key.json
 
+set_env_vars.sh
 posters/
 tfplan
 __pycache__
