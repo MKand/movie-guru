@@ -17,7 +17,6 @@
 import { z } from 'genkit';
 import { ai } from './genkitConfig';
 import { SimpleMessageSchema, UserProfileSchema } from './queryTransformTypes';
-import { ModelOutputMetadata, ModelOutputMetadataSchema } from './modelOutputMetadataTypes';
 
 
 // RelevantMovie schema
