@@ -33,11 +33,7 @@ export const QueryTransformFlow = ai.defineFlow(
   async (input) => {
     const defaultOutput = QueryTransformFlowOutputSchema.parse({})
     try {
-      const response = await QueryTransformPrompt({
-        history: input.history,
-        userMessage: input.userMessage,
-        userPreferences: input.userPreferences,
-      });
+      const response = await QueryTransformPrompt(input);
       const safeOutput = response.output?? defaultOutput;
       const output = QueryTransformFlowOutputSchema.parse(safeOutput)
       return output;
