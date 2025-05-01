@@ -1,5 +1,5 @@
 ---
-model: vertexai/gemini-2.5-pro-exp-03-25
+model: vertexai/gemini-1.0-pro
 config:
   safetySettings:
     - category: HARM_CATEGORY_HARASSMENT

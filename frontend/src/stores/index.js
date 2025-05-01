@@ -11,11 +11,11 @@ export const store = createStore({
       user: userStore,
       preferences: preferencesStore
     },
-    plugins: [
-      createPersistedState({
-        paths: ['user'],  // Persist the entire 'user' module's state
-      }),
-    ],
+    // plugins: [
+    //   createPersistedState({
+    //     paths: ['user'],  // Persist the entire 'user' module's state
+    //   }),
+    // ],
   })
 export function init(){
 

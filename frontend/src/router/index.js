@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import {store} from '../stores/index'
+import LoginStatusCheckService from '@/services/LoginStatusCheckService'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -27,19 +28,19 @@ const router = createRouter({
   ]
 })
 
-// router.beforeEach(async (to, from, next) => {
-//     if (to.meta.requiresAuth) {
-//       const loggedIn = store.getters['user/loginStatus']
-//       if (!loggedIn && to.name !== "login") next({name: "login"})
-//       }
-//     next()
-// })
 router.beforeEach(async (to, from) => {
   if (to.meta.requiresAuth) {
     const loggedIn = store.getters['user/loginStatus']
-    
-    if (!loggedIn && to.name !== "login") 
-      return{name: "login"}
+    if (!loggedIn && to.name !== "login") {
+     const user = await LoginStatusCheckService.checkLogin();
+     if (user){
+      console.log('Valid cookie found, logging in user:', user);
+      store.commit('user/logIn', user);
+    } else {
+      console.log('Invalid cookie, redirecting to login.');
+      return { name: 'login' };
+    }
+     }
     }
 })
 
