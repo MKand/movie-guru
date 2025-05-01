@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { gemini20Flash001, gemini15Flash, gemini20ProExp0205, vertexAI } from '@genkit-ai/vertexai';
+import { gemini20Flash001, gemini15Flash, vertexAI } from '@genkit-ai/vertexai';
 import { enableFirebaseTelemetry } from '@genkit-ai/firebase';
 import { genkitEval, GenkitMetric } from "@genkit-ai/evaluator";
 
