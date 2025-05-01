@@ -13,17 +13,16 @@
 // limitations under the License.
 
 import { ChatFlowInputSchema, ChatFlowOutput, ChatOutputSchema } from './chatFlowTypes';
-import { MovieContext, MovieFlowInputSchema, RelevantMovie } from './movieFlowTypes';
+import { MovieContext, MovieFlowInputSchema, RelevantMovie, MovieFlowOutputSchema } from './movieFlowTypes';
 
 import { ai } from './genkitConfig';
 import { GenerationBlockedError } from 'genkit';
 
 import {  SafetyTransformPrompt, SafetyPromptOutputSchema } from './safetyFlow';
-import { QueryTransformFlow, QueryTransformPrompt } from './queryTransformFlow';
+import { QueryTransformFlow } from './queryTransformFlow';
 import { QueryTransformFlowOutputSchema } from './queryTransformTypes';
 import { MovieDocFlow } from './docRetriever';
-import { MovieFlow, MovieFlowPrompt } from './movieFlow';
-import { MovieFlowOutputSchema } from './movieFlowTypes';
+import { MovieFlow } from './movieFlow';
 
 export const ChatFlow = ai.defineFlow(
     {
