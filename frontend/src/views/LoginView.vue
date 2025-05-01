@@ -3,8 +3,7 @@ import { ref } from 'vue';
 import store from '../stores';
 import router from '../router'
 import LoginClientService from '../services/LoginClientService';
-
-let loginFailed = ref(false);
+import { errorMessages } from 'vue/compiler-sfc';
 
 export default {
   data() {
@@ -20,7 +19,7 @@ export default {
             store.commit('user/logIn', user)
             router.push('/')
             this.loginFailed = false;
-          }).catch(() => {
+          }).catch((err) => {
             this.loginFailed = true;
           })
     }

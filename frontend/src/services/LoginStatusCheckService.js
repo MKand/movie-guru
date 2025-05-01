@@ -8,18 +8,19 @@ async checkLogin() {
         try {
           const user = await this.checkServerLogin(); 
           if (user) {
-            store.commit('user/logIn', user)            
+            store.commit('user/logIn', user)  // This might be unnecessary          
             console.log('Valid cookie found, logging in user: ', user);
             return true;
           } else {
-            console.log('Invalid cookie, redirecting to login.');
+            console.log('Invalid cookie');
             return false;
           }
         } catch (error) {
-          console.error('Error validating cookie:', error);
+          console.log('Error validating cookie:', error);
           return false; 
         }
     }
+    return true;
   }
   
 async checkServerLogin() {
