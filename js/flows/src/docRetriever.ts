@@ -15,7 +15,7 @@
  */
 
 import { Document } from '@genkit-ai/ai/retriever';
-import { textEmbedding004 } from '@genkit-ai/vertexai';
+import { textEmbedding004, textEmbedding005 } from '@genkit-ai/vertexai';
 import { toSql } from 'pgvector';
 import { openDB } from './db';
 import { ai } from './genkitConfig'
