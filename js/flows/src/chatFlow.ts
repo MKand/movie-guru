@@ -13,16 +13,16 @@
 // limitations under the License.
 
 import { ChatFlowInputSchema, ChatFlowOutput, ChatOutputSchema } from './chatFlowTypes';
-import { MovieContext, RelevantMovie } from './movieFlowTypes';
+import { MovieContext, MovieFlowInputSchema, RelevantMovie } from './movieFlowTypes';
 
 import { ai } from './genkitConfig';
 import { GenerationBlockedError } from 'genkit';
 
 import {  SafetyTransformPrompt, SafetyPromptOutputSchema } from './safetyFlow';
-import { QueryTransformPrompt } from './queryTransformFlow';
+import { QueryTransformFlow, QueryTransformPrompt } from './queryTransformFlow';
 import { QueryTransformFlowOutputSchema } from './queryTransformTypes';
 import { MovieDocFlow } from './docRetriever';
-import { MovieFlowPrompt } from './movieFlow';
+import { MovieFlow, MovieFlowPrompt } from './movieFlow';
 import { MovieFlowOutputSchema } from './movieFlowTypes';
 
 export const ChatFlow = ai.defineFlow(
@@ -53,12 +53,12 @@ export const ChatFlow = ai.defineFlow(
 
                  // Add a delay
                  await new Promise(resolve => setTimeout(resolve, 5 * 1000));
-            const qtRawOutput = await QueryTransformPrompt( ChatFlowInputSchema.parse({
+            const qtRawOutput = await QueryTransformFlow( ChatFlowInputSchema.parse({
                 history: input.history,
                 userPreferences: input.userPreferences,
                 userMessage: input.userMessage
             }))
-            const defaultQTOutput = qtRawOutput.output ??  QueryTransformFlowOutputSchema.parse({});
+            const defaultQTOutput = qtRawOutput ??  QueryTransformFlowOutputSchema.parse({});
             const qtOutput = QueryTransformFlowOutputSchema.parse(defaultQTOutput);
 
             // Search if required
@@ -74,13 +74,13 @@ export const ChatFlow = ai.defineFlow(
             // Final RAG
             // Add a delay
             await new Promise(resolve => setTimeout(resolve, 5 * 1000));
-            const movieFlowRawOutput = await MovieFlowPrompt({
+            const movieFlowRawOutput = await MovieFlow(MovieFlowInputSchema.parse({
                 history: input.history,
                 userPreferences: input.userPreferences,
                 contextDocuments: movieContexts,
                 userMessage: input.userMessage
-            })
-            const defaultMovieQOutput = movieFlowRawOutput.output ??  MovieFlowOutputSchema.parse({});
+            }))
+            const defaultMovieQOutput = movieFlowRawOutput ??  MovieFlowOutputSchema.parse({});
             const movieQAOutput = MovieFlowOutputSchema.parse(defaultMovieQOutput);
 
             // Transform into chat Response
