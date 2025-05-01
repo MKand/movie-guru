@@ -51,21 +51,28 @@ export const ChatFlow = ai.defineFlow(
             
             // Search Required Check
 
-            const qtRawOutput = await QueryTransformPrompt({
+            // Add 1 min delay
+            await new Promise(resolve => setTimeout(resolve, 5 * 1000));
+            const qtRawOutput = await QueryTransformPrompt( ChatFlowInputSchema.parse({
                 history: input.history,
                 userPreferences: input.userPreferences,
                 userMessage: input.userMessage
-            })
+            }))
             const defaultQTOutput = qtRawOutput.output ??  QueryTransformFlowOutputSchema.parse({});
             const qtOutput = QueryTransformFlowOutputSchema.parse(defaultQTOutput);
 
             // Search if required
+
+            // Add 1 min delay
+            await new Promise(resolve => setTimeout(resolve, 5 * 1000));
             var movieContexts: MovieContext[] = []
             if(qtOutput.followupAction == "SEARCH_REQUIRED"){
                 movieContexts = await MovieDocFlow( {query: qtOutput.searchQuery})
             }
             
             // Final RAG
+            // Add 1 min delay
+            await new Promise(resolve => setTimeout(resolve, 5 * 1000));
             const movieFlowRawOutput = await MovieFlowPrompt({
                 history: input.history,
                 userPreferences: input.userPreferences,
