@@ -32,10 +32,10 @@ router.beforeEach(async (to, from) => {
   if (to.meta.requiresAuth) {
     const loggedIn = store.getters['user/loginStatus']
     if (!loggedIn && to.name !== "login") {
-     const user = await LoginStatusCheckService.checkLogin();
-     if (user){
-      console.log('Valid cookie found, logging in user:', user);
-      store.commit('user/logIn', user);
+    const serverLoggedIn = await LoginStatusCheckService.checkLogin();
+     if (serverLoggedIn){
+      console.log('Valid cookie found, logging in user');
+     
     } else {
       console.log('Invalid cookie, redirecting to login.');
       return { name: 'login' };
