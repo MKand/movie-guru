@@ -1,6 +1,9 @@
 ---
 model: vertexai/gemini-2.0-flash-lite
 config:
+  temperature: 0.5
+  topK: 32
+  topP: 0.80
   safetySettings:
     - category: HARM_CATEGORY_HARASSMENT
       threshold: BLOCK_MEDIUM_AND_ABOVE
@@ -29,7 +32,7 @@ VECTOR: For queries about movies, recommendations, specific movie details (plot,
 
 Respond with:
 vectorQuery: A concise representation of the query (original inputQuery if category is VECTOR, otherwise empty).
-searchCategory: The determined category: NONE or VECTOR.
+searchCategory: This field is REQUIRED and should either be "NONE" or "VECTOR"
 justification: Brief explanation for the classification.
 
 Examples:

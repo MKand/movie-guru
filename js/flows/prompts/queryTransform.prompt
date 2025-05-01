@@ -34,15 +34,7 @@ Instructions for searchQuery and followupAction:
 
 2. Movie Title: Always include the movie title in searchQuery if present in userMessage or derivable from history.
 
-3. Vague Queries (e.g., "recommend a movie", "I want to watch something"):
-
-Refine searchQuery using UserProfile likes (e.g., add preferred genres: "action movies") and dislikes (e.g., exclude genres: "without horror").
-
-If no relevant profile info, use a general query (e.g., "movies").
-
-followupAction: SEARCH_REQUIRED.
-
-4. Specific Queries (e.g., "short comedy movies", "details about 'Inception'", "movies like 'Dune'"):
+3. Specific Queries (e.g., "short comedy movies", "details about 'Inception'", "movies like 'Dune'"):
 
 Use the user's specific terms in searchQuery. Retain descriptives (short, great).
 
@@ -59,32 +51,18 @@ If agent provided info and didn't ask a question, user's "OK" is acknowledgment.
 6. Non-Movie Intent (greetings, off-topic, ending conversation) or Unclear Intent:
 
 searchQuery: "" (empty).
-
 followupAction: SEARCH_NOT_REQUIRED.
 
-Output Format:
 Respond with:
 
 searchQuery: The refined query string for the vector search (empty if no search).
 
-followupAction: SEARCH_REQUIRED or SEARCH_NOT_REQUIRED. This field is required.
+followupAction: SEARCH_REQUIRED or SEARCH_NOT_REQUIRED. This field is REQUIRED.
 
 justification: Brief explanation of your reasoning. This field is required.
     
 {{ role "user" }}
 User Input: {{userMessage}}
-
-UserProfile: 
-    likes: 
-        * actors: {{#each userPreferences.likes.actors}}{{this}}, {{~/each}}
-        * directors: {{#each userPreferences.likes.directors}}{{this}}, {{~/each}}
-        * genres: {{#each userPreferences.likes.genres}}{{this}}, {{~/each}}
-        * others: {{#each userPreferences.likes.others}}{{this}}, {{~/each}}
-    dislikes: 
-        * actors: {{#each userPreferences.dislikes.actors}}{{this}}, {{~/each}}
-        * directors: {{#each userPreferences.dislikes.directors}}{{this}}, {{~/each}}
-        * genres: {{#each userPreferences.dislikes.genres}}{{this}}, {{~/each}}
-        * others: {{#each userPreferences.dislikes.others}}{{this}}, {{~/each}}
 
 History:
 {{#each history}}{{this.role}}: {{this.content}}{{~/each}}

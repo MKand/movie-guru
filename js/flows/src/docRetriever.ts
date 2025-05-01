@@ -27,7 +27,7 @@ const SearchTypeCategory = z.enum(['KEYWORD', 'VECTOR', 'MIXED', 'NONE']);
 
 export const RetrieverOptionsSchema = z.object({
   k: z.number().optional().default(10),
-  searchCategory: SearchTypeCategory.optional().default("VECTOR"),
+  searchCategory: SearchTypeCategory.default("VECTOR"),
   keywordQuery: z.string().default(""),
   vectorQuery: z.string().default(""),
 });
@@ -75,7 +75,7 @@ export const MovieDocFlow = ai.defineFlow(
     const movieContexts: MovieContext[] = [];
     const searchFlowOutput = await createSearchObject(input);
   try{
-    if (searchFlowOutput.searchCategory == "NONE"){
+    if (searchFlowOutput.searchCategory == "NONE" || (searchFlowOutput.vectorQuery == "" && searchFlowOutput.keywordQuery == "") ){
       return movieContexts;
     }
     const docs = await ai.retrieve({
@@ -139,7 +139,7 @@ export const sqlRetriever = ai.defineRetriever(
     }
 
      //Vector Query
-     if(options.searchCategory == "VECTOR"){
+     if(options.searchCategory == "VECTOR" || options.vectorQuery != ""){
       const embedding = await ai.embed({
         embedder: textEmbedding004,
         content: options.vectorQuery,
