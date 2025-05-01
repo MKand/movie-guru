@@ -18,11 +18,11 @@
     "typescript": "^5.7.3"
   },
   "dependencies": {
-    "@genkit-ai/evaluator": "^1.2.0",
-    "@genkit-ai/express": "^1.0.5",
-    "@genkit-ai/firebase": "^1.0.5",
-    "@genkit-ai/vertexai": "^1.0.5",
-    "genkit": "^1.0.5",
+    "@genkit-ai/evaluator": "^1.7.0",
+    "@genkit-ai/express": "^1.7.0",
+    "@genkit-ai/firebase": "^1.7.0",
+    "@genkit-ai/vertexai": "^1.7.0",
+    "genkit": "^1.7.0",
     "pgvector": "^0.2.0",
     "postgres": "^3.4.5"
   }

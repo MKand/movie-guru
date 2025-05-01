@@ -9,7 +9,7 @@ services:
     build: ./js/flows
     environment:
       - PROJECT_ID=$PROJECT_ID
-      - LOCATION=$REGION
+      - LOCATION=us-central1
       - POSTGRES_HOST=db
       - POSTGRES_DB_USER=minimal-user
       - POSTGRES_DB_USER_PASSWORD=minimal
