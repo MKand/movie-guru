@@ -15,7 +15,7 @@
  */
 
 import { Document } from '@genkit-ai/ai/retriever';
-import { textEmbedding004, textEmbedding005 } from '@genkit-ai/vertexai';
+import { textEmbedding005 } from '@genkit-ai/vertexai';
 import { toSql } from 'pgvector';
 import { openDB } from './db';
 import { ai } from './genkitConfig'
@@ -141,7 +141,7 @@ export const sqlRetriever = ai.defineRetriever(
      //Vector Query
      if(options.searchCategory == "VECTOR" || options.vectorQuery != ""){
       const embedding = await ai.embed({
-        embedder: textEmbedding004,
+        embedder: textEmbedding005,
         content: options.vectorQuery,
       });  
         results = await db`
@@ -156,7 +156,7 @@ export const sqlRetriever = ai.defineRetriever(
     if (options.searchCategory === "MIXED") {
       // Generate the vector embedding for the vector query
       const embedding = await ai.embed({
-        embedder: textEmbedding004,
+        embedder: textEmbedding005,
         content: options.vectorQuery,
       });
     
