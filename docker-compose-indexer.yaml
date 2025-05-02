@@ -8,10 +8,8 @@ services:
       - POSTGRES_HOST=db
       - POSTGRES_DB_NAME=fake-movies-db
       - TABLE_NAME=movies
-      - APP_VERSION=v1
       - GOOGLE_APPLICATION_CREDENTIALS=/key.json
       - LOCATION=us-central1
-      - LOCAL=true
     volumes:
       - ./key.json:/key.json
       - ./dataset/:/dataset
