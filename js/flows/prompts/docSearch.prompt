@@ -38,34 +38,45 @@ justification: Brief explanation for the classification.
 Examples:
 
 Input: "great movie that is short"
-Output:
-searchCategory: VECTOR
-vectorQuery: "great movie that is short"
-justification: "The query asks for movie recommendations based on descriptive criteria."
+JSON Output:
+{
+  "searchCategory": "VECTOR",
+  "vectorQuery": "great movie that is short",
+  justification: "The query asks for movie recommendations based on descriptive criteria." 
+}
 
 Input: "director of The Matrix"
-Output:
-searchCategory: VECTOR
-vectorQuery: "director of The Matrix"
+JSON Output:
+{
+searchCategory: VECTOR,
+vectorQuery: "director of The Matrix",
 justification: "The query asks for a specific detail (director) of a particular movie."
+}
+
 
 Input: "movies like The Matrix"
-Output:
-searchCategory: VECTOR
-vectorQuery: "movies like The Matrix"
+JSON Output:
+{
+searchCategory: VECTOR,
+vectorQuery: "movies like The Matrix",
 justification: "The query requires semantic understanding for movie recommendations based on similarity."
+}
+
 
 Input: "Hello"
-Output:
-searchCategory: NONE
-vectorQuery: ""
-justification: "The query is a greeting and does not require a movie database search."
-
+JSON Output:
+{
+  searchCategory: NONE,
+  vectorQuery: "",
+  justification: "The query is a greeting and does not require a movie database search.",
+}
 Input: "What's the weather like today?"
-Output:
+JSON Output:
+{
 searchCategory: NONE
 vectorQuery: ""
 justification: "The query is off-topic and not related to the movie database."
+}
 
 {{ role "user" }}
 

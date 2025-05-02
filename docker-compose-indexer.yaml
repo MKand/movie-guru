@@ -13,7 +13,7 @@ services:
       - LOCATION=us-central1
       - LOCAL=true
     volumes:
-      - ./.key.json:/key.json
+      - ./key.json:/key.json
       - ./dataset/:/dataset
     networks:
       - db-shared-network

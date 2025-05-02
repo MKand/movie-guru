@@ -19,7 +19,7 @@ services:
       - GRPC_TRACE=all
       - GRPC_VERBOSITY=ERROR
     volumes:
-      - ./.key.json:/key.json
+      - ./key.json:/key.json
     networks:
       - db-shared-network    
   server:
@@ -53,8 +53,6 @@ services:
       - VITE_FIREBASE_API_KEY=${FIREBASE_API_KEY}
       - VITE_FIREBASE_AUTH_DOMAIN=${FIREBASE_AUTH_DOMAIN}
       - VITE_GCP_PROJECT_ID=${PROJECT_ID}
-      - VITE_FIREBASE_STORAGE_BUCKET=${FIREBASE_STORAGE_BUCKET}
-      - VITE_FIREBASE_MESSAGING_SENDERID=${FIREBASE_MESSAGING_SENDERID}
       - VITE_FIREBASE_APPID=${FIREBASE_APPID}
       - VITE_CHAT_SERVER_URL=http://localhost:8080/api
     networks:

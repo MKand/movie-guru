@@ -90,8 +90,8 @@ if [[ "$SKIP_INFRA" == false ]]; then
 fi
 
 
-echo -e "\e[95mCreating service account local key as .key.json\e[0m"
-gcloud iam service-accounts keys create ./.key.json \
+echo -e "\e[95mCreating service account local key as key.json\e[0m"
+gcloud iam service-accounts keys create ./key.json \
     --iam-account=$SERVICE_ACCOUNT_EMAIL
 
 echo -e "\e[92mDownloading and unzipping posters from the external archive..\e[0m"

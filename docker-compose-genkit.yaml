@@ -17,7 +17,7 @@ services:
       - LOCAL=true
     volumes:
       - ./js/flows:/app
-      - ./.key.json:/key.json
+      - ./key.json:/key.json
     working_dir: /app
     networks:
       - db-shared-network

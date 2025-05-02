@@ -75,7 +75,7 @@ export const MovieDocFlow = ai.defineFlow(
     const movieContexts: MovieContext[] = [];
     const searchFlowOutput = await createSearchObject(input);
   try{
-    if (searchFlowOutput.searchCategory == "NONE" || (searchFlowOutput.vectorQuery == "" && searchFlowOutput.keywordQuery == "") ){
+    if (searchFlowOutput.searchCategory == "NONE" && (searchFlowOutput.keywordQuery == "" && searchFlowOutput.vectorQuery == "")){
       return movieContexts;
     }
     const docs = await ai.retrieve({
@@ -131,7 +131,7 @@ export const sqlRetriever = ai.defineRetriever(
     }
 
     let results;
-    if(options.searchCategory == "KEYWORD"){
+    if(options.searchCategory == "KEYWORD" || options.keywordQuery != ""){
       results =  await db`SELECT content, title, poster, released, runtime_mins, rating, genres, director, actors, plot, tconst
       FROM movies
       WHERE ${db.unsafe(options.keywordQuery)} 
