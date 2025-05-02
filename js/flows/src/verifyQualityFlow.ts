@@ -17,8 +17,19 @@
 import {ResponseQualityFlowInputSchema, ResponseQualityFlowOutputSchema} from './verifyQualityTypes'
 import { ai } from './genkitConfig'
 
-
-export const QualityFlowPrompt = ai.prompt( 'verifyQuality');
+/**
+ * Prompt file: js/flows/prompts/verifyQuality.prompt
+ * 
+ * This prompt instructs the LLM to assess the quality of the response based on the user's reaction to it.
+ * 
+ * Input schema: ResponseQualityFlowInputSchema
+ * Output schema: ResponseQualityFlowOutputSchema
+ * 
+ * This team, uses a variant system to version our prompts. The "v2" variant corresponds to the verifyQuality.v2.prompt file. 
+ * To use the default variant -- ai.prompt('verifyQuality')
+ * To use a variant -- ai.prompt('verifyQuality', {variant: 'v2'})
+ */
+export const verifyResponseQuality = ai.prompt( 'verifyQuality');
   
 export const QualityFlow = ai.defineFlow(
   {
@@ -29,7 +40,7 @@ export const QualityFlow = ai.defineFlow(
   async (input) => {
     const defaultOutput = ResponseQualityFlowOutputSchema.parse({})
     try {
-      const response = await QualityFlowPrompt({ history: input.history });
+      const response = await verifyResponseQuality({ history: input.history });
       const safeOutput = response.output?? defaultOutput
 
       console.log("quality response:", response.output)

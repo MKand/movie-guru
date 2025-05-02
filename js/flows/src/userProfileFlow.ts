@@ -19,8 +19,19 @@ import { UserProfileFlowInputSchema, UserProfileFlowOutputSchema,
 import { ai } from './genkitConfig'
 import { GenerationBlockedError } from 'genkit';
 
-// Defined in js/flows/prompts/findUserPreferences.prompt
-export const userProfilePrompt = ai.prompt('userProfile');
+/**
+ * Prompt file: js/flows/prompts/userProfile.prompt
+ * 
+ * This prompt instructs the LLM to extract user preferences so that we can persist them.
+ * 
+ * Input schema: UserProfileFlowInputSchema
+ * Output schema: UserProfileFlowOutputSchema
+ * 
+ * This team, uses a variant system to version our prompts. The "v2" variant corresponds to the userProfile.v2.prompt file. 
+ * To use the default variant -- ai.prompt('userProfile')
+ * To use a variant -- ai.prompt('userProfile', {variant: 'v2'})
+ */
+export const extractUserPreferences = ai.prompt('userProfile');
 
 export const UserProfileFlow = ai.defineFlow(
   {
@@ -31,7 +42,7 @@ export const UserProfileFlow = ai.defineFlow(
   async (input) => {
     const defaultOutput = UserProfileFlowOutputSchema.parse({})
     try {
-      const response = await userProfilePrompt({ 
+      const response = await extractUserPreferences({ 
         query: input.query, 
         agentMessage: input.agentMessage });
       const output = UserProfileFlowOutputSchema.parse(response.output)

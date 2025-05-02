@@ -34,7 +34,9 @@ if(gemini20){
 }
 
 enableFirebaseTelemetry({
-  "forceDevExport": true
+  "forceDevExport": true, // NOTE: Set explicitly for exporting from Cloud Shell local environment - do not ship this value to production.
+  "metricExportIntervalMillis": 5_000, // NOTE: Set explicitly to 5 seconds to improve throughput - do not ship this value to production.
+  "metricExportTimeoutMillis": 5_000 // NOTE: Set explicitly to 5 seconds to improve throughput - do not ship this value to production.
 });
 
 

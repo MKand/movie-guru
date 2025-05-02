@@ -47,9 +47,22 @@ export const SearchFlowOutputSchema = z.strictObject({
 
 ai.defineSchema('SearchFlowOutputSchema', SearchFlowOutputSchema);
 
-// Defined in js/flows/prompts/docSearch.prompt
-// This has two variants. For more about how to use variants, see https://firebase.google.com/docs/genkit/dotprompt#prompt_variants
-export const SearchFlowPrompt = ai.prompt('docSearch');
+/**
+ * Prompt file: js/flows/prompts/docSearch.prompt
+ * 
+ * This prompt takes the generated search terms from the queryTransformFlow and uses that to retrieve relevant documents
+ * from the database.
+ * 
+ * Input schema: QuerySchema
+ * Output schema: SearchFlowOutputSchema
+ * 
+ * This team, uses a variant system to version our prompts. The "v2" variant corresponds to the docSearch.v2.prompt file. 
+ * To use the default variant -- ai.prompt('docSearch')
+ * To use a variant -- ai.prompt('docSearch', {variant: 'v2'})
+ * 
+ * ATTENTION: Variant v2 is currently being tested, if it is not performing well, please revert to the default variant.
+ */
+export const SearchFlowPrompt = ai.prompt('docSearch', {variant: 'v2'});
 
 export const MovieSearchPromptFlow = ai.defineFlow(
   {

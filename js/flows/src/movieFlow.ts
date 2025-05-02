@@ -18,9 +18,21 @@ import { ai } from './genkitConfig'
 import { MovieFlowInputSchema, MovieFlowOutputSchema } from './movieFlowTypes'
 import { GenerationBlockedError } from 'genkit';
 
-// Defined in js/flows/prompts/movieSearch.prompt
-// This has two variants. For more about how to use variants, see https://firebase.google.com/docs/genkit/dotprompt#prompt_variants
-export const MovieFlowPrompt = ai.prompt('movie');
+
+/**
+ * Prompt file: js/flows/prompts/movie.prompt
+ * 
+ * This prompt takes the original user input, user preferences, relevant documents retrieved from the database,
+ * and conversation history to make a recommendation to the user.
+ * 
+ * Input schema: MovieFlowInputSchema
+ * Output schema: MovieFlowOutputSchema
+ * 
+ * This team, uses a variant system to version our prompts. The "v2" variant corresponds to the movie.v2.prompt file. 
+ * To use the default variant -- ai.prompt('movie')
+ * To use a variant -- ai.prompt('movie', {variant: 'v2'})
+ */
+export const makeMovieRecommendation = ai.prompt('movie', {variant: 'v2'});
 
 export const MovieFlow = ai.defineFlow(
   {
@@ -33,7 +45,7 @@ export const MovieFlow = ai.defineFlow(
   async (input) => {
     const defaultOutput = MovieFlowOutputSchema.parse({})
     try {
-      const response = await MovieFlowPrompt({ history: input.history, userPreferences: input.userPreferences, userMessage: input.userMessage, contextDocuments: input.contextDocuments });
+      const response = await makeMovieRecommendation({ history: input.history, userPreferences: input.userPreferences, userMessage: input.userMessage, contextDocuments: input.contextDocuments });
       const safeOutput = response.output ?? defaultOutput;
       const output = MovieFlowOutputSchema.parse(safeOutput);
       return output

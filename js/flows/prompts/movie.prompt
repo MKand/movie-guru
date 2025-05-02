@@ -48,31 +48,32 @@ Respond with the following information:
 * a *response* which is your response to the user's question or statement, written in a friendly and conversational way. Never return an empty response. Always say something, never leave this empty. Keep your responses between 1-5 sentences long. Don't use more than 2 emojis and symbols.
 * a list of *relevantMovies* which is a list of objects extracted from the MovieContext that are relevant to your response. Each object contains the reason why you think a movie is relevant and the title of the movie. If none are relevant, leave this list empty. If any movies you are talking about in your answer are relevant, *always* add them.
 
-    {{ role "user" }}
-    * userProfile (May be empty):
-        * likes: 
-            * actors: {{#each userPreferences.likes.actors}}{{this}}, {{~/each}}
-            * directors: {{#each userPreferences.likes.directors}}{{this}}, {{~/each}}
-            * genres: {{#each userPreferences.likes.genres}}{{this}}, {{~/each}}
-            * others: {{#each userPreferences.likes.others}}{{this}}, {{~/each}}
-        * dislikes: 
-            * actors: {{#each userPreferences.dislikes.actors}}{{this}}, {{~/each}}
-            * directors: {{#each userPreferences.dislikes.directors}}{{this}}, {{~/each}}
-            * genres: {{#each userPreferences.dislikes.genres}}{{this}}, {{~/each}}
-            * others: {{#each userPreferences.dislikes.others}}{{this}}, {{~/each}}
-    * history (May be empty):
-        {{#each history}}{{this.role}}: {{this.content}}{{~/each}}
+{{ role "user" }}
 
-    * MovieContext (May be empty):
-        {{#each contextDocuments}} 
-        Movie: 
-        - title:{{this.title}}
-        - plot:{{this.plot}} 
-        - genres:{{this.genres}}
-        - actors:{{this.actors}} 
-        - directors:{{this.directors}} 
-        - rating:{{this.rating}} 
-        - runtimeMinutes:{{this.runtime_minutes}}
-        - released:{{this.released}} 
-        {{/each}}
-    * userMessage: {{userMessage}}
+* userProfile (May be empty):
+    * likes: 
+        * actors: {{#each userPreferences.likes.actors}}{{this}}, {{~/each}}
+        * directors: {{#each userPreferences.likes.directors}}{{this}}, {{~/each}}
+        * genres: {{#each userPreferences.likes.genres}}{{this}}, {{~/each}}
+        * others: {{#each userPreferences.likes.others}}{{this}}, {{~/each}}
+    * dislikes: 
+        * actors: {{#each userPreferences.dislikes.actors}}{{this}}, {{~/each}}
+        * directors: {{#each userPreferences.dislikes.directors}}{{this}}, {{~/each}}
+        * genres: {{#each userPreferences.dislikes.genres}}{{this}}, {{~/each}}
+        * others: {{#each userPreferences.dislikes.others}}{{this}}, {{~/each}}
+* history (May be empty):
+    {{#each history}}{{this.role}}: {{this.content}}{{~/each}}
+
+* MovieContext (May be empty):
+    {{#each contextDocuments}} 
+    Movie: 
+    - title:{{this.title}}
+    - plot:{{this.plot}} 
+    - genres:{{this.genres}}
+    - actors:{{this.actors}} 
+    - directors:{{this.directors}} 
+    - rating:{{this.rating}} 
+    - runtimeMinutes:{{this.runtime_minutes}}
+    - released:{{this.released}} 
+    {{/each}}
+* userMessage: {{userMessage}}

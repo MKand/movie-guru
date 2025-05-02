@@ -59,6 +59,28 @@ ai.defineSchema('SimpleMessageSchema', SimpleMessageSchema);
 
 export type QueryTransformFlowInput = z.infer<typeof ChatFlowInputSchema>
 
+// Schema is used as the output schema for the searchRequired prompt.
+// See js/flows/prompts/searchRequired.prompt
+export const SearchRequiredOutputSchema = z.strictObject({
+  followupAction: FOLLOWUP_ACTION.default("SEARCH_NOT_REQUIRED"),
+  justification: z.string().default("No justification provided")
+});
+
+export type SearchRequiredOutput = z.infer<typeof SearchRequiredOutputSchema>
+
+ai.defineSchema('SearchRequiredOutputSchema', SearchRequiredOutputSchema);
+
+// Schema is used as the output schema for the searchRequired prompt.
+// See js/flows/prompts/searchQuery.prompt
+export const SearchQueryOutputSchema = z.strictObject({
+  searchQuery: z.string().optional().default(""),
+  justification: z.string().default("No justification provided")
+});
+
+export type SearchQueryOutput = z.infer<typeof SearchQueryOutputSchema>
+
+ai.defineSchema('SearchQueryOutputSchema', SearchQueryOutputSchema);
+
 // QueryTransformFlowOutput schema
 export const QueryTransformFlowOutputSchema = z.strictObject({
   searchQuery: z.string().optional().default(""),
