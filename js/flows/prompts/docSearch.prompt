@@ -62,6 +62,13 @@ vectorQuery: "movies like The Matrix",
 justification: "The query requires semantic understanding for movie recommendations based on similarity."
 }
 
+Input: "deatils about movie The Matrix"
+JSON Output:
+{
+searchCategory: VECTOR,
+vectorQuery: "The Matrix",
+justification: "The query asks for a specific movie."
+}
 
 Input: "Hello"
 JSON Output:
