@@ -18,7 +18,7 @@ import { MovieContext, MovieFlowInputSchema, RelevantMovie, MovieFlowOutputSchem
 import { ai } from './genkitConfig';
 import { GenerationBlockedError } from 'genkit';
 
-import {  SafetyTransformPrompt, SafetyPromptOutputSchema } from './safetyFlow';
+import {  SafetyTransformPrompt, SafetyPromptOutputSchema, SafetyIssueFlow } from './safetyFlow';
 import { QueryTransformFlow } from './queryTransformFlow';
 import { QueryTransformFlowOutputSchema } from './queryTransformTypes';
 import { MovieDocFlow } from './docRetriever';
@@ -36,10 +36,10 @@ export const ChatFlow = ai.defineFlow(
         try {
         
             // Initial safety check
-            const safetyRawOutput =  await SafetyTransformPrompt({
+            const safetyRawOutput =  await SafetyIssueFlow({
                 userMessage: input.userMessage,
                 });
-                const defaultSafetyOutput = safetyRawOutput.output ??  SafetyPromptOutputSchema.parse({});
+                const defaultSafetyOutput = safetyRawOutput ??  SafetyPromptOutputSchema.parse({});
                 const safetyOutput = SafetyPromptOutputSchema.parse(defaultSafetyOutput);
             
             if(safetyOutput.safetyIssue == true || safetyOutput.wrongQuery == true){
@@ -49,7 +49,7 @@ export const ChatFlow = ai.defineFlow(
             }
             
             // Search Required Check
-            const qtRawOutput = await QueryTransformFlow( ChatFlowInputSchema.parse({
+            const qtRawOutput = await QueryTransformFlow(ChatFlowInputSchema.parse({
                 history: input.history,
                 userPreferences: input.userPreferences,
                 userMessage: input.userMessage

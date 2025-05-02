@@ -16,6 +16,9 @@
 
 import { z } from 'genkit';
 import { ai } from './genkitConfig';
+import { GenerationBlockedError } from 'genkit';
+
+export const SafetyTransformPrompt = ai.prompt('safety');
 
 export const SafetyPromptInputSchema = z.object({
     userMessage: z.string(),
@@ -29,7 +32,36 @@ export const SafetyPromptOutputSchema = z.strictObject({
     justification: z.string().default("No justification provided by model")
   });
 export type SafetyPromptOutput = z.infer<typeof SafetyPromptOutputSchema>;
+
 ai.defineSchema('SafetyPromptOutputSchema', SafetyPromptOutputSchema);
 
-
-export const SafetyTransformPrompt = ai.prompt('safety');
+export const SafetyIssueFlow = ai.defineFlow(
+    { 
+        name: 'safetyIssueFlow',
+        inputSchema: SafetyPromptInputSchema,
+        outputSchema: SafetyPromptOutputSchema,
+    },
+    async (input) => {
+        const defaultOutput = SafetyPromptOutputSchema.parse({});
+        try{
+            const response = await SafetyTransformPrompt(input);
+            const safeOutput = response.output?? defaultOutput;
+            const output = SafetyPromptOutputSchema.parse(safeOutput)
+            return output;
+            } catch (error) {
+            if (error instanceof GenerationBlockedError){
+                
+                console.error("QTFlow: GenerationBlockedError generating response:", error.message);
+                return defaultOutput;
+            }
+            else if(error instanceof Error && (error.message.includes('429') || error.message.includes('RESOURCE_EXHAUSTED'))){
+                console.error("QTFlow: There is a quota issue:", error.message);
+                return defaultOutput;
+                }
+                else {
+                console.error("QTFlow: Error generating response:", error);
+                throw error;
+              }
+            }
+        }
+)
