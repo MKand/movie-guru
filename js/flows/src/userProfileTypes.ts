@@ -42,7 +42,7 @@ export type UserProfileFlowInput = z.infer<typeof UserProfileFlowInputSchema>
 
 ai.defineSchema('UserProfileFlowInputSchema', UserProfileFlowInputSchema);
 
-// UserProfileFlowOutput schema
+
 export const UserProfileFlowOutputSchema = z.strictObject({
   profileChangeRecommendations: z.array(ProfileChangeRecommendationSchema).optional().default([]),
   modelOutputMetadata: ModelOutputMetadataSchema.default(ModelOutputMetadataSchema.parse({}))

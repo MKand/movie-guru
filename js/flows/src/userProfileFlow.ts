@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { UserProfileFlowInputSchema, UserProfileFlowOutputSchema } from './userProfileTypes'
+import { UserProfileFlowInputSchema, UserProfileFlowOutputSchema, 
+ } from './userProfileTypes'
 import { ai } from './genkitConfig'
 import { GenerationBlockedError } from 'genkit';
 
