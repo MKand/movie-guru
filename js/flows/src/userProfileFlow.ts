@@ -14,61 +14,57 @@
  * limitations under the License.
  */
 
-import { UserProfileFlowOutput, UserProfileFlowInputSchema, UserProfileFlowOutputSchema } from './userProfileTypes'
-import { UserProfilePromptText } from './prompts';
-import { ai, safetySettings } from './genkitConfig'
+import { UserProfileFlowInputSchema, UserProfileFlowOutputSchema, 
+ } from './userProfileTypes'
+import { ai } from './genkitConfig'
 import { GenerationBlockedError } from 'genkit';
-import { parseBooleanfromField } from '.';
 
-export const UserProfileFlowPrompt = ai.definePrompt(
+/**
+ * Prompt file: js/flows/prompts/userProfile.prompt
+ * 
+ * This prompt instructs the LLM to extract user preferences so that we can persist them.
+ * 
+ * Input schema: UserProfileFlowInputSchema
+ * Output schema: UserProfileFlowOutputSchema
+ * 
+ * The MovieGuru development team, uses a variant system to version our prompts. The "v2" variant corresponds to the userProfile.v2.prompt file. 
+ * To use the default variant -- ai.prompt('userProfile')
+ * To use a variant -- ai.prompt('userProfile', {variant: 'v2'})
+ */
+export const extractUserPreferences = ai.prompt('userProfile');
+
+export const UserProfileFlow = ai.defineFlow(
   {
-    name: 'userProfileFlowPrompt',
-    input: {
-      schema: UserProfileFlowInputSchema,
-    },
-    output: {
-      schema: UserProfileFlowOutputSchema,
-      format: 'json',
-    },
-    config: {
-      safetySettings: safetySettings
-    }
+    name: 'userProfileFlow',
+    inputSchema: UserProfileFlowInputSchema,
+    outputSchema: UserProfileFlowOutputSchema 
   },
-  UserProfilePromptText)
-
-  export const UserProfileFlow = ai.defineFlow(
-    {
-      name: 'userProfileFlow',
-      inputSchema: UserProfileFlowInputSchema,
-      outputSchema: UserProfileFlowOutputSchema
-    },
-    async (input) => {
-      const defaultOutput = UserProfileFlowOutputSchema.parse({})
-      try {
-        const response = await UserProfileFlowPrompt({ 
-          query: input.query, 
-          agentMessage: input.agentMessage });
-        const safeOutput =  response.output?? defaultOutput
-        const output = UserProfileFlowOutputSchema.parse(safeOutput)
-        return output
-        
-        } catch (error) {
-        
-        if(error instanceof GenerationBlockedError){
-          console.error("UserProfileFlow: GenerationBlockedError generating response:", error.message);
-          defaultOutput.modelOutputMetadata.safetyIssue = true;
-          return defaultOutput;
-        }
-        else if(error instanceof Error && (error.message.includes('429') || error.message.includes('RESOURCE_EXHAUSTED'))){
-          console.error("UserProfileFlow: There is a quota issue:", error.message);
-          defaultOutput.modelOutputMetadata.quotaIssue = true;
-          return defaultOutput;
-          }
-        else{
-          console.error("UserProfileFlow: Error generating response:", error);
-          throw error;
-        }
+  async (input) => {
+    const defaultOutput = UserProfileFlowOutputSchema.parse({})
+    try {
+      const response = await extractUserPreferences({ 
+        query: input.query, 
+        agentMessage: input.agentMessage });
+      const output = UserProfileFlowOutputSchema.parse(response.output)
+      return output
+      
+    } catch (error) {
+    
+      if(error instanceof GenerationBlockedError){
+        console.error("UserProfileFlow: GenerationBlockedError generating response:", error.message);
+        defaultOutput.modelOutputMetadata.safetyIssue = true;
+        return defaultOutput;
       }
-    } 
+      else if(error instanceof Error && (error.message.includes('429') || error.message.includes('RESOURCE_EXHAUSTED'))){
+        console.error("UserProfileFlow: There is a quota issue:", error.message);
+        defaultOutput.modelOutputMetadata.quotaIssue = true;
+        return defaultOutput;
+        }
+      else{
+        console.error("UserProfileFlow: Error generating response:", error);
+        throw error;
+      }
+    }
+  }
 );
 

@@ -15,6 +15,7 @@
  */
 
 import { z } from 'genkit';
+import { ai } from './genkitConfig';
 import { ChatFlowInputSchema } from './chatFlowTypes';
 
 // FOLLOWUP_ACTION as Zod Enum
@@ -34,6 +35,7 @@ const ProfileCategoriesSchema = z.object({
 
 export type ProfileCategories = z.infer<typeof ProfileCategoriesSchema>
 
+ai.defineSchema('ProfileCategoriesSchema', ProfileCategoriesSchema);
 
 // UserProfile schema
 export const UserProfileSchema = z.object({
@@ -43,6 +45,7 @@ export const UserProfileSchema = z.object({
 
 export type UserProfile = z.infer<typeof UserProfileSchema>
 
+ai.defineSchema('UserProfileSchema', UserProfileSchema);
 
 // SimpleMessage schema
 export const SimpleMessageSchema = z.object({
@@ -52,8 +55,31 @@ export const SimpleMessageSchema = z.object({
 
 export type SimpleMessage = z.infer<typeof SimpleMessageSchema>
 
+ai.defineSchema('SimpleMessageSchema', SimpleMessageSchema);
+
 export type QueryTransformFlowInput = z.infer<typeof ChatFlowInputSchema>
 
+// Schema is used as the output schema for the searchRequired prompt.
+// See js/flows/prompts/searchRequired.prompt
+export const SearchRequiredOutputSchema = z.strictObject({
+  followupAction: FOLLOWUP_ACTION.default("SEARCH_NOT_REQUIRED"),
+  justification: z.string().default("No justification provided")
+});
+
+export type SearchRequiredOutput = z.infer<typeof SearchRequiredOutputSchema>
+
+ai.defineSchema('SearchRequiredOutputSchema', SearchRequiredOutputSchema);
+
+// Schema is used as the output schema for the searchRequired prompt.
+// See js/flows/prompts/searchQuery.prompt
+export const SearchQueryOutputSchema = z.strictObject({
+  searchQuery: z.string().optional().default(""),
+  justification: z.string().default("No justification provided")
+});
+
+export type SearchQueryOutput = z.infer<typeof SearchQueryOutputSchema>
+
+ai.defineSchema('SearchQueryOutputSchema', SearchQueryOutputSchema);
 
 // QueryTransformFlowOutput schema
 export const QueryTransformFlowOutputSchema = z.strictObject({
@@ -63,3 +89,6 @@ export const QueryTransformFlowOutputSchema = z.strictObject({
 });
 
 export type QueryTransformFlowOutput = z.infer<typeof QueryTransformFlowOutputSchema>
+
+ai.defineSchema('QueryTransformFlowOutputSchema', QueryTransformFlowOutputSchema);
+

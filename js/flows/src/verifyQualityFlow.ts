@@ -14,44 +14,39 @@
  * limitations under the License.
  */
 
-import {ResponseQualityFlowInputSchema, ResponseQualityFlowOutputSchema, OUTCOME, USERSENTIMENT, ResponseQualityFlowOutput} from './verifyQualityTypes'
-import { ConversationQualityAnalysisPromptText } from './prompts';
+import {ResponseQualityFlowInputSchema, ResponseQualityFlowOutputSchema} from './verifyQualityTypes'
 import { ai } from './genkitConfig'
 
-
-export const QualityFlowPrompt = ai.definePrompt(
-    {
-      name: 'qualityFlowPrompt',
-      input: {
-        schema: ResponseQualityFlowInputSchema,
-      },
-      output: {
-        schema: ResponseQualityFlowOutputSchema,
-        format: 'json',
-      },  
-    }, 
-    ConversationQualityAnalysisPromptText
-  )
+/**
+ * Prompt file: js/flows/prompts/verifyQuality.prompt
+ * 
+ * This prompt instructs the LLM to assess the quality of the response based on the user's reaction to it.
+ * 
+ * Input schema: ResponseQualityFlowInputSchema
+ * Output schema: ResponseQualityFlowOutputSchema
+ * 
+ */
+export const verifyResponseQuality = ai.prompt( 'verifyQuality');
   
-  export const QualityFlow = ai.defineFlow(
-    {
-      name: 'qualityFlow',
-      inputSchema: ResponseQualityFlowInputSchema,
-      outputSchema: ResponseQualityFlowOutputSchema
-    },
-    async (input) => {
-      const defaultOutput = ResponseQualityFlowOutputSchema.parse({})
-      try {
-        const response = await QualityFlowPrompt({ history: input.history });
-        const safeOutput = response.output?? defaultOutput
+export const QualityFlow = ai.defineFlow(
+  {
+    name: 'qualityFlow',
+    inputSchema: ResponseQualityFlowInputSchema,
+    outputSchema: ResponseQualityFlowOutputSchema
+  },
+  async (input) => {
+    const defaultOutput = ResponseQualityFlowOutputSchema.parse({})
+    try {
+      const response = await verifyResponseQuality({ history: input.history });
+      const safeOutput = response.output?? defaultOutput
 
-        console.log("quality response:", response.output)
-        const output = ResponseQualityFlowOutputSchema.parse(safeOutput);
-        return output
-      } catch (error) {
-        console.error("Quality Flow: Error generating response:", error);
-        return defaultOutput
-      }
+      console.log("quality response:", response.output)
+      const output = ResponseQualityFlowOutputSchema.parse(safeOutput);
+      return output
+    } catch (error) {
+      console.error("Quality Flow: Error generating response:", error);
+      return defaultOutput
     }
+  }
   );
   

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { textEmbedding004 } from '@genkit-ai/vertexai';
+import { textEmbedding005 } from '@genkit-ai/vertexai';
 import { toSql } from 'pgvector';
 import { z } from 'genkit';
 import { MovieContextSchema, MovieContext } from './types';
@@ -36,14 +36,14 @@ export const IndexerFlow = ai.defineFlow(
       // Reduce rate at which operation is performed to avoid hitting VertexAI rate limits
       await new Promise((resolve) => setTimeout(resolve, 300));
       const contentString = createText(doc);
-      const eres = await ai.embed({
-        embedder: textEmbedding004,
+      const embedding = await ai.embed({
+        embedder: textEmbedding005,
         content: contentString,
       });
       try {
         await db`
           INSERT INTO movies (embedding, title, runtime_mins, genres, rating, released, actors, director, plot, poster, tconst, content)
-          VALUES (${toSql(eres)}, ${doc.title}, ${doc.runtimeMinutes}, ${doc.genres}, ${doc.rating}, ${doc.released}, ${doc.actors}, ${doc.director}, ${doc.plot}, ${doc.poster}, ${doc.tconst}, ${contentString})
+          VALUES (${toSql(embedding[0].embedding)}, ${doc.title}, ${doc.runtimeMinutes}, ${doc.genres}, ${doc.rating}, ${doc.released}, ${doc.actors}, ${doc.director}, ${doc.plot}, ${doc.poster}, ${doc.tconst}, ${contentString})
           ON CONFLICT (tconst) DO UPDATE
           SET embedding = EXCLUDED.embedding
         `;
