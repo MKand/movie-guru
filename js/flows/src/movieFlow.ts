@@ -28,7 +28,7 @@ import { GenerationBlockedError } from 'genkit';
  * Input schema: MovieFlowInputSchema
  * Output schema: MovieFlowOutputSchema
  * 
- * This uses a variant system to version our prompts. The "v2" variant corresponds to the movie.v2.prompt file. 
+ * The MovieGuru development team, uses a variant system to version our prompts. The "v2" variant corresponds to the movie.v2.prompt file. 
  * To use the default variant -- ai.prompt('movie')
  * To use a variant -- ai.prompt('movie', {variant: 'v2'})
  */

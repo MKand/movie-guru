@@ -27,7 +27,7 @@ import { GenerationBlockedError } from 'genkit';
  * Input schema: UserProfileFlowInputSchema
  * Output schema: UserProfileFlowOutputSchema
  * 
- * This uses a variant system to version our prompts. The "v2" variant corresponds to the userProfile.v2.prompt file. 
+ * The MovieGuru development team, uses a variant system to version our prompts. The "v2" variant corresponds to the userProfile.v2.prompt file. 
  * To use the default variant -- ai.prompt('userProfile')
  * To use a variant -- ai.prompt('userProfile', {variant: 'v2'})
  */

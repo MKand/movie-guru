@@ -26,7 +26,7 @@ import { GenerationBlockedError } from 'genkit';
  * Input schema: SafetyPromptInputSchema
  * Output schema: SafetyPromptOutputSchema
  * 
- * This uses a variant system to version our prompts. The "v2" variant corresponds to the safety.v2.prompt file. 
+ * The MovieGuru development team, uses a variant system to version our prompts. The "v2" variant corresponds to the safety.v2.prompt file. 
  * To use the default variant -- ai.prompt('safety')
  * To use a variant -- ai.prompt('safety', {variant: 'v2'})
  */

@@ -36,7 +36,6 @@ if [[ $? -ne 0 ]]; then  # Check exit code of gsutil ls
 else
     echo -e "\e[95mBucket $POSTER_BUCKET_NAME for posters already exists.\e[0m"
 fi
-fi
 
 echo -e "\e[92mDownloading and unzipping posters from the external archive..\e[0m"
 

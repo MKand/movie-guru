@@ -56,13 +56,13 @@ ai.defineSchema('SearchFlowOutputSchema', SearchFlowOutputSchema);
  * Input schema: QuerySchema
  * Output schema: SearchFlowOutputSchema
  * 
- * This team, uses a variant system to version our prompts. The "v2" variant corresponds to the docSearch.v2.prompt file. 
+ * The MovieGuru development team, uses a variant system to version our prompts. The "v2" variant corresponds to the docSearch.v2.prompt file. 
  * To use the default variant -- ai.prompt('docSearch')
  * To use a variant -- ai.prompt('docSearch', {variant: 'v2'})
  * 
  * ATTENTION: Variant v2 is currently being tested, if it is not performing well, please revert to the default variant.
  */
-export const SearchFlowPrompt = ai.prompt('docSearch');
+export const SearchFlowPrompt = ai.prompt('docSearch', {variant: 'v2'});
 
 export const MovieSearchPromptFlow = ai.defineFlow(
   {

@@ -24,6 +24,7 @@ import { QueryTransformFlowOutputSchema } from './queryTransformTypes';
 import { MovieDocFlow } from './docRetriever';
 import { MovieFlow } from './movieFlow';
 
+// This flow orchestrates multiple other flows.
 export const ChatFlow = ai.defineFlow(
     {
         name: "chatFlow",
@@ -34,7 +35,6 @@ export const ChatFlow = ai.defineFlow(
         const chatResponse: ChatFlowOutput = ChatOutputSchema.parse({});
         
         try {
-        
             // Initial safety check
             const safetyRawOutput =  await SafetyIssueFlow({
                 userMessage: input.userMessage,
