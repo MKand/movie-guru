@@ -1,0 +1,88 @@
+---
+model: vertexai/gemini-2.0-flash-lite
+config:
+  temperature: 0.5
+  topK: 32
+  topP: 0.80
+  safetySettings:
+    - category: HARM_CATEGORY_HARASSMENT
+      threshold: BLOCK_MEDIUM_AND_ABOVE
+    - category: HARM_CATEGORY_HATE_SPEECH
+      threshold: BLOCK_MEDIUM_AND_ABOVE
+    - category: HARM_CATEGORY_SEXUALLY_EXPLICIT
+      threshold: BLOCK_ONLY_HIGH
+    - category: HARM_CATEGORY_DANGEROUS_CONTENT
+      threshold: BLOCK_NONE
+input:
+  schema: QuerySchema
+output:
+  format: "json"
+  schema: SearchFlowOutputSchema
+---
+
+Analyze inputQuery against a movie database with fields: embedding (vector for title, plot, genres), genres, title, plot, runtime_mins, released (year), actors, director, rating.
+
+Determine searchCategory for inputQuery: "NONE" or "VECTOR".
+
+NONE: For non-movie related queries (e.g., greetings like "hello"; off-topic like "what's the weather?"; or too vague/nonsensical for movie search).
+
+VECTOR: For queries about movies, recommendations, specific movie details (plot, actors of a named movie), or filtering by any criteria (genre, theme, actor, director, runtime, year, rating, semantic similarity). If VECTOR, vectorQuery is the original inputQuery.
+
+Respond with:
+vectorQuery: A concise representation of the query (original inputQuery if category is VECTOR, otherwise empty).
+searchCategory: This field is REQUIRED and should either be "NONE" or "VECTOR"
+justification: Brief explanation for the classification.
+
+Examples:
+
+Input: "great movie that is short"
+JSON Output:
+{
+  "searchCategory": "VECTOR",
+  "vectorQuery": "great movie that is short",
+  justification: "The query asks for movie recommendations based on descriptive criteria." 
+}
+
+Input: "director of The Matrix"
+JSON Output:
+{
+searchCategory: VECTOR,
+vectorQuery: "director of The Matrix",
+justification: "The query asks for a specific detail (director) of a particular movie."
+}
+
+
+Input: "movies like The Matrix"
+JSON Output:
+{
+searchCategory: VECTOR,
+vectorQuery: "movies like The Matrix",
+justification: "The query requires semantic understanding for movie recommendations based on similarity."
+}
+
+Input: "details about movie The Matrix"
+JSON Output:
+{
+searchCategory: VECTOR,
+vectorQuery: "The Matrix",
+justification: "The query asks for a specific movie."
+}
+
+Input: "Hello"
+JSON Output:
+{
+  searchCategory: NONE,
+  vectorQuery: "",
+  justification: "The query is a greeting and does not require a movie database search.",
+}
+Input: "What's the weather like today?"
+JSON Output:
+{
+searchCategory: NONE
+vectorQuery: ""
+justification: "The query is off-topic and not related to the movie database."
+}
+
+{{ role "user" }}
+
+{{ query }}

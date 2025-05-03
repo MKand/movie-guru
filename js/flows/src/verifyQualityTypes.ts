@@ -15,6 +15,7 @@
  */
 
 import { z } from 'genkit';
+import { ai } from './genkitConfig';
 import { SimpleMessageSchema } from './queryTransformTypes'; 
 
 export const OUTCOME = z.enum([
@@ -40,7 +41,9 @@ export const ResponseQualityFlowInputSchema = z.object({
   history: z.array(SimpleMessageSchema),
 })
 
-export type ResponseQualityFlowInput = z.infer<typeof ResponseQualityFlowInputSchema>
+export type ResponseQualityFlowInput = z.infer<typeof ResponseQualityFlowInputSchema>;
+
+ai.defineSchema('ResponseQualityFlowInputSchema', ResponseQualityFlowInputSchema);
 
 // ResponseQualityFlowOutput represents the output of the response quality analysis flow.
 export const ResponseQualityFlowOutputSchema = z.strictObject({
@@ -48,4 +51,6 @@ export const ResponseQualityFlowOutputSchema = z.strictObject({
 	userSentiment: USERSENTIMENT.default('SENTIMENTUNKNOWN'),
 })
 
-export type ResponseQualityFlowOutput = z.infer<typeof ResponseQualityFlowOutputSchema>
+export type ResponseQualityFlowOutput = z.infer<typeof ResponseQualityFlowOutputSchema>;
+ai.defineSchema('ResponseQualityFlowOutputSchema', ResponseQualityFlowOutputSchema);
+

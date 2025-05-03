@@ -14,49 +14,48 @@
  * limitations under the License.
  */
 
-import { ai, safetySettings } from './genkitConfig'
+import { ai } from './genkitConfig'
 import { MovieFlowInputSchema, MovieFlowOutputSchema } from './movieFlowTypes'
-import { MovieFlowPromptText } from './prompts';
 import { GenerationBlockedError } from 'genkit';
 
-export const MovieFlowPrompt = ai.definePrompt(
-  {
-    name: 'movieFlowPrompt',
-    input: {
-      schema: MovieFlowInputSchema,
-    },
-    output: {
-      schema: MovieFlowOutputSchema,
-      format: 'json',
-    },  
-    config:{
-      safetySettings: safetySettings
-      }
-  }, 
- MovieFlowPromptText
-)
+
+/**
+ * Prompt file: js/flows/prompts/movie.prompt
+ * 
+ * This prompt takes the original user input, user preferences, relevant documents retrieved from the database,
+ * and conversation history to make a recommendation to the user.
+ * 
+ * Input schema: MovieFlowInputSchema
+ * Output schema: MovieFlowOutputSchema
+ * 
+ * The MovieGuru development team, uses a variant system to version our prompts. The "v2" variant corresponds to the movie.v2.prompt file. 
+ * To use the default variant -- ai.prompt('movie')
+ * To use a variant -- ai.prompt('movie', {variant: 'v2'})
+ */
+export const makeMovieRecommendation = ai.prompt('movie', {variant: 'v2'});
+
 export const MovieFlow = ai.defineFlow(
   {
     name: 'movieQAFlow',
     inputSchema: MovieFlowInputSchema,
-    outputSchema: MovieFlowOutputSchema
+    outputSchema: MovieFlowOutputSchema,
+    
+
   },
   async (input) => {
     const defaultOutput = MovieFlowOutputSchema.parse({})
     try {
-      const response = await MovieFlowPrompt({ history: input.history, userPreferences: input.userPreferences, userMessage: input.userMessage, contextDocuments: input.contextDocuments });
+      const response = await makeMovieRecommendation({ history: input.history, userPreferences: input.userPreferences, userMessage: input.userMessage, contextDocuments: input.contextDocuments });
       const safeOutput = response.output ?? defaultOutput;
       const output = MovieFlowOutputSchema.parse(safeOutput);
       return output
     } catch (error) {
       if(error instanceof GenerationBlockedError){
         console.error("MovieFlow: GenerationBlockedError generating response:", error.message);
-        defaultOutput.modelOutputMetadata.safetyIssue = true;
         return defaultOutput; 
       }
       else if(error instanceof Error && (error.message.includes('429') || error.message.includes('RESOURCE_EXHAUSTED'))){
         console.error("MovieFlow: There is a quota issue:", error.message);
-        defaultOutput.modelOutputMetadata.quotaIssue = true;
         return defaultOutput;
         }
         else {

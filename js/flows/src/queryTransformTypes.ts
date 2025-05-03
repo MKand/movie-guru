@@ -15,16 +15,13 @@
  */
 
 import { z } from 'genkit';
-import { ModelOutputMetadata, ModelOutputMetadataSchema } from './modelOutputMetadataTypes';
+import { ai } from './genkitConfig';
 import { ChatFlowInputSchema } from './chatFlowTypes';
-// USERINTENT as Zod Enum
-export const USERINTENT = z.enum([
-  'UNCLEAR',
-  'GREET',
-  'END_CONVERSATION',
-  'REQUEST',
-  'RESPONSE',
-  'ACKNOWLEDGE',
+
+// FOLLOWUP_ACTION as Zod Enum
+export const FOLLOWUP_ACTION = z.enum([
+  'SEARCH_REQUIRED',
+  'SEARCH_NOT_REQUIRED',
 ]);
 
 
@@ -38,6 +35,7 @@ const ProfileCategoriesSchema = z.object({
 
 export type ProfileCategories = z.infer<typeof ProfileCategoriesSchema>
 
+ai.defineSchema('ProfileCategoriesSchema', ProfileCategoriesSchema);
 
 // UserProfile schema
 export const UserProfileSchema = z.object({
@@ -47,6 +45,7 @@ export const UserProfileSchema = z.object({
 
 export type UserProfile = z.infer<typeof UserProfileSchema>
 
+ai.defineSchema('UserProfileSchema', UserProfileSchema);
 
 // SimpleMessage schema
 export const SimpleMessageSchema = z.object({
@@ -56,16 +55,40 @@ export const SimpleMessageSchema = z.object({
 
 export type SimpleMessage = z.infer<typeof SimpleMessageSchema>
 
-
+ai.defineSchema('SimpleMessageSchema', SimpleMessageSchema);
 
 export type QueryTransformFlowInput = z.infer<typeof ChatFlowInputSchema>
 
+// Schema is used as the output schema for the searchRequired prompt.
+// See js/flows/prompts/searchRequired.prompt
+export const SearchRequiredOutputSchema = z.strictObject({
+  followupAction: FOLLOWUP_ACTION.default("SEARCH_NOT_REQUIRED"),
+  justification: z.string().default("No justification provided")
+});
+
+export type SearchRequiredOutput = z.infer<typeof SearchRequiredOutputSchema>
+
+ai.defineSchema('SearchRequiredOutputSchema', SearchRequiredOutputSchema);
+
+// Schema is used as the output schema for the searchRequired prompt.
+// See js/flows/prompts/searchQuery.prompt
+export const SearchQueryOutputSchema = z.strictObject({
+  searchQuery: z.string().optional().default(""),
+  justification: z.string().default("No justification provided")
+});
+
+export type SearchQueryOutput = z.infer<typeof SearchQueryOutputSchema>
+
+ai.defineSchema('SearchQueryOutputSchema', SearchQueryOutputSchema);
 
 // QueryTransformFlowOutput schema
 export const QueryTransformFlowOutputSchema = z.strictObject({
-  transformedQuery: z.string().optional().default(""),
-  userIntent: USERINTENT.default("UNCLEAR"),
-  modelOutputMetadata: ModelOutputMetadataSchema.default(ModelOutputMetadataSchema.parse({})),
+  searchQuery: z.string().optional().default(""),
+  followupAction: FOLLOWUP_ACTION.default("SEARCH_NOT_REQUIRED"),
+  justification: z.string().default("No justification provided")
 });
 
 export type QueryTransformFlowOutput = z.infer<typeof QueryTransformFlowOutputSchema>
+
+ai.defineSchema('QueryTransformFlowOutputSchema', QueryTransformFlowOutputSchema);
+

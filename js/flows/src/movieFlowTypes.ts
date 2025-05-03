@@ -15,8 +15,8 @@
  */
 
 import { z } from 'genkit';
+import { ai } from './genkitConfig';
 import { SimpleMessageSchema, UserProfileSchema } from './queryTransformTypes';
-import { ModelOutputMetadata, ModelOutputMetadataSchema } from './modelOutputMetadataTypes';
 
 
 // RelevantMovie schema
@@ -25,6 +25,8 @@ export const RelevantMovieSchema = z.object({
   reason: z.string().optional(),
 });
 export type RelevantMovie = z.infer<typeof RelevantMovieSchema>
+
+ai.defineSchema('RelevantMovieSchema', RelevantMovieSchema);
 
 // MovieContext schema
 export const MovieContextSchema = z.object({
@@ -50,9 +52,14 @@ export const MovieFlowInputSchema = z.object({
 });
 export type MovieFlowInput = z.infer<typeof MovieFlowInputSchema>
 
+ai.defineSchema('MovieFlowInputSchema', MovieFlowInputSchema);
 
 // MovieFlowOutput schema
 export const MovieFlowOutputSchema = z.strictObject({
-  answer: z.string().default(""),
+  response: z.string().default(""),
   relevantMovies: z.array(RelevantMovieSchema).optional().default([]), // Changed to 'relevantMovies' for clarity
+  justification: z.string().default("No justification provided")
 });
+
+ai.defineSchema('MovieFlowOutputSchema', MovieFlowOutputSchema);
+

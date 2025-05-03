@@ -15,29 +15,28 @@
  */
 
 import { Document } from '@genkit-ai/ai/retriever';
-import { textEmbedding004 } from '@genkit-ai/vertexai';
+import { textEmbedding005 } from '@genkit-ai/vertexai';
 import { toSql } from 'pgvector';
 import { openDB } from './db';
-import { ai, safetySettings } from './genkitConfig'
+import { ai } from './genkitConfig'
 import { z } from 'genkit';
 import { MovieContextSchema, MovieContext } from './movieFlowTypes';
-import { DocSearchFlowPromptText } from './prompts';
 import {  ModelOutputMetadataSchema } from './modelOutputMetadataTypes';
 
 const SearchTypeCategory = z.enum(['KEYWORD', 'VECTOR', 'MIXED', 'NONE']);
 
-
 export const RetrieverOptionsSchema = z.object({
   k: z.number().optional().default(10),
-  searchCategory: SearchTypeCategory.optional().default("VECTOR"),
+  searchCategory: SearchTypeCategory.default("VECTOR"),
   keywordQuery: z.string().default(""),
   vectorQuery: z.string().default(""),
-
 });
 
 export const QuerySchema = z.object({
   query: z.string(),
 });
+
+ai.defineSchema('QuerySchema', QuerySchema);
 
 export const SearchFlowOutputSchema = z.strictObject({
   keywordQuery: z.string().optional().default(""),
@@ -46,22 +45,24 @@ export const SearchFlowOutputSchema = z.strictObject({
   modelOutputMetadata: ModelOutputMetadataSchema.default(ModelOutputMetadataSchema.parse({})),
 });
 
-export const SearchFlowPrompt = ai.definePrompt(
-  {
-    name: 'MixedSearchFlowPrompt',
-    input: {
-      schema: QuerySchema,
-    },
-    output: {
-      format: 'json',
-      schema: SearchFlowOutputSchema,
-    },  
-    config: {
-      safetySettings: safetySettings
-    }
-  }, 
-  DocSearchFlowPromptText
-)
+ai.defineSchema('SearchFlowOutputSchema', SearchFlowOutputSchema);
+
+/**
+ * Prompt file: js/flows/prompts/docSearch.prompt
+ * 
+ * This prompt takes the generated search terms from the queryTransformFlow and uses that to retrieve relevant documents
+ * from the database.
+ * 
+ * Input schema: QuerySchema
+ * Output schema: SearchFlowOutputSchema
+ * 
+ * The MovieGuru development team, uses a variant system to version our prompts. The "v2" variant corresponds to the docSearch.v2.prompt file. 
+ * To use the default variant -- ai.prompt('docSearch')
+ * To use a variant -- ai.prompt('docSearch', {variant: 'v2'})
+ * 
+ * ATTENTION: Variant v2 is currently being tested, if it is not performing well, please revert to the default variant.
+ */
+export const SearchFlowPrompt = ai.prompt('docSearch');
 
 export const MovieSearchPromptFlow = ai.defineFlow(
   {
@@ -87,7 +88,7 @@ export const MovieDocFlow = ai.defineFlow(
     const movieContexts: MovieContext[] = [];
     const searchFlowOutput = await createSearchObject(input);
   try{
-    if (searchFlowOutput.searchCategory == "NONE"){
+    if (searchFlowOutput.searchCategory == "NONE" && (searchFlowOutput.keywordQuery == "" && searchFlowOutput.vectorQuery == "")){
       return movieContexts;
     }
     const docs = await ai.retrieve({
@@ -143,7 +144,7 @@ export const sqlRetriever = ai.defineRetriever(
     }
 
     let results;
-    if(options.searchCategory == "KEYWORD"){
+    if(options.searchCategory == "KEYWORD" || options.keywordQuery != ""){
       results =  await db`SELECT content, title, poster, released, runtime_mins, rating, genres, director, actors, plot, tconst
       FROM movies
       WHERE ${db.unsafe(options.keywordQuery)} 
@@ -151,9 +152,9 @@ export const sqlRetriever = ai.defineRetriever(
     }
 
      //Vector Query
-     if(options.searchCategory == "VECTOR"){
+     if(options.searchCategory == "VECTOR" || options.vectorQuery != ""){
       const embedding = await ai.embed({
-        embedder: textEmbedding004,
+        embedder: textEmbedding005,
         content: options.vectorQuery,
       });  
         results = await db`
@@ -168,7 +169,7 @@ export const sqlRetriever = ai.defineRetriever(
     if (options.searchCategory === "MIXED") {
       // Generate the vector embedding for the vector query
       const embedding = await ai.embed({
-        embedder: textEmbedding004,
+        embedder: textEmbedding005,
         content: options.vectorQuery,
       });
     
@@ -216,7 +217,6 @@ async function createSearchObject(input: { query: string; }) {
     });
     const safeOutput = response.output ?? SearchFlowOutputSchema.parse({});
     return SearchFlowOutputSchema.parse(safeOutput);
-
   }
   catch (error) {
     console.error('MovieDocFlow: Error generating response:', {

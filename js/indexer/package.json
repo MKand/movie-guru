@@ -13,15 +13,16 @@
   "author": "",
   "license": "ISC",
   "description": "",
+  "devDependencies": {
+    "genkit-cli": "^1.7.0",
+    "typescript": "^5.7.3"
+  },
   "dependencies": {
-    "@genkit-ai/vertexai": "^0.9.12",
+    "@genkit-ai/vertexai": "^1.7.0",
+    "@genkit-ai/express": "^1.7.0",
     "csv-parse": "^5.6.0",
-    "genkit": "^0.9.12",
+    "genkit": "^1.7.0",
     "pgvector": "^0.2.0",
     "postgres": "^3.4.5"
-  },
-  "devDependencies": {
-    "genkit-cli": "^0.9.12",
-    "typescript": "^5.7.3"
   }
 }

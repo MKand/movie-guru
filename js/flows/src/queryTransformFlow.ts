@@ -15,32 +15,35 @@
  */
 
 import {
-  USERINTENT,
   QueryTransformFlowOutputSchema,
-  QueryTransformFlowOutput
+  SearchQueryOutputSchema,
+  SearchRequiredOutputSchema
 } from './queryTransformTypes';
 import { ChatFlowInputSchema } from './chatFlowTypes';
-import { QueryTransformPromptText } from './prompts';
-import { ai, safetySettings } from './genkitConfig';
+import { ai } from './genkitConfig';
 import { GenerationBlockedError } from 'genkit';
 
-export const QueryTransformPrompt = ai.definePrompt(
-  {
-    name: 'queryTransformFlowPrompt',
-    input: {
-      schema: ChatFlowInputSchema,
-    },
-    output: {
-      schema: QueryTransformFlowOutputSchema,
-      format: 'json',
-    },
-    config:{
-      safetySettings: safetySettings
-      }
-  },
-  
-  QueryTransformPromptText
-);
+/**
+ * Prompt file: js/flows/prompts/searchRequired.prompt
+ * 
+ * This prompt asks the LLM to determine if we require a database search for this query.
+ * 
+ * Input schema: ChatFlowInputSchema
+ * Output schema: SearchRequiredOutputSchema
+ *
+ */
+export const isDbSearchRequired = ai.prompt('searchRequired');
+
+/**
+ * Prompt file: js/flows/prompts/searchQuery.prompt
+ * 
+ * This prompt asks the LLM to extract the relevant phrases for a vector search.
+ * 
+ * Input schema: ChatFlowInputSchema
+ * Output schema: SearchQueryOutputSchema
+ * 
+ */
+export const createSearchQuery = ai.prompt('searchQuery');
 
 export const QueryTransformFlow = ai.defineFlow(
   {
@@ -51,24 +54,35 @@ export const QueryTransformFlow = ai.defineFlow(
   async (input) => {
     const defaultOutput = QueryTransformFlowOutputSchema.parse({})
     try {
-      const response = await QueryTransformPrompt({
-        history: input.history,
-        userMessage: input.userMessage,
-        userPreferences: input.userPreferences,
-      });
-      const safeOutput = response.output?? defaultOutput;
-      const output = QueryTransformFlowOutputSchema.parse(safeOutput)
-      return output;
+      const response = await isDbSearchRequired(input);
+      const safeOutput = response.output?? SearchRequiredOutputSchema.parse({});
+      const searchRequiredOutput = SearchRequiredOutputSchema.parse(safeOutput);
+
+      if(searchRequiredOutput.followupAction === 'SEARCH_REQUIRED') {
+        const searchQueryResponse = await createSearchQuery(input);
+        const safeSearchQueryResponse = searchQueryResponse.output?? SearchQueryOutputSchema.parse({});
+        const searchQueryOutput = SearchQueryOutputSchema.parse(safeSearchQueryResponse);
+
+        return {
+          searchQuery: searchQueryOutput.searchQuery,
+          followupAction: searchRequiredOutput.followupAction,
+          justification: searchRequiredOutput.justification + " " + searchQueryOutput.justification
+        };
+      } else {
+        return {
+          searchQuery: "",
+          followupAction: searchRequiredOutput.followupAction,
+          justification: searchRequiredOutput.justification
+        };
+      }
     } catch (error) {
       if (error instanceof GenerationBlockedError){
         
         console.error("QTFlow: GenerationBlockedError generating response:", error.message);
-        defaultOutput.modelOutputMetadata.safetyIssue = true;
         return defaultOutput;
       }
       else if(error instanceof Error && (error.message.includes('429') || error.message.includes('RESOURCE_EXHAUSTED'))){
         console.error("QTFlow: There is a quota issue:", error.message);
-        defaultOutput.modelOutputMetadata.quotaIssue = true;
         return defaultOutput;
         }
         else {

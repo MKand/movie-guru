@@ -19,7 +19,7 @@ services:
       - 6379:6379
     command: redis-server --save 20 1 --loglevel warning
   flows:
-    build: ./js/flows_v2
+    build: ./js/flows
     ports:
       - "3400:3400"
       - "4000:4000"
@@ -77,22 +77,6 @@ services:
     restart: always
     ports:
       - 8085:8080
-  mock:
-    build: ./js/mock-user
-    ports:
-      - "3402:3400"
-      - "4002:4000"
-    environment:
-      - GOOGLE_APPLICATION_CREDENTIALS=/key.json
-      - LOCATION=us-west1
-      - PROJECT_ID=$PROJECT_ID
-      - FIREBASE_API_KEY=$FIREBASE_API_KEY
-      - FIREBASE_STORAGE_BUCKET=$FIREBASE_STORAGE_BUCKET
-      - FIREBASE_MESSAGING_SENDERID=$FIREBASE_MESSAGING_SENDERID
-      - FIREBASE_APPID=$FIREBASE_APPID
-    volumes:
-      - ./.key.json:/key.json
-
   locust-master:
     image: locustio/locust
     ports:
