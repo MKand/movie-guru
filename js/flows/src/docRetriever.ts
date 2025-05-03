@@ -62,7 +62,7 @@ ai.defineSchema('SearchFlowOutputSchema', SearchFlowOutputSchema);
  * 
  * ATTENTION: Variant v2 is currently being tested, if it is not performing well, please revert to the default variant.
  */
-export const SearchFlowPrompt = ai.prompt('docSearch', {variant: 'v2'});
+export const SearchFlowPrompt = ai.prompt('docSearch');
 
 export const MovieSearchPromptFlow = ai.defineFlow(
   {
