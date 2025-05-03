@@ -23,70 +23,19 @@ if [[ -z "$REGION" ]]; then
 fi
 echo -e "\e[93mUsing REGION: $REGION\e[0m"
 
-
-SKIP_INFRA=false
-for arg in "$@"; do
-  if [[ "$arg" == "--skip-infra" ]]; then
-    SKIP_INFRA=true
-    echo -e "\e[93mSkipping infrastructure setup as requested.\e[0m"
-    break
-  fi
-done
-
 SERVICE_ACCOUNT_NAME="movie-guru-chat-server-sa"
 SERVICE_ACCOUNT_EMAIL="$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com"
 POSTER_BUCKET_NAME="gs://${PROJECT_ID}_posters"
 
+# Check if the bucket exists
+gsutil ls "$POSTER_BUCKET_NAME" > /dev/null 2>&1  # Suppress output
 
-if [[ "$SKIP_INFRA" == false ]]; then
-
-    echo -e "\e[95mEnabling required APIs for project: $PROJECT_ID\e[0m"
-
-    gcloud config set core/project "$PROJECT_ID"
-    gcloud services enable \
-        storage.googleapis.com \
-        serviceusage.googleapis.com \
-        cloudresourcemanager.googleapis.com \
-        aiplatform.googleapis.com \
-        storage-api.googleapis.com \
-        firebase.googleapis.com \
-        monitoring.googleapis.com
-
-    echo -e "\e[95mAPIs have been enabled successfully.\e[0m"
-
-    # Create the service account
-
-
-    echo -e "\e[95mCreating service account: $SERVICE_ACCOUNT_NAME\e[0m"
-    gcloud iam service-accounts create "$SERVICE_ACCOUNT_NAME" \
-        --description="Service account for Movie Guru application" \
-        --display-name="Movie Guru Local SA"
-
-    # Assign roles to the service account
-    echo -e "\e[95mAssigning roles to service account: $SERVICE_ACCOUNT_EMAIL\e[0m"
-    gcloud projects add-iam-policy-binding "$PROJECT_ID" \
-        --member="serviceAccount:$SERVICE_ACCOUNT_EMAIL" \
-        --role="roles/aiplatform.user"
-    gcloud projects add-iam-policy-binding "$PROJECT_ID" \
-        --member="serviceAccount:$SERVICE_ACCOUNT_EMAIL" \
-        --role="roles/logging.logWriter"
-    gcloud projects add-iam-policy-binding "$PROJECT_ID" \
-        --member="serviceAccount:$SERVICE_ACCOUNT_EMAIL" \
-        --role="roles/monitoring.metricWriter"
-    gcloud projects add-iam-policy-binding "$PROJECT_ID" \
-        --member="serviceAccount:$SERVICE_ACCOUNT_EMAIL" \
-        --role="roles/cloudtrace.agent"
-    echo -e "\e[95mService account $SERVICE_ACCOUNT_NAME has been created and configured successfully.\e[0m"
-    
-    # Check if the bucket exists
-    gsutil ls "$POSTER_BUCKET_NAME" > /dev/null 2>&1  # Suppress output
-
-    if [[ $? -ne 0 ]]; then  # Check exit code of gsutil ls
-        echo -e "\e[95mBucket $POSTER_BUCKET_NAME for posters does not exist. Creating...\e[0m"
-        gsutil mb -l "$REGION" "$POSTER_BUCKET_NAME"
-    else
-        echo -e "\e[95mBucket $POSTER_BUCKET_NAME for posters already exists.\e[0m"
-    fi
+if [[ $? -ne 0 ]]; then  # Check exit code of gsutil ls
+    echo -e "\e[95mBucket $POSTER_BUCKET_NAME for posters does not exist. Creating...\e[0m"
+    gsutil mb -l "$REGION" "$POSTER_BUCKET_NAME"
+else
+    echo -e "\e[95mBucket $POSTER_BUCKET_NAME for posters already exists.\e[0m"
+fi
 fi
 
 echo -e "\e[92mDownloading and unzipping posters from the external archive..\e[0m"

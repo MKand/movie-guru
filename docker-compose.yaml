@@ -1,10 +1,22 @@
 services:
+  db:
+    image: pgvector/pgvector:pg17
+    environment:
+      POSTGRES_PASSWORD: main
+    restart: always
+    ports:
+      - 5432:5432
+    volumes:
+      - ./pgvector/init_substituted.sql:/docker-entrypoint-initdb.d/init_substituted.sql:ro
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8082:8080
   cache:
     image: redis:6.2-alpine
     restart: always
     command: redis-server --save 20 1 --loglevel warning 
-    networks:
-      - db-shared-network
   flows:
     build: ./js/flows
     environment:
@@ -20,8 +32,6 @@ services:
       - GRPC_VERBOSITY=ERROR
     volumes:
       - ./key.json:/key.json
-    networks:
-      - db-shared-network    
   server:
     build: ./chat_server_go
     restart: always
@@ -41,12 +51,9 @@ services:
       - REDIS_HOST=cache
       - REDIS_PORT=6379
       - FEEDBACK_URL=https://${GENKIT_FEEDBACK_REGION}-${PROJECT_ID}.cloudfunctions.net/ext-firebase-ai-user-engagement-collectEngagement
-
     depends_on:
       - cache 
-    networks:
-      - movie-guru
-      - db-shared-network
+      - db
   frontend:
     build: ./frontend
     environment:
@@ -54,8 +61,6 @@ services:
       - VITE_GCP_PROJECT_ID=${PROJECT_ID}
       - VITE_FIREBASE_APPID=${FIREBASE_APPID}
       - VITE_CHAT_SERVER_URL=http://localhost:8080/api
-    networks:
-      - movie-guru
   nginx:
     image: nginx:latest
     restart: always
@@ -66,10 +71,3 @@ services:
     depends_on:
       - server
       - frontend
-    networks:
-      - movie-guru
-networks:
-  db-shared-network:
-    external: true
-  movie-guru: 
-    driver: bridge
