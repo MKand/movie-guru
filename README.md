@@ -22,7 +22,11 @@
 
 ## About Movie Guru
 
-**Genkit version**: 0.9.12 for Node.js
+**Genkit version**: 1.7.0 for Node.js
+
+**Gemini Models**: Gemini 2.0 Flash amd Flash Lite
+
+**Embedding Models**: textEmbedding005
 
 [![Movie Guru](https://img.youtube.com/vi/l_KhN3RJ8qA/0.jpg)](https://youtu.be/l_KhN3RJ8qA)
 
