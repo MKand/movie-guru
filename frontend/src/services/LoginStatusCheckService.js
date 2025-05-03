@@ -6,10 +6,10 @@ async checkLogin() {
     const loggedIn = store.getters['user/loginStatus'];
     if (!loggedIn) {
         try {
-          const user = await this.checkServerLogin(); 
-          if (user) {
-            store.commit('user/logIn', user)  // This might be unnecessary          
-            console.log('Valid cookie found, logging in user: ', user);
+          const serverLoggedIn = await this.checkServerLogin(); 
+          console.log("serverLoggedIn is ", serverLoggedIn )
+          if (serverLoggedIn == "true") {
+            console.log('Valid cookie found, logging in user');
             return true;
           } else {
             console.log('Invalid cookie');
@@ -43,7 +43,7 @@ async checkServerLogin() {
     }
 
     const json = await response.json();
-    return json["user"];
+    return json["loggedIn"];
     } catch (error) {
     console.error(error.message);
     throw error;
