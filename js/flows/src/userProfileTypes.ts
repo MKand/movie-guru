@@ -43,7 +43,9 @@ export type UserProfileFlowInput = z.infer<typeof UserProfileFlowInputSchema>
 ai.defineSchema('UserProfileFlowInputSchema', UserProfileFlowInputSchema);
 
 
-// Challenge 3. This is the output schema for the userProfile Flow.
+// HINT: Challenge 3. This is the output schema for the userProfile Flow. 
+// Compare this to the schema in the error message.
+
 export const UserProfileFlowOutputSchema = z.strictObject({
   profileChangeRecommendations: z.array(ProfileChangeRecommendationSchema).optional().default([]),
   modelOutputMetadata: z.object({

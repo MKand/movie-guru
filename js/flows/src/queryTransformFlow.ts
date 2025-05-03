@@ -30,10 +30,7 @@ import { GenerationBlockedError } from 'genkit';
  * 
  * Input schema: ChatFlowInputSchema
  * Output schema: SearchRequiredOutputSchema
- * 
- * This uses a variant system to version our prompts. The "v2" variant corresponds to the searchRequired.v2.prompt file. 
- * To use the default variant -- ai.prompt('searchRequired')
- * To use a variant -- ai.prompt('searchRequired', {variant: 'v2'})
+ *
  */
 export const isDbSearchRequired = ai.prompt('searchRequired');
 
@@ -45,9 +42,6 @@ export const isDbSearchRequired = ai.prompt('searchRequired');
  * Input schema: ChatFlowInputSchema
  * Output schema: SearchQueryOutputSchema
  * 
- * This team, uses a variant system to version our prompts. The "v2" variant corresponds to the searchQuery.v2.prompt file. 
- * To use the default variant -- ai.prompt('searchRequired')
- * To use a variant -- ai.prompt('searchRequired', {variant: 'v2'})
  */
 export const createSearchQuery = ai.prompt('searchQuery');
 

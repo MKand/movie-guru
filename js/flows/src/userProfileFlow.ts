@@ -38,7 +38,7 @@ export const UserProfileFlow = ai.defineFlow(
     name: 'userProfileFlow',
     inputSchema: UserProfileFlowInputSchema,
 
-    // Hint Challenge 3: Notice the flow defines an expected output schema. 
+    // Hint Challenge 3: Notice the flow defines an output schema. 
     // Does the information in userProfile.prompt align with this?
     outputSchema: UserProfileFlowOutputSchema 
   },
