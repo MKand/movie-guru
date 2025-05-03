@@ -65,6 +65,12 @@ Determine the appropriate search category for the query: KEYWORD, VECTOR, or MIX
     Examples of transformed KEYWORD queries:
     * IMPORTANT: Remove all special characters (e.g.: @, #, $,%,', etc.) from the names or titles before using ILIKE, leaving only letters, numbers, and spaces. Pay special care that you remove apostrophes from titles.
 
+ -   Input: "movie with rating greater than 4"
+        Output:
+            searchCategory: KEYWORD
+            KeywordQuery: "rating > 4"
+            VectorQuery: ""
+            justification: "The query can be fully expressed using comparisons on the 'rating'
     -   Input: "great movie that is short"
         Output:
             searchCategory: KEYWORD

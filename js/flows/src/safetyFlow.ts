@@ -18,6 +18,19 @@ import { z } from 'genkit';
 import { ai } from './genkitConfig';
 import { GenerationBlockedError } from 'genkit';
 
+/**
+ * Prompt file: js/flows/prompts/safety.prompt
+ * 
+ * This prompt instructs the LLM to assess whether a user's statement is safe.
+ * 
+ * Input schema: SafetyPromptInputSchema
+ * Output schema: SafetyPromptOutputSchema
+ * 
+ * This uses a variant system to version our prompts. The "v2" variant corresponds to the verifyQuality.v2.prompt file. 
+ * To use the default variant -- ai.prompt('verifyQuality')
+ * To use a variant -- ai.prompt('verifyQuality', {variant: 'v2'})
+ */
+
 export const SafetyTransformPrompt = ai.prompt('safety');
 
 export const SafetyPromptInputSchema = z.object({

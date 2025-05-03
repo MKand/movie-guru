@@ -31,7 +31,7 @@ import { GenerationBlockedError } from 'genkit';
  * Input schema: ChatFlowInputSchema
  * Output schema: SearchRequiredOutputSchema
  * 
- * This team, uses a variant system to version our prompts. The "v2" variant corresponds to the searchRequired.v2.prompt file. 
+ * This uses a variant system to version our prompts. The "v2" variant corresponds to the searchRequired.v2.prompt file. 
  * To use the default variant -- ai.prompt('searchRequired')
  * To use a variant -- ai.prompt('searchRequired', {variant: 'v2'})
  */

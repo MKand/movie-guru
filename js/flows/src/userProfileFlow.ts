@@ -27,7 +27,7 @@ import { GenerationBlockedError } from 'genkit';
  * Input schema: UserProfileFlowInputSchema
  * Output schema: UserProfileFlowOutputSchema
  * 
- * This team, uses a variant system to version our prompts. The "v2" variant corresponds to the userProfile.v2.prompt file. 
+ * This uses a variant system to version our prompts. The "v2" variant corresponds to the userProfile.v2.prompt file. 
  * To use the default variant -- ai.prompt('userProfile')
  * To use a variant -- ai.prompt('userProfile', {variant: 'v2'})
  */
@@ -37,7 +37,10 @@ export const UserProfileFlow = ai.defineFlow(
   {
     name: 'userProfileFlow',
     inputSchema: UserProfileFlowInputSchema,
-    outputSchema: UserProfileFlowOutputSchema
+
+    // Hint Challenge 3: Notice the flow defines an expected output schema. 
+    // Does the information in userProfile.prompt align with this?
+    outputSchema: UserProfileFlowOutputSchema 
   },
   async (input) => {
     const defaultOutput = UserProfileFlowOutputSchema.parse({})

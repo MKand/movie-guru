@@ -25,7 +25,7 @@ import { ai } from './genkitConfig'
  * Input schema: ResponseQualityFlowInputSchema
  * Output schema: ResponseQualityFlowOutputSchema
  * 
- * This team, uses a variant system to version our prompts. The "v2" variant corresponds to the verifyQuality.v2.prompt file. 
+ * This uses a variant system to version our prompts. The "v2" variant corresponds to the verifyQuality.v2.prompt file. 
  * To use the default variant -- ai.prompt('verifyQuality')
  * To use a variant -- ai.prompt('verifyQuality', {variant: 'v2'})
  */
