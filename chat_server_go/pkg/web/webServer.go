@@ -28,22 +28,12 @@ import (
 	metrics "github.com/movie-guru/pkg/metrics"
 )
 
-<<<<<<< HEAD
-func enableCORS(allowedOrigins []string, next http.Handler, disableCors bool) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		origin := r.Header.Get("Origin")
-
-		// Check if the origin is in the allowed list
-		isAllowed := false
-		if !disableCors {
-=======
 func enableCORS(allowedOrigins []string, next http.Handler, corsStrict bool) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		origin := r.Header.Get("Origin")
 
 		if corsStrict {
 			isAllowed := false
->>>>>>> ghack-genkit-monitoring
 			for _, allowedOrigin := range allowedOrigins {
 				if origin == allowedOrigin {
 					isAllowed = true
@@ -93,21 +83,12 @@ func StartServer(ctx context.Context, ulh *UserLoginHandler, metadata *db.Metada
 	}
 	slog.Info("USE AUTH?", slog.Bool("useAuth", useAuth))
 
-<<<<<<< HEAD
-	// DISABLE CORS
-	disableCors, err := strconv.ParseBool(os.Getenv("DISABLE_CORS"))
-	if err != nil {
-		disableCors = false
-	}
-	slog.Info("DISABLE CORS?", slog.Bool("disableCors", disableCors))
-=======
 	// STRICT CORS
 	corsStrict, err := strconv.ParseBool(os.Getenv("CORS_STRICT"))
 	if err != nil {
 		corsStrict = false
 	}
 	slog.Info("STRICT CORS?", slog.Bool("STRICTCORS", corsStrict))
->>>>>>> ghack-genkit-monitoring
 
 	mux := http.NewServeMux()
 
@@ -120,9 +101,5 @@ func StartServer(ctx context.Context, ulh *UserLoginHandler, metadata *db.Metada
 	mux.HandleFunc("/startup", createStartupHandler(deps))
 	mux.HandleFunc("/login", createLoginHandler(ulh, loginMeters, metadata, useAuth))
 	mux.HandleFunc("/logout", logoutHandler)
-<<<<<<< HEAD
-	return http.ListenAndServe(":8080", enableCORS(corsOrigins, mux, disableCors))
-=======
 	return http.ListenAndServe(":8080", enableCORS(corsOrigins, mux, corsStrict))
->>>>>>> ghack-genkit-monitoring
 }
