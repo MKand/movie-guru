@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: "{{ .Values.Config.Image.Repository }}/movie-guru-frontend:ghack-sre"
+        image: "{{ .Values.Config.Image.Repository }}/frontend:ghack-sre-v2"
         imagePullPolicy: Always
         ports:
         - containerPort: 5173
