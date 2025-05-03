@@ -77,7 +77,6 @@ echo -e "\e[95mGenerated SHORT_SHA: $SHORT_SHA\e[0m"
 echo -e "\e[95mSubstituting env variables in init.sql\e[0m"
 
 envsubst < pgvector/init.sql > pgvector/init_substituted.sql
-envsubst < pgvector/py_init.sql > pgvector/py_init_substituted.sql
 
 # Start Cloud Build
 echo -e "\e[95mStarting Cloud Build...\e[0m"

@@ -15,7 +15,7 @@
 FROM python:3.12-slim
 WORKDIR /code
 COPY requirements.txt /code/requirements.txt
-COPY py_init_substituted.sql /code/py_init_substituted.sql
+COPY init_substituted.sql /code/init_substituted.sql
 RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 COPY main.py /code/main.py
 CMD ["python", "main.py"]
