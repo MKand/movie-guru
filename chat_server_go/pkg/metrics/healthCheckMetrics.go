@@ -16,6 +16,7 @@ package metrics
 
 import (
 	"log"
+	"os"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/metric"
@@ -27,8 +28,12 @@ type HCMeters struct {
 }
 
 func NewHCMeters() *HCMeters {
-	meter := otel.Meter("healthcheck-handler")
+	podName := os.Getenv("POD_NAME")
+	if podName == "" {
+		podName = "local"
+	}
 
+	meter := otel.Meter(podName)
 	hcCounter, err := meter.Int64Counter("movieguru_healthcheck_attempts_total", metric.WithDescription("Total number of healthcheck attempts"))
 	if err != nil {
 		log.Printf("Error creating hc counter: %v", err)

@@ -44,32 +44,32 @@ data "http" "locustfile" {
   url = var.locust_file
 }
 
-resource "helm_release" "movie_guru" {
-  name  = "movie-guru"
-  chart = var.helm_chart
-  set {
-    name  = "Config.Image.Repository"
-    value = "manaskandula"
-  }
-  set {
-    name  = "Config.serverIP"
-    value = google_compute_address.server-address.address
-  }
-    set {
-    name  = "Config.mockserverIP"
-    value = google_compute_address.mockserver-address.address
-  }
+# resource "helm_release" "movie_guru" {
+#   name  = "movie-guru"
+#   chart = var.helm_chart
+#   set {
+#     name  = "Config.Image.Repository"
+#     value = "manaskandula"
+#   }
+#   set {
+#     name  = "Config.serverIP"
+#     value = google_compute_address.server-address.address
+#   }
+#     set {
+#     name  = "Config.mockserverIP"
+#     value = google_compute_address.mockserver-address.address
+#   }
   
-    set {
-    name  = "Config.frontendIP"
-    value = google_compute_address.frontend-address.address
-  }
-  set {
-    name  = "Config.projectID"
-    value = var.gcp_project_id
-  }
-  depends_on = [ google_compute_address.server-address ]
-}
+#     set {
+#     name  = "Config.frontendIP"
+#     value = google_compute_address.frontend-address.address
+#   }
+#   set {
+#     name  = "Config.projectID"
+#     value = var.gcp_project_id
+#   }
+#   depends_on = [ google_compute_address.server-address ]
+# }
 
 resource "kubernetes_config_map" "loadtest_locustfile" {
   metadata {

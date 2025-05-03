@@ -16,6 +16,7 @@ package metrics
 
 import (
 	"log"
+	"os"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/metric"
@@ -35,8 +36,12 @@ type ChatMeters struct {
 }
 
 func NewChatMeters() *ChatMeters {
-	meter := otel.Meter("chat-handler")
+	podName := os.Getenv("POD_NAME")
+	if podName == "" {
+		podName = "local"
+	}
 
+	meter := otel.Meter(podName)
 	cCounter, err := meter.Int64Counter("movieguru_chat_calls_total", metric.WithDescription("Total number of chat calls"))
 	if err != nil {
 		log.Printf("Error creating chat calls counter: %v", err)

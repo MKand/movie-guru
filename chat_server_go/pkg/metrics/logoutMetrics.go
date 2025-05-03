@@ -2,7 +2,9 @@ package metrics
 
 import (
 	"log"
+	"os"
 
+	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/metric"
 )
 
@@ -12,7 +14,14 @@ type LogoutMeters struct {
 	LogoutLatencyHistogram metric.Int64Histogram
 }
 
-func NewLogoutMeters(meter metric.Meter) *LogoutMeters {
+func NewLogoutMeters() *LogoutMeters {
+	podName := os.Getenv("POD_NAME")
+	if podName == "" {
+		podName = "local"
+	}
+
+	meter := otel.Meter(podName)
+
 	logoutCounter, err := meter.Int64Counter("movieguru_Logout_attempts_total", metric.WithDescription("Total number of Logout attempts"))
 	if err != nil {
 		log.Printf("Error creating Logout counter: %v", err)

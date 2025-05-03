@@ -2,7 +2,9 @@ package metrics
 
 import (
 	"log"
+	"os"
 
+	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/metric"
 )
 
@@ -12,7 +14,13 @@ type StartupMeters struct {
 	StartupLatencyHistogram metric.Int64Histogram
 }
 
-func NewStartupMeters(meter metric.Meter) *StartupMeters {
+func NewStartupMeters() *StartupMeters {
+
+	podName := os.Getenv("POD_NAME")
+	if podName == "" {
+		podName = "local"
+	}
+	meter := otel.Meter(podName)
 
 	startupCounter, err := meter.Int64Counter("movieguru_startup_attempts_total", metric.WithDescription("Total number of startup attempts"))
 	if err != nil {

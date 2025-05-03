@@ -6,11 +6,9 @@ import (
 	"log/slog"
 	"math/rand"
 	"net/http"
-	"os"
 	"time"
 
 	metrics "github.com/movie-guru/pkg/metrics"
-	"go.opentelemetry.io/otel"
 )
 
 var (
@@ -18,20 +16,14 @@ var (
 )
 
 func StartServer(ctx context.Context, deps *Dependencies) error {
-
 	globalDeps = deps
-	podName := os.Getenv("POD_NAME")
-	if podName == "" {
-		podName = "local"
-	}
-	meter := otel.Meter(podName)
 
 	loginMeters := metrics.NewLoginMeters()
-	logoutMeters := metrics.NewLogoutMeters(meter)
+	logoutMeters := metrics.NewLogoutMeters()
 	hcMeters := metrics.NewHCMeters()
 	chatMeters := metrics.NewChatMeters()
-	prefMeters := metrics.NewPreferencesMeters(meter)
-	startupMeters := metrics.NewStartupMeters(meter)
+	prefMeters := metrics.NewPreferencesMeters()
+	startupMeters := metrics.NewStartupMeters()
 
 	http.HandleFunc("/login", createLoginHandler(globalDeps, loginMeters))
 	http.HandleFunc("/logout", createLogoutHandler(globalDeps, logoutMeters))

@@ -16,6 +16,7 @@ package metrics
 
 import (
 	"log"
+	"os"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/metric"
@@ -28,7 +29,12 @@ type LoginMeters struct {
 }
 
 func NewLoginMeters() *LoginMeters {
-	meter := otel.Meter("login-handler")
+	podName := os.Getenv("POD_NAME")
+	if podName == "" {
+		podName = "local"
+	}
+
+	meter := otel.Meter(podName)
 
 	loginCounter, err := meter.Int64Counter("movieguru_login_attempts_total", metric.WithDescription("Total number of login attempts"))
 	if err != nil {

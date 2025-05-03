@@ -2,7 +2,9 @@ package metrics
 
 import (
 	"log"
+	"os"
 
+	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/metric"
 )
 
@@ -16,7 +18,14 @@ type PreferencesMeters struct {
 	PreferencesGetLatencyHistogram    metric.Int64Histogram
 }
 
-func NewPreferencesMeters(meter metric.Meter) *PreferencesMeters {
+func NewPreferencesMeters() *PreferencesMeters {
+
+	podName := os.Getenv("POD_NAME")
+	if podName == "" {
+		podName = "local"
+	}
+
+	meter := otel.Meter(podName)
 
 	preferencesGetCounter, err := meter.Int64Counter("movieguru_prefGet_attempts_total", metric.WithDescription("Total number of pref get attempts"))
 	if err != nil {
