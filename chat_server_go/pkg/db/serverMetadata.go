@@ -34,7 +34,22 @@ type Metadata struct {
 }
 
 func (d *MovieDB) GetMetadata(ctx context.Context, appVersion string) (*Metadata, error) {
-	return d.getServerMetadata(ctx, appVersion)
+	if appVersion == "static" {
+		return &Metadata{
+			AppVersion:               "v1",
+			TokenAudience:            "",
+			HistoryLength:            10,
+			MaxUserMessageLen:        500,
+			CorsOrigin:               "",
+			RetrieverLength:          10,
+			GoogleChatModelName:      "",
+			GoogleEmbeddingModelName: "",
+			ServerDomain:             "",
+		}, nil
+	} else {
+		return d.getServerMetadata(ctx, appVersion)
+
+	}
 }
 
 // getMetadata retrieves metadata from the database

@@ -7,7 +7,7 @@ services:
     ports:
       - 5432:5432
     volumes:
-      - ./pgvector/init_substituted.sql:/docker-entrypoint-initdb.d/init_substituted.sql:ro
+      - ./pgvector/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
   adminer:
     image: adminer
     restart: always
@@ -44,7 +44,7 @@ services:
       - POSTGRES_DB_USER=minimal-user
       - POSTGRES_DB_NAME=fake-movies-db
       - TABLE_NAME=movies
-      - APP_VERSION=v1_local
+      - APP_VERSION=static
       - USE_AUTH=false
       - CORS_STRICT=false # allows any origin to get through
       - FLOWS_URL=http://flows:3400

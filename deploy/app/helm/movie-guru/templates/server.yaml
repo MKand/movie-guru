@@ -35,16 +35,14 @@ spec:
           value: "movies"
         - name: REDIS_PORT
           value: "6379"
-        - name: REDIS_PASSWORD
-          value: "my_redis_pwd"
         - name: REDIS_HOST
           value: "cache-service"
         - name: FLOWS_URL
           value: "http://flows-service.movie-guru.svc.cluster.local:3401"
         - name: LOCATION
           value: {{ .Values.Config.geminiApiLocation }}
-        - name: SIMPLE
-          value: "true"
+        - name: APP_VERSION
+          value: "static"
         - name: OTEL_EXPORTER_OTLP_INSECURE
           value: "true"
         - name: OTEL_EXPORTER_OTLP_ENDPOINT

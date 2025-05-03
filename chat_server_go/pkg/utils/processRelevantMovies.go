@@ -15,6 +15,7 @@
 package utils
 
 import (
+	"fmt"
 	"os"
 
 	types "github.com/movie-guru/pkg/types"
@@ -42,7 +43,9 @@ func FilterRelevantContext(relevantMovies []string, fullContext []*types.MovieCo
 func AddPosterURLs(contextDocuments []*types.MovieContext) error {
 	// make this defensive
 	for _, c := range contextDocuments {
-
+		if c.Poster != "" {
+			c.Poster = fmt.Sprintf("https://storage.googleapis.com/generated_posters/%s", c.Poster)
+		}
 		if os.Getenv("USE_SIGNED_URL") != "" {
 			var err error
 			c.Poster, err = GetSignedURL(c.Poster)
