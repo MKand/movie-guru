@@ -218,7 +218,7 @@ func createLoginHandler(ulh *UserLoginHandler, meters *m.LoginMeters, metadata *
 			}
 			http.SetCookie(w, &cookie)
 			w.Header().Set("Vary", "Cookie, Origin")
-			json.NewEncoder(w).Encode(map[string]string{"login": "success"})
+			json.NewEncoder(w).Encode(map[string]string{"login": "success", "user": user})
 		}
 	}
 }
