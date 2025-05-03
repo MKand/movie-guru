@@ -100,6 +100,7 @@ func StartServer(ctx context.Context, ulh *UserLoginHandler, metadata *db.Metada
 	mux.HandleFunc("/preferences", createPreferencesHandler(deps.DB))
 	mux.HandleFunc("/startup", createStartupHandler(deps))
 	mux.HandleFunc("/login", createLoginHandler(ulh, loginMeters, metadata, useAuth))
+	mux.HandleFunc("/checklogin", checkloginHandler)
 	mux.HandleFunc("/logout", logoutHandler)
 	return http.ListenAndServe(":8080", enableCORS(corsOrigins, mux, corsStrict))
 }

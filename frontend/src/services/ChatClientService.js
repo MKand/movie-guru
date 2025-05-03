@@ -1,6 +1,8 @@
 import { fetch } from 'whatwg-fetch'
 import store from '../stores';
 import { ref } from 'vue';
+import router from '@/router';
+import LoginStatusCheckService from '@/services/LoginStatusCheckService';
 
 class ChatClientService {
 
@@ -22,7 +24,19 @@ class ChatClientService {
     this.spanId.value = spanId;
   }
 
+
+  async checkLoginStatus(){
+    if(!await LoginStatusCheckService.checkLogin()){
+      console.log('Invalid cookie, redirecting to login.');
+      router.push('/login');
+      return false;
+    }
+    return true
+  }
+
   async send(message) {
+    await this.checkLoginStatus();
+
     this.handleAddedUserMessage();
 
     store.commit('chat/add', { "message": message, "sender": "user" })
@@ -73,6 +87,9 @@ class ChatClientService {
 
 
   async startup() {
+
+    await this.checkLoginStatus();
+
     const requestOptions = {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
@@ -94,6 +111,9 @@ class ChatClientService {
   } 
 
   async getHistory() {
+
+    await this.checkLoginStatus();
+
     const requestOptions = {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
@@ -109,6 +129,7 @@ class ChatClientService {
   } 
 
   async submitFeedback(traceId, spanId, valueString) {
+    await this.checkLoginStatus();
     const requestOptions = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -126,6 +147,8 @@ class ChatClientService {
   }
 
   async submitFeatureAcceptance(traceId, spanId, accepted) {
+    await this.checkLoginStatus();
+
     const requestOptions = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -144,6 +167,7 @@ class ChatClientService {
 
 
   async clearHistory() {
+    await this.checkLoginStatus();
     try {
       this.clearTraceIds();
       const requestOptions = {

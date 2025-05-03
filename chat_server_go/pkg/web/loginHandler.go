@@ -50,6 +50,22 @@ func NewUserLoginHandler(tokenAudience string, db *db.MovieDB) *UserLoginHandler
 	}
 }
 
+func checkloginHandler(w http.ResponseWriter, r *http.Request) {
+	var err error
+	ctx := r.Context()
+	sessionInfo := &SessionInfo{}
+	if r.Method != "OPTIONS" {
+		var shouldReturn bool
+		sessionInfo, shouldReturn = authenticateAndGetSessionInfo(ctx, sessionInfo, err, r, w)
+		if shouldReturn {
+			return
+		}
+		user := sessionInfo.User
+		json.NewEncoder(w).Encode(map[string]string{"loggedIn": "true", "user": user})
+		return
+	}
+}
+
 func (ulh *UserLoginHandler) HandleLogin(ctx context.Context, authHeader, inviteCode string) (string, error) {
 	token := ulh.getToken(authHeader)
 	user, err := ulh.verifyGoogleToken(token)

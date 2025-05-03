@@ -2,6 +2,9 @@ import {fetch as fetchPolyfill} from 'whatwg-fetch'
 
 class LoginClientService {
   async login(user, inviteCode) {
+    if(user == ""){
+      throw new Error("User cannot be empty");
+    }
     try {
       const requestOptions = {
         method: 'POST',
