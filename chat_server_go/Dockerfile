@@ -21,13 +21,15 @@ WORKDIR /app
 
 COPY go.mod go.sum ./
 
-# Copy the source code. Note the slash at the end, as explained in
-# https://docs.docker.com/reference/dockerfile/#copy
-COPY . .
 
 ENV GO111MODULE=on
 RUN go mod tidy
 RUN go mod download
+
+# Copy the source code. Note the slash at the end, as explained in
+# https://docs.docker.com/reference/dockerfile/#copy
+COPY . .
+
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath -buildvcs=true -a -gcflags='all="-l"' -ldflags='-s -w -extldflags "-static"'  -o /app/webserver cmd/webserver/main.go
 
 # use debug because it includes busybox

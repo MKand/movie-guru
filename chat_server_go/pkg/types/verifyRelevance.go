@@ -50,7 +50,7 @@ const (
 	SentimentPositive UserSentiment = "SENTIMENTPOSITIVE"
 
 	// SentimentNegative indicates a negative sentiment expressed by the user.
-	SentimentNegative UserSentiment = "SENTIMENTNEGATIVE"
+	SentimentNegative UserSentiment = "SENTIMENTEGATIVE"
 
 	// SentimentNeutral indicates a neutral sentiment expressed by the user.
 	SentimentNeutral UserSentiment = "SENTIMENTNEUTRAL"

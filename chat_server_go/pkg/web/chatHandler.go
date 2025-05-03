@@ -21,7 +21,6 @@ import (
 	"time"
 
 	"github.com/movie-guru/pkg/db"
-	"github.com/movie-guru/pkg/types"
 
 	m "github.com/movie-guru/pkg/metrics"
 )
@@ -55,22 +54,18 @@ func createChatHandler(deps *Dependencies, meters *m.ChatMeters, metadata *db.Me
 				return
 			}
 			if len(chatRequest.Content) > metadata.MaxUserMessageLen {
-				slog.InfoContext(ctx, "Input message too long")
-				agentResp := types.NewAgentResponse()
-				agentResp.Result = types.TOO_LONG
-				agentResp.Answer = "Sorry, I cannot process that. The message was too long."
-				meters.CWrongQueryCounter.Add(ctx, 1)
-				updateSuccessMeter(ctx, meters, agentResp.Result, "No trace Id from flows")
-				json.NewEncoder(w).Encode(agentResp)
+				slog.InfoContext(ctx, "Input message too long", slog.String("user", user), slog.Any("error", err.Error()))
+				http.Error(w, "Message too long", http.StatusBadRequest)
 				return
 			}
 			ch, err := getHistory(ctx, user)
 			if err != nil {
-				slog.ErrorContext(ctx, "Error while fetching history")
+				slog.ErrorContext(ctx, "Error while fetching history", slog.String("user", user), slog.Any("error", err.Error()))
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
 			agentResp := chatSingleFlow(ctx, deps, metadata, ch, user, chatRequest.Content, meters)
+
 			saveHistory(ctx, ch, user, metadata)
 			w.WriteHeader(http.StatusOK)
 			json.NewEncoder(w).Encode(agentResp)

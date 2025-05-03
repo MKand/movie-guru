@@ -50,6 +50,22 @@ func NewUserLoginHandler(tokenAudience string, db *db.MovieDB) *UserLoginHandler
 	}
 }
 
+func checkloginHandler(w http.ResponseWriter, r *http.Request) {
+	var err error
+	ctx := r.Context()
+	sessionInfo := &SessionInfo{}
+	if r.Method != "OPTIONS" {
+		var shouldReturn bool
+		sessionInfo, shouldReturn = authenticateAndGetSessionInfo(ctx, sessionInfo, err, r, w)
+		if shouldReturn {
+			return
+		}
+		user := sessionInfo.User
+		json.NewEncoder(w).Encode(map[string]string{"loggedIn": "true", "user": user})
+		return
+	}
+}
+
 func (ulh *UserLoginHandler) HandleLogin(ctx context.Context, authHeader, inviteCode string) (string, error) {
 	token := ulh.getToken(authHeader)
 	user, err := ulh.verifyGoogleToken(token)
@@ -79,7 +95,17 @@ func (ulh *UserLoginHandler) HandleLogin(ctx context.Context, authHeader, invite
 func (ulh *UserLoginHandler) HandleApiKeyLogin(ctx context.Context, apiKey, user string) (string, error) {
 	// simple implementation for now
 	if user == "" {
-		return "", &AuthorizationError{"Invalid/Missing User Header"}
+		return "", &AuthorizationError{"Invalid invite code"}
+	}
+	return user, nil
+}
+
+func (ulh *UserLoginHandler) HandleAuthlessLogin(ctx context.Context, user, inviteCode string) (string, error) {
+	if ulh.db.CheckUser(ctx, user) {
+		return user, nil
+	}
+	if err := ulh.db.CreateUser(user); err != nil {
+		return "", err
 	}
 	return user, nil
 }
@@ -115,7 +141,7 @@ func (ulh *UserLoginHandler) verifyGoogleToken(tokenString string) (string, erro
 	return email, nil
 }
 
-func createLoginHandler(ulh *UserLoginHandler, meters *m.LoginMeters, metadata *db.Metadata) http.HandlerFunc {
+func createLoginHandler(ulh *UserLoginHandler, meters *m.LoginMeters, metadata *db.Metadata, useAuth bool) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		if r.Method == "POST" {
@@ -130,7 +156,7 @@ func createLoginHandler(ulh *UserLoginHandler, meters *m.LoginMeters, metadata *
 			apiKey := r.Header.Get("ApiKey")
 			user := r.Header.Get("User")
 
-			if authHeader == "" && apiKey == "" {
+			if useAuth && (authHeader == "" && apiKey == "") {
 				slog.InfoContext(ctx, "No auth header")
 				http.Error(w, "Unauthorized", http.StatusUnauthorized)
 				return
@@ -143,16 +169,20 @@ func createLoginHandler(ulh *UserLoginHandler, meters *m.LoginMeters, metadata *
 				http.Error(w, err.Error(), http.StatusBadRequest)
 				return
 			}
-			if authHeader != "" {
+			if useAuth && authHeader != "" {
 				user, err = ulh.HandleLogin(ctx, authHeader, loginBody.InviteCode)
 			}
-			if apiKey != "" {
+			if useAuth && apiKey != "" {
 				user, err = ulh.HandleApiKeyLogin(ctx, apiKey, user)
+			}
+			if !useAuth {
+				user, err = ulh.HandleAuthlessLogin(ctx, user, loginBody.InviteCode)
+
 			}
 
 			if err != nil {
 				if _, ok := err.(*AuthorizationError); ok {
-					slog.InfoContext(ctx, "Unauthorized")
+					slog.InfoContext(ctx, "Unauthorized", err.Error())
 					http.Error(w, err.Error(), http.StatusUnauthorized)
 					return
 				}
