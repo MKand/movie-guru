@@ -4,6 +4,8 @@ export const store = {
         chatMessageHistory:[],
         movies: [],
         placeHolderMovies: [],
+        traceId: "",
+        spanId: ""
     },
     getters: {
       messages (state) {
@@ -15,12 +17,21 @@ export const store = {
       placeHolderMovies (state) {
         return state.placeHolderMovies
       },
+      traceAndSpanIds (state) {
+        return state.traceId, state.spanId
+      },
     },
     mutations: {
         add(state, message) {
           // mutate state
           state.chatMessageHistory.push(message)
         },
+        updateTraceSpanIds(state, traceId, spanId) {
+          // mutate state
+          state.traceId=traceId
+          state.spanId= spanId
+        },
+
         clear(state) {
           // mutate state
           state.chatMessageHistory = []
@@ -30,7 +41,7 @@ export const store = {
           state.movies = []
           movies.forEach(element => {
             if (element.poster=="") {
-              element.poster="https://storage.googleapis.com/generated_posters/notfound.png"
+              element.poster= new URL("../assets/movie-guru.png", import.meta.url)
             }
             state.movies.push(element)
           });
@@ -40,7 +51,7 @@ export const store = {
           state.placeHolderMovies = []
           movies.forEach(element => {
             if (element.poster=="") {
-              element.poster="https://storage.googleapis.com/generated_posters/notfound.png"
+              element.poster=new URL("../assets/movie-guru.png", import.meta.url)
             }
             state.placeHolderMovies.push(element)
           });

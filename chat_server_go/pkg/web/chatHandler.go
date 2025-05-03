@@ -1,31 +1,38 @@
+// Copyright 2025 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package web
 
 import (
-	"context"
 	"encoding/json"
+	"log/slog"
 	"net/http"
-	"strings"
 	"time"
 
-	db "github.com/movie-guru/pkg/db"
+	"github.com/movie-guru/pkg/db"
 
 	m "github.com/movie-guru/pkg/metrics"
-	"github.com/movie-guru/pkg/types"
-	"go.opentelemetry.io/otel/attribute"
-	metric "go.opentelemetry.io/otel/metric"
-	"golang.org/x/exp/slog"
 )
 
 func createChatHandler(deps *Dependencies, meters *m.ChatMeters, metadata *db.Metadata) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var err error
 		ctx := r.Context()
-		origin := r.Header.Get("Origin")
-		addResponseHeaders(w, origin)
 		sessionInfo := &SessionInfo{}
 		if r.Method != "OPTIONS" {
 			var shouldReturn bool
-			sessionInfo, shouldReturn = authenticateAndGetSessionInfo(ctx, sessionInfo, err, r, w, metadata)
+			sessionInfo, shouldReturn = authenticateAndGetSessionInfo(ctx, sessionInfo, err, r, w)
 			if shouldReturn {
 				return
 			}
@@ -36,7 +43,6 @@ func createChatHandler(deps *Dependencies, meters *m.ChatMeters, metadata *db.Me
 			defer func() {
 				meters.CLatencyHistogram.Record(ctx, int64(time.Since(startTime).Milliseconds()))
 			}()
-			addResponseHeaders(w, origin)
 			user := sessionInfo.User
 			chatRequest := &ChatRequest{
 				Content: "",
@@ -58,8 +64,7 @@ func createChatHandler(deps *Dependencies, meters *m.ChatMeters, metadata *db.Me
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
-			agentResp, respQuality := chat(ctx, deps, metadata, ch, user, chatRequest.Content)
-			updateChatMeters(ctx, agentResp, meters, respQuality)
+			agentResp := chatSingleFlow(ctx, deps, metadata, ch, user, chatRequest.Content, meters)
 
 			saveHistory(ctx, ch, user, metadata)
 			w.WriteHeader(http.StatusOK)
@@ -67,41 +72,5 @@ func createChatHandler(deps *Dependencies, meters *m.ChatMeters, metadata *db.Me
 			return
 
 		}
-		if r.Method == "OPTIONS" {
-			addResponseHeaders(w, origin)
-			handleOptions(w, origin)
-			return
-		}
-	}
-}
-
-func updateChatMeters(ctx context.Context, agentResp *types.AgentResponse, meters *m.ChatMeters, respQuality *types.ResponseQualityOutput) {
-	if agentResp.Result == types.UNSAFE {
-		meters.CSafetyIssueCounter.Add(ctx, 1)
-	}
-	if agentResp.Result == types.SUCCESS {
-		meters.CSuccessCounter.Add(ctx, 1)
-	}
-	switch strings.ToUpper(string(respQuality.UserSentiment)) {
-	case strings.ToUpper(string(types.SentimentPositive)):
-		meters.CSentimentCounter.Add(ctx, 1, metric.WithAttributes(attribute.String("Sentiment", "Positive")))
-	case strings.ToUpper(string(types.SentimentNegative)):
-		meters.CSentimentCounter.Add(ctx, 1, metric.WithAttributes(attribute.String("Sentiment", "Negative")))
-	case strings.ToUpper(string(types.SentimentNeutral)):
-		meters.CSentimentCounter.Add(ctx, 1, metric.WithAttributes(attribute.String("Sentiment", "Neutral")))
-	default:
-		meters.CSentimentCounter.Add(ctx, 1, metric.WithAttributes(attribute.String("Sentiment", "Unclassified")))
-	}
-	switch strings.ToUpper(string(respQuality.Outcome)) {
-	case strings.ToUpper(string(types.OutcomeAcknowledged)):
-		meters.COutcomeCounter.Add(ctx, 1, metric.WithAttributes(attribute.String("Outcome", "Acknowledged")))
-	case strings.ToUpper(string(types.OutcomeEngaged)):
-		meters.COutcomeCounter.Add(ctx, 1, metric.WithAttributes(attribute.String("Outcome", "Engaged")))
-	case strings.ToUpper(string(types.OutcomeIrrelevant)):
-		meters.COutcomeCounter.Add(ctx, 1, metric.WithAttributes(attribute.String("Outcome", "Irrelevant")))
-	case strings.ToUpper(string(types.OutcomeRejected)):
-		meters.COutcomeCounter.Add(ctx, 1, metric.WithAttributes(attribute.String("Outcome", "Rejected")))
-	default:
-		meters.COutcomeCounter.Add(ctx, 1, metric.WithAttributes(attribute.String("Outcome", "Unclassified")))
 	}
 }

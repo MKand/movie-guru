@@ -1,3 +1,17 @@
+// Copyright 2025 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package wrappers
 
 import (
@@ -5,56 +19,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
+	"log/slog"
 	"net/http"
-	"strconv"
-	"strings"
 
-	"github.com/firebase/genkit/go/ai"
 	_ "github.com/lib/pq"
-	_ "github.com/movie-guru/pkg/types"
 	types "github.com/movie-guru/pkg/types"
+	utils "github.com/movie-guru/pkg/utils"
 )
-
-func parseMovieContexts(docs []*ai.Document) ([]*types.MovieContext, error) {
-	movies := make([]*types.MovieContext, 0, len(docs))
-
-	for _, doc := range docs {
-		var intermediate struct {
-			Title       string `json:"title"`
-			RuntimeMins int    `json:"runtime_mins"`
-			Genres      string `json:"genres"`
-			Rating      string `json:"rating"`
-			Released    int    `json:"released"`
-			Actors      string `json:"actors"`
-			Director    string `json:"director"`
-			Plot        string `json:"plot"`
-		}
-
-		err := json.Unmarshal([]byte(doc.Content[0].Text), &intermediate)
-		if err != nil {
-			return nil, err
-		}
-
-		rating, err := strconv.ParseFloat(intermediate.Rating, 32)
-		if err != nil {
-			rating = 0
-		}
-
-		movies = append(movies, &types.MovieContext{
-			Title:          intermediate.Title,
-			RuntimeMinutes: intermediate.RuntimeMins,
-			Genres:         strings.Split(intermediate.Genres, ", "),
-			Rating:         float32(rating),
-			Plot:           intermediate.Plot,
-			Released:       intermediate.Released,
-			Director:       intermediate.Director,
-			Actors:         strings.Split(intermediate.Actors, ", "),
-			Poster:         doc.Metadata["poster"].(string),
-		})
-	}
-
-	return movies, nil
-}
 
 type MovieRetrieverFlowClient struct {
 	RetrieverLength int
@@ -69,47 +41,77 @@ func CreateMovieRetrieverFlowClient(retrieverLength int, url string) *MovieRetri
 }
 
 func (flowClient *MovieRetrieverFlowClient) RetriveDocuments(ctx context.Context, query string) ([]*types.MovieContext, error) {
-	doc := ai.DocumentFromText(query, nil)
-	retDoc := ai.RetrieverRequest{
-		Document: doc,
-		Options:  flowClient.RetrieverLength,
-	}
-	rResp, err := flowClient.runFlow(retDoc)
+
+	rResp, err := flowClient.runFlow(query)
+
 	if err != nil {
 		return nil, err
 	}
-	return parseMovieContexts(rResp)
+
+	err = utils.AddPosterURLs(rResp)
+	if err != nil {
+		return nil, err
+	}
+
+	return rResp, nil
 }
 
-func (flowClient *MovieRetrieverFlowClient) runFlow(retRequest ai.RetrieverRequest) ([]*ai.Document, error) {
+type QueryData struct {
+	Query string `json:"query"`
+}
+
+func (flowClient *MovieRetrieverFlowClient) runFlow(input string) ([]*types.MovieContext, error) {
 	// Marshal the input struct to JSON
-	inputJSON, err := json.Marshal(retRequest)
+	dataInput := DataInput{
+		Data: &QueryData{
+			Query: input, // Assuming input is a string
+		},
+	}
+	inputJSON, err := json.Marshal(dataInput)
 	if err != nil {
 		return nil, fmt.Errorf("error marshaling input to JSON: %w", err)
 	}
 	req, err := http.NewRequest("POST", flowClient.URL, bytes.NewBuffer(inputJSON))
 	if err != nil {
-		fmt.Println("Error creating request:", err)
+		slog.Log(context.Background(), slog.LevelError, "Error creating request", "error", err)
 		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{}
+	ctx := context.Background()
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Println("Error sending request:", err)
+		slog.ErrorContext(ctx, "QualityFlow: Error sending request to Flows", err.Error(), err)
 		return nil, err
 	}
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		slog.ErrorContext(ctx, "QualityFlow: Genkit returned an Error", "errorCode", resp.StatusCode)
+		return nil, fmt.Errorf("genkit server returned error: %s (%d)", http.StatusText(resp.StatusCode), resp.StatusCode)
+	}
+
 	var result struct {
-		Result []*ai.Document `json:"result"`
+		Result []*types.MovieContext `json:"result"`
 	}
 	defer resp.Body.Close()
 
-	err = json.NewDecoder(resp.Body).Decode(&result)
+	b, _ := io.ReadAll(resp.Body)
+
+	err = json.Unmarshal(b, &result)
 	if err != nil {
-		fmt.Println("Error decoding JSON response:", err)
+		slog.Log(context.Background(), slog.LevelError, "Error unmarshaling JSON response", "error", err)
 		return nil, err
 	}
+
+	/*b = bytes.TrimSpace(b)
+	resp.Body = ioutil.NopCloser(bytes.NewReader(b))
+
+	err = json.NewDecoder(resp.Body).Decode(&result)
+	if err != nil {
+		slog.Log(context.Background(), slog.LevelError, "Error decoding JSON response", "error", err)
+		return nil, err
+	}*/
 
 	return result.Result, nil
 }

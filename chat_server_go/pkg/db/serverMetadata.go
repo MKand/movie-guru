@@ -1,9 +1,22 @@
+// Copyright 2025 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package db
 
 import (
 	"context"
 	"log"
-	"os"
 	"time"
 )
 
@@ -17,13 +30,10 @@ type Metadata struct {
 	RetrieverLength          int    `json:"retriever_length"`
 	GoogleChatModelName      string `json:"google_chat_model_name"`
 	GoogleEmbeddingModelName string `json:"google_embedding_model_name"`
-	FrontEndDomain           string `json:"front_end_domain"`
+	ServerDomain             string `json:"server_domain"`
 }
 
 func (d *MovieDB) GetMetadata(ctx context.Context, appVersion string) (*Metadata, error) {
-	if os.Getenv("SIMPLE") == "true" {
-		return getMetadataSimple()
-	}
 	return d.getServerMetadata(ctx, appVersion)
 }
 
@@ -31,7 +41,7 @@ func (d *MovieDB) GetMetadata(ctx context.Context, appVersion string) (*Metadata
 func (d *MovieDB) getServerMetadata(ctx context.Context, appVersion string) (*Metadata, error) {
 	dbCtx, cancel := context.WithTimeout(ctx, 3*time.Second)
 	defer cancel()
-	query := `SELECT * FROM app_metadata WHERE "app_version" = $1;`
+	query := `SELECT * FROM app_metadata WHERE "appversion" = $1;`
 	metadata := &Metadata{}
 	rows := d.DB.QueryRowContext(dbCtx, query, appVersion)
 	err := rows.Scan(
@@ -41,25 +51,12 @@ func (d *MovieDB) getServerMetadata(ctx context.Context, appVersion string) (*Me
 		&metadata.MaxUserMessageLen,
 		&metadata.CorsOrigin,
 		&metadata.RetrieverLength,
+		&metadata.ServerDomain,
 		&metadata.GoogleChatModelName,
 		&metadata.GoogleEmbeddingModelName,
-		&metadata.FrontEndDomain,
 	)
 	if err != nil {
 		return metadata, err
-	}
-	log.Println(metadata)
-	return metadata, nil
-}
-
-func getMetadataSimple() (*Metadata, error) {
-	metadata := &Metadata{
-		AppVersion:               "simple",
-		HistoryLength:            10,
-		MaxUserMessageLen:        1000,
-		RetrieverLength:          10,
-		GoogleChatModelName:      "gemini-1.5-flash",
-		GoogleEmbeddingModelName: "text-embedding-004",
 	}
 	log.Println(metadata)
 	return metadata, nil

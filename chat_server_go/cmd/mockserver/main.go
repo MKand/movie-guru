@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"errors"
 	"log/slog"
 	"os"
 
@@ -13,16 +12,17 @@ import (
 func main() {
 	ctx := context.Background()
 
-	shutdown, err := met.SetupOpenTelemetry(ctx)
-	if err != nil {
-		slog.ErrorContext(ctx, "error setting up OpenTelemetry", slog.Any("error", err))
+	if shutdown, err := met.SetupOpenTelemetry(ctx); err != nil {
+		slog.ErrorContext(ctx, "Error setting up OpenTelemetry", slog.Any("error", err))
 		os.Exit(1)
+	} else {
+		defer shutdown(ctx)
 	}
 
 	deps := getDependencies()
 
-	if err = errors.Join(web.StartServer(ctx, deps), shutdown(ctx)); err != nil {
-		slog.ErrorContext(ctx, "server exited with error", slog.Any("error", err))
+	if err := web.StartServer(ctx, deps); err != nil {
+		slog.ErrorContext(ctx, "Server exited with error", slog.Any("error", err))
 		os.Exit(1)
 	}
 

@@ -1,8 +1,23 @@
+// Copyright 2025 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package metrics
 
 import (
 	"log"
 
+	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/metric"
 )
 
@@ -12,7 +27,9 @@ type LoginMeters struct {
 	LoginLatencyHistogram metric.Int64Histogram
 }
 
-func NewLoginMeters(meter metric.Meter) *LoginMeters {
+func NewLoginMeters() *LoginMeters {
+	meter := otel.Meter("login-handler")
+
 	loginCounter, err := meter.Int64Counter("movieguru_login_attempts_total", metric.WithDescription("Total number of login attempts"))
 	if err != nil {
 		log.Printf("Error creating login counter: %v", err)
@@ -22,10 +39,7 @@ func NewLoginMeters(meter metric.Meter) *LoginMeters {
 		log.Printf("Error creating login success counter: %v", err)
 	}
 
-	loginLatencyHistogram, err := meter.Int64Histogram("movieguru_login_latency", metric.WithDescription("Histogram of login request latency"),
-		metric.WithUnit("ms"),
-		metric.WithExplicitBucketBoundaries(0.05, 0.1, 0.5, 1, 10, 50, 100, 200, 500, 1000, 5000),
-	)
+	loginLatencyHistogram, err := meter.Int64Histogram("movieguru_login_latency", metric.WithDescription("Histogram of login request latency"))
 	if err != nil {
 		log.Printf("Error creating login latency histogram: %v", err)
 	}

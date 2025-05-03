@@ -26,10 +26,10 @@ func StartServer(ctx context.Context, deps *Dependencies) error {
 	}
 	meter := otel.Meter(podName)
 
-	loginMeters := metrics.NewLoginMeters(meter)
+	loginMeters := metrics.NewLoginMeters()
 	logoutMeters := metrics.NewLogoutMeters(meter)
-	hcMeters := metrics.NewHCMeters(meter)
-	chatMeters := metrics.NewChatMeters(meter)
+	hcMeters := metrics.NewHCMeters()
+	chatMeters := metrics.NewChatMeters()
 	prefMeters := metrics.NewPreferencesMeters(meter)
 	startupMeters := metrics.NewStartupMeters(meter)
 

@@ -14,8 +14,8 @@
             <div v-for="a in store.getters['preferences/preferences']['likes']['director']"  class="rounded-full bg-secondary w-auto align-middle m-2 p-2 text-primary  shadow-md shadow-black">{{ a }}
                 <button class="text-text hover:text-pop text-lg" @click="deletePref('likes', 'director', a)"> ✖ </button>
             </div> 
-            <div v-for="a in store.getters['preferences/preferences']['likes']['other']"  class="rounded-full bg-secondary w-auto align-middle m-2 p-2 text-primary  shadow-md shadow-black">{{ a }}
-                <button class="text-text hover:text-pop text-lg" @click="deletePref('likes', 'other', a)"> ✖ </button>
+            <div v-for="a in store.getters['preferences/preferences']['likes']['others']"  class="rounded-full bg-secondary w-auto align-middle m-2 p-2 text-primary  shadow-md shadow-black">{{ a }}
+                <button class="text-text hover:text-pop text-lg" @click="deletePref('likes', 'others', a)"> ✖ </button>
             </div> 
 
              <div v-for="a in store.getters['preferences/preferences']['dislikes']['genres']"  class="rounded-full bg-negative w-auto align-middle m-2 p-2 text-text  shadow-md shadow-black">{{ a }}
@@ -27,8 +27,8 @@
             <div v-for="a in store.getters['preferences/preferences']['dislikes']['director']"  class="rounded-full bg-negative w-auto align-middle m-2 p-2 text-text  shadow-md shadow-black">{{ a }}
                 <button class="text-text hover:text-pop text-lg" @click="deletePref('dislikes', 'director', a)"> ✖ </button>
             </div> 
-            <div v-for="a in store.getters['preferences/preferences']['dislikes']['other']"  class="rounded-full bg-negative w-auto align-middle m-2 p-2 text-text  shadow-md shadow-black">{{ a }}
-                <button class="text-text hover:text-pop text-lg" @click="deletePref('dislikes', 'other', a)"> ✖ </button>
+            <div v-for="a in store.getters['preferences/preferences']['dislikes']['others']"  class="rounded-full bg-negative w-auto align-middle m-2 p-2 text-text  shadow-md shadow-black">{{ a }}
+                <button class="text-text hover:text-pop text-lg" @click="deletePref('dislikes', 'others', a)"> ✖ </button>
             </div> 
 
           </div>
@@ -41,7 +41,6 @@
 <script>
   import store  from '../stores';
   import LoginClientService from '../services/LoginClientService';
-  import { getAuth } from "firebase/auth";
   import PreferencesClientService from '../services/PreferencesClientService';
   import {ref } from 'vue';
 

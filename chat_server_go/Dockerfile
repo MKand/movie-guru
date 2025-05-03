@@ -15,8 +15,6 @@ COPY . .
 
 # Build
 RUN CGO_ENABLED=0 GOOS=linux go build -o /app/webserver cmd/webserver/main.go 
-RUN CGO_ENABLED=0 GOOS=linux go build -o /app/flows cmd/flows/main.go 
-RUN CGO_ENABLED=0 GOOS=linux go build -o /app/indexer cmd/indexer/main.go 
 RUN CGO_ENABLED=0 GOOS=linux go build -o /app/mockserver cmd/mockserver/main.go 
 
 # Optional:

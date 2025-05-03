@@ -4,6 +4,7 @@
 /var
 key.json
 
+pgvector/init_substituted.sql
 posters/
 tfplan
 __pycache__

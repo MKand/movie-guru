@@ -1,77 +1,73 @@
 services:
-  frontend:
-    build: ./frontend
-    ports:
-      -  5173:5173
+  db:
+    image: pgvector/pgvector:pg17
     environment:
-      - VITE_CHAT_SERVER_URL=http://localhost:8081
-    networks:
-      - shared-network
-  mock-user-js:
-    build: ./js/mock-user
+      POSTGRES_PASSWORD: main
+    restart: always
     ports:
-      - "3404:3400"
-    environment:
-      - PROJECT_ID=$PROJECT_ID
-      - GOOGLE_APPLICATION_CREDENTIALS=/key.json
-      - LOCATION=us-central1
+      - 5432:5432
     volumes:
-      - ./.key.json:/key.json
-    networks:
-      - shared-network
-  server:
-    build: ./chat_server_go
-    command: /app/webserver
+      - ./pgvector/init_substituted.sql:/docker-entrypoint-initdb.d/init_substituted.sql:ro
+  adminer:
+    image: adminer
+    restart: always
     ports:
-      - 8081:8080
-    environment:
-      - POSTGRES_HOST=db
-      - PROJECT_ID=$PROJECT_ID
-      - POSTGRES_DB_USER_PASSWORD=minimal
-      - POSTGRES_DB_USER=minimal-user
-      - POSTGRES_DB_NAME=fake-movies-db
-      - TABLE_NAME=movies
-      - LOCATION=europe-west4
-      - SIMPLE=true
-      - FLOWS_URL=http://flows:3401
-      - REDIS_HOST=cache
-      - REDIS_PORT=6379
-      - REDIS_PASSWORD=my_redis_pwd
-      - OTEL_EXPORTER_OTLP_INSECURE=true
-      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otelcol:4318
-      - OTEL_SERVICE_NAME=movieguru-backend-go
-      - OTEL_GO_X_EXEMPLAR=true
-    networks:
-      - shared-network
-    depends_on:
-      - cache
-  flows:
-    build: ./chat_server_go
-    command: /app/flows
-    ports:
-      - "3401:3401"
-    environment:
-      - POSTGRES_HOST=db
-      - PROJECT_ID=$PROJECT_ID
-      - POSTGRES_DB_USER_PASSWORD=minimal
-      - POSTGRES_DB_USER=minimal-user
-      - POSTGRES_DB_NAME=fake-movies-db
-      - TABLE_NAME=movies
-      - GOOGLE_APPLICATION_CREDENTIALS=/key.json
-      - LOCATION=europe-west4
-      - SIMPLE=true
-    volumes:
-      - ./.key.json:/key.json
-    networks:
-      - shared-network
+      - 8082:8080
   cache:
     image: redis:6.2-alpine
     restart: always
+    command: redis-server --save 20 1 --loglevel warning 
+  flows:
+    build: ./js/flows
+    environment:
+      - PROJECT_ID=$PROJECT_ID
+      - LOCATION=us-central1
+      - POSTGRES_HOST=db
+      - POSTGRES_DB_USER=minimal-user
+      - POSTGRES_DB_USER_PASSWORD=minimal
+      - TABLE_NAME=movies
+      - POSTGRES_DB_NAME=fake-movies-db
+      - GOOGLE_APPLICATION_CREDENTIALS=/key.json
+      - GRPC_TRACE=all
+      - GRPC_VERBOSITY=ERROR
+    volumes:
+      - ./key.json:/key.json
+  server:
+    build: ./chat_server_go
+    restart: always
+    command: /app/webserver
+    environment:
+      - PROJECT_ID=$PROJECT_ID      
+      - LOCATION=$REGION
+      - POSTGRES_HOST=db
+      - POSTGRES_DB_USER_PASSWORD=minimal
+      - POSTGRES_DB_USER=minimal-user
+      - POSTGRES_DB_NAME=fake-movies-db
+      - TABLE_NAME=movies
+      - APP_VERSION=v1_local
+      - USE_AUTH=false
+      - CORS_STRICT=false # allows any origin to get through
+      - FLOWS_URL=http://flows:3400
+      - REDIS_HOST=cache
+      - REDIS_PORT=6379
+      - FEEDBACK_URL=https://${GENKIT_FEEDBACK_REGION}-${PROJECT_ID}.cloudfunctions.net/ext-firebase-ai-user-engagement-collectEngagement
+    depends_on:
+      - cache 
+      - db
+  frontend:
+    build: ./frontend
+    environment:
+      - VITE_FIREBASE_API_KEY=${FIREBASE_API_KEY}
+      - VITE_GCP_PROJECT_ID=${PROJECT_ID}
+      - VITE_FIREBASE_APPID=${FIREBASE_APPID}
+      - VITE_CHAT_SERVER_URL=http://localhost:8080/api
+  nginx:
+    image: nginx:latest
+    restart: always
     ports:
-      - 6379:6379
-    command: redis-server --save 20 1 --loglevel warning --requirepass my_redis_pwd
-    networks:
-      - shared-network
-networks:
-  shared-network:
-    external: true
+      - 8080:80
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - server
+      - frontend
