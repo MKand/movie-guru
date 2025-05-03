@@ -1,6 +1,8 @@
 import { fetch } from 'whatwg-fetch'
 import store from '../stores';
 import { ref } from 'vue';
+import router from '@/router';
+import LoginStatusCheckService from '@/services/LoginStatusCheckService';
 
 class ChatClientService {
 
@@ -22,25 +24,35 @@ class ChatClientService {
     this.spanId.value = spanId;
   }
 
+
+  async checkLoginStatus(){
+    if(!await LoginStatusCheckService.checkLogin()){
+      console.log('Invalid cookie, redirecting to login.');
+      router.push('/login');
+      return false;
+    }
+    return true
+  }
+
   async send(message) {
-    var requestOptions = {}
-    try{
-      this.handleAddedUserMessage();
-      this.clearTraceIds();
-      requestOptions = {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content: message }),
-        credentials: 'include'
-      };
-      store.commit('chat/add', { "message": message, "sender": "user" })
+    await this.checkLoginStatus();
 
-    }
-    catch (error) {
-      this.handleErrorMessage("I've had trouble sending your message. Try again.")
-    }
+    this.handleAddedUserMessage();
 
+    store.commit('chat/add', { "message": message, "sender": "user" })
+    this.clearTraceIds();
+
+    const requestOptions = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content: message }),
+      credentials: 'include'
+    };
     try {
+      if (message == "error"){
+        throw new Error();
+      }
+
       const response = await fetch(import.meta.env.VITE_CHAT_SERVER_URL + '/chat', requestOptions)
 
       if (!response.ok) {
@@ -53,8 +65,14 @@ class ChatClientService {
         store.commit('chat/addMovies', json["context"])
         this.setTraceIds(json["traceId"], json["spanId"])
         this.handleAgentMessage();
+        if(this.traceId.value && this.spanId.value){
+          // Setting acceptance as rejected by default
+          if(json["context"] != []){
+            this.submitFeatureAcceptance(this.traceId.value, this.spanId.value, "rejected")
+          }
+        }
       }
-      else if (result == "ERROR" || result == "QUOTALIMIT" || result == "UNSAFE" || result == "BAD_QUERY" || result == "TOO_LONG") {
+      else if (result == "ERROR" || result == "QUOTALIMIT" || result == "UNSAFE" || result == "BAD_QUERY") {
         this.handleErrorMessage(json["answer"]|| "unknown error occurred")
       }
       if (json["preferences"]) {
@@ -69,6 +87,9 @@ class ChatClientService {
 
 
   async startup() {
+
+    await this.checkLoginStatus();
+
     const requestOptions = {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
@@ -90,6 +111,9 @@ class ChatClientService {
   } 
 
   async getHistory() {
+
+    await this.checkLoginStatus();
+
     const requestOptions = {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
@@ -105,6 +129,7 @@ class ChatClientService {
   } 
 
   async submitFeedback(traceId, spanId, valueString) {
+    await this.checkLoginStatus();
     const requestOptions = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -122,6 +147,8 @@ class ChatClientService {
   }
 
   async submitFeatureAcceptance(traceId, spanId, accepted) {
+    await this.checkLoginStatus();
+
     const requestOptions = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -140,6 +167,7 @@ class ChatClientService {
 
 
   async clearHistory() {
+    await this.checkLoginStatus();
     try {
       this.clearTraceIds();
       const requestOptions = {

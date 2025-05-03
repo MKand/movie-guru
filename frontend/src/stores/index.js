@@ -1,5 +1,4 @@
 import { createStore } from 'vuex'
-import createPersistedState from 'vuex-persistedstate';
 
 import {store as chatStore} from './chatStore'
 import {store as userStore} from './userStore'
@@ -11,11 +10,6 @@ export const store = createStore({
       user: userStore,
       preferences: preferencesStore
     },
-    plugins: [
-      createPersistedState({
-        paths: ['user'],  // Persist the entire 'user' module's state
-      }),
-    ],
   })
 export function init(){
 

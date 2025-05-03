@@ -1,7 +1,10 @@
-import {fetch} from 'whatwg-fetch'
+import {fetch as fetchPolyfill} from 'whatwg-fetch'
 
 class LoginClientService {
   async login(user, inviteCode) {
+    if(user == ""){
+      throw new Error("User cannot be empty");
+    }
     try {
       const requestOptions = {
         method: 'POST',
@@ -10,7 +13,7 @@ class LoginClientService {
           'Authorization': `Bearer ${user.accessToken}`,
         },
         body: JSON.stringify({ inviteCode }),
-        credentials: 'include', // Include cookies or authentication credentials
+        credentials: 'include',
       };
   
       const response = await fetch(
@@ -36,7 +39,7 @@ class LoginClientService {
           headers: { 'Content-Type': 'application/json'},
           credentials: 'include'
         };
-      const response = await fetch(import.meta.env.VITE_CHAT_SERVER_URL + '/logout', requestOptions)
+      const response = await fetchPolyfill(import.meta.env.VITE_CHAT_SERVER_URL + '/logout', requestOptions)
       if (!response.ok) {
           throw new Error(`Response status: ${response.status}`);
         }
