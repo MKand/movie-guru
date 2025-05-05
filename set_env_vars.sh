@@ -7,3 +7,4 @@ export FIREBASE_APP_ID="<appId>" # appId from firebase web configGet this value 
 export FIREBASE_GCP_ID=$PROJECT_ID
 export REGION="us-central1" 
 export GENKIT_FEEDBACK_REGION="us-central1"
+export SERVICE_ACCOUNT_NAME="movie-guru-chat-server-sa"
