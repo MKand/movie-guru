@@ -22,15 +22,9 @@ import { openDB } from './db';
 
 const FILENAME = process.env.DATASETFILE || "/dataset/movies_with_posters.csv";
 
-const sleep = (ms: number): Promise<void> =>
-  new Promise((resolve) => setTimeout(resolve, ms));
-
-
 export async function processMovies() {
   try {
     const fileContent = await fs.readFile(FILENAME, 'utf8');
-
-    await sleep(100);
 
     const parser = parse({
       delimiter: '\t',
@@ -54,6 +48,7 @@ export async function processMovies() {
 
     let index = 0;
     const db = await openDB();
+    const indexerPromises = [];
     console.log("starting indexing")
 
     for (const record of records) {
@@ -74,16 +69,14 @@ export async function processMovies() {
         tconst: index.toString(),
       };
       try {
-        await IndexerFlow(movieContext)
-        // Slowing down to avoid pesky rate limits
-        await sleep(1500)
-        console.log("processed ", record[0])
+        const indexerPromise = IndexerFlow(movieContext);
+        indexerPromises.push(indexerPromise);
       } catch (err) {
         console.error('Error loading movie: ', record[0], err);
       }
       index++;
-
     }
+    await Promise.all(indexerPromises);
     console.log(`finished indexing ${index} documents.`)
 
   } catch (err) {

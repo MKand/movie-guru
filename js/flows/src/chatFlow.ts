@@ -21,7 +21,7 @@ import { GenerationBlockedError } from 'genkit';
 import {  SafetyTransformPrompt, SafetyPromptOutputSchema, SafetyIssueFlow } from './safetyFlow';
 import { QueryTransformFlow } from './queryTransformFlow';
 import { QueryTransformFlowOutputSchema } from './queryTransformTypes';
-import { MovieDocFlow } from './docRetriever';
+import { DocSearchFlow } from './docRetriever';
 import { MovieFlow } from './movieFlow';
 
 // This flow orchestrates multiple other flows.
@@ -60,7 +60,7 @@ export const ChatFlow = ai.defineFlow(
             // Search if required
             var movieContexts: MovieContext[] = []
             if(qtOutput.followupAction == "SEARCH_REQUIRED" || qtOutput.searchQuery != ""){
-                movieContexts = await MovieDocFlow( {query: qtOutput.searchQuery})
+                movieContexts = await DocSearchFlow( {query: qtOutput.searchQuery})
             }
             
             // Final RAG

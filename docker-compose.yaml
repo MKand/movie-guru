@@ -4,6 +4,12 @@ services:
     environment:
       POSTGRES_PASSWORD: main
     restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U minimal-user -d fake-movies-db"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
     ports:
       - 5432:5432
     volumes:
@@ -17,6 +23,11 @@ services:
     image: redis:6.2-alpine
     restart: always
     command: redis-server --save 20 1 --loglevel warning 
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping | grep PONG"]
+      interval: 2s
+      timeout: 3s
+      retries: 3
   flows:
     build: ./js/flows
     environment:
@@ -32,6 +43,10 @@ services:
       - GRPC_VERBOSITY=ERROR
     volumes:
       - ./key.json:/key.json
+    depends_on:
+      db:
+        condition: service_healthy
+        restart: true
   server:
     build: ./chat_server_go
     restart: always
@@ -52,8 +67,11 @@ services:
       - REDIS_PORT=6379
       - FEEDBACK_URL=https://${GENKIT_FEEDBACK_REGION}-${PROJECT_ID}.cloudfunctions.net/ext-firebase-ai-user-engagement-collectEngagement
     depends_on:
-      - cache 
-      - db
+      db:
+        condition: service_healthy
+        restart: true
+      cache:
+        condition: service_healthy
   frontend:
     build: ./frontend
     environment:

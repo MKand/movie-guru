@@ -17,7 +17,6 @@ fi
 echo -e "\e[93mUsing Project: $PROJECT_ID\e[0m"
 
 
-SERVICE_ACCOUNT_NAME="movie-guru-chat-server-sa"
 SERVICE_ACCOUNT_EMAIL="$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com"
 
 echo -e "\e[95mCreating service account local key as key.json\e[0m"
@@ -29,6 +28,3 @@ echo -e "\e[95m Substituting env variables in init.sql\e[0m"
 envsubst < pgvector/init.sql > pgvector/init_substituted.sql
 
 echo -e "\e[95m Finished setting up local environment \e[0m"
-
-
-

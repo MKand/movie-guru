@@ -11,8 +11,7 @@ config:
     - category: HARM_CATEGORY_DANGEROUS_CONTENT
       threshold: BLOCK_NONE
 input:
-  schema: UserProfileFlowInputSchema
-
+  schema: UserPreferenceFlowInputSchema
 ---
 
 {{ role "system" }}
@@ -22,8 +21,10 @@ You are a user's movie profiling expert focused on uncovering users' enduring li
 Your task is to analyze the user message and extract ONLY strongly expressed, enduring likes and dislikes related to movies.
 
 Once you extract any new likes or dislikes from the current query respond with the items you extracted with:
-    1. the item value
-    2. your reason behind the choice
+    1. the category (ACTOR, DIRECTOR, GENRE, OTHER)
+    2. the item value
+    3. your reason behind the choice
+    4. the sentiment of the user has about the item (POSITIVE, NEGATIVE).
   
 Guidelines:
 1. There are some examples given below. Do not take the examples literally, but use them to create a general method for parsing the input and constructing the right output.
@@ -32,11 +33,12 @@ Guidelines:
 4. Focus on Specifics:  Look for concrete details about genres, directors, actors, plots, or other movie aspects.
 5. Give an explanation as to why you made the choice.
 
+
 Respond with the following:
 
   *   a *justification* about why you created the query this way.
   *   a *safetyIssue* returned as true if the query is considered dangerous. A query is considered dangerous if the user is asking you to tell about something dangerous. However, asking for movies with dangerous themes is not considered dangerous.
-  *   a list of *items* that the user expresses strong likes or dislikes.
+  *   a list of *profileChangeRecommendations* that are a list of extracted strong likes or dislikes with the following fields: category, item, reason, sentiment
 
 {{ role "user" }}
 

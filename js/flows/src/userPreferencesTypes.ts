@@ -33,20 +33,20 @@ export const ProfileChangeRecommendationSchema = z.object({
 export type ProfileChangeRecommendation = z.infer<typeof ProfileChangeRecommendationSchema>
 
 // UserProfileFlowInput schema
-export const UserProfileFlowInputSchema = z.object({
+export const UserPreferenceFlowInputSchema = z.object({
   query: z.string(),
   agentMessage: z.string(),
 });
 
-export type UserProfileFlowInput = z.infer<typeof UserProfileFlowInputSchema>
+export type UserPreferenceFlowInput = z.infer<typeof UserPreferenceFlowInputSchema>
 
-ai.defineSchema('UserProfileFlowInputSchema', UserProfileFlowInputSchema);
+ai.defineSchema('UserPreferenceFlowInputSchema', UserPreferenceFlowInputSchema);
 
 
 // HINT: Challenge 3. This is the output schema for the userProfile Flow. 
 // Compare this to the schema in the error message.
 
-export const UserProfileFlowOutputSchema = z.strictObject({
+export const UserPreferenceFlowOutputSchema = z.strictObject({
   profileChangeRecommendations: z.array(ProfileChangeRecommendationSchema).optional().default([]),
   modelOutputMetadata: z.object({
     justification: z.string().default("Unknown"),
@@ -59,7 +59,7 @@ export const UserProfileFlowOutputSchema = z.strictObject({
   }),
 });
 
-export type UserProfileFlowOutput = z.infer<typeof UserProfileFlowOutputSchema>
+export type UserPreferenceFlowOutput = z.infer<typeof UserPreferenceFlowOutputSchema>
 
-ai.defineSchema('UserProfileFlowOutputSchema', UserProfileFlowOutputSchema);
+ai.defineSchema('UserPreferenceFlowOutputSchema', UserPreferenceFlowOutputSchema);
 

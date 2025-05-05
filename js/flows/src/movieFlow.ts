@@ -31,6 +31,8 @@ import { GenerationBlockedError } from 'genkit';
  * The MovieGuru development team, uses a variant system to version our prompts. The "v2" variant corresponds to the movie.v2.prompt file. 
  * To use the default variant -- ai.prompt('movie')
  * To use a variant -- ai.prompt('movie', {variant: 'v2'})
+ * 
+ * ATTENTION: Variant v2 is currently being tested with Gemini 2.5 PRO, if it is not performing well, please revert to the default variant.
  */
 export const makeMovieRecommendation = ai.prompt('movie', {variant: 'v2'});
 
