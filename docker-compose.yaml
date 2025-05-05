@@ -59,7 +59,7 @@ services:
     environment:
       - VITE_FIREBASE_API_KEY=${FIREBASE_API_KEY}
       - VITE_GCP_PROJECT_ID=${PROJECT_ID}
-      - VITE_FIREBASE_APPID=${FIREBASE_APPID}
+      - VITE_FIREBASE_APP_ID=${FIREBASE_APP_ID}
       - VITE_CHAT_SERVER_URL=http://localhost:8080/api
   nginx:
     image: nginx:latest
