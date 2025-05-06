@@ -20,4 +20,7 @@ resource "google_container_cluster" "primary" {
     create = "30m"
     update = "40m"
   }
+
+    depends_on = [google_project_service.enable_apis]
+
 }

@@ -12,17 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-resource "google_artifact_registry_repository" "repo" {
-  location      = var.region
-  repository_id = "movie-guru"
-  description   = "docker repository for app movie-guru"
-  format        = "DOCKER"
-  project       = var.gcp_project_id
-  docker_config {
-    immutable_tags = false
+terraform {
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = "~> 6.18"
+    }
+    google-beta = {
+      source  = "hashicorp/google-beta"
+      version = "~> 6.18"
+    }
   }
-
-      depends_on = [google_project_service.enable_apis]
-
 }
-

@@ -44,6 +44,15 @@ data "http" "locustfile" {
   url = var.locust_file
 }
 
+data "http" "sql_file" {
+  url = var.sql_file
+}
+
+data "http" "otel_file" {
+  url = var.otel_file
+}
+
+
 # resource "helm_release" "movie_guru" {
 #   name  = "movie-guru"
 #   chart = var.helm_chart
@@ -59,6 +68,14 @@ data "http" "locustfile" {
 #     name  = "Config.mockserverIP"
 #     value = google_compute_address.mockserver-address.address
 #   }
+#     set {
+#     name  = "Config.frontend.FIREBASE_API_KEY"
+#     value = data.google_firebase_web_app_config.basic.api_key
+#   }
+#     set {
+#     name  = "Config.frontend.FIREBASE_APP_ID"
+#     value = google_firebase_web_app.movieguru-web.app_id
+#   }
   
 #     set {
 #     name  = "Config.frontendIP"
@@ -71,63 +88,115 @@ data "http" "locustfile" {
 #   depends_on = [ google_compute_address.server-address ]
 # }
 
+ resource "kubernetes_namespace" "locust" {
+  metadata {
+    name = "locust"
+  }
+ }
+
+ resource "kubernetes_namespace" "otel" {
+  metadata {
+    name = "otel"
+  }
+ }
+
+
 resource "kubernetes_config_map" "loadtest_locustfile" {
   metadata {
     name      = "loadtest-locustfile"
     namespace = "locust"
   }
-
   data = {
     "locustfile.py" = (
       data.http.locustfile.response_body
     )
   }
-  depends_on = [helm_release.movie_guru]
+
+  depends_on = [ kubernetes_namespace.locust ]
 }
 
-resource "helm_release" "locust" {
-  name      = "locust"
-  chart     = "deliveryhero/locust"
-  namespace = "locust"
-
-  set {
-    name  = "loadtest.name"
-    value = "movieguru-loadtest"
-  }
-
-  set {
-    name  = "loadtest.locust_locustfile_configmap"
-    value = "loadtest-locustfile" 
-  }
-
-  set {
-    name  = "loadtest.locust_locustfile"
-    value = "locustfile.py"
-  }
-  set {
-    name  = "loadtest.locust_host"
-    value = "http://mockserver-service.movie-guru.svc.cluster.local"
-  }
-
-  set {
-    name  = "service.type"
-    value = "LoadBalancer"
-  }
-
-  set {
-    name  = "worker.replicas"
-    value = "3"
-  }
-
-    depends_on = [helm_release.movie_guru, kubernetes_config_map.loadtest_locustfile]
-}
-
-data "kubernetes_service" "locust" {
+resource "kubernetes_config_map" "otel_config" {
   metadata {
-    name      = "locust"  
-    namespace = "locust"   
+    name      = "otel-config"
+    namespace = "otel"
   }
-    depends_on = [ helm_release.locust ]
 
+  data = {
+    "otel-collector-config.py" = (
+      data.http.otel_file.response_body
+    )
+  }
+
+  depends_on = [ kubernetes_namespace.otel ]
 }
+
+resource "helm_release" "otel" {
+  name      = "otel-collector"
+  chart     = "opentelemetry-collector"
+  repository = "https://open-telemetry.github.io/opentelemetry-helm-charts"
+  namespace = "otel"
+
+  set {
+    name  = "mode"
+    value = "daemonset"
+  }
+
+  set {
+    name = "image.repository"
+    value = "ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-k8s"
+  }
+
+  set {
+    name="command.name"
+    value="otelcol-k8s"
+  }
+
+    depends_on = [ kubernetes_config_map.otel_config ]
+}
+
+# resource "helm_release" "locust" {
+#   name      = "locust"
+#   chart     = "locust"
+#   repository = "https://raw.githubusercontent.com/deliveryhero/helm-charts/refs/heads/master/"
+#   namespace = "locust"
+
+#   set {
+#     name  = "loadtest.name"
+#     value = "movieguru-loadtest"
+#   }
+
+#   set {
+#     name  = "loadtest.locust_locustfile_configmap"
+#     value = "loadtest-locustfile" 
+#   }
+
+#   set {
+#     name  = "loadtest.locust_locustfile"
+#     value = "locustfile.py"
+#   }
+#   set {
+#     name  = "loadtest.locust_host"
+#     value = "http://mockserver-service.movie-guru.svc.cluster.local"
+#   }
+
+#   set {
+#     name  = "service.type"
+#     value = "LoadBalancer"
+#   }
+
+#   set {
+#     name  = "worker.replicas"
+#     value = "3"
+#   }
+
+#     depends_on = [kubernetes_config_map.loadtest_locustfile]
+# }
+
+# data "kubernetes_service" "locust" {
+#   metadata {
+#     name      = "locust"  
+#     namespace = "locust"   
+#   }
+#     depends_on = [ helm_release.locust ]
+# }
 

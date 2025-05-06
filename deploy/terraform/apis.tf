@@ -12,17 +12,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-resource "google_artifact_registry_repository" "repo" {
-  location      = var.region
-  repository_id = "movie-guru"
-  description   = "docker repository for app movie-guru"
-  format        = "DOCKER"
-  project       = var.gcp_project_id
-  docker_config {
-    immutable_tags = false
-  }
+provider "google" {
+  project = var.gcp_project_id
+  region  = var.region
+}
 
-      depends_on = [google_project_service.enable_apis]
+resource "google_project_service" "enable_apis" {
+  for_each = toset([
+    "aiplatform.googleapis.com",
+    "artifactregistry.googleapis.com",
+    "cloudresourcemanager.googleapis.com",
+    "storage-api.googleapis.com",
+    "firebase.googleapis.com",
+    "iam.googleapis.com",
+    "cloudbilling.googleapis.com",
+    "compute.googleapis.com",
+    "container.googleapis.com",
+    "secretmanager.googleapis.com",
+    "apphub.googleapis.com",
+  ])
 
+  service = each.key
+
+  disable_on_destroy = false
 }
 
