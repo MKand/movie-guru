@@ -49,7 +49,7 @@ resource "google_cloudbuild_trigger" "github-trigger" {
     _REGION = var.region
   }
 
-  filename = "../ci/ci.yaml"
+  filename = "deploy/ci/ci.yaml"
 
   ignored_files = [ "/deploy/*", "docker-compose-*", "*.md", "/nginx/*"  ]
 

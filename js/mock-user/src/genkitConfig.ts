@@ -14,17 +14,24 @@
  * limitations under the License.
  */
 
-import { z } from 'genkit';
+import { gemini20Flash, vertexAI,  } from '@genkit-ai/vertexai';
+import { enableFirebaseTelemetry } from '@genkit-ai/firebase';
+import { initializeApp } from 'firebase-admin/app';
 
-export const MockUserFlowInputSchema = z.object({
-  expert_answer: z.string(),
-  response_mood: z.string(),
-  response_type: z.string(),
+import { genkit } from 'genkit';
+
+const LOCATION = process.env.LOCATION|| 'us-central1';
+const PROJECT_ID = process.env.PROJECT_ID;
+
+
+initializeApp({
+  projectId: PROJECT_ID,
 });
 
-export const MockUserFlowOutputSchema = z.object({
-  answer: z.string(),
-});
+enableFirebaseTelemetry();
 
-export type MockUserFlowInput = z.infer<typeof MockUserFlowInputSchema>
-export type MockUserFlowOutput = z.infer<typeof MockUserFlowOutputSchema>
+
+export const ai = genkit({
+    plugins: [vertexAI({location: LOCATION, projectId: PROJECT_ID})],
+    model: gemini20Flash, // set default model
+  });
