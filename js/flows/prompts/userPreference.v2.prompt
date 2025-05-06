@@ -12,6 +12,8 @@ config:
       threshold: BLOCK_NONE
 input:
   schema: UserPreferenceFlowInputSchema
+output:
+  schema: UserPreferenceFlowOutputSchema
 ---
 
 {{ role "system" }}
