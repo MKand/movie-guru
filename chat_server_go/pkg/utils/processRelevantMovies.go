@@ -45,7 +45,7 @@ func AddPosterURLs(contextDocuments []*types.MovieContext) error {
 	projectId := os.Getenv("PROJECT_ID")
 	for _, c := range contextDocuments {
 		if c.Poster != "" {
-			c.Poster = fmt.Sprintf("https://storage.googleapis.com/%s_posters/%s", projectId, c.Poster)
+			c.Poster = fmt.Sprintf("https://storage.googleapis.com/generated_posters/%s", c.Poster)
 		}
 		if os.Getenv("USE_SIGNED_URL") != "" {
 			var err error
