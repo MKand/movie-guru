@@ -32,9 +32,11 @@ import { GenerationBlockedError } from 'genkit';
  * The MovieGuru development team, uses a variant system to version our prompts. The "v2" variant corresponds to the userPreference.v2.prompt file. 
  * To use the default variant -- ai.prompt('userPreference')
  * To use a variant -- ai.prompt('userPreference', {variant: 'v2'})
+ * 
+ * ATTENTION: We are currently testing an experimental version of the userPreference prompt with 50% of our users. If this is performing well, we should roll it out to 100%.
  */
 export const extractUserPreferencesV1 = ai.prompt('userPreference');
-export const extractUserPreferencesV2 = ai.prompt('userPreference', {variant: 'v2'});
+export const extractUserPreferencesExperimental = ai.prompt('userPreference', {variant: 'experimental'});
 
 export const UserPreferenceFlow = ai.defineFlow(
   {
@@ -54,13 +56,13 @@ export const UserPreferenceFlow = ai.defineFlow(
       // Currently targeting 50% of requests
       // TODO: use Firebase Remote Config to make this configurable without a rollout.
       if(Math.random() >= .5) {
-        console.info("Routing request to V2 userProfile.");
-        const response = await extractUserPreferencesV2({ 
+        console.info("Routing request to experimental userPreference query.");
+        const response = await extractUserPreferencesExperimental({ 
           query: input.query, 
           agentMessage: input.agentMessage });
         output = UserPreferenceFlowOutputSchema.parse(response.output)
       } else {
-        console.info("Routing request to V1 userProfile.");
+        console.info("Routing request to default userPreference query.");
         const response = await extractUserPreferencesV1({ 
           query: input.query, 
           agentMessage: input.agentMessage });
