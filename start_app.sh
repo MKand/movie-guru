@@ -28,3 +28,7 @@ echo -e "\e[95m Substituting env variables in init.sql\e[0m"
 envsubst < pgvector/init.sql > pgvector/init_substituted.sql
 
 echo -e "\e[95m Finished setting up local environment \e[0m"
+
+echo -e "\e[95m Starting app with docker compose \e[0m"
+
+docker compose up --build
