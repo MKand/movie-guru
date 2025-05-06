@@ -42,7 +42,6 @@ func FilterRelevantContext(relevantMovies []string, fullContext []*types.MovieCo
 
 func AddPosterURLs(contextDocuments []*types.MovieContext) error {
 	// make this defensive
-	projectId := os.Getenv("PROJECT_ID")
 	for _, c := range contextDocuments {
 		if c.Poster != "" {
 			c.Poster = fmt.Sprintf("https://storage.googleapis.com/generated_posters/%s", c.Poster)
