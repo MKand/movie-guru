@@ -18,30 +18,6 @@ tags:
 
 steps:
 - name: 'gcr.io/cloud-builders/docker'
-  id: "build-db-init-image"
-  dir: './pgvector'
-  entrypoint: "sh"
-  args:
-    - -xe 
-    - -c
-    - |
-      docker build \
-         -t "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/db-init:sre-v2" \
-         --cache-from "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/db-init:sre-v2" \
-         -f Dockerfile.init \
-         .
-
-- name: 'gcr.io/cloud-builders/docker'
-  id: "push-db-init-image"
-  waitFor: [build-db-init-image]
-  entrypoint: "sh"
-  args:
-    - -xe 
-    - -c
-    - |
-      docker push '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/db-init:sre-v2'
-
-- name: 'gcr.io/cloud-builders/docker'
   id: "build-db-image"
   dir: './pgvector'
   entrypoint: "sh"
@@ -54,7 +30,6 @@ steps:
          --cache-from "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/db:sre-v2" \
          -f Dockerfile \
          .
-
 - name: 'gcr.io/cloud-builders/docker'
   id: "push-db-image"
   waitFor: [build-db-image]
@@ -64,6 +39,29 @@ steps:
     - -c
     - |
       docker push '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/db:sre-v2'
+- name: 'gcr.io/cloud-builders/docker'
+  id: "build-db-init-image"
+  dir: './pgvector'
+  entrypoint: "sh"
+  args:
+    - -xe 
+    - -c
+    - |
+      docker build \
+         -t "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/db-init:sre-v2" \
+         --cache-from "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/db-init:sre-v2" \
+         -f Dockerfile.init \
+         .
+- name: 'gcr.io/cloud-builders/docker'
+  id: "push-db-init-image"
+  waitFor: [build-db-init-image]
+  entrypoint: "sh"
+  args:
+    - -xe 
+    - -c
+    - |
+      docker push '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/db-init:sre-v2'
+
 
 - name: "gcr.io/cloud-builders/docker"
   id: "build-frontend"

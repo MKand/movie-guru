@@ -23,6 +23,7 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"strconv"
 
 	redis "github.com/redis/go-redis/v9"
 )
@@ -75,21 +76,28 @@ func setupSessionStore(ctx context.Context) {
 }
 
 func getSessionID(r *http.Request) (string, error) {
-	cookie, err := r.Cookie("movie-guru-sid")
+	useAuth, err := strconv.ParseBool(os.Getenv("USE_AUTH"))
 	if err != nil {
-		switch {
-		case errors.Is(err, http.ErrNoCookie):
-			return "", errors.New("No cookie found")
-		default:
-			log.Println(err)
-			return "", err
+		useAuth = false
+	}
+	if useAuth {
+
+		cookie, err := r.Cookie("movie-guru-sid")
+		if err != nil {
+			switch {
+			case errors.Is(err, http.ErrNoCookie):
+				return "", errors.New("No cookie found")
+			default:
+				log.Println(err)
+				return "", err
+			}
 		}
+		sessionID := cookie.Value
+		if sessionID == "" {
+			return "", errors.New("None or malformed cookie found")
+		}
+		return sessionID, nil
 	}
-	sessionID := cookie.Value
-	if sessionID == "" {
-		return "", errors.New("None or malformed cookie found")
-	}
-	return sessionID, nil
 }
 
 func authenticateAndGetSessionInfo(ctx context.Context, sessionInfo *SessionInfo, err error, r *http.Request, w http.ResponseWriter) (*SessionInfo, bool) {

@@ -53,5 +53,9 @@ resource "google_cloudbuild_trigger" "github-trigger" {
 
   ignored_files = [ "/deploy/*", "docker-compose-*", "*.md", "/nginx/*"  ]
 
-  depends_on = [google_project_service.enable_apis, google_service_account.cloudbuild]  # Add the dependency
+  lifecycle {
+    ignore_changes = []
+  }
+
+  depends_on = [google_project_service.enable_apis, google_service_account.cloudbuild]
 }

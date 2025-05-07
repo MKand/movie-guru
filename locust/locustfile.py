@@ -56,7 +56,7 @@ class ChatUser(HttpUser):
             print("No Set-Cookie header received.")
         
         self.helper_api_client = requests.Session()
-        self.mock_url = os.getenv("MOCK_URL", "http://mockuser.mockuser.svc.cluster.local:80/mockUserFlow")
+        self.mock_url = os.getenv("MOCK_URL", "http://mockuser-service.movieguru.svc.cluster.local:80/mockUserFlow")
         print("using mock url", self.mock_url)
 
     @task(1)

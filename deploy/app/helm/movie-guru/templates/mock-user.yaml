@@ -32,7 +32,7 @@ metadata:
   namespace: movieguru
 spec:
   selector:
-    app: mock-user-js 
+    app: mock-user
   ports:
   - protocol: TCP
     port: 80  

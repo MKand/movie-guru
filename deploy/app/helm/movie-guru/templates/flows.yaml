@@ -18,7 +18,7 @@ spec:
         image: "{{ .Values.Config.Image.Repository }}/flows:sre-v2"
         imagePullPolicy: Always
         ports:
-        - containerPort: 3401
+        - containerPort: 3400
         env:
         - name: POSTGRES_HOST
           value: "http://db-service.movieguru.svc.cluster.local:5432"
@@ -45,6 +45,6 @@ spec:
     app: flows 
   ports:
   - protocol: TCP
-    port: 3401 
-    targetPort: 3401 
+    port: 3400
+    targetPort: 3400
   type: ClusterIP

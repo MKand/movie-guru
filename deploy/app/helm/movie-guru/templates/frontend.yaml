@@ -18,7 +18,7 @@ spec:
         image: "{{ .Values.Config.Image.Repository }}/frontend:sre-v2"
         imagePullPolicy: Always
         ports:
-        - containerPort: 5173
+        - containerPort: 4001
         env:
         - name: VITE_CHAT_SERVER_URL
           value: "http://{{ .Values.Config.serverIP }}"
@@ -41,6 +41,6 @@ spec:
   ports:
   - protocol: TCP
     port: 80
-    targetPort: 5173
+    targetPort: 4001
   type: LoadBalancer
   loadBalancerIP: {{ .Values.Config.frontendIP }}

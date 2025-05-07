@@ -31,7 +31,7 @@ import { GenerationBlockedError } from 'genkit';
  * To use the default variant -- ai.prompt('userProfile')
  * To use a variant -- ai.prompt('userProfile', {variant: 'v2'})
  */
-export const extractUserPreferences = ai.prompt('userProfile');
+export const extractUserPreferences = ai.prompt('userProfile', {variant: 'v2'});
 
 export const UserProfileFlow = ai.defineFlow(
   {
