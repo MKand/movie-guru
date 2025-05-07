@@ -158,12 +158,12 @@ class ChatUser(HttpUser):
                     "/startup",
                 )
         
-        @task(2)
-        def preferences(self):
-            self.client.post(f"/preferences", json={
-                    "Content": {
-                        "likes": {"genres": ["action"]},
-                        "dislikes": {}
-                    }
-            })
-            self.client.get(f"/preferences")
+    @task(2)
+    def preferences(self):
+        self.client.post(f"/preferences", json={
+                "Content": {
+                    "likes": {"genres": ["action"]},
+                    "dislikes": {}
+                }
+        })
+        self.client.get(f"/preferences")

@@ -40,8 +40,8 @@ resource "google_compute_address" "mockserver-address" {
 }
 
 
-data "http" "locustfile" {
-  url = var.locust_file
+data "http" "locust_py_file" {
+  url = var.locust_py_file
 }
 
 data "http" "sql_file" {
@@ -56,9 +56,11 @@ data "http" "otel_file" {
 # resource "helm_release" "movie_guru" {
 #   name  = "movie-guru"
 #   chart = var.helm_chart
+#   namespace = "movieguru"
+
 #   set {
 #     name  = "Config.Image.Repository"
-#     value = "manaskandula"
+#     value = var.repo_prefix
 #   }
 #   set {
 #     name  = "Config.serverIP"
@@ -85,7 +87,7 @@ data "http" "otel_file" {
 #     name  = "Config.projectID"
 #     value = var.gcp_project_id
 #   }
-#   depends_on = [ google_compute_address.server-address ]
+#   depends_on = [ google_compute_address.server-address, kubernetes_namespace.movieguru ]
 # }
 
  resource "kubernetes_namespace" "locust" {
@@ -100,6 +102,12 @@ data "http" "otel_file" {
   }
  }
 
+ resource "kubernetes_namespace" "movieguru" {
+  metadata {
+    name = "movieguru"
+  }
+ }
+
 
 resource "kubernetes_config_map" "loadtest_locustfile" {
   metadata {
@@ -107,8 +115,8 @@ resource "kubernetes_config_map" "loadtest_locustfile" {
     namespace = "locust"
   }
   data = {
-    "locustfile.py" = (
-      data.http.locustfile.response_body
+    "locust.py" = (
+      data.http.locust_py_file.response_body
     )
   }
 
@@ -130,6 +138,8 @@ resource "kubernetes_config_map" "otel_config" {
   depends_on = [ kubernetes_namespace.otel ]
 }
 
+
+
 resource "helm_release" "otel" {
   name      = "otel-collector"
   chart     = "opentelemetry-collector"
@@ -140,63 +150,51 @@ resource "helm_release" "otel" {
     name  = "mode"
     value = "daemonset"
   }
-
-  set {
-    name = "image.repository"
-    value = "ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-k8s"
-  }
-
-  set {
-    name="command.name"
-    value="otelcol-k8s"
-  }
-
-    depends_on = [ kubernetes_config_map.otel_config ]
+  # repository = "https://raw.githubusercontent.com/deliveryhero/helm-charts/refs/heads/master/"
 }
 
-# resource "helm_release" "locust" {
-#   name      = "locust"
-#   chart     = "locust"
-#   repository = "https://raw.githubusercontent.com/deliveryhero/helm-charts/refs/heads/master/"
-#   namespace = "locust"
+resource "helm_release" "locust" {
+  name      = "locust"
+  chart     = "deliveryhero/locust"
+  namespace = "locust"
 
-#   set {
-#     name  = "loadtest.name"
-#     value = "movieguru-loadtest"
-#   }
+  set {
+    name  = "loadtest.name"
+    value = "movieguru-loadtest"
+  }
 
-#   set {
-#     name  = "loadtest.locust_locustfile_configmap"
-#     value = "loadtest-locustfile" 
-#   }
+  set {
+    name  = "loadtest.locust_locustfile_configmap"
+    value = "loadtest-locustfile" 
+  }
 
-#   set {
-#     name  = "loadtest.locust_locustfile"
-#     value = "locustfile.py"
-#   }
-#   set {
-#     name  = "loadtest.locust_host"
-#     value = "http://mockserver-service.movie-guru.svc.cluster.local"
-#   }
+  set {
+    name  = "loadtest.locust_locustfile"
+    value = "locustfile.py"
+  }
+  set {
+    name  = "loadtest.locust_host"
+    value = "http://mockserver-service.movie-guru.svc.cluster.local"
+  }
 
-#   set {
-#     name  = "service.type"
-#     value = "LoadBalancer"
-#   }
+  set {
+    name  = "service.type"
+    value = "LoadBalancer"
+  }
 
-#   set {
-#     name  = "worker.replicas"
-#     value = "3"
-#   }
+  set {
+    name  = "worker.replicas"
+    value = "3"
+  }
 
-#     depends_on = [kubernetes_config_map.loadtest_locustfile]
-# }
+    depends_on = [kubernetes_config_map.loadtest_locustfile]
+}
 
-# data "kubernetes_service" "locust" {
-#   metadata {
-#     name      = "locust"  
-#     namespace = "locust"   
-#   }
-#     depends_on = [ helm_release.locust ]
-# }
+data "kubernetes_service" "locust" {
+  metadata {
+    name      = "locust"  
+    namespace = "locust"   
+  }
+    depends_on = [ helm_release.locust ]
+}
 

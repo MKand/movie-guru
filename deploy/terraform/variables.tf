@@ -5,7 +5,7 @@ variable "gcp_project_id" {
 
 variable "repo_prefix" {
   description = "Docker/Artifact registry prefix"
-  default = "manaskandula"
+  default = "o11y-movie-guru"
 }
 
 variable "region" {
@@ -13,9 +13,9 @@ variable "region" {
   description = "Region"
 }
 
-variable "locust_file" {
+variable "locust_py_file" {
   description = "URL of the locustfile"
-  default = "https://raw.githubusercontent.com/MKand/movie-guru/refs/heads/ghack-sre/locust/locustfile.py"
+  default = "https://raw.githubusercontent.com/MKand/movie-guru/refs/heads/ghack-sre/locust/locust.py"
 }
 
 variable "sql_file" {

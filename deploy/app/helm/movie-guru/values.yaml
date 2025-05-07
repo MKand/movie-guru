@@ -1,4 +1,5 @@
 Config: 
   Image:
-    Repository: manaskandula
+    Repository: manaskandula  
   geminiApiLocation: us-central1
+
