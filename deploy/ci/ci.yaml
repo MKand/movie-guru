@@ -124,7 +124,7 @@ steps:
 
 - name: 'gcr.io/cloud-builders/docker'
   id: "push-db-init-image"
-  waitFor: [build-mock-image]
+  waitFor: [build-db-init-image]
   entrypoint: "sh"
   args:
     - -xe 

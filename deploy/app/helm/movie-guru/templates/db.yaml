@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: db
-  namespace: {{.Chart.Name }}
+  namespace: movie-guru
 spec:
   replicas: 1
   selector:
@@ -15,18 +15,40 @@ spec:
     spec:
       containers:
       - name: db
-        image: "{{ .Values.Config.Image.Repository }}/movie-guru-db:ghack-sre-v2"
+        image: pgvector/pgvector:pg17
         ports:
         - containerPort: 5432
         env:
         - name: POSTGRES_PASSWORD
           value: main
 ---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: db-init-job
+  namespace: movie-guru
+  template:
+    spec:
+      containers:
+      - name: update-db-init-image
+        image: "{{ .Values.Config.Image.Repository }}/db-init:sre-v2"
+        env:
+        - name: DB_HOST
+          value: "http://db-service.movie-guru.svc.cluster.local:5432"
+        - name: DB_USER
+          value: main
+        - name: DB_NAME
+          value: fake-movies-db
+        - name: DB_PASS
+          value: main
+      restartPolicy: Never
+  backoffLimit: 4 # Optional: Define the number of retries before considering the Job as failed
+---
 apiVersion: v1
 kind: Service
 metadata:
   name: db-service
-  namespace: {{.Chart.Name }}
+  namespace: movie-guru
 spec:
   selector:
     app: db 
