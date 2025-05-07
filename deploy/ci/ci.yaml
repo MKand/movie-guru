@@ -109,7 +109,7 @@ steps:
       docker push '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/mockuser:sre-v2'
 
 - name: 'gcr.io/cloud-builders/docker'
-  id: "build-db-image"
+  id: "build-db-init-image"
   dir: './pgvector'
   entrypoint: "sh"
   args:
@@ -123,8 +123,8 @@ steps:
          .
 
 - name: 'gcr.io/cloud-builders/docker'
-  id: "push-db-image"
-  waitFor: [build-db-image]
+  id: "push-db-init-image"
+  waitFor: [build-mock-image]
   entrypoint: "sh"
   args:
     - -xe 
