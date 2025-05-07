@@ -21,6 +21,9 @@ import { MovieContextSchema, MovieContext } from './types';
 import { openDB } from './db';
 import { ai } from './genkitConfig'
 
+const sleep = (ms: number): Promise<void> =>
+  new Promise((resolve) => setTimeout(resolve, ms));
+
 export const IndexerFlow = ai.defineFlow(
   {
     name: 'indexerFlow',
@@ -40,6 +43,7 @@ export const IndexerFlow = ai.defineFlow(
         embedder: textEmbedding005,
         content: contentString,
       });
+      await sleep(1000);
       try {
         await db`
           INSERT INTO movies (embedding, title, runtime_mins, genres, rating, released, actors, director, plot, poster, tconst, content)
@@ -47,6 +51,7 @@ export const IndexerFlow = ai.defineFlow(
           ON CONFLICT (tconst) DO UPDATE
           SET embedding = EXCLUDED.embedding
         `;
+        console.log("processed ", doc.title)
         return contentString;
       } catch (error) {
         console.error('Error inserting or updating movie:', error);

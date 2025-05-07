@@ -36,7 +36,7 @@ type UserProfileFlowClient struct {
 func CreateUserProfileFlowClient(db *db.MovieDB, URL string) (*UserProfileFlowClient, error) {
 	return &UserProfileFlowClient{
 		MovieDB: db,
-		URL:     URL + "/userProfileFlow",
+		URL:     URL + "/userPreferenceFlow",
 	}, nil
 }
 

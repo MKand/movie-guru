@@ -16,11 +16,11 @@
 
 import { startFlowServer } from '@genkit-ai/express';
 
-import { UserProfileFlow } from './userProfileFlow'
+import { UserPreferenceFlow } from './userPreferencesFlow'
 
 import { QueryTransformFlow } from './queryTransformFlow'
 
-import { MovieDocFlow } from './docRetriever'
+import { DocSearchFlow } from './docRetriever'
 
 import { MovieFlow } from './movieFlow'
 
@@ -36,5 +36,5 @@ export function parseBooleanfromField(field: string|null|undefined): boolean{
 
 
 startFlowServer({
-    flows: [UserProfileFlow, QueryTransformFlow, MovieFlow, MovieDocFlow, QualityFlow, ChatFlow, SafetyIssueFlow],
+    flows: [UserPreferenceFlow, QueryTransformFlow, MovieFlow, DocSearchFlow, QualityFlow, ChatFlow, SafetyIssueFlow],
   });

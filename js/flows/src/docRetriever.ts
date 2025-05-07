@@ -60,27 +60,13 @@ ai.defineSchema('SearchFlowOutputSchema', SearchFlowOutputSchema);
  * To use the default variant -- ai.prompt('docSearch')
  * To use a variant -- ai.prompt('docSearch', {variant: 'v2'})
  * 
- * ATTENTION: Variant v2 is currently being tested, if it is not performing well, please revert to the default variant.
+ * ATTENTION: SREs will test variant 'v2' to see if we can eliminate keyword search.
  */
-export const SearchFlowPrompt = ai.prompt('docSearch');
+export const searchForRelevantMovies = ai.prompt('docSearch');
 
-export const MovieSearchPromptFlow = ai.defineFlow(
+export const DocSearchFlow = ai.defineFlow(
   {
-    name: 'MovieSearchPromptFlow',
-    inputSchema: QuerySchema,
-    outputSchema: SearchFlowOutputSchema,
-  },
-  async (input) => {
-    const searchFlowOutput = await createSearchObject(input);
-    return SearchFlowOutputSchema.parse(searchFlowOutput);
-  
-  }
-
-);
-
-export const MovieDocFlow = ai.defineFlow(
-  {
-    name: 'movieDocFlow',
+    name: 'docSearchFlow',
     inputSchema: QuerySchema,
     outputSchema: z.array(MovieContextSchema),
   },
@@ -212,7 +198,7 @@ export const sqlRetriever = ai.defineRetriever(
 async function createSearchObject(input: { query: string; }) {
   const defaultOutput = SearchFlowOutputSchema.parse({});
   try {
-    const response = await SearchFlowPrompt({
+    const response = await searchForRelevantMovies({
       query: input.query
     });
     const safeOutput = response.output ?? SearchFlowOutputSchema.parse({});
