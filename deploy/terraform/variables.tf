@@ -15,17 +15,17 @@ variable "region" {
 
 variable "locust_py_file" {
   description = "URL of the locustfile"
-  default     = "https://raw.githubusercontent.com/MKand/movie-guru/refs/heads/ghack-sre/locust/locustfile.py"
+  default     = "https://raw.githubusercontent.com/MKand/movie-guru/refs/heads/reworking-sre/locust/locustfile.py"
 }
 
 variable "sql_file" {
   description = "URL of the sql file"
-  default     = "https://raw.githubusercontent.com/MKand/movie-guru/refs/heads/ghack-sre/pgvector/init.sql"
+  default     = "https://raw.githubusercontent.com/MKand/movie-guru/refs/heads/reworking-sre/pgvector/init.sql"
 }
 
 variable "otel_file" {
   description = "URL of the otel config"
-  default     = "https://raw.githubusercontent.com/MKand/movie-guru/refs/heads/ghack-sre/metrics/otel-collector-config.yaml"
+  default     = "https://raw.githubusercontent.com/MKand/movie-guru/refs/heads/reworking-sre/metrics/otel-collector-config.yaml"
 }
 
 variable "helm_chart" {
@@ -35,5 +35,5 @@ variable "helm_chart" {
 
 variable "branch_name" {
   description = "value of the branch for cloud build trigger"
-  default     = "practical-sre"
+  default     = "reworking-sre"
 }

@@ -21,10 +21,9 @@ resource "google_container_cluster" "primary" {
     update = "40m"
   }
 
-  # gateway_api_config {
-  #   channel = CHANNEL_STANDARD
-    
-  # }
+  gateway_api_config {
+    channel = "CHANNEL_STANDARD"
+  }
 
   depends_on = [google_project_service.enable_apis]
 

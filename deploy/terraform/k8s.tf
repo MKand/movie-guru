@@ -75,10 +75,20 @@ resource "helm_release" "movie_guru" {
   }
   set {
     name  = "Config.serverAddress"
-    value =  "https://movie-guru.endpoints.${var.gcp_project_id}.cloud.goog/server"
+    value =  "http://movie-guru.endpoints.${var.gcp_project_id}.cloud.goog/server"
   }
   set {
     name  = "Config.mockserverIP"
+    value = google_compute_global_address.mockserver-address.address
+  }
+
+    set {
+    name  = "Gateway.IP"
+    value = google_compute_global_address.movieguru-address.address
+  }
+
+  set {
+    name  = "Config.frontend.mockserverIP"
     value = google_compute_global_address.mockserver-address.address
   }
   set {

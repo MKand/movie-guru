@@ -8,5 +8,5 @@ output "locust_address" {
 }
 
 output "movieguru_address" {
-  value =  "https://movie-guru.endpoints.${var.gcp_project_id}.cloud.goog/server"
+  value =  "http://movie-guru.endpoints.${var.gcp_project_id}.cloud.goog/server"
   }
