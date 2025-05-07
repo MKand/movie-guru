@@ -18,25 +18,37 @@ provider "helm" {
   }
 }
 
-resource "google_compute_address" "server-address" {
-  name         = "server-address"
+resource "google_compute_global_address" "movieguru-address" {
+  name         = "movieguru-address"
   address_type = "EXTERNAL"
-  project = var.gcp_project_id
-  region = var.region
+  project      = var.gcp_project_id
 }
 
-resource "google_compute_address" "frontend-address" {
-  name         = "frontend-address"
-  address_type = "EXTERNAL"
-  project = var.gcp_project_id
-  region = var.region
-}
-
-resource "google_compute_address" "mockserver-address" {
+resource "google_compute_global_address" "mockserver-address" {
   name         = "mockerserver-address"
   address_type = "EXTERNAL"
-  project = var.gcp_project_id
-  region = var.region
+  project      = var.gcp_project_id
+}
+
+resource "google_endpoints_service" "openapi_service" {
+  service_name = "movieguru.endpoints.${var.gcp_project_id}.cloud.goog"
+  project      = var.gcp_project_id
+  openapi_config = yamlencode({
+    swagger = "2.0"
+    info = {
+      description = "Cloud Endpoints service for MovieGuru"
+      title       = "MovieGuru"
+      version     = "1.0.0"
+    }
+    paths = {}
+    host  = "movieguru.endpoints.${var.gcp_project_id}.cloud.goog"
+    x-google-endpoints = [
+      {
+        name   = "movieguru.endpoints.${var.gcp_project_id}.cloud.goog"
+        target = google_compute_global_address.movieguru-address.address
+      },
+    ]
+  })
 }
 
 
@@ -53,8 +65,8 @@ data "http" "otel_file" {
 }
 
 resource "helm_release" "movie_guru" {
-  name  = "movie-guru"
-  chart = var.helm_chart
+  name      = "movie-guru"
+  chart     = var.helm_chart
   namespace = "movieguru"
 
   set {
@@ -62,50 +74,45 @@ resource "helm_release" "movie_guru" {
     value = var.repo_prefix
   }
   set {
-    name  = "Config.serverIP"
-    value = google_compute_address.server-address.address
+    name  = "Config.serverAddress"
+    value =  "https://movie-guru.endpoints.${var.gcp_project_id}.cloud.goog/server"
   }
-    set {
+  set {
     name  = "Config.mockserverIP"
-    value = google_compute_address.mockserver-address.address
+    value = google_compute_global_address.mockserver-address.address
   }
-    set {
+  set {
     name  = "Config.frontend.FIREBASE_API_KEY"
     value = data.google_firebase_web_app_config.basic.api_key
   }
-    set {
+  set {
     name  = "Config.frontend.FIREBASE_APP_ID"
     value = google_firebase_web_app.movieguru-web.app_id
-  }
-  
-    set {
-    name  = "Config.frontendIP"
-    value = google_compute_address.frontend-address.address
   }
   set {
     name  = "Config.projectID"
     value = var.gcp_project_id
   }
-  depends_on = [ google_compute_address.server-address, kubernetes_namespace.movieguru ]
+  depends_on = [kubernetes_namespace.movieguru]
 }
 
- resource "kubernetes_namespace" "locust" {
+resource "kubernetes_namespace" "locust" {
   metadata {
     name = "locust"
   }
- }
+}
 
- resource "kubernetes_namespace" "otel" {
+resource "kubernetes_namespace" "otel" {
   metadata {
     name = "otel"
   }
- }
+}
 
- resource "kubernetes_namespace" "movieguru" {
+resource "kubernetes_namespace" "movieguru" {
   metadata {
     name = "movieguru"
   }
- }
+}
 
 
 resource "kubernetes_config_map" "loadtest_locustfile" {
@@ -119,7 +126,7 @@ resource "kubernetes_config_map" "loadtest_locustfile" {
     )
   }
 
-  depends_on = [ kubernetes_namespace.locust ]
+  depends_on = [kubernetes_namespace.locust]
 }
 
 resource "kubernetes_config_map" "otel_config" {
@@ -134,23 +141,29 @@ resource "kubernetes_config_map" "otel_config" {
     )
   }
 
-  depends_on = [ kubernetes_namespace.otel ]
+  depends_on = [kubernetes_namespace.otel]
 }
 
 
 
-resource "helm_release" "otel" {
-  name      = "otel-collector"
-  chart     = "opentelemetry-collector"
-  repository = "https://open-telemetry.github.io/opentelemetry-helm-charts"
-  namespace = "otel"
+# resource "helm_release" "otel" {
+#   name       = "otel-collector"
+#   chart      = "opentelemetry-collector"
+#   repository = "https://open-telemetry.github.io/opentelemetry-helm-charts"
+#   namespace  = "otel"
 
-  set {
-    name  = "mode"
-    value = "daemonset"
-  }
-  # repository = "https://raw.githubusercontent.com/deliveryhero/helm-charts/refs/heads/master/"
-}
+#   set {
+#     name  = "mode"
+#     value = "daemonset"
+#   }
+
+#   set {
+#     name  = "service.type"
+#     value = "ClusterIP"
+#   }
+
+#   # repository = "https://raw.githubusercontent.com/deliveryhero/helm-charts/refs/heads/master/"
+# }
 
 resource "helm_release" "locust" {
   name      = "locust"
@@ -164,7 +177,7 @@ resource "helm_release" "locust" {
 
   set {
     name  = "loadtest.locust_locustfile_configmap"
-    value = "loadtest-locustfile" 
+    value = "loadtest-locustfile"
   }
 
   set {
@@ -181,19 +194,25 @@ resource "helm_release" "locust" {
     value = "LoadBalancer"
   }
 
+# set {
+#     name  = "loadtest.environment"
+#     value = jsonencode({"MOCK_URL" = "http://mockuser-service.movieguru.svc.cluster.local:80/mockUserFlow"})
+#     type  = "string"
+#   }
+
   set {
     name  = "worker.replicas"
     value = "3"
   }
 
-    depends_on = [kubernetes_config_map.loadtest_locustfile]
+  depends_on = [kubernetes_config_map.loadtest_locustfile]
 }
 
 data "kubernetes_service" "locust" {
   metadata {
-    name      = "locust"  
-    namespace = "locust"   
+    name      = "locust"
+    namespace = "locust"
   }
-    depends_on = [ helm_release.locust ]
+  depends_on = [helm_release.locust]
 }
 

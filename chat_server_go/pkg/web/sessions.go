@@ -77,11 +77,11 @@ func setupSessionStore(ctx context.Context) {
 
 func getSessionID(r *http.Request) (string, error) {
 	useAuth, err := strconv.ParseBool(os.Getenv("USE_AUTH"))
+
 	if err != nil {
 		useAuth = false
 	}
 	if useAuth {
-
 		cookie, err := r.Cookie("movie-guru-sid")
 		if err != nil {
 			switch {
@@ -97,6 +97,9 @@ func getSessionID(r *http.Request) (string, error) {
 			return "", errors.New("None or malformed cookie found")
 		}
 		return sessionID, nil
+	} else {
+		user := r.Header.Get("User")
+		return user, nil
 	}
 }
 

@@ -93,24 +93,7 @@ class ChatUser(HttpUser):
                         "/chat",
                         json={"content":mock_response_answer}
                     )
-            if (response_mood == "POSITIVE"):
-                self.client.post(
-                        "/feedback",
-                        json={"traceId":chat_response.json()["traceId"], "spanId": chat_response.json()["spanId"], "feedbackExperience":"positive"}
-                    )
-            
-            if (response_mood == "NEGATIVE"):
-                self.client.post(
-                        "/feedback",
-                        json={"traceId":chat_response.json()["traceId"], "spanId": chat_response.json()["spanId"], "feedbackExperience":"negative"}
-                    )
-            
-            if (response_type == "CONTINUE"):
-                self.client.post(
-                        "/acceptance",
-                        json={"traceId":chat_response.json()["traceId"], "spanId": chat_response.json()["spanId"], "accepted":"accepted"}
-                    )
-            
+
             if(chat_response.json()["result"] == "SUCCESS"):
                 chat_answer = chat_response.json()["answer"]
             

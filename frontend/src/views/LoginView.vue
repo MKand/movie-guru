@@ -3,7 +3,6 @@ import { ref } from 'vue';
 import store from '../stores';
 import router from '../router'
 import LoginClientService from '../services/LoginClientService';
-import { errorMessages } from 'vue/compiler-sfc';
 
 export default {
   data() {

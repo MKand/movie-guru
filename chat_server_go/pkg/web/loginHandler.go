@@ -100,7 +100,7 @@ func (ulh *UserLoginHandler) HandleApiKeyLogin(ctx context.Context, apiKey, user
 	return user, nil
 }
 
-func (ulh *UserLoginHandler) HandleAuthlessLogin(ctx context.Context, user, inviteCode string) (string, error) {
+func (ulh *UserLoginHandler) HandleAuthlessLogin(ctx context.Context, user string) (string, error) {
 	if ulh.db.CheckUser(ctx, user) {
 		return user, nil
 	}
@@ -169,15 +169,12 @@ func createLoginHandler(ulh *UserLoginHandler, meters *m.LoginMeters, metadata *
 				http.Error(w, err.Error(), http.StatusBadRequest)
 				return
 			}
+
 			if useAuth && authHeader != "" {
 				user, err = ulh.HandleLogin(ctx, authHeader, loginBody.InviteCode)
 			}
-			if useAuth && apiKey != "" {
-				user, err = ulh.HandleApiKeyLogin(ctx, apiKey, user)
-			}
 			if !useAuth {
-				user, err = ulh.HandleAuthlessLogin(ctx, user, loginBody.InviteCode)
-
+				user, err = ulh.HandleAuthlessLogin(ctx, user)
 			}
 
 			if err != nil {
@@ -190,13 +187,28 @@ func createLoginHandler(ulh *UserLoginHandler, meters *m.LoginMeters, metadata *
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
-			sessionID := uuid.New().String()
+			sessionID := user // default set as user
 			session := &SessionInfo{
-				ID:            sessionID,
 				User:          user,
 				Authenticated: true,
+				ID:            user,
+			}
+			if useAuth {
+				sessionID := uuid.New().String()
+				session.ID = sessionID
+				cookie := http.Cookie{
+					Name:     "movie-guru-sid",
+					Value:    sessionID,
+					Path:     "/",
+					MaxAge:   86400,
+					HttpOnly: true,
+					SameSite: http.SameSiteLaxMode,
+				}
+				http.SetCookie(w, &cookie)
+				w.Header().Set("Vary", "Cookie, Origin")
 			}
 			sessionJSON, err := json.Marshal(session)
+
 			if err != nil {
 				slog.ErrorContext(ctx, "Error while decoding session info", slog.Any("error", err.Error()))
 				http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -208,16 +220,6 @@ func createLoginHandler(ulh *UserLoginHandler, meters *m.LoginMeters, metadata *
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 			}
 			meters.LoginSuccessCounter.Add(ctx, 1)
-			cookie := http.Cookie{
-				Name:     "movie-guru-sid",
-				Value:    sessionID,
-				Path:     "/",
-				MaxAge:   86400,
-				HttpOnly: true,
-				SameSite: http.SameSiteLaxMode,
-			}
-			http.SetCookie(w, &cookie)
-			w.Header().Set("Vary", "Cookie, Origin")
 			json.NewEncoder(w).Encode(map[string]string{"login": "success"})
 		}
 	}

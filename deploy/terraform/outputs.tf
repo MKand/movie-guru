@@ -7,10 +7,6 @@ output "locust_address" {
   value = "http://${data.kubernetes_service.locust.status.0.load_balancer.0.ingress.0.ip}:8089"
 }
 
-output "backend_address" {
-  value = "http://${google_compute_address.mockserver-address.address}"
-}
-
-output "frontend_address" {
-  value = "http://${google_compute_address.frontend-address.address}"
-}
+output "movieguru_address" {
+  value =  "https://movie-guru.endpoints.${var.gcp_project_id}.cloud.goog/server"
+  }

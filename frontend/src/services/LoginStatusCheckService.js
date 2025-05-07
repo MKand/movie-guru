@@ -27,9 +27,7 @@ async checkServerLogin() {
     try {
     const requestOptions = {
         method: 'GET',
-        headers: {
-        'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json', 'User': store.getters['user/email'] },
         credentials: 'include',
     };
 

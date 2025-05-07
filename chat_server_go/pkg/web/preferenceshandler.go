@@ -28,6 +28,7 @@ func createPreferencesHandler(MovieDB *db.MovieDB) http.HandlerFunc {
 		var err error
 		ctx := r.Context()
 		sessionInfo := &SessionInfo{}
+
 		if r.Method != "OPTIONS" {
 			var shouldReturn bool
 			sessionInfo, shouldReturn = authenticateAndGetSessionInfo(ctx, sessionInfo, err, r, w)

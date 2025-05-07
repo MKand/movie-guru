@@ -36,7 +36,7 @@ class LoginClientService {
     async logout(){
       const requestOptions = {
           method: 'GET',
-          headers: { 'Content-Type': 'application/json'},
+          headers: { 'Content-Type': 'application/json', 'User': store.getters['user/email'] },
           credentials: 'include'
         };
       const response = await fetchPolyfill(import.meta.env.VITE_CHAT_SERVER_URL + '/logout', requestOptions)

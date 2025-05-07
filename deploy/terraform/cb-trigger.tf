@@ -14,7 +14,7 @@
 
 
 resource "google_service_account" "cloudbuild" {
-  account_id   = "movie-guru-cloudbuild"  # Choose a descriptive name
+  account_id   = "movie-guru-cloudbuild" # Choose a descriptive name
   display_name = "Movie Guru Cloud Build Service Account"
   project      = var.gcp_project_id
 }
@@ -22,7 +22,7 @@ resource "google_service_account" "cloudbuild" {
 # Grant necessary permissions. Adjust roles as needed.
 resource "google_project_iam_member" "cloudbuild-storage" {
   project = var.gcp_project_id
-  role    = "roles/storage.objectAdmin"  # Example: Allows access to objects in your bucket
+  role    = "roles/storage.objectAdmin" # Example: Allows access to objects in your bucket
   member  = "serviceAccount:${google_service_account.cloudbuild.email}"
 }
 
@@ -36,8 +36,8 @@ resource "google_project_iam_member" "cloudbuild-artifactregistry" {
 
 
 resource "google_cloudbuild_trigger" "github-trigger" {
-  location = var.region
-  project  = var.gcp_project_id
+  location        = var.region
+  project         = var.gcp_project_id
   service_account = "projects/${var.gcp_project_id}/serviceAccounts/${google_service_account.cloudbuild.email}"
   trigger_template {
     branch_name = var.branch_name
@@ -46,12 +46,12 @@ resource "google_cloudbuild_trigger" "github-trigger" {
 
   substitutions = {
     _PROJECT_ID = var.gcp_project_id,
-    _REGION = var.region
+    _REGION     = var.region
   }
 
   filename = "deploy/ci/ci.yaml"
 
-  ignored_files = [ "/deploy/*", "docker-compose-*", "*.md", "/nginx/*"  ]
+  ignored_files = ["/deploy/*", "docker-compose-*", "*.md", "/nginx/*"]
 
   lifecycle {
     ignore_changes = []

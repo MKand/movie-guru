@@ -21,7 +21,7 @@ spec:
         - containerPort: 4001
         env:
         - name: VITE_CHAT_SERVER_URL
-          value: "http://{{ .Values.Config.serverIP }}"
+          value: "{{ .Values.Config.serverAddress }}"
         - name: VITE_FIREBASE_API_KEY
           value: "{{ .Values.Config.FIREBASE_API_KEY }}"
         - name: VITE_FIREBASE_APP_ID
@@ -42,5 +42,23 @@ spec:
   - protocol: TCP
     port: 80
     targetPort: 4001
-  type: LoadBalancer
-  loadBalancerIP: {{ .Values.Config.frontendIP }}
+  type: ClusterIP
+
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: frontend-route
+  namespace: movieguru
+spec:
+  parentRefs:
+    - name: movieguru-gateway
+      namespace: movieguru
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: "/"
+      backendRefs:
+        - name: frontend-service
+          port: 80

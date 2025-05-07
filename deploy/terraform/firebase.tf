@@ -14,7 +14,7 @@
 
 
 resource "google_firebase_project" "firebase_project" {
-  provider   = google-beta 
+  provider   = google-beta
   project    = var.gcp_project_id
   depends_on = [google_project_service.enable_apis]
 }

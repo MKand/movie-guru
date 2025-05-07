@@ -22,7 +22,7 @@ resource "google_artifact_registry_repository" "repo" {
     immutable_tags = false
   }
 
-      depends_on = [google_project_service.enable_apis]
+  depends_on = [google_project_service.enable_apis]
 
 }
 
@@ -37,6 +37,6 @@ data "google_iam_policy" "reader" {
 }
 
 resource "google_artifact_registry_repository_iam_policy" "policy" {
-  repository = google_artifact_registry_repository.repo.name
+  repository  = google_artifact_registry_repository.repo.name
   policy_data = data.google_iam_policy.reader.policy_data
 }

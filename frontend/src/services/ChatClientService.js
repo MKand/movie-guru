@@ -44,7 +44,7 @@ class ChatClientService {
 
     const requestOptions = {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'User': store.getters['user/email']},
       body: JSON.stringify({ content: message }),
       credentials: 'include'
     };
@@ -92,7 +92,7 @@ class ChatClientService {
 
     const requestOptions = {
       method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'User': store.getters['user/email'] },
       credentials: 'include'
     };
     const response = await fetch(import.meta.env.VITE_CHAT_SERVER_URL + '/startup', requestOptions)
@@ -116,7 +116,7 @@ class ChatClientService {
 
     const requestOptions = {
       method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'User': store.getters['user/email'] },
       credentials: 'include'
     };
     const response = await fetch(import.meta.env.VITE_CHAT_SERVER_URL + '/history', requestOptions)
@@ -132,7 +132,7 @@ class ChatClientService {
     await this.checkLoginStatus();
     const requestOptions = {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'User': store.getters['user/email'] },
       body: JSON.stringify({ traceId: traceId, spanId: spanId, name: "chatFlow", feedbackExperience: valueString }),
 
     };
@@ -151,7 +151,7 @@ class ChatClientService {
 
     const requestOptions = {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'User': store.getters['user/email'] },
       body: JSON.stringify({ traceId: traceId, spanId: spanId, name: "chatFlow", accepted: accepted }),
 
     };
@@ -172,7 +172,7 @@ class ChatClientService {
       this.clearTraceIds();
       const requestOptions = {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'User': store.getters['user/email'] },
         credentials: 'include'
       };
       const response = await fetch(import.meta.env.VITE_CHAT_SERVER_URL + '/history', requestOptions)

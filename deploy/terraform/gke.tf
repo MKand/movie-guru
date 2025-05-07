@@ -21,6 +21,17 @@ resource "google_container_cluster" "primary" {
     update = "40m"
   }
 
-    depends_on = [google_project_service.enable_apis]
+  # gateway_api_config {
+  #   channel = CHANNEL_STANDARD
+    
+  # }
 
+  depends_on = [google_project_service.enable_apis]
+
+}
+
+resource "google_compute_ssl_policy" "prod-ssl-policy" {
+  name            = "movieguru-ssl-policy"
+  profile         = "MODERN"
+  min_tls_version = "TLS_1_2"
 }
