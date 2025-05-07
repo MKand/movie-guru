@@ -52,7 +52,7 @@ steps:
       docker build \
          -t "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/db:sre-v2" \
          --cache-from "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/db:sre-v2" \
-         -f Dockerfile.init \
+         -f Dockerfile \
          .
 
 - name: 'gcr.io/cloud-builders/docker'

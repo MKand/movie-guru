@@ -15,38 +15,12 @@ spec:
     spec:
       containers:
       - name: db
-        image: pgvector/pgvector:pg17
+        image: "{{ .Values.Config.Image.Repository }}/db:sre-v2"
         ports:
         - containerPort: 5432
         env:
         - name: POSTGRES_PASSWORD
           value: main
----
-apiVersion: batch/v1
-kind: Job
-metadata:
-  name: db-init-job
-  namespace: movieguru
-spec: 
-  template:
-    metadata:
-      labels:
-        app: db-init
-    spec: 
-      containers:
-      - name: update-db-init-image
-        image: "{{ .Values.Config.Image.Repository }}/db-init:sre-v2"
-        env:
-        - name: DB_HOST
-          value: "db-service.movieguru.svc.cluster.local"
-        - name: DB_USER
-          value: main
-        - name: DB_NAME
-          value: fake-movies-db
-        - name: DB_PASS
-          value: main
-      restartPolicy: Never #
-  backoffLimit: 4 
 ---
 apiVersion: v1
 kind: Service
