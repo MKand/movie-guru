@@ -28,20 +28,8 @@ spec:
       - kind: HTTPRoute
   addresses:
     - type: NamedAddress
-      value: {{ .Values.Gateway.IP }}
----
-apiVersion: networking.gke.io/v1
-kind: GCPGatewayPolicy
-metadata:
-  name: movie-guru-gateway-policy
-  namespace: movieguru
-spec:
-  default:
-    sslPolicy: movie-guru-ssl-policy
-  targetRef:
-    group: gateway.networking.k8s.io
-    kind: Gateway
-    name: movieguru-gateway
+      value: movieguru-address
+
 ---
 apiVersion: networking.gke.io/v1
 kind: GCPBackendPolicy
@@ -55,4 +43,18 @@ spec:
   targetRef:
     group: ""
     kind: Service
-    name: server
+    name: server-service
+
+# ---
+# apiVersion: networking.gke.io/v1
+# kind: GCPGatewayPolicy
+# metadata:
+#   name: movie-guru-gateway-policy
+#   namespace: movieguru
+# spec:
+#   default:
+#     sslPolicy: movie-guru-ssl-policy
+#   targetRef:
+#     group: gateway.networking.k8s.io
+#     kind: Gateway
+#     name: movieguru-gateway

@@ -34,7 +34,7 @@ class ChatUser(HttpUser):
 
     def on_start(self):
         # create random name
-        name=''.join(random.choices(string.ascii_lowercase, k=8))
+        self.name=''.join(random.choices(string.ascii_lowercase, k=8))
 
         headers = {
         "ApiKey": "ABC",
@@ -46,14 +46,14 @@ class ChatUser(HttpUser):
         print(f"Login Headers {response.headers}")
         print(f"Login Response {response.content}")
 
-        # Capture 'Set-Cookie' from the response headers
-        set_cookie = response.headers.get('Set-Cookie').split(';', 1)[0]
-        if set_cookie:
-            print(f"Extracted cookie: {set_cookie}")
-            # Stores it in the locust client.
-            self.client.cookies.set("stored_cookie", set_cookie)
-        else:
-            print("No Set-Cookie header received.")
+        # # Capture 'Set-Cookie' from the response headers
+        # set_cookie = response.headers.get('Set-Cookie').split(';', 1)[0]
+        # if set_cookie:
+        #     print(f"Extracted cookie: {set_cookie}")
+        #     # Stores it in the locust client.
+        #     self.client.cookies.set("stored_cookie", set_cookie)
+        # else:
+        #     print("No Set-Cookie header received.")
         
         self.helper_api_client = requests.Session()
         self.mock_url = os.getenv("MOCK_URL", "http://mockuser-service.movieguru.svc.cluster.local:80/mockUserFlow")

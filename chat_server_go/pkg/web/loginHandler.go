@@ -187,25 +187,23 @@ func createLoginHandler(ulh *UserLoginHandler, meters *m.LoginMeters, metadata *
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
-			sessionID := user // default set as user
+			sessionID := uuid.New().String()
 			session := &SessionInfo{
 				User:          user,
 				Authenticated: true,
-				ID:            user,
+				ID:            sessionID,
 			}
-			if useAuth {
-				sessionID := uuid.New().String()
-				session.ID = sessionID
-				cookie := http.Cookie{
-					Name:     "movie-guru-sid",
-					Value:    sessionID,
-					Path:     "/",
-					MaxAge:   86400,
-					HttpOnly: true,
-					SameSite: http.SameSiteLaxMode,
-				}
-				http.SetCookie(w, &cookie)
-				w.Header().Set("Vary", "Cookie, Origin")
+			cookie := http.Cookie{
+				Name:     "movie-guru-sid",
+				Value:    sessionID,
+				Path:     "/",
+				MaxAge:   86400,
+				HttpOnly: true,
+				SameSite: http.SameSiteLaxMode,
+			}
+			
+			http.SetCookie(w, &cookie)
+			w.Header().Set("Vary", "Cookie, Origin")
 			}
 			sessionJSON, err := json.Marshal(session)
 
