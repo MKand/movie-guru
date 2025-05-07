@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: flows
-  namespace: {{.Chart.Name }}
+  namespace: movieguru
 spec:
   replicas: 1
   selector:
@@ -21,7 +21,7 @@ spec:
         - containerPort: 3401
         env:
         - name: POSTGRES_HOST
-          value: db-service
+          value: "http://db-service.movieguru.svc.cluster.local:5432"
         - name: PROJECT_ID
           value: {{ .Values.Config.projectID }}
         - name: POSTGRES_DB_USER_PASSWORD
@@ -34,14 +34,12 @@ spec:
           value: "movies"
         - name: LOCATION
           value: {{ .Values.Config.geminiApiLocation }}
-        - name: SIMPLE
-          value: "true"
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: flows-service
-  namespace: {{.Chart.Name }}
+  namespace: movieguru
 spec:
   selector:
     app: flows 

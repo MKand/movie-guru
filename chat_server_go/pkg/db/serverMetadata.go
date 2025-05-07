@@ -36,7 +36,7 @@ type Metadata struct {
 func (d *MovieDB) GetMetadata(ctx context.Context, appVersion string) (*Metadata, error) {
 	if appVersion == "static" {
 		return &Metadata{
-			AppVersion:               "v1",
+			AppVersion:               "static",
 			TokenAudience:            "",
 			HistoryLength:            10,
 			MaxUserMessageLen:        500,

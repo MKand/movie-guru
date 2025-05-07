@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: db
-  namespace: movie-guru
+  namespace: movieguru
 spec:
   replicas: 1
   selector:
@@ -26,7 +26,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: db-init-job
-  namespace: movie-guru
+  namespace: movieguru
   template:
     spec:
       containers:
@@ -34,7 +34,7 @@ metadata:
         image: "{{ .Values.Config.Image.Repository }}/db-init:sre-v2"
         env:
         - name: DB_HOST
-          value: "http://db-service.movie-guru.svc.cluster.local:5432"
+          value: "http://db-service.movieguru.svc.cluster.local:5432"
         - name: DB_USER
           value: main
         - name: DB_NAME
@@ -48,7 +48,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: db-service
-  namespace: movie-guru
+  namespace: movieguru
 spec:
   selector:
     app: db 
@@ -57,3 +57,31 @@ spec:
     port: 5432  
     targetPort: 5432
   type: ClusterIP
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: adminer
+  namespace: movieguru
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: adminer
+  template:
+    metadata:
+      labels:
+        app: adminer
+    spec:
+      containers:
+        - name: adminer
+          image: adminer
+          ports:
+            - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: adminer
+  namespace: movieguru

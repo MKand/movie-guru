@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: server
-  namespace: {{.Chart.Name }}
+  namespace: movieguru
 spec:
   replicas: 1
   selector:
@@ -22,7 +22,7 @@ spec:
         - containerPort: 8080
         env:
         - name: POSTGRES_HOST
-          value: db-service
+          value: "db-service.movieguru.svc.cluster.local"
         - name: PROJECT_ID
           value: {{ .Values.Config.projectID }}
         - name: POSTGRES_DB_USER_PASSWORD
@@ -36,9 +36,9 @@ spec:
         - name: REDIS_PORT
           value: "6379"
         - name: REDIS_HOST
-          value: "cache-service"
+          value: "cache-service.movieguru.svc.cluster.local"
         - name: FLOWS_URL
-          value: "http://flows-service.movie-guru.svc.cluster.local:3401"
+          value: "http://flows-service.movieguru.svc.cluster.local:3401"
         - name: LOCATION
           value: {{ .Values.Config.geminiApiLocation }}
         - name: APP_VERSION
@@ -47,6 +47,8 @@ spec:
           value: "true"
         - name: OTEL_EXPORTER_OTLP_ENDPOINT
           value: http://otel-collector.otel-collector.svc.cluster.local:4318
+        - name: FEEDBACK_URL
+          value: https://${GENKIT_FEEDBACK_REGION}-${PROJECT_ID}.cloudfunctions.net/ext-firebase-ai-user-engagement-collectEngagement
 ---
 apiVersion: v1
 kind: Service

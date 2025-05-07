@@ -2,9 +2,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: cache
-  namespace: {{.Chart.Name }}
+  namespace: movieguru
 spec:
-  replicas: {{ .Values.Cache.replicas }}
+  replicas: 1
   selector:
     matchLabels:
       app: cache
@@ -23,8 +23,8 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: cache
-  namespace: {{.Chart.Name }}
+  name: cache-service
+  namespace: movieguru
 spec:
   selector:
     app: cache
