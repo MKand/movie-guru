@@ -201,25 +201,24 @@ func createLoginHandler(ulh *UserLoginHandler, meters *m.LoginMeters, metadata *
 				HttpOnly: true,
 				SameSite: http.SameSiteLaxMode,
 			}
-			
+
 			http.SetCookie(w, &cookie)
 			w.Header().Set("Vary", "Cookie, Origin")
-			}
-			sessionJSON, err := json.Marshal(session)
-
-			if err != nil {
-				slog.ErrorContext(ctx, "Error while decoding session info", slog.Any("error", err.Error()))
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-			}
-
-			err = redisStore.Set(r.Context(), sessionID, sessionJSON, 0).Err()
-			if err != nil {
-				slog.ErrorContext(ctx, "Error while setting context in redis", slog.Any("error", err.Error()))
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-			}
-			meters.LoginSuccessCounter.Add(ctx, 1)
-			json.NewEncoder(w).Encode(map[string]string{"login": "success"})
 		}
+		sessionJSON, err := json.Marshal(session)
+
+		if err != nil {
+			slog.ErrorContext(ctx, "Error while decoding session info", slog.Any("error", err.Error()))
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+
+		err = redisStore.Set(r.Context(), sessionID, sessionJSON, 0).Err()
+		if err != nil {
+			slog.ErrorContext(ctx, "Error while setting context in redis", slog.Any("error", err.Error()))
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+		meters.LoginSuccessCounter.Add(ctx, 1)
+		json.NewEncoder(w).Encode(map[string]string{"login": "success"})
 	}
 }
 
