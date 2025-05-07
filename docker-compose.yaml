@@ -19,7 +19,7 @@ services:
       - GRPC_TRACE=all
       - GRPC_VERBOSITY=DEBUG
     volumes:
-      - ./.key.json:/key.json
+      - ./key.json:/key.json
     networks:
       - db-shared-network    
   server:
