@@ -18,7 +18,7 @@ metadata:
   name: movieguru-gateway
   namespace: movieguru 
 spec:
-  gatewayClassName: gke-l7-global-external-managed # gke-l7-regional-external-managed
+  gatewayClassName: gke-l7-global-external-managed
   listeners:
   - name: https
     protocol: HTTPS

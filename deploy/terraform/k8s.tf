@@ -77,6 +77,7 @@ resource "helm_release" "movie_guru" {
     name  = "Config.serverAddress"
     value = "http://movieguru.endpoints.${var.gcp_project_id}.cloud.goog/server"
   }
+
   set {
     name  = "Config.mockserverIP"
     value = google_compute_global_address.mockserver-address.address
@@ -91,10 +92,12 @@ resource "helm_release" "movie_guru" {
     name  = "Config.FIREBASE_API_KEY"
     value = data.google_firebase_web_app_config.basic.api_key
   }
+
   set {
     name  = "Config.FIREBASE_APP_ID"
     value = google_firebase_web_app.movieguru-web.app_id
   }
+  
   set {
     name  = "Config.projectID"
     value = var.gcp_project_id

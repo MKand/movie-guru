@@ -12,6 +12,6 @@ output "movieguru_ip" {
 }
 
 
-output "movieguru_address" {
-  value = "http://movie-guru.endpoints.${var.gcp_project_id}.cloud.goog/server"
+output "movieguru_backend_address" {
+  value = "http://movieguru.endpoints.${var.gcp_project_id}.cloud.goog/server"
 }
