@@ -26,3 +26,17 @@ resource "google_artifact_registry_repository" "repo" {
 
 }
 
+
+data "google_iam_policy" "reader" {
+  binding {
+    role = "roles/artifactregistry.reader"
+    members = [
+      "allUsers"
+    ]
+  }
+}
+
+resource "google_artifact_registry_repository_iam_policy" "policy" {
+  repository = google_artifact_registry_repository.repo.name
+  policy_data = data.google_iam_policy.reader.policy_data
+}

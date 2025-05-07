@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: mockserver
-        image: "{{ .Values.Config.Image.Repository }}/server:sre-v2"
+        image: "{{ .Values.Config.Image.Repository }}/chatserver:sre-v2"
         command: ["/app/mockserver"]
         imagePullPolicy: Always
         ports:

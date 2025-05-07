@@ -5,7 +5,7 @@ variable "gcp_project_id" {
 
 variable "repo_prefix" {
   description = "Docker/Artifact registry prefix"
-  default = "o11y-movie-guru"
+  default = "us-central1-docker.pkg.dev/o11y-movie-guru/movie-guru"
 }
 
 variable "region" {
@@ -30,7 +30,7 @@ variable "otel_file" {
 
 variable "helm_chart" {
   description = "URL of the movie guru helm chart"
-  default = "https://mkand.github.io/movie-guru/movie-guru-0.6.0.tgz"
+  default = "oci://us-central1-docker.pkg.dev/o11y-movie-guru/movie-guru/movie-guru"
 }
 
 variable "branch_name" {

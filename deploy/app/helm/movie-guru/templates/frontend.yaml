@@ -8,12 +8,10 @@ spec:
   selector:
     matchLabels:
       app: frontend
-      svc: frontend
   template:
     metadata:
       labels:
         app: frontend
-        svc: frontend
     spec:
       containers:
       - name: frontend
@@ -39,7 +37,7 @@ metadata:
   namespace: movieguru
 spec:
   selector:
-    svc: frontend 
+    app: frontend 
   ports:
   - protocol: TCP
     port: 80

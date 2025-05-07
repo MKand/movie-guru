@@ -52,43 +52,42 @@ data "http" "otel_file" {
   url = var.otel_file
 }
 
+resource "helm_release" "movie_guru" {
+  name  = "movie-guru"
+  chart = var.helm_chart
+  namespace = "movieguru"
 
-# resource "helm_release" "movie_guru" {
-#   name  = "movie-guru"
-#   chart = var.helm_chart
-#   namespace = "movieguru"
-
-#   set {
-#     name  = "Config.Image.Repository"
-#     value = var.repo_prefix
-#   }
-#   set {
-#     name  = "Config.serverIP"
-#     value = google_compute_address.server-address.address
-#   }
-#     set {
-#     name  = "Config.mockserverIP"
-#     value = google_compute_address.mockserver-address.address
-#   }
-#     set {
-#     name  = "Config.frontend.FIREBASE_API_KEY"
-#     value = data.google_firebase_web_app_config.basic.api_key
-#   }
-#     set {
-#     name  = "Config.frontend.FIREBASE_APP_ID"
-#     value = google_firebase_web_app.movieguru-web.app_id
-#   }
+  set {
+    name  = "Config.Image.Repository"
+    value = var.repo_prefix
+  }
+  set {
+    name  = "Config.serverIP"
+    value = google_compute_address.server-address.address
+  }
+    set {
+    name  = "Config.mockserverIP"
+    value = google_compute_address.mockserver-address.address
+  }
+    set {
+    name  = "Config.frontend.FIREBASE_API_KEY"
+    value = data.google_firebase_web_app_config.basic.api_key
+  }
+    set {
+    name  = "Config.frontend.FIREBASE_APP_ID"
+    value = google_firebase_web_app.movieguru-web.app_id
+  }
   
-#     set {
-#     name  = "Config.frontendIP"
-#     value = google_compute_address.frontend-address.address
-#   }
-#   set {
-#     name  = "Config.projectID"
-#     value = var.gcp_project_id
-#   }
-#   depends_on = [ google_compute_address.server-address, kubernetes_namespace.movieguru ]
-# }
+    set {
+    name  = "Config.frontendIP"
+    value = google_compute_address.frontend-address.address
+  }
+  set {
+    name  = "Config.projectID"
+    value = var.gcp_project_id
+  }
+  depends_on = [ google_compute_address.server-address, kubernetes_namespace.movieguru ]
+}
 
  resource "kubernetes_namespace" "locust" {
   metadata {
@@ -115,7 +114,7 @@ resource "kubernetes_config_map" "loadtest_locustfile" {
     namespace = "locust"
   }
   data = {
-    "locust.py" = (
+    "locustfile.py" = (
       data.http.locust_py_file.response_body
     )
   }

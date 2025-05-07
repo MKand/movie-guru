@@ -27,22 +27,26 @@ kind: Job
 metadata:
   name: db-init-job
   namespace: movieguru
+spec: 
   template:
-    spec:
+    metadata:
+      labels:
+        app: db-init
+    spec: 
       containers:
       - name: update-db-init-image
         image: "{{ .Values.Config.Image.Repository }}/db-init:sre-v2"
         env:
         - name: DB_HOST
-          value: "http://db-service.movieguru.svc.cluster.local:5432"
+          value: "db-service.movieguru.svc.cluster.local"
         - name: DB_USER
           value: main
         - name: DB_NAME
           value: fake-movies-db
         - name: DB_PASS
           value: main
-      restartPolicy: Never
-  backoffLimit: 4 # Optional: Define the number of retries before considering the Job as failed
+      restartPolicy: Never #
+  backoffLimit: 4 
 ---
 apiVersion: v1
 kind: Service
@@ -85,3 +89,11 @@ kind: Service
 metadata:
   name: adminer
   namespace: movieguru
+spec:
+  selector:
+    app: adminer 
+  ports:
+  - protocol: TCP
+    port: 8082  
+    targetPort: 8080
+  type: ClusterIP

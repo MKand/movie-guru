@@ -41,6 +41,30 @@ steps:
     - |
       docker push '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/db-init:sre-v2'
 
+- name: 'gcr.io/cloud-builders/docker'
+  id: "build-db-image"
+  dir: './pgvector'
+  entrypoint: "sh"
+  args:
+    - -xe 
+    - -c
+    - |
+      docker build \
+         -t "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/db:sre-v2" \
+         --cache-from "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/db:sre-v2" \
+         -f Dockerfile.init \
+         .
+
+- name: 'gcr.io/cloud-builders/docker'
+  id: "push-db-image"
+  waitFor: [build-db-image]
+  entrypoint: "sh"
+  args:
+    - -xe 
+    - -c
+    - |
+      docker push '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/db:sre-v2'
+
 - name: "gcr.io/cloud-builders/docker"
   id: "build-frontend"
   waitFor: ['-']
