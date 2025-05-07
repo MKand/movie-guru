@@ -32,16 +32,13 @@ resource "google_project_iam_member" "cloudbuild-artifactregistry" {
   member  = "serviceAccount:${google_service_account.cloudbuild.email}"
 }
 
-# Add other roles as needed... 
-
-
 resource "google_cloudbuild_trigger" "github-trigger" {
   location        = var.region
   project         = var.gcp_project_id
   service_account = "projects/${var.gcp_project_id}/serviceAccounts/${google_service_account.cloudbuild.email}"
   trigger_template {
     branch_name = var.branch_name
-    repo_name   = "MKand/movie-guru"
+    repo_name   = "MKand-movie-guru"
   }
 
   substitutions = {

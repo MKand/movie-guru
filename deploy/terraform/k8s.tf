@@ -75,7 +75,7 @@ resource "helm_release" "movie_guru" {
   }
   set {
     name  = "Config.serverAddress"
-    value = "http://movie-guru.endpoints.${var.gcp_project_id}.cloud.goog/server"
+    value = "http://movieguru.endpoints.${var.gcp_project_id}.cloud.goog/server"
   }
   set {
     name  = "Config.mockserverIP"
@@ -87,10 +87,6 @@ resource "helm_release" "movie_guru" {
     value = google_compute_global_address.movieguru-address.address
   }
 
-  set {
-    name  = "Config.serverAddress"
-    value = "http://movie-guru.endpoints.${var.gcp_project_id}.cloud.goog/server"
-  }
   set {
     name  = "Config.FIREBASE_API_KEY"
     value = data.google_firebase_web_app_config.basic.api_key
@@ -203,12 +199,6 @@ resource "helm_release" "locust" {
     name  = "service.type"
     value = "LoadBalancer"
   }
-
-  # set {
-  #     name  = "loadtest.environment"
-  #     value = jsonencode({"MOCK_URL" = "http://mockuser-service.movieguru.svc.cluster.local:80/mockUserFlow"})
-  #     type  = "string"
-  #   }
 
   set {
     name  = "worker.replicas"

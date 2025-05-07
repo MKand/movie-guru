@@ -3,12 +3,12 @@ output "gke-connection-string" {
   description = "Connection string for the cluster"
 }
 
-output "locust_ip" {
+output "locust_address" {
   value = "http://${data.kubernetes_service.locust.status.0.load_balancer.0.ingress.0.ip}:8089"
 }
 
 output "movieguru_ip" {
-  value = "http://${google_compute_global_address.movieguru-address.address}"
+  value =  google_compute_global_address.movieguru-address.address
 }
 
 
