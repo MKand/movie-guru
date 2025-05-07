@@ -153,7 +153,7 @@ class ChatUser(HttpUser):
                     )
 
     @task(1)
-        def startup(self):
+    def startup(self):
             self.client.get(
                     "/startup",
                 )
