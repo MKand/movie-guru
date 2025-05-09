@@ -44,7 +44,7 @@ export const UserPreferenceFlow = ai.defineFlow(
     inputSchema: UserPreferenceFlowInputSchema,
 
     // Hint Challenge 3: Notice the flow defines an output schema. 
-    // Does the information in userProfile.prompt align with this?
+    // Does the information in userPreference.prompt align with this?
     outputSchema: UserPreferenceFlowOutputSchema 
   },
   async (input) => {
