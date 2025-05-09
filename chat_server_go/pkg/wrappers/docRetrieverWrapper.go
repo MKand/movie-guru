@@ -36,7 +36,7 @@ type MovieRetrieverFlowClient struct {
 func CreateMovieRetrieverFlowClient(retrieverLength int, url string) *MovieRetrieverFlowClient {
 	return &MovieRetrieverFlowClient{
 		RetrieverLength: retrieverLength,
-		URL:             url + "/movieDocFlow",
+		URL:             url + "/docSearchFlow",
 	}
 }
 
