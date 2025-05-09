@@ -29,9 +29,9 @@ import { GenerationBlockedError } from 'genkit';
  * Input schema: UserPreferenceFlowInputSchema
  * Output schema: UserPreferenceFlowOutputSchema
  * 
- * The MovieGuru development team, uses a variant system to version our prompts. The "v2" variant corresponds to the userPreference.v2.prompt file. 
+ * The MovieGuru development team, uses a variant system to version our prompts. The "experimental" variant corresponds to the userPreference.experimental.prompt file. 
  * To use the default variant -- ai.prompt('userPreference')
- * To use a variant -- ai.prompt('userPreference', {variant: 'v2'})
+ * To use a variant -- ai.prompt('userPreference', {variant: 'experimental'})
  * 
  * ATTENTION: We are currently testing an experimental version of the userPreference prompt with 50% of our users. If this is performing well, we should roll it out to 100%.
  */
