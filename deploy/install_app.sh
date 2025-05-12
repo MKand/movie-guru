@@ -30,8 +30,9 @@ helm upgrade --install locust "$LOCUST_CHART" \
   --set loadtest.locust_locustfile="locustfile.py" \
   --set loadtest.locust_host="http://server-service.movie-guru.svc.cluster.local" \
   --set service.type="LoadBalancer" \
-  --set worker.replicas=3 \
-  --dry-run
+  --set worker.replicas=3 
+  
+  
 # === WAIT FOR LOCUST SERVICE TO GET EXTERNAL IP ===
 echo "Waiting for Locust service external IP..."
 for i in {1..30}; do

@@ -148,7 +148,7 @@ resource "helm_release" "locust" {
   }
   set {
     name  = "loadtest.locust_host"
-    value = "http://server-service.movie-guru.svc.cluster.local"
+    value = "http://movieguru.endpoints.${var.gcp_project_id}.cloud.goog/server"
   }
 
   set {
