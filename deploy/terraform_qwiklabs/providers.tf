@@ -22,25 +22,11 @@ terraform {
       source  = "hashicorp/google-beta"
       version = "~> 6.18"
     }
-    # kubernetes = {
-    #   source  = "hashicorp/kubernetes"
-    #   version = "~> 2.0" # Use the latest version
-    # }
-    # helm = {
-    #   source  = "hashicorp/helm"
-    #   version = "~> 2.0"
-    # }
   }
 }
 
 
 provider "google" {
-  project = var.gcp_project_id
-  region  = var.gcp_region
-  zone    = var.gcp_zone
-}
-
-provider "google-beta" {
   project = var.gcp_project_id
   region  = var.gcp_region
   zone    = var.gcp_zone

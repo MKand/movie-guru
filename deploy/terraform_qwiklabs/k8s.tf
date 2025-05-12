@@ -60,10 +60,6 @@ data "http" "sql_file" {
   url = var.sql_file
 }
 
-data "http" "otel_file" {
-  url = var.otel_file
-}
-
 resource "helm_release" "movie_guru" {
   name      = "movie-guru"
   chart     = var.helm_chart
@@ -138,46 +134,12 @@ resource "kubernetes_config_map" "loadtest_locustfile" {
   depends_on = [kubernetes_namespace.locust]
 }
 
-resource "kubernetes_config_map" "otel_config" {
-  metadata {
-    name      = "otel-config"
-    namespace = "otel"
-  }
-
-  data = {
-    "otel-collector-config.py" = (
-      data.http.otel_file.response_body
-    )
-  }
-
-  depends_on = [kubernetes_namespace.otel]
-}
-
-
-
-# resource "helm_release" "otel" {
-#   name       = "otel-collector"
-#   chart      = "opentelemetry-collector"
-#   repository = "https://open-telemetry.github.io/opentelemetry-helm-charts"
-#   namespace  = "otel"
-
-#   set {
-#     name  = "mode"
-#     value = "daemonset"
-#   }
-
-#   set {
-#     name  = "service.type"
-#     value = "ClusterIP"
-#   }
-
-#   # repository = "https://raw.githubusercontent.com/deliveryhero/helm-charts/refs/heads/master/"
-# }
 
 resource "helm_release" "locust" {
   name      = "locust"
-  chart     = "deliveryhero/locust"
+  chart     = "oci://ghcr.io/deliveryhero/helm-charts/locust"
   namespace = "locust"
+  version   = "0.31.6"
 
   set {
     name  = "loadtest.name"

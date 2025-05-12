@@ -90,12 +90,12 @@ resource "helm_release" "movie_guru" {
 
   set {
     name  = "Config.FIREBASE_API_KEY"
-    value = data.google_firebase_web_app_config.basic.api_key
+    value = "not included"
   }
 
   set {
     name  = "Config.FIREBASE_APP_ID"
-    value = google_firebase_web_app.movieguru-web.app_id
+    value = "not included"
   }
   
   set {
