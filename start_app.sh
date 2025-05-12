@@ -19,9 +19,13 @@ echo -e "\e[93mUsing Project: $PROJECT_ID\e[0m"
 
 SERVICE_ACCOUNT_EMAIL="$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com"
 
+if [[ ! -f "key.json" ]]; then
 echo -e "\e[95mCreating service account local key as key.json\e[0m"
 gcloud iam service-accounts keys create key.json \
     --iam-account=$SERVICE_ACCOUNT_EMAIL
+else
+echo -e "\e[95mService account local key already exists. So skipping creation of key.json\e[0m"
+fi
 
 echo -e "\e[95m Substituting env variables in init.sql\e[0m"
 
