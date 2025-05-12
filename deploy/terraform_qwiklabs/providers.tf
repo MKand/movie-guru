@@ -22,7 +22,7 @@ terraform {
       source  = "hashicorp/google-beta"
       version = "~> 6.18"
     }
-        kubernetes = {
+    kubernetes = {
       source  = "hashicorp/kubernetes"
       version = "~> 2.0"  # Use the latest version
     }
@@ -32,3 +32,10 @@ terraform {
     }
   }
   }
+
+
+provider "google" {
+  project = var.gcp_project_id
+  region  = var.gcp_region
+  zone    = var.gcp_zone
+}

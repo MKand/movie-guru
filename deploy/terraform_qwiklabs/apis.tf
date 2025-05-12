@@ -12,23 +12,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-terraform {
-  required_providers {
-    google = {
-      source  = "hashicorp/google"
-      version = "~> 6.18"
-    }
-    google-beta = {
-      source  = "hashicorp/google-beta"
-      version = "~> 6.18"
-    }
-        kubernetes = {
-      source  = "hashicorp/kubernetes"
-      version = "~> 2.0"  # Use the latest version
-    }
-    helm = {
-      source  = "hashicorp/helm"
-      version = "~> 2.0"
-    }
-  }
-  }
+resource "google_project_service" "enable_apis" {
+  for_each = toset([
+    "aiplatform.googleapis.com",
+    "artifactregistry.googleapis.com",
+    "cloudresourcemanager.googleapis.com",
+    "storage-api.googleapis.com",
+    "firebase.googleapis.com",
+    "iam.googleapis.com",
+    "cloudbilling.googleapis.com",
+    "compute.googleapis.com",
+    "container.googleapis.com",
+    "secretmanager.googleapis.com",
+    "apphub.googleapis.com",
+  ])
+
+  service = each.key
+
+  disable_on_destroy = false
+}
+
