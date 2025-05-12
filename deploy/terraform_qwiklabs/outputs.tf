@@ -8,7 +8,7 @@ output "locust_address" {
 }
 
 output "movieguru_ip" {
-  value =  google_compute_global_address.movieguru-address.address
+  value = google_compute_global_address.movieguru-address.address
 }
 
 

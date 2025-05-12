@@ -64,7 +64,8 @@ resource "helm_release" "movie_guru" {
   name      = "movie-guru"
   chart     = var.helm_chart
   namespace = "movieguru"
-  version = "0.2.0"
+  version   = "0.2.0"
+  wait      = false
 
   set {
     name  = "Config.Image.Repository"

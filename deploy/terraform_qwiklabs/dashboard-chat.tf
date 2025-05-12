@@ -13,14 +13,14 @@
 # limitations under the License.
 
 resource "google_monitoring_dashboard" "chat_dashboard" {
-  project    = var.gcp_project_id
+  project = var.gcp_project_id
   dashboard_json = jsonencode({
     "displayName" : "MovieGuru-ChatMetrics-Dashboard",
     "mosaicLayout" : {
       "columns" : 48,
       "tiles" : [
         {
-           "xPos": 0,
+          "xPos" : 0,
           "yPos" : 0,
           "width" : 24,
           "height" : 16,
@@ -36,14 +36,14 @@ resource "google_monitoring_dashboard" "chat_dashboard" {
                   "plotType" : "LINE",
                   "legendTemplate" : "",
                   "targetAxis" : "Y1",
-                  "dimensions" :[],
+                  "dimensions" : [],
                   "measures" : [],
                   "breakdowns" : []
                 }
               ],
-              "thresholds" :[{
-                "value": 95,
-                "targetAxis": "Y1"
+              "thresholds" : [{
+                "value" : 95,
+                "targetAxis" : "Y1"
               }],
               "yAxis" : {
                 "label" : "Percentage Successful",
@@ -60,7 +60,7 @@ resource "google_monitoring_dashboard" "chat_dashboard" {
           }
         },
         {
-           "xPos" : 24,
+          "xPos" : 24,
           "yPos" : 0,
           "width" : 24,
           "height" : 16,
@@ -82,8 +82,8 @@ resource "google_monitoring_dashboard" "chat_dashboard" {
                 }
               ],
               "thresholds" : [{
-                "value": 99,
-                "targetAxis": "Y1"
+                "value" : 99,
+                "targetAxis" : "Y1"
               }],
               "yAxis" : {
                 "label" : "",
@@ -99,7 +99,7 @@ resource "google_monitoring_dashboard" "chat_dashboard" {
             "id" : ""
           }
         },
-      
+
         {
           "xPos" : 0,
           "yPos" : 16,
@@ -212,8 +212,8 @@ resource "google_monitoring_dashboard" "chat_dashboard" {
                 }
               ],
               "thresholds" : [{
-                "value": 5,
-                "targetAxis": "Y1"
+                "value" : 5,
+                "targetAxis" : "Y1"
               }],
               "yAxis" : {
                 "label" : "",
@@ -246,14 +246,14 @@ resource "google_monitoring_dashboard" "chat_dashboard" {
                   "plotType" : "LINE",
                   "legendTemplate" : "",
                   "targetAxis" : "Y1",
-                  "dimensions" :[],
+                  "dimensions" : [],
                   "measures" : [],
                   "breakdowns" : []
                 }
               ],
               "thresholds" : [{
-                "value": 5,
-                "targetAxis": "Y1"
+                "value" : 5,
+                "targetAxis" : "Y1"
               }],
               "yAxis" : {
                 "label" : "",
