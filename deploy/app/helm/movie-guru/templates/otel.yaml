@@ -47,7 +47,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: otel-config
-  namespace: otel-collector
+  namespace: otel
 data:
   config.yaml: |
     receivers:

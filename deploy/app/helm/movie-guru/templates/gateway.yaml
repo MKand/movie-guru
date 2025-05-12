@@ -20,16 +20,6 @@ metadata:
 spec:
   gatewayClassName: gke-l7-global-external-managed
   listeners:
-  - name: https
-    protocol: HTTPS
-    port: 443
-    tls:
-      mode: Terminate
-      options:
-        networking.gke.io/pre-shared-certs: movie-guru-certificate
-    allowedRoutes:
-      kinds:
-      - kind: HTTPRoute
   - name: http
     protocol: HTTP
     port: 80
@@ -54,17 +44,3 @@ spec:
     group: ""
     kind: Service
     name: server-service
-
----
-apiVersion: networking.gke.io/v1
-kind: GCPGatewayPolicy
-metadata:
-  name: movie-guru-gateway-policy
-  namespace: movieguru
-spec:
-  default:
-    sslPolicy: movie-guru-ssl-policy
-  targetRef:
-    group: gateway.networking.k8s.io
-    kind: Gateway
-    name: movieguru-gateway
