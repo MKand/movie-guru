@@ -1,264 +1,98 @@
-resource "google_monitoring_dashboard" "preferences_dashboard" {
-  project        = var.gcp_project_id
-  dashboard_json = <<EOF
-  {
-    "displayName": "MovieGuru-Preferences-Dashboard",
-    "mosaicLayout": {
-      "columns": 48,
-      "tiles": [
-        {
-          "xPos": 24,
-          "width": 24,
-          "height": 16,
-          "widget": {
-            "xyChart": {
-              "dataSets": [
-                {
-                  "timeSeriesQuery": {
-                    "prometheusQuery": "histogram_quantile(0.1, sum(rate(movieguru_prefGet_latency_milliseconds_bucket[$${__interval}])) by (le))\n",
-                    "unitOverride": "s",
-                    "outputFullDuration": false
-                  },
-                  "plotType": "LINE",
-                  "legendTemplate": "",
-                  "targetAxis": "Y1",
-                  "dimensions": [],
-                  "measures": [],
-                  "breakdowns": []
-                },
-                {
-                  "timeSeriesQuery": {
-                    "prometheusQuery": "histogram_quantile(0.5, sum(rate(movieguru_prefGet_latency_milliseconds_bucket[$${__interval}])) by (le))\n",
-                    "unitOverride": "s",
-                    "outputFullDuration": false
-                  },
-                  "plotType": "LINE",
-                  "legendTemplate": "",
-                  "targetAxis": "Y1",
-                  "dimensions": [],
-                  "measures": [],
-                  "breakdowns": []
-                },
-                {
-                  "timeSeriesQuery": {
-                    "prometheusQuery": "histogram_quantile(0.9, sum(rate(movieguru_prefGet_latency_milliseconds_bucket[$${__interval}])) by (le))\n",
-                    "unitOverride": "s",
-                    "outputFullDuration": false
-                  },
-                  "plotType": "LINE",
-                  "legendTemplate": "",
-                  "targetAxis": "Y1",
-                  "dimensions": [],
-                  "measures": [],
-                  "breakdowns": []
-                },
-                {
-                  "timeSeriesQuery": {
-                    "prometheusQuery": "histogram_quantile(0.95, sum(rate(movieguru_prefGet_latency_milliseconds_bucket[$${__interval}])) by (le))\n",
-                    "unitOverride": "s",
-                    "outputFullDuration": false
-                  },
-                  "plotType": "LINE",
-                  "legendTemplate": "",
-                  "targetAxis": "Y1",
-                  "dimensions": [],
-                  "measures": [],
-                  "breakdowns": []
-                },
-                {
-                  "timeSeriesQuery": {
-                    "prometheusQuery": "histogram_quantile(0.99, sum(rate(movieguru_prefGet_latency_milliseconds_bucket[$${__interval}])) by (le))\n",
-                    "unitOverride": "s",
-                    "outputFullDuration": false
-                  },
-                  "plotType": "LINE",
-                  "legendTemplate": "",
-                  "targetAxis": "Y1",
-                  "dimensions": [],
-                  "measures": [],
-                  "breakdowns": []
-                }
-              ],
-              "thresholds": [],
-              "yAxis": {
-                "label": "",
-                "scale": "LINEAR"
-              },
-              "chartOptions": {
-                "mode": "COLOR",
-                "showLegend": false,
-                "displayHorizontal": false
-              }
+# Copyright 2025 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+resource "google_monitoring_dashboard" "chat_quality_dashboard" {
+  project    = var.project_id
+  dashboard_json = jsonencode({
+  "displayName": "MovieGuru-ChatQualityMetrics-Dashboard",
+  "dashboardFilters": [
+    {
+      "filterType": "",
+      "labelKey": "undefined",
+      "stringValue": "",
+      "valueType": "STRING"
+    }
+  ],
+  "mosaicLayout": {
+    "columns": 48,
+    "tiles": [
+      {
+        "height": 16,
+        "width": 24,
+        "widget": {
+          "title": "Implicit User Sentiment: Positive",
+          "scorecard": {
+            "gaugeView": {
+              "lowerBound": 0,
+              "upperBound": 100
             },
-            "title": "Preferences Get Latency",
-            "id": ""
-          }
-        },
-        {
-          "width": 24,
-          "height": 16,
-          "widget": {
-            "xyChart": {
-              "dataSets": [
-                {
-                  "timeSeriesQuery": {
-                    "prometheusQuery": "histogram_quantile(0.1, sum(rate(movieguru_prefUpdate_latency_milliseconds_bucket[$${__interval}])) by (le))\n",
-                    "unitOverride": "ms",
-                    "outputFullDuration": false
-                  },
-                  "plotType": "LINE",
-                  "legendTemplate": "",
-                  "targetAxis": "Y1",
-                  "dimensions": [],
-                  "measures": [],
-                  "breakdowns": []
-                },
-                {
-                  "timeSeriesQuery": {
-                    "prometheusQuery": "histogram_quantile(0.5, sum(rate(movieguru_prefUpdate_latency_milliseconds_bucket[$${__interval}])) by (le))\n",
-                    "unitOverride": "ms",
-                    "outputFullDuration": false
-                  },
-                  "plotType": "LINE",
-                  "legendTemplate": "",
-                  "targetAxis": "Y1",
-                  "dimensions": [],
-                  "measures": [],
-                  "breakdowns": []
-                },
-                {
-                  "timeSeriesQuery": {
-                    "prometheusQuery": "histogram_quantile(0.9, sum(rate(movieguru_prefUpdate_latency_milliseconds_bucket[$${__interval}])) by (le))\n",
-                    "unitOverride": "ms",
-                    "outputFullDuration": false
-                  },
-                  "plotType": "LINE",
-                  "legendTemplate": "",
-                  "targetAxis": "Y1",
-                  "dimensions": [],
-                  "measures": [],
-                  "breakdowns": []
-                },
-                {
-                  "timeSeriesQuery": {
-                    "prometheusQuery": "histogram_quantile(0.95, sum(rate(movieguru_prefUpdate_latency_milliseconds_bucket[$${__interval}])) by (le))\n",
-                    "unitOverride": "ms",
-                    "outputFullDuration": false
-                  },
-                  "plotType": "LINE",
-                  "legendTemplate": "",
-                  "targetAxis": "Y1",
-                  "dimensions": [],
-                  "measures": [],
-                  "breakdowns": []
-                },
-                {
-                  "timeSeriesQuery": {
-                    "prometheusQuery": "histogram_quantile(0.99, sum(rate(movieguru_prefUpdate_latency_milliseconds_bucket[$${__interval}])) by (le))\n",
-                    "unitOverride": "ms",
-                    "outputFullDuration": false
-                  },
-                  "plotType": "LINE",
-                  "legendTemplate": "",
-                  "targetAxis": "Y1",
-                  "dimensions": [],
-                  "measures": [],
-                  "breakdowns": []
-                }
-              ],
-              "thresholds": [],
-              "yAxis": {
-                "label": "",
-                "scale": "LINEAR"
+            "thresholds": [
+              {
+                "color": "YELLOW",
+                "direction": "BELOW",
+                "targetAxis": "Y1",
+                "value": 60
               },
-              "chartOptions": {
-                "mode": "COLOR",
-                "showLegend": false,
-                "displayHorizontal": false
+              {
+                "color": "RED",
+                "direction": "BELOW",
+                "targetAxis": "Y1",
+                "value": 30
               }
-            },
-            "title": "Preferences Update Latency",
-            "id": ""
-          }
-        },
-        {
-          "yPos": 16,
-          "width": 24,
-          "height": 16,
-          "widget": {
-            "xyChart": {
-              "dataSets": [
-                {
-                  "timeSeriesQuery": {
-                    "prometheusQuery": "(sum(rate(movieguru_prefGet_success_total[$${__interval}])) / sum(rate(movieguru_prefGet_attempts_total[$${__interval}]))) *100",
-                    "unitOverride": "",
-                    "outputFullDuration": false
-                  },
-                  "plotType": "LINE",
-                  "legendTemplate": "",
-                  "targetAxis": "Y1",
-                  "dimensions": [],
-                  "measures": [],
-                  "breakdowns": []
-                }
-              ],
-              "thresholds": [],
-              "yAxis": {
-                "label": "",
-                "scale": "LINEAR"
-              },
-              "chartOptions": {
-                "mode": "COLOR",
-                "showLegend": false,
-                "displayHorizontal": false
-              }
-            },
-            "title": "Preferences Get Success Rate",
-            "id": ""
-          }
-        },
-        {
-          "xPos": 24,
-          "yPos": 16,
-          "width": 24,
-          "height": 16,
-          "widget": {
-            "xyChart": {
-              "dataSets": [
-                {
-                  "timeSeriesQuery": {
-                    "prometheusQuery": "(sum(rate(movieguru_prefUpdate_success_total[$${__interval}])) / sum(rate(movieguru_prefUpdate_attempts_total[$${__interval}]))) *100",
-                    "unitOverride": "",
-                    "outputFullDuration": false
-                  },
-                  "plotType": "LINE",
-                  "legendTemplate": "",
-                  "targetAxis": "Y1",
-                  "dimensions": [],
-                  "measures": [],
-                  "breakdowns": []
-                }
-              ],
-              "thresholds": [],
-              "yAxis": {
-                "label": "",
-                "scale": "LINEAR"
-              },
-              "chartOptions": {
-                "mode": "COLOR",
-                "showLegend": false,
-                "displayHorizontal": false
-              }
-            },
-            "title": "Preferences Update Success Rate",
-            "id": ""
+            ],
+            "timeSeriesQuery": {
+              "outputFullDuration": true,
+              "prometheusQuery": "label_replace((sum(rate(movieguru_chat_sentiment_counter_total{Sentiment=\"Positive\"}[${__interval}])) / sum(rate(movieguru_chat_sentiment_counter_total[${__interval}]))) * 100, \"legend\", \"Positive\", \"\", \"\")",
+              "unitOverride": "%"
+            }
           }
         }
-      ]
-    },
-    "dashboardFilters": [],
-    "labels": {}
+      },
+      {
+        "xPos": 24,
+        "height": 16,
+        "width": 24,
+        "widget": {
+          "title": "Implicit User Sentiment: Negative",
+          "scorecard": {
+            "gaugeView": {
+              "lowerBound": 0,
+              "upperBound": 100
+            },
+            "thresholds": [
+              {
+                "color": "YELLOW",
+                "direction": "ABOVE",
+                "targetAxis": "Y1",
+                "value": 20
+              },
+              {
+                "color": "RED",
+                "direction": "ABOVE",
+                "targetAxis": "Y1",
+                "value": 30
+              }
+            ],
+            "timeSeriesQuery": {
+              "outputFullDuration": true,
+              "prometheusQuery": "label_replace((sum(rate(movieguru_chat_sentiment_counter_total{Sentiment=\"Negative\"}[${__interval}])) / sum(rate(movieguru_chat_sentiment_counter_total[${__interval}]))) * 100, \"legend\", \"Negative\", \"\", \"\")",
+              "unitOverride": "%"
+            }
+          }
+        }
+      },
+    ]
   }
-  
-  EOF
+})
 }

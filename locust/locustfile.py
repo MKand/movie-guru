@@ -39,7 +39,7 @@ class ChatUser(HttpUser):
         headers = {
         "ApiKey": "ABC",
         "Content-Type": "application/json",
-        "User": name
+        "User": self.name
         }
         response = self.client.post(
             "/login", headers=headers, json={"inviteCode": ""})
