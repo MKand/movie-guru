@@ -89,18 +89,25 @@ There are 2 important tables:
   - Docker and Docker Compose
 - Required APIs enabled (will be performed in `setup_local.sh`).
 
+### Get into Cloud Shell
+
+- Navigate to the Cloud Console.
+- Type Cloud Shell into the search bar at the top
+- Open the Cloud Shell Editor - this will provision a VM for you and give you a canned environment to operate in.
+
 ### Clone the Repository
 
 ```sh
 git clone https://github.com/MKand/movie-guru.git
 cd movie-guru
-git checkout <current-branch> # Replace with branch name
+git checkout ghack-genkit-monitoring-dogfood
 ```
 
 ### Firebase setup
 
-1. Go to the firebase console. Follow the steps [here](https://firebase.google.com/docs/projects/use-firebase-with-existing-cloud-project#how-to-add-firebase_console).
-1. Create a new firebase web app and copy the firebase config variables into **set_env_vars.sh**. (FIREBASE_GCP_ID is the project ID)
+1. Navigate to the Firebase Console. 
+1. Using the same project you are using in Cloud Shell, set up a new web app in the Firebase Console. Follow the steps [here](https://firebase.google.com/docs/projects/use-firebase-with-existing-cloud-project#how-to-add-firebase_console).
+1. Create a new firebase web app and copy the firebase config variables into **set_env_vars.sh**.
 
 ### Environment setup
 
@@ -114,8 +121,8 @@ git checkout <current-branch> # Replace with branch name
 1. Run setup script.
 
     ```sh
-    chmod +x setup_local.sh
-    ./setup_local.sh --skip-infra #gHack creates the infra for you
+    chmod +x setup_cloud.sh
+    ./setup_cloud.sh
     ```
 
 This enables the required APIs and creates the necessary service account with roles.
@@ -179,27 +186,20 @@ Once all the required data is added, it is time to run the application that cons
 
 ### Run the Application
 
-1. Make sure the env variables are in the execution context of docker compose.
+1. Start the all docker containers
 
-    ```sh
-    source set_env_vars.sh
-    ```
+```sh
+  chmod +x start_app.sh # if the first time running
+  ./start_app.sh
+```
 
-2. Start the application services. This can take upto 10 minutes are we are building many docker images for all the application containers (frontend, webserver, genkit flows).
-
-    ```sh
-    docker compose up --build
-    ```
-
-3. Access the Frontend Application Open http://localhost:8080 in your browser.
+1. Access the Frontend Application Open http://localhost:8080 in your browser.
 
 ### Clean up
 
 Run the following commands:
 
 ```sh
-  docker compose down
-  docker compose -f docker-compose-pgvector.yaml down
-  docker network rm db-shared-network
-  rm pgvector/init_substituted.sql
+  chmod +x stop_app.sh # if the first time running
+  ./stop_app.sh
 ```
