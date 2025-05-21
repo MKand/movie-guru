@@ -110,7 +110,7 @@ func getMetadata(ctx context.Context) (*types.Metadata, error) {
 	if posterBucketName != "" {
 		metadata.PosterBucketName = posterBucketName
 	}
-	// appVersion := os.Getenv("APP_VERSION")
+
 	flowsURL := os.Getenv("FLOWS_URL")
 	if flowsURL == "" {
 		slog.ErrorContext(ctx, "No FlowsURL found in environment variables")

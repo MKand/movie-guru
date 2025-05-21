@@ -13,7 +13,7 @@ services:
     ports:
       - 5432:5432
     volumes:
-      - ./pgvector/init_substituted.sql:/docker-entrypoint-initdb.d/init_substituted.sql:ro
+      - ./pgvector/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
   adminer:
     image: adminer
     restart: always
@@ -52,7 +52,7 @@ services:
     restart: always
     command: /app/webserver
     environment:
-      - PROJECT_ID=$PROJECT_ID      
+      - PROJECT_ID=${PROJECT_ID}      
       - LOCATION=$REGION
       - USE_AUTH=${USE_AUTH}
       - STRICT_CORS=${STRICT_CORS}
