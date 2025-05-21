@@ -5,7 +5,7 @@ services:
       POSTGRES_PASSWORD: main
       restart: always
     volumes:
-      - ./pgvector/init_substituted.sql:/docker-entrypoint-initdb.d/init_substituted.sql:ro
+      - ./pgvector/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     networks:
       - db-shared-network
   adminer:

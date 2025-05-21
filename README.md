@@ -100,7 +100,7 @@ There are 2 important tables:
    ```sh
    git clone https://github.com/MKand/movie-guru.git
    cd movie-guru
-   git checkout main # Replace with branch name
+   git checkout main
    ```
 
 1. Authenticate with Google Cloud
