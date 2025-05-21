@@ -96,7 +96,8 @@ There are 2 important tables:
 ```sh
 git clone https://github.com/MKand/movie-guru.git
 cd movie-guru
-git checkout <current-branch> # Replace with branch name
+git checkout ghack-genkit-monitoring
+git checkout main -- chat_server_go frontend set_env_vars.sh
 ```
 
 ### Environment setup
@@ -113,8 +114,7 @@ git checkout <current-branch> # Replace with branch name
 3. Run setup script **if** the environment is not preprovisioned with the required APIs and infrastructure.
 
     ```sh
-    chmod +x setup_cloud.sh
-    ./setup_cloud.sh
+    chmod +x setup_cloud.sh && ./setup_cloud.sh
     ```
 
 This enables the required APIs and creates the necessary service account with roles.
@@ -128,11 +128,10 @@ This enables the required APIs and creates the necessary service account with ro
 1. Start the application services. This can take upto 10 minutes are we are building many docker images for all the application containers (frontend, webserver, genkit flows, databases).
 
     ```sh
-    chmod +x start_app.sh
-    ./start_app.sh
+    chmod +x start_app.sh && ./start_app.sh
     ```
 
-1. Access the Frontend Application Open http://localhost:8080 in your browser.
+1. Access the Frontend Application Open <http://localhost:8080> in your browser.
 
 ### Clean up
 
