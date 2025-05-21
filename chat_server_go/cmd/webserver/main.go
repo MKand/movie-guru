@@ -77,14 +77,14 @@ func getDependencies(ctx context.Context, metadata *types.Metadata, db *db.Movie
 		slog.ErrorContext(ctx, "error setting up userProfileFlowClient client")
 	}
 
-	movieRetrieverFlowClient := wrappers.CreateMovieRetrieverFlowClient(metadata.FlowsURL)
+	movieRetrieverFlowClient := wrappers.CreateMovieRetrieverFlowClient(metadata.FlowsURL, metadata.PosterBucketName)
 
 	responseQualityFlowClient, err := wrappers.CreateResponseQualityFlowClient(metadata.FlowsURL)
 	if err != nil {
 		slog.ErrorContext(ctx, "error setting up responseQualityFlowClient client")
 	}
 
-	chatFlowClient, err := wrappers.CreateChatFlowClient(metadata.FlowsURL)
+	chatFlowClient, _ := wrappers.CreateChatFlowClient(metadata.FlowsURL, metadata.PosterBucketName)
 
 	deps := &web.Dependencies{
 		UserProfileFlowClient:     userProfileFlowClient,
@@ -103,8 +103,13 @@ func getMetadata(ctx context.Context) (*types.Metadata, error) {
 		StrictCors:           false,
 		MaxUserMessageLength: 500,
 		HistoryLength:        10,
+		PosterBucketName:     "generated_posters",
 	}
 
+	posterBucketName := os.Getenv("POSTER_BUCKET_NAME")
+	if posterBucketName != "" {
+		metadata.PosterBucketName = posterBucketName
+	}
 	// appVersion := os.Getenv("APP_VERSION")
 	flowsURL := os.Getenv("FLOWS_URL")
 	if flowsURL == "" {
@@ -168,6 +173,7 @@ func getMetadata(ctx context.Context) (*types.Metadata, error) {
 
 	slog.InfoContext(ctx, "Metadata",
 		slog.String("FlowsURL", metadata.FlowsURL),
+		slog.String("PosterBucketName", metadata.PosterBucketName),
 		slog.String("FeedbackURL", metadata.FeedbackURL),
 		slog.Bool("EnableMetrics", metadata.EnableMetrics),
 		slog.Int("MaxUserMessageLength", metadata.MaxUserMessageLength),

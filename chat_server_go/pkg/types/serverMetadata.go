@@ -8,6 +8,7 @@ type Metadata struct {
 	CorsOrigins          string
 	FlowsURL             string
 	FeedbackURL          string
+	PosterBucketName     string
 	UseAuth              bool
 	StrictCors           bool
 	EnableMetrics        bool
