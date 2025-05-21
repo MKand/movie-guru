@@ -98,6 +98,8 @@ rm -rf dataset/posters_small
 
 echo -e "\e[93mMaking posters publicly readable\e[0m"
 
+SERVICE_ACCOUNT_MEMBER="serviceAccount:$SERVICE_ACCOUNT_EMAIL"
+
 gcloud storage buckets add-iam-policy-binding $POSTER_BUCKET_NAME \
-  --member="allUsers" \
+  --member="$SERVICE_ACCOUNT_MEMBER" \
   --role="roles/storage.objectViewer"
