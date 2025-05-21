@@ -65,7 +65,7 @@ services:
       - FLOWS_URL=http://flows:3400
       - REDIS_HOST=cache
       - REDIS_PORT=6379
-      - FEEDBACK_URL=https://${GENKIT_FEEDBACK_REGION}-${PROJECT_ID}.cloudfunctions.net/ext-firebase-ai-user-engagement-collectEngagement
+      - FEEDBACK_URL="" # Leave empty if you don't have genkit feedback setup. Otherwise, use https://${GENKIT_FEEDBACK_REGION}-${PROJECT_ID}.cloudfunctions.net/ext-firebase-ai-user-engagement-collectEngagement
     depends_on:
       db:
         condition: service_healthy
