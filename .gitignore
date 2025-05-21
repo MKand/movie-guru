@@ -4,7 +4,6 @@
 /var
 key.json
 
-set_env_vars.sh
 posters/
 tfplan
 __pycache__
@@ -21,4 +20,9 @@ dist
 *.tfstate
 *.tfstate.*
 
-pgvector/init_substituted.sql
+# Files and folders that are taken from main
+set_env_vars.sh
+pgvector/
+chat_server_go/
+frontend/
+nginx/
