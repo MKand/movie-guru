@@ -97,7 +97,7 @@ There are 2 important tables:
 git clone https://github.com/MKand/movie-guru.git
 cd movie-guru
 git checkout ghack-genkit-monitoring
-git checkout main -- chat_server_go frontend nginx pgvector set_env_vars.sh 
+git checkout main -- chat_server_go frontend nginx pgvector
 ```
 
 ### Environment setup

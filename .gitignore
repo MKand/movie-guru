@@ -21,7 +21,6 @@ dist
 *.tfstate.*
 
 # Files and folders that are taken from main
-set_env_vars.sh
 pgvector/
 chat_server_go/
 frontend/
