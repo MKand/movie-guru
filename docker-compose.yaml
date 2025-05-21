@@ -24,7 +24,7 @@ services:
       - db-shared-network    
   server:
     build: ./chat_server_go
-    restart: always
+    # restart: always
     command: /app/webserver
     environment:
       - PROJECT_ID=$PROJECT_ID      
@@ -35,12 +35,13 @@ services:
       - POSTGRES_DB_NAME=fake-movies-db
       - TABLE_NAME=movies
       - APP_VERSION=v1_local
-      - USE_AUTH=false
-      - CORS_STRICT=false # allows any origin to get through
+      - USE_AUTH=${USE_AUTH}
+      - STRICT_CORS=false # allows any origin to get through
+      - TOKEN_AUDIENCE=${TOKEN_AUDIENCE}
       - FLOWS_URL=http://flows:3400
       - REDIS_HOST=cache
       - REDIS_PORT=6379
-      - FEEDBACK_URL=https://${GENKIT_FEEDBACK_REGION}-${PROJECT_ID}.cloudfunctions.net/ext-firebase-ai-user-engagement-collectEngagement
+      # - FEEDBACK_URL=https://${GENKIT_FEEDBACK_REGION}-${PROJECT_ID}.cloudfunctions.net/ext-firebase-ai-user-engagement-collectEngagement  Leave empty to disable feedback 
     depends_on:
       - cache 
     networks:
@@ -49,13 +50,12 @@ services:
   frontend:
     build: ./frontend
     environment:
+      - VITE_GCP_PROJECT_ID=${PROJECT_ID}
+      - VITE_USE_AUTH=${USE_AUTH}
+      - VITE_CHAT_SERVER_URL=http://localhost:8080/api
       - VITE_FIREBASE_API_KEY=${FIREBASE_API_KEY}
       - VITE_FIREBASE_AUTH_DOMAIN=${FIREBASE_AUTH_DOMAIN}
-      - VITE_GCP_PROJECT_ID=${PROJECT_ID}
-      - VITE_FIREBASE_STORAGE_BUCKET=${FIREBASE_STORAGE_BUCKET}
-      - VITE_FIREBASE_MESSAGING_SENDERID=${FIREBASE_MESSAGING_SENDERID}
       - VITE_FIREBASE_APPID=${FIREBASE_APPID}
-      - VITE_CHAT_SERVER_URL=http://localhost:8080/api
     networks:
       - movie-guru
   nginx:

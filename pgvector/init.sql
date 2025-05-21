@@ -54,19 +54,6 @@ CREATE TABLE apiKeys (
     PRIMARY KEY ("key")
 );
 
-CREATE TABLE app_metadata (
-    AppVersion VARCHAR(255) NOT NULL,
-    TokenAudience VARCHAR(255) NOT NULL,
-    HistoryLength INTEGER NOT NULL,
-    MaxUserMessageLen INTEGER NOT NULL,
-    CorsOrigin VARCHAR(255) NOT NULL,
-    RetrieverLength INTEGER NOT NULL,
-    GoogleChatModelName VARCHAR(255) NOT NULL,
-    GoogleEmbeddingModelName VARCHAR(255) NOT NULL,
-    ServerDomain VARCHAR(255) NOT NULL,
-    PRIMARY KEY (AppVersion)
-);
-
 CREATE TABLE IF NOT EXISTS user_logins (
     email VARCHAR(255) PRIMARY KEY,
     login_count INT NOT NULL DEFAULT 0,
@@ -77,16 +64,8 @@ CREATE TABLE IF NOT EXISTS user_logins (
 
 GRANT SELECT ON movies TO "minimal-user";
 GRANT SELECT ON invite_codes TO "minimal-user";
-GRANT SELECT ON app_metadata TO "minimal-user";
 GRANT SELECT, INSERT, UPDATE, DELETE ON user_logins TO "minimal-user";
 GRANT SELECT, INSERT, UPDATE, DELETE ON user_preferences TO "minimal-user";
-
-INSERT INTO "app_metadata" ("appversion", "tokenaudience", "historylength", "maxusermessagelen", "corsorigin", "retrieverlength", "googlechatmodelname", "googleembeddingmodelname", "serverdomain") VALUES
-('v1', '${PROJECT_ID}', 100, 500, 'movie-guru.endpoints.${PROJECT_ID}.cloud.goog,locust.locust.svc.cluster.local', 10, '', '', 'https://movie-guru.endpoints.${PROJECT_ID}.cloud.goog/server');
-
-INSERT INTO "app_metadata" ("appversion", "tokenaudience", "historylength", "maxusermessagelen", "corsorigin", "retrieverlength", "googlechatmodelname", "googleembeddingmodelname", "serverdomain") VALUES
-('v1_local', '${PROJECT_ID}', 100, 500, 'http://localhost:4001', 10, '', '', 'http://localhost:8081');
-
 
 INSERT INTO "invite_codes" ("code", "valid") VALUES
 ('0000',	't');

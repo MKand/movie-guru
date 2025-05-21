@@ -9,3 +9,4 @@ export FIREBASE_STORAGE_BUCKET="some value"
 export FIREBASE_MESSAGING_SENDERID="some value"
 export FIREBASE_APPID="some value"
 
+export USE_AUTH=true #

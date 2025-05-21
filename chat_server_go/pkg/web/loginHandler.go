@@ -27,6 +27,7 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/movie-guru/pkg/db"
 	m "github.com/movie-guru/pkg/metrics"
+	"github.com/movie-guru/pkg/types"
 	utils "github.com/movie-guru/pkg/utils"
 )
 
@@ -141,7 +142,7 @@ func (ulh *UserLoginHandler) verifyGoogleToken(tokenString string) (string, erro
 	return email, nil
 }
 
-func createLoginHandler(ulh *UserLoginHandler, meters *m.LoginMeters, metadata *db.Metadata, useAuth bool) http.HandlerFunc {
+func createLoginHandler(ulh *UserLoginHandler, meters *m.LoginMeters, metadata *types.Metadata) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		if r.Method == "POST" {
@@ -156,7 +157,7 @@ func createLoginHandler(ulh *UserLoginHandler, meters *m.LoginMeters, metadata *
 			apiKey := r.Header.Get("ApiKey")
 			user := r.Header.Get("User")
 
-			if useAuth && (authHeader == "" && apiKey == "") {
+			if metadata.UseAuth && (authHeader == "" && apiKey == "") {
 				slog.InfoContext(ctx, "No auth header")
 				http.Error(w, "Unauthorized", http.StatusUnauthorized)
 				return
@@ -169,13 +170,13 @@ func createLoginHandler(ulh *UserLoginHandler, meters *m.LoginMeters, metadata *
 				http.Error(w, err.Error(), http.StatusBadRequest)
 				return
 			}
-			if useAuth && authHeader != "" {
+			if metadata.UseAuth && authHeader != "" {
 				user, err = ulh.HandleLogin(ctx, authHeader, loginBody.InviteCode)
 			}
-			if useAuth && apiKey != "" {
+			if metadata.UseAuth && apiKey != "" {
 				user, err = ulh.HandleApiKeyLogin(ctx, apiKey, user)
 			}
-			if !useAuth {
+			if !metadata.UseAuth {
 				user, err = ulh.HandleAuthlessLogin(ctx, user, loginBody.InviteCode)
 
 			}

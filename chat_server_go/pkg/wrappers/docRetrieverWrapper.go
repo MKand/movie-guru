@@ -29,14 +29,12 @@ import (
 )
 
 type DocRetrieverFlowClient struct {
-	RetrieverLength int
-	URL             string
+	URL string
 }
 
-func CreateMovieRetrieverFlowClient(retrieverLength int, url string) *DocRetrieverFlowClient {
+func CreateMovieRetrieverFlowClient(url string) *DocRetrieverFlowClient {
 	return &DocRetrieverFlowClient{
-		RetrieverLength: retrieverLength,
-		URL:             url + "/docSearchFlow",
+		URL: url + "/docSearchFlow",
 	}
 }
 

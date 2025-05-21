@@ -21,14 +21,13 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/movie-guru/pkg/db"
 	m "github.com/movie-guru/pkg/metrics"
 	"github.com/movie-guru/pkg/types"
 	"go.opentelemetry.io/otel/attribute"
 	metric "go.opentelemetry.io/otel/metric"
 )
 
-func chatSingleFlow(ctx context.Context, deps *Dependencies, metadata *db.Metadata, h *types.ChatHistory, user string, userMessage string, meters *m.ChatMeters) *types.AgentResponse {
+func chatSingleFlow(ctx context.Context, deps *Dependencies, metadata *types.Metadata, h *types.ChatHistory, user string, userMessage string, meters *m.ChatMeters) *types.AgentResponse {
 	h.AddUserMessage(userMessage)
 
 	userProfile, err := deps.DB.GetCurrentProfile(ctx, user)

@@ -20,12 +20,11 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/movie-guru/pkg/db"
-
 	m "github.com/movie-guru/pkg/metrics"
+	"github.com/movie-guru/pkg/types"
 )
 
-func createChatHandler(deps *Dependencies, meters *m.ChatMeters, metadata *db.Metadata) http.HandlerFunc {
+func createChatHandler(deps *Dependencies, meters *m.ChatMeters, metadata *types.Metadata) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var err error
 		ctx := r.Context()
@@ -53,7 +52,7 @@ func createChatHandler(deps *Dependencies, meters *m.ChatMeters, metadata *db.Me
 				http.Error(w, err.Error(), http.StatusBadRequest)
 				return
 			}
-			if len(chatRequest.Content) > metadata.MaxUserMessageLen {
+			if len(chatRequest.Content) > metadata.MaxUserMessageLength {
 				slog.InfoContext(ctx, "Input message too long", slog.String("user", user), slog.Any("error", err.Error()))
 				http.Error(w, "Message too long", http.StatusBadRequest)
 				return
