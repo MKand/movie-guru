@@ -52,23 +52,11 @@ export const UserPreferenceFlow = ai.defineFlow(
     const defaultOutput = UserPreferenceFlowOutputSchema.parse({})
     try {
       var output: UserPreferenceFlowOutput;
-
-      // Using a fairly naive percentage based mechanism to roll out our new version of this prompt
-      // Currently targeting 50% of requests
-      // TODO: use Firebase Remote Config to make this configurable without a rollout.
-      if(Math.random() >= .5) {
-        console.info("Routing request to experimental userPreference query.");
-        const response = await extractUserPreferencesExperimental({ 
+      console.info("Routing request to default userPreference query.");
+      const response = await extractUserPreferencesV1({ 
           query: input.query, 
           agentMessage: input.agentMessage });
-        output = UserPreferenceFlowOutputSchema.parse(response.output)
-      } else {
-        console.info("Routing request to default userPreference query.");
-        const response = await extractUserPreferencesV1({ 
-          query: input.query, 
-          agentMessage: input.agentMessage });
-        output = UserPreferenceFlowOutputSchema.parse(response.output)
-      }
+      output = UserPreferenceFlowOutputSchema.parse(response.output)
       return output
     } catch (error) {
     

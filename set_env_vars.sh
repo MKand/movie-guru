@@ -1,14 +1,14 @@
 export PROJECT_ID=<the project id> # Change add add project id
-export REGION="us-central1" # Change region as required
-export POSTER_REGION="" # The region where the poster bucket is. Change region as required 
-export GENKIT_FEEDBACK_REGION="" # Change region as required
+export REGION=<your infra and models region> # Change region as required
 
-export FIREBASE_GCP_ID="some value"
-export FIREBASE_API_KEY="some value"
-export FIREBASE_AUTH_DOMAIN="some value"
-export FIREBASE_APPID="some value"
+# Optional
+export GENKIT_FEEDBACK_REGION=<your region where the genkit feedback collection service is located> # Change region as required
 
-export USE_AUTH=true # Make this false if no Auth is required
-export STRICT_CORS=false # App accepts any origin if false
-export CORS_ORIGINS="localhost:8080" # if strict cors is false, then give a comma seperated list of accepted origins
-export TOKEN_AUDIENCE=${PROJECT_ID}
+# Leave this variable empty to disable genkit feedback. Only enable it if your genkit project has this feature enabled.
+export GENKIT_FEEDBACK_URL= "" #https://${GENKIT_FEEDBACK_REGION}-${PROJECT_ID}.cloudfunctions.net/ext-firebase-ai-user-engagement-collectEngagement  Leave empty to disable feedback 
+
+# Don't change these variables
+export FIREBASE_GCP_ID=${PROJECT_ID}
+export USE_AUTH=false 
+export STRICT_CORS=false 
+

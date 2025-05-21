@@ -31,9 +31,7 @@ services:
       - LOCATION=$REGION
       - USE_AUTH=${USE_AUTH}
       - STRICT_CORS=${STRICT_CORS}
-      - CORS_ORIGINS=${CORS_ORIGINS}
-      - TOKEN_AUDIENCE=${TOKEN_AUDIENCE}
-      - POSTER_BUCKET_NAME=${PROJECT_ID}_${POSTER_REGION}_posters
+      - FEEDBACK_URL=${GENKIT_FEEDBACK_URL}
       - POSTGRES_HOST=db
       - POSTGRES_DB_USER_PASSWORD=minimal
       - POSTGRES_DB_USER=minimal-user
@@ -42,8 +40,6 @@ services:
       - FLOWS_URL=http://flows:3400
       - REDIS_HOST=cache
       - REDIS_PORT=6379
-      # - CORS_ORIGINS="http://localhost:8080"
-      # - FEEDBACK_URL=https://${GENKIT_FEEDBACK_REGION}-${PROJECT_ID}.cloudfunctions.net/ext-firebase-ai-user-engagement-collectEngagement  Leave empty to disable feedback 
     depends_on:
       - cache 
     networks:
@@ -55,9 +51,6 @@ services:
       - VITE_GCP_PROJECT_ID=${PROJECT_ID}
       - VITE_USE_AUTH=${USE_AUTH}
       - VITE_CHAT_SERVER_URL=http://localhost:8080/api
-      - VITE_FIREBASE_API_KEY=${FIREBASE_API_KEY}
-      - VITE_FIREBASE_AUTH_DOMAIN=${FIREBASE_AUTH_DOMAIN}
-      - VITE_FIREBASE_APPID=${FIREBASE_APPID}
     networks:
       - movie-guru
   nginx:
