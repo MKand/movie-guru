@@ -60,7 +60,7 @@ services:
       - POSTGRES_DB_NAME=fake-movies-db
       - TABLE_NAME=movies
       - APP_VERSION=v1_local
-      - USE_AUTH=false
+      - USE_AUTH=${USE_AUTH}
       - CORS_STRICT=false # allows any origin to get through
       - FLOWS_URL=http://flows:3400
       - REDIS_HOST=cache
@@ -76,7 +76,7 @@ services:
     build: ./frontend
     environment:
       - VITE_GCP_PROJECT_ID=${PROJECT_ID}
-      - VITE_USE_AUTH=false
+      - VITE_USE_AUTH=${USE_AUTH}
       - VITE_CHAT_SERVER_URL=http://localhost:8080/api
   nginx:
     image: nginx:latest

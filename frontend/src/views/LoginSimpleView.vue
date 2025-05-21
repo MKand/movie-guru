@@ -14,7 +14,7 @@ export default {
   methods: {
     handleSignIn() {
       let user = document.querySelector('input[type="text"]').value;
-      LoginClientService.login(user, "").then(() => {
+      LoginClientService.login(user).then(() => {
             store.commit('user/logIn', user)
             router.push('/')
             this.loginFailed = false;

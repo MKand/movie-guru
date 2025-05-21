@@ -1,17 +1,23 @@
 import {fetch as fetchPolyfill} from 'whatwg-fetch'
 
+const USE_FIREBASE_AUTH = import.meta.env.VITE_USE_AUTH
+
 class LoginClientService {
-  async login(user, inviteCode) {
-    if(user == ""){
+  async login(userId, inviteCode="", accessToken="") {
+    if(userId == ""){
       throw new Error("User cannot be empty");
     }
     try {
+      const headers = {
+        'Content-Type': 'application/json',
+        'User': userId,
+      }
+      if (USE_FIREBASE_AUTH=="true"){
+        headers['Authorization'] = `Bearer ${accessToken}`
+      }
       const requestOptions = {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'User': user,
-        },
+        headers: headers,
         body: JSON.stringify({ inviteCode }),
         credentials: 'include',
       };

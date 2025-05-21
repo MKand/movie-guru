@@ -3,6 +3,9 @@ import HomeView from '../views/HomeView.vue'
 import {store} from '../stores/index'
 import LoginStatusCheckService from '@/services/LoginStatusCheckService'
 
+
+const USE_FIREBASE_AUTH = import.meta.env.VITE_USE_AUTH
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -13,17 +16,11 @@ const router = createRouter({
       meta: { requiresAuth: true },
     },
     {
-      path: '/about',
-      name: 'about',
-      // route level code-splitting
-      // this generates a separate chunk (About.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () => import('../views/AboutView.vue')
-    },
-    {
       path: "/login",
       name: "login",
-      component: () => import('../views/LoginView.vue'),
+      component: USE_FIREBASE_AUTH === "true" 
+        ? () => import('../views/LoginFirebaseView.vue') 
+        : () => import('../views/LoginSimpleView.vue')
     }
   ]
 })
