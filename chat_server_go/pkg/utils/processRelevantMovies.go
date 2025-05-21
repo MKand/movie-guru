@@ -41,10 +41,13 @@ func FilterRelevantContext(relevantMovies []string, fullContext []*types.MovieCo
 }
 
 func AddPosterURLs(contextDocuments []*types.MovieContext) error {
-	// make this defensive
+	posterBucket := os.Getenv("POSTER_BUCKET")
+	if posterBucket == "" {
+		posterBucket = "generated_posters"
+	}
 	for _, c := range contextDocuments {
 		if c.Poster != "" {
-			c.Poster = fmt.Sprintf("https://storage.googleapis.com/generated_posters/%s", c.Poster)
+			c.Poster = fmt.Sprintf("https://storage.googleapis.com/%s/%s", posterBucket, c.Poster)
 		}
 		if os.Getenv("USE_SIGNED_URL") != "" {
 			var err error
