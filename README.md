@@ -89,7 +89,7 @@ There are 2 important tables:
 - Tools:
   - [Google Cloud CLI](https://cloud.google.com/sdk/docs/install)
   - Docker and Docker Compose
-- Required APIs enabled (will be performed in `setup_local.sh`).
+- Required APIs enabled (will be performed in `setup_cloud.sh`).
 
 ### Clone the Repository
 
@@ -108,7 +108,7 @@ git checkout <current-branch> # Replace with branch name
     gcloud config set project <YOUR_PROJECT_ID>
     ```
 
-2. Inspect the variables in the **set_env_vars.sh** file and replace the values for the variables *PROJECT_ID*, *REGION* (make sure your model is available here), GENKIT_FEEDBACK_REGION (this is optional, and use this only if you have genkit feedback enabled on your project). 
+2. Inspect the variables in the **set_env_vars.sh** file and replace the values for the variables *PROJECT_ID*, *REGION* (make sure your model is available here), GENKIT_FEEDBACK_REGION (this is optional, and use this only if you have genkit feedback enabled on your project).
 
 3. Run setup script **if** the environment is not preprovisioned with the required APIs and infrastructure.
 
