@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ResponseQualityFlowInputSchema, ResponseQualityFlowOutputSchema} from './verifyQualityTypes'
+import {JudgeFlowInputSchema, JudgeFlowOutputSchema} from './judgeFlowTypes'
 import { ai } from './genkitConfig'
 
 /**
@@ -26,22 +26,22 @@ import { ai } from './genkitConfig'
  * Output schema: ResponseQualityFlowOutputSchema
  * 
  */
-export const verifyResponseQuality = ai.prompt( 'verifyQuality');
+export const verifyResponseQuality = ai.prompt( 'judgePrompt');
   
-export const QualityFlow = ai.defineFlow(
+export const JudgeFlow = ai.defineFlow(
   {
-    name: 'qualityFlow',
-    inputSchema: ResponseQualityFlowInputSchema,
-    outputSchema: ResponseQualityFlowOutputSchema
+    name: 'judgeFlow',
+    inputSchema: JudgeFlowInputSchema,
+    outputSchema: JudgeFlowOutputSchema
   },
   async (input) => {
-    const defaultOutput = ResponseQualityFlowOutputSchema.parse({})
+    const defaultOutput = JudgeFlowOutputSchema.parse({})
     try {
       const response = await verifyResponseQuality({ history: input.history });
       const safeOutput = response.output?? defaultOutput
 
       console.log("quality response:", response.output)
-      const output = ResponseQualityFlowOutputSchema.parse(safeOutput);
+      const output = JudgeFlowOutputSchema.parse(safeOutput);
       return output
     } catch (error) {
       console.error("Quality Flow: Error generating response:", error);

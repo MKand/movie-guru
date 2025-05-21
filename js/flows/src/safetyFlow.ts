@@ -40,7 +40,7 @@ export const SafetyPromptInputSchema = z.object({
 ai.defineSchema('SafetyPromptInputSchema', SafetyPromptInputSchema);
 
 export const SafetyPromptOutputSchema = z.strictObject({
-    wrongQuery: z.boolean().optional().default(false),
+    badQuery: z.boolean().optional().default(false),
     safetyIssue: z.boolean().optional().default(false),
     justification: z.string().default("No justification provided by model")
   });

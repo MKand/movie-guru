@@ -14,25 +14,23 @@
 
 package types
 
-type USERINTENT string
-
-const (
-	UNCLEAR          USERINTENT = "UNCLEAR"
-	GREET            USERINTENT = "GREET"
-	END_CONVERSATION USERINTENT = "END_CONVERSATION"
-	REQUEST          USERINTENT = "REQUEST"
-	RESPONSE         USERINTENT = "RESPONSE"
-	ACKNOWLEDGE      USERINTENT = "ACKNOWLEDGE"
-)
-
-type QueryTransformFlowOutput struct {
-	TransformedQuery     string     `json:"transformedQuery, omitempty"`
-	Intent               USERINTENT `json:"userIntent, omitempty"`
-	*ModelOutputMetadata `json:"modelOutputMetadata"`
-}
-
-type QueryTransformFlowInput struct {
+type ChatFlowInput struct {
 	History     []*SimpleMessage `json:"history"`
 	Profile     *UserProfile     `json:"userProfile"`
 	UserMessage string           `json:"userMessage"`
+}
+
+type ChatWrapperOutput struct {
+	Answer               string               `json:"answer"`
+	RelevantMoviesTitles []*RelevantMovie     `json:"relevantMovies"`
+	BadQuery             bool                 `json:"badQuery,omitempty" `
+	ContextDocuments     []*MovieContext      `json:"contextDocuments"`
+	ModelOutputMetadata  *ModelOutputMetadata `json:"modelOutputMetadata"`
+	TraceId              string
+	SpanId               string
+}
+
+type RelevantMovie struct {
+	Title  string `json:"title"`
+	Reason string `json:"reason"`
 }

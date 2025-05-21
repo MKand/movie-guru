@@ -79,22 +79,12 @@ func main() {
 
 func getDependencies(ctx context.Context, metadata *db.Metadata, db *db.MovieDB, url string) *web.Dependencies {
 
-	queryTransformFlowClient, err := wrappers.CreateQueryTransformFlowClient(db, url)
-	if err != nil {
-		slog.ErrorContext(ctx, "error setting up queryTransformFlowClient client")
-
-	}
 	userProfileFlowClient, err := wrappers.CreateUserProfileFlowClient(db, url)
 	if err != nil {
 		slog.ErrorContext(ctx, "error setting up userProfileFlowClient client")
 	}
 
 	movieRetrieverFlowClient := wrappers.CreateMovieRetrieverFlowClient(metadata.RetrieverLength, url)
-
-	movieFlowClient, err := wrappers.CreateMovieFlowClient(db, url)
-	if err != nil {
-		slog.ErrorContext(ctx, "error setting up movieFlowClient client")
-	}
 
 	responseQualityFlowClient, err := wrappers.CreateResponseQualityFlowClient(url)
 	if err != nil {
@@ -104,9 +94,7 @@ func getDependencies(ctx context.Context, metadata *db.Metadata, db *db.MovieDB,
 	chatFlowClient, err := wrappers.CreateChatFlowClient(url)
 
 	deps := &web.Dependencies{
-		QueryTransformFlowClient:  queryTransformFlowClient,
 		UserProfileFlowClient:     userProfileFlowClient,
-		MovieFlowClient:           movieFlowClient,
 		MovieRetrieverFlowClient:  movieRetrieverFlowClient,
 		ResponseQualityFlowClient: responseQualityFlowClient,
 		ChatFlowClient:            chatFlowClient,

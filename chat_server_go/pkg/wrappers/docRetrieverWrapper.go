@@ -28,19 +28,19 @@ import (
 	utils "github.com/movie-guru/pkg/utils"
 )
 
-type MovieRetrieverFlowClient struct {
+type DocRetrieverFlowClient struct {
 	RetrieverLength int
 	URL             string
 }
 
-func CreateMovieRetrieverFlowClient(retrieverLength int, url string) *MovieRetrieverFlowClient {
-	return &MovieRetrieverFlowClient{
+func CreateMovieRetrieverFlowClient(retrieverLength int, url string) *DocRetrieverFlowClient {
+	return &DocRetrieverFlowClient{
 		RetrieverLength: retrieverLength,
 		URL:             url + "/docSearchFlow",
 	}
 }
 
-func (flowClient *MovieRetrieverFlowClient) RetriveDocuments(ctx context.Context, query string) ([]*types.MovieContext, error) {
+func (flowClient *DocRetrieverFlowClient) RetriveDocuments(ctx context.Context, query string) ([]*types.MovieContext, error) {
 
 	rResp, err := flowClient.runFlow(query)
 
@@ -60,7 +60,7 @@ type QueryData struct {
 	Query string `json:"query"`
 }
 
-func (flowClient *MovieRetrieverFlowClient) runFlow(input string) ([]*types.MovieContext, error) {
+func (flowClient *DocRetrieverFlowClient) runFlow(input string) ([]*types.MovieContext, error) {
 	// Marshal the input struct to JSON
 	dataInput := DataInput{
 		Data: &QueryData{

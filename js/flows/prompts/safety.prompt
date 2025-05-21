@@ -1,6 +1,7 @@
 ---
 model: vertexai/gemini-2.0-flash-lite
 config:
+  maxOutputTokens: 40
   safetySettings:
     - category: HARM_CATEGORY_HARASSMENT
       threshold: BLOCK_MEDIUM_AND_ABOVE
@@ -52,7 +53,7 @@ You are the SafetyChecker agent for a MovieApp. Your task is to analyze user mes
         * The user is allowed to express their discontent and provide harsh feedback.
 4.  **Response Format:**
     * "safetyIssue": Indicate with true or false whether the "userMessage" presents a safety issue.
-    * "wrongQuery": Indicate with true or false whether the "userMessage" is a wrong query (out of scope).
+    * "badQuery": Indicate with true or false whether the "userMessage" is a wrong query (out of scope).
     * Provide a brief "justification" explaining your classification. This is **REQUIRED**.
 
 {{ role "user" }}

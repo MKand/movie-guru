@@ -37,20 +37,20 @@ export const OUTCOME = z.enum([
 
   
 // ResponseQualityFlowInput represents the input to the response quality analysis flow.
-export const ResponseQualityFlowInputSchema = z.object({
+export const JudgeFlowInputSchema = z.object({
   history: z.array(SimpleMessageSchema),
 })
 
-export type ResponseQualityFlowInput = z.infer<typeof ResponseQualityFlowInputSchema>;
+export type JudgeFlowInput = z.infer<typeof JudgeFlowInputSchema>;
 
-ai.defineSchema('ResponseQualityFlowInputSchema', ResponseQualityFlowInputSchema);
+ai.defineSchema('JudgeFlowInputSchema', JudgeFlowInputSchema);
 
 // ResponseQualityFlowOutput represents the output of the response quality analysis flow.
-export const ResponseQualityFlowOutputSchema = z.strictObject({
+export const JudgeFlowOutputSchema = z.strictObject({
 	outcome: OUTCOME.default('OUTCOMEUNKNOWN'),
 	userSentiment: USERSENTIMENT.default('SENTIMENTUNKNOWN'),
 })
 
-export type ResponseQualityFlowOutput = z.infer<typeof ResponseQualityFlowOutputSchema>;
-ai.defineSchema('ResponseQualityFlowOutputSchema', ResponseQualityFlowOutputSchema);
+export type JudgeFlowOutput = z.infer<typeof JudgeFlowOutputSchema>;
+ai.defineSchema('JudgeFlowOutputSchema', JudgeFlowOutputSchema);
 

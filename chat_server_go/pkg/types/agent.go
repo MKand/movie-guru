@@ -26,12 +26,6 @@ const (
 	QUOTALIMIT RESULT = "QUOTALIMIT"
 )
 
-type ModelOutputMetadata struct {
-	Justification string `json:"justification" omitempty`
-	SafetyIssue   bool   `json:"safetyIssue" omitempty`
-	QuotaIssue    bool   `json: "quotaIssue" omitempty`
-}
-
 type AgentResponse struct {
 	Answer         string          `json:"answer"`
 	RelevantMovies []string        `json:"relevant_movies"`
@@ -41,6 +35,13 @@ type AgentResponse struct {
 	Preferences    *UserProfile    `json:"preferences"`
 	TraceId        string          `json:"traceId"`
 	SpanId         string          `json:"spanId"`
+}
+
+type ModelOutputMetadata struct {
+	Justification string `json:"justification" omitempty`
+	SafetyIssue   bool   `json:"safetyIssue" omitempty`
+	QuotaIssue    bool   `json: "quotaIssue" omitempty`
+	BadQuery      bool   `json: "badQuery" omitempty`
 }
 
 func NewAgentResponse() *AgentResponse {

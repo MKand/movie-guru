@@ -20,7 +20,6 @@ import { SimpleMessageSchema } from './queryTransformTypes';
 import { UserProfileSchema } from './queryTransformTypes';
 import { RelevantMovieSchema } from './movieFlowTypes';
 import { MovieContextSchema } from './movieFlowTypes';
-import { ModelOutputMetadataSchema } from './modelOutputMetadataTypes';
 
 
 // ChatFlowInput schema
@@ -34,15 +33,17 @@ ai.defineSchema('ChatFlowInputSchema', ChatFlowInputSchema);
 
 
 // ChatFlowOutput schema
-export const ChatOutputSchema = z.strictObject({
+export const ChatFlowOutputSchema = z.strictObject({
   answer: z.string().optional().default(""),
-  relevantMovies: z.array(RelevantMovieSchema).optional().default([]), // Changed to 'relevantMovies' for clarity
-  wrongQuery: z.boolean().optional().default(false),
+  relevantMovies: z.array(RelevantMovieSchema).optional().default([]),
   contextDocuments: z.array(MovieContextSchema).optional().default([]),
-  modelOutputMetadata: ModelOutputMetadataSchema.default(ModelOutputMetadataSchema.parse({}))
+  badQuery: z.boolean().optional().default(false),
+  safetyIssue: z.boolean().optional().default(false),
+  quotaIssue: z.boolean().optional().default(false),
+  justification: z.string().default("No justification provided"),
 });
 
-export type ChatFlowOutput = z.infer<typeof ChatOutputSchema>;
-ai.defineSchema('ChatOutputSchema', ChatOutputSchema);
+export type ChatFlowOutput = z.infer<typeof ChatFlowOutputSchema>;
+ai.defineSchema('ChatOutputSchema', ChatFlowOutputSchema);
 
   

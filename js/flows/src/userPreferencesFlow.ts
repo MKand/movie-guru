@@ -35,6 +35,7 @@ import { GenerationBlockedError } from 'genkit';
  * 
  * ATTENTION: We are currently testing an experimental version of the userPreference prompt with 50% of our users. If this is performing well, we should roll it out to 100%.
  */
+
 export const extractUserPreferencesV1 = ai.prompt('userPreference');
 export const extractUserPreferencesExperimental = ai.prompt('userPreference', {variant: 'experimental'});
 
@@ -73,12 +74,12 @@ export const UserPreferenceFlow = ai.defineFlow(
     
       if(error instanceof GenerationBlockedError){
         console.error("UserPreferenceFlow: GenerationBlockedError generating response:", error.message);
-        defaultOutput.modelOutputMetadata.safetyIssue = true;
+        defaultOutput.safetyIssue = true;
         return defaultOutput;
       }
       else if(error instanceof Error && (error.message.includes('429') || error.message.includes('RESOURCE_EXHAUSTED'))){
         console.error("UserPreferenceFlow: There is a quota issue:", error.message);
-        defaultOutput.modelOutputMetadata.quotaIssue = true;
+        defaultOutput.quotaIssue = true;
         return defaultOutput;
         }
       else{

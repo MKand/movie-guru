@@ -23,37 +23,35 @@ import (
 	"log/slog"
 	"net/http"
 
-	db "github.com/movie-guru/pkg/db"
 	types "github.com/movie-guru/pkg/types"
 )
 
-type QueryTransformFlowClient struct {
-	MovieDB *db.MovieDB
-	URL     string
+type ResponseQualityFlowClient struct {
+	URL string
 }
 
-func CreateQueryTransformFlowClient(db *db.MovieDB, URL string) (*QueryTransformFlowClient, error) {
-	return &QueryTransformFlowClient{
-		MovieDB: db,
-		URL:     URL + "/queryTransformFlow",
+func CreateResponseQualityFlowClient(URL string) (*ResponseQualityFlowClient, error) {
+	return &ResponseQualityFlowClient{
+		URL: URL + "/judgeFlow",
 	}, nil
 }
 
-func (flowClient *QueryTransformFlowClient) Run(history []*types.SimpleMessage, preferences *types.UserProfile) (*types.QueryTransformFlowOutput, error) {
-	queryTransformInput := types.QueryTransformFlowInput{Profile: preferences, History: history, UserMessage: history[len(history)-1].Content}
-	resp, err := flowClient.runFlow(&queryTransformInput)
+func (flowClient *ResponseQualityFlowClient) Run(ctx context.Context, history []*types.SimpleMessage, user string) (*types.ResponseQualityOutput, error) {
+	responseQualityFlowInput := types.ResponseQualityFlowInput{History: history}
+	resp, err := flowClient.runFlow(&responseQualityFlowInput)
 	if err != nil {
 		return nil, err
 	}
 	return resp, nil
 }
 
-func (flowClient *QueryTransformFlowClient) runFlow(input *types.QueryTransformFlowInput) (*types.QueryTransformFlowOutput, error) {
+func (flowClient *ResponseQualityFlowClient) runFlow(input *types.ResponseQualityFlowInput) (*types.ResponseQualityOutput, error) {
+	ctx := context.Background()
+
 	// Marshal the input struct to JSON
 	dataInput := DataInput{
 		Data: input,
 	}
-
 	inputJSON, err := json.Marshal(dataInput)
 	if err != nil {
 		return nil, fmt.Errorf("error marshaling input to JSON: %w", err)
@@ -64,20 +62,23 @@ func (flowClient *QueryTransformFlowClient) runFlow(input *types.QueryTransformF
 		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/json")
-
 	client := &http.Client{}
-	ctx := context.Background()
 	resp, err := client.Do(req)
 	if err != nil {
 		slog.ErrorContext(ctx, "QualityFlow: Error sending request to Flows", err.Error(), err)
 		return nil, err
 	}
+
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		slog.ErrorContext(ctx, "QualityFlow: Genkit returned an Error", "errorCode", resp.StatusCode)
-		return nil, fmt.Errorf("genkit server returned error: %s (%d)", http.StatusText(resp.StatusCode), resp.StatusCode)
+		bodyBytes, _ := io.ReadAll(resp.Body)
+		bodyString := string(bodyBytes)
+
+		slog.ErrorContext(ctx, "QualityFlow: Genkit returned an Error", "errorCode", resp.StatusCode, "body", bodyString)
+		return nil, fmt.Errorf("genkit returned error: %s (%d)", http.StatusText(resp.StatusCode), resp.StatusCode)
 	}
+
 	var result struct {
-		Result *types.QueryTransformFlowOutput `json:"result"`
+		Result *types.ResponseQualityOutput `json:"result"`
 	}
 	defer resp.Body.Close()
 

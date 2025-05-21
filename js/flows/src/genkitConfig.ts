@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { gemini20Flash001, gemini20Flash, vertexAI } from '@genkit-ai/vertexai';
+import { gemini20Flash, vertexAI } from '@genkit-ai/vertexai';
 import { enableFirebaseTelemetry } from '@genkit-ai/firebase';
 import { genkitEval, GenkitMetric } from "@genkit-ai/evaluator";
 
@@ -27,11 +27,6 @@ import { genkit } from 'genkit';
 const gemini20: boolean = parseBooleanfromField(process.env.USEGEMINIFLASH2) 
 const LOCATION = process.env.LOCATION || 'us-central1';
 const PROJECT_ID = process.env.PROJECT_ID;
-
-export var model = gemini20Flash
-if(gemini20){
-  model = gemini20Flash001
-}
 
 enableFirebaseTelemetry({
   "forceDevExport": true, // NOTE: Set explicitly for exporting from Cloud Shell local environment - do not ship this value to production.
@@ -53,7 +48,7 @@ export const safetySettings = [
 ];
 
 
-console.log("Using model", model.name)
+console.log("Using default model:", gemini20Flash.name, ", unless overriden by dotPrompt")
 export const ai = genkit({
   plugins: [vertexAI({ location: LOCATION, projectId: PROJECT_ID }),
     genkitEval({
@@ -61,5 +56,5 @@ export const ai = genkit({
       metrics: [GenkitMetric.MALICIOUSNESS, GenkitMetric.FAITHFULNESS],
     }),
   ],
-  model: model, // set default model
+  model: gemini20Flash, // set default model
 });

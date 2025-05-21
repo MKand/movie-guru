@@ -19,11 +19,6 @@ type UserProfileFlowInput struct {
 	AgentMessage string `json:"agentMessage"`
 }
 
-type UserProfileFlowOutput struct {
-	ProfileChangeRecommendations []*ProfileChangeRecommendation `json:"profileChangeRecommendations"`
-	*ModelOutputMetadata         `json:"modelOutputMetadata"`
-}
-
 type ProfileChangeRecommendation struct {
 	Item     string               `json:"item"`
 	Reason   string               `json:"reason"`
@@ -31,19 +26,9 @@ type ProfileChangeRecommendation struct {
 	Sentiment
 }
 
-type UserProfileOutput struct {
-	UserProfile *UserProfile `json:"userProfile"`
-	*ModelOutputMetadata
-}
-
-func NewUserProfileFlowOuput() *UserProfileFlowOutput {
-	return &UserProfileFlowOutput{
-		ProfileChangeRecommendations: make([]*ProfileChangeRecommendation, 5),
-		ModelOutputMetadata: &ModelOutputMetadata{
-			Justification: "",
-			SafetyIssue:   false,
-		},
-	}
+type UserProfileWrapperOutput struct {
+	UserProfile         *UserProfile         `json:"userProfile"`
+	ModelOutputMetadata *ModelOutputMetadata `json:"modelOutputMetadata"`
 }
 
 type MovieFeatureCategory string

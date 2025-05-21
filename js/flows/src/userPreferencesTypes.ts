@@ -16,7 +16,6 @@
 
 import { z } from 'genkit';
 import { ai } from './genkitConfig'
-import { ModelOutputMetadataSchema } from './modelOutputMetadataTypes';
 
 // Enums as Zod Enums
 const MovieFeatureCategory = z.enum(['OTHER', 'ACTOR', 'DIRECTOR', 'GENRE']);
@@ -46,20 +45,23 @@ ai.defineSchema('UserPreferenceFlowInputSchema', UserPreferenceFlowInputSchema);
 // HINT: Challenge 3. This is the output schema for the userProfile Flow. 
 // Compare this to the schema in the error message.
 
+export const UserPreferencePromptOutputSchema = z.strictObject({
+  profileChangeRecommendations: z.array(ProfileChangeRecommendationSchema).optional().default([]),
+  justification: z.string().default("No justification provided"),
+});
+
+export type UserPreferencePromptOutput = z.infer<typeof UserPreferencePromptOutputSchema>
+
 export const UserPreferenceFlowOutputSchema = z.strictObject({
   profileChangeRecommendations: z.array(ProfileChangeRecommendationSchema).optional().default([]),
-  modelOutputMetadata: z.object({
-    justification: z.string().default("Unknown"),
-    safetyIssue: z.boolean().optional().default(false),
-    quotaIssue: z.boolean().optional().default(false)
-  }).default({
-    justification: "Unknown",
-    safetyIssue: false,
-    quotaIssue: false
-  }),
+  safetyIssue: z.boolean().optional().default(false),
+  quotaIssue: z.boolean().optional().default(false),
+  justification: z.string().default("No justification provided"),
+
 });
 
 export type UserPreferenceFlowOutput = z.infer<typeof UserPreferenceFlowOutputSchema>
 
+ai.defineSchema('UserPreferencePromptOutputSchema', UserPreferencePromptOutputSchema);
 ai.defineSchema('UserPreferenceFlowOutputSchema', UserPreferenceFlowOutputSchema);
 

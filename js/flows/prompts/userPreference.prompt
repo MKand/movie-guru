@@ -1,6 +1,7 @@
 ---
 model: vertexai/gemini-2.0-flash
 config:
+  maxOutputTokens: 100
   safetySettings:
     - category: HARM_CATEGORY_HARASSMENT
       threshold: BLOCK_MEDIUM_AND_ABOVE
@@ -13,7 +14,7 @@ config:
 input:
   schema: UserPreferenceFlowInputSchema
 output:
-  schema: UserPreferenceFlowOutputSchema
+  schema: UserPreferencePromptOutputSchema
 ---
 
 {{ role "system" }}
@@ -38,7 +39,6 @@ Guidelines:
 Respond with the following:
 
   *   a *justification* about why you created the query this way.
-  *   a *safetyIssue* returned as true if the query is considered dangerous. A query is considered dangerous if the user is asking you to tell about something dangerous. However, asking for movies with dangerous themes is not considered dangerous.
   *   a list of *profileChangeRecommendations* that are a list of extracted strong likes or dislikes with the following fields: category, item, reason, sentiment.
 
 {{ role "user" }}

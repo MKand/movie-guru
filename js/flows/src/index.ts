@@ -24,7 +24,7 @@ import { DocSearchFlow } from './docRetriever'
 
 import { MovieFlow } from './movieFlow'
 
-import { QualityFlow } from './verifyQualityFlow'
+import { JudgeFlow } from './judgeFlow'
 
 import { ChatFlow } from './chatFlow';
 
@@ -36,5 +36,5 @@ export function parseBooleanfromField(field: string|null|undefined): boolean{
 
 
 startFlowServer({
-    flows: [UserPreferenceFlow, QueryTransformFlow, MovieFlow, DocSearchFlow, QualityFlow, ChatFlow, SafetyIssueFlow],
+    flows: [UserPreferenceFlow, QueryTransformFlow, MovieFlow, DocSearchFlow, JudgeFlow, ChatFlow, SafetyIssueFlow],
   });
