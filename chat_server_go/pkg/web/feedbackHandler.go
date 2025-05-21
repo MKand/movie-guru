@@ -41,7 +41,7 @@ func createFeedbackHandler(URL string) http.HandlerFunc {
 		if r.Method == "POST" {
 			ctx := r.Context()
 
-			if URL == "" {
+			if URL == "NONE" {
 				slog.InfoContext(ctx, "No Feedback URL found. Not forwarding feedback to Genkit")
 
 				json.NewEncoder(w).Encode("No Feedback URL found. Not forwarding feedback to Genkit")
@@ -102,7 +102,7 @@ func createAcceptanceHandler(URL string) http.HandlerFunc {
 		if r.Method == "POST" {
 			ctx := r.Context()
 
-			if URL == "" {
+			if URL == "NONE" {
 				slog.InfoContext(ctx, "No Feedback URL found. Not forwarding feedback to Genkit")
 
 				json.NewEncoder(w).Encode("No Feedback URL found. Not forwarding feedback to Genkit")

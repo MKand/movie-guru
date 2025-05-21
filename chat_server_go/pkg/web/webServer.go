@@ -17,15 +17,13 @@ package web
 import (
 	"context"
 	"log/slog"
-	"os"
-	"strconv"
 
 	"net/http"
 
 	"strings"
 
-	"github.com/movie-guru/pkg/db"
 	metrics "github.com/movie-guru/pkg/metrics"
+	"github.com/movie-guru/pkg/types"
 )
 
 func enableCORS(allowedOrigins []string, next http.Handler, corsStrict bool) http.Handler {
@@ -63,44 +61,30 @@ func enableCORS(allowedOrigins []string, next http.Handler, corsStrict bool) htt
 	})
 }
 
-func StartServer(ctx context.Context, ulh *UserLoginHandler, metadata *db.Metadata, deps *Dependencies) error {
+func StartServer(ctx context.Context, ulh *UserLoginHandler, metadata *types.Metadata, deps *Dependencies) error {
 	setupSessionStore(ctx)
 
-	corsOrigins := strings.Split(metadata.CorsOrigin, ",")
+	corsOrigins := strings.Split(metadata.CorsOrigins, ",")
 	for i := range corsOrigins {
 		corsOrigins[i] = strings.TrimSpace(corsOrigins[i])
 		slog.InfoContext(ctx, "Setting cors origin", slog.Any("origin", corsOrigins[i]))
 
 	}
 
-	FEEDBACK_URL := os.Getenv("FEEDBACK_URL")
 	loginMeters := metrics.NewLoginMeters()
 	hcMeters := metrics.NewHCMeters()
 	chatMeters := metrics.NewChatMeters()
-	useAuth, err := strconv.ParseBool(os.Getenv("USE_AUTH"))
-	if err != nil {
-		useAuth = false
-	}
-	slog.Info("USE AUTH?", slog.Bool("useAuth", useAuth))
-
-	// STRICT CORS
-	corsStrict, err := strconv.ParseBool(os.Getenv("CORS_STRICT"))
-	if err != nil {
-		corsStrict = false
-	}
-	slog.Info("STRICT CORS?", slog.Bool("STRICTCORS", corsStrict))
 
 	mux := http.NewServeMux()
-
 	mux.HandleFunc("/", createHealthCheckHandler(deps, hcMeters))
 	mux.HandleFunc("/chat", createChatHandler(deps, chatMeters, metadata))
-	mux.HandleFunc("/feedback", createFeedbackHandler(FEEDBACK_URL))
-	mux.HandleFunc("/acceptance", createAcceptanceHandler(FEEDBACK_URL))
+	mux.HandleFunc("/feedback", createFeedbackHandler(metadata.FeedbackURL))
+	mux.HandleFunc("/acceptance", createAcceptanceHandler(metadata.FeedbackURL))
 	mux.HandleFunc("/history", createHistoryHandler(metadata))
 	mux.HandleFunc("/preferences", createPreferencesHandler(deps.DB))
 	mux.HandleFunc("/startup", createStartupHandler(deps))
-	mux.HandleFunc("/login", createLoginHandler(ulh, loginMeters, metadata, useAuth))
+	mux.HandleFunc("/login", createLoginHandler(ulh, loginMeters, metadata))
 	mux.HandleFunc("/checklogin", checkloginHandler)
 	mux.HandleFunc("/logout", logoutHandler)
-	return http.ListenAndServe(":8080", enableCORS(corsOrigins, mux, corsStrict))
+	return http.ListenAndServe(":8080", enableCORS(corsOrigins, mux, metadata.StrictCors))
 }

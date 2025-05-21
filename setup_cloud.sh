@@ -24,7 +24,6 @@ fi
 echo -e "\e[93mUsing REGION: $REGION\e[0m"
 
 SERVICE_ACCOUNT_EMAIL="$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com"
-POSTER_BUCKET_NAME="gs://${PROJECT_ID}_posters"
 
 echo -e "\e[95mEnabling required APIs for project: $PROJECT_ID\e[0m"
 
@@ -67,37 +66,3 @@ if [[ $? -ne 0 ]]; then  # Check exit code of the gcloud command
 else
     echo -e "\e[95mService account $SERVICE_ACCOUNT_EMAIL already exists.\e[0m"
 fi
-
-# Check if the bucket exists
-gsutil ls "$POSTER_BUCKET_NAME" > /dev/null 2>&1  # Suppress output
-
-if [[ $? -ne 0 ]]; then  # Check exit code of gsutil ls
-    echo -e "\e[95mBucket $POSTER_BUCKET_NAME for posters does not exist. Creating...\e[0m"
-    gsutil mb -l "$REGION" "$POSTER_BUCKET_NAME"
-else
-    echo -e "\e[95mBucket $POSTER_BUCKET_NAME for posters already exists.\e[0m"
-fi
-
-echo -e "\e[92mDownloading and unzipping posters from the external archive..\e[0m"
-
-# Download the zip file with posters
-curl -o dataset/posters_small.zip https://storage.googleapis.com/movie-guru-posters/posters_small.zip
-
-# Unzip into dataset/posters
-unzip dataset/posters_small.zip -d . > /dev/null 2>&1  # Suppress output
-
-# Upload posters to bucket
-echo -e "\e[92mUploading posters to bucket and deleting local posters\e[0m"
-
-# Delete zip file
-rm dataset/posters_small.zip 
-
-gcloud storage cp ./dataset/posters_small/* $POSTER_BUCKET_NAME > /dev/null 2>&1  # Suppress output
-
-rm -rf dataset/posters_small
-
-echo -e "\e[93mMaking posters publicly readable\e[0m"
-
-gcloud storage buckets add-iam-policy-binding $POSTER_BUCKET_NAME \
-  --member="allUsers" \
-  --role="roles/storage.objectViewer"

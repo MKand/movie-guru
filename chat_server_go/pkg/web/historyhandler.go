@@ -21,12 +21,11 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/movie-guru/pkg/db"
 	types "github.com/movie-guru/pkg/types"
 	"github.com/redis/go-redis/v9"
 )
 
-func createHistoryHandler(metadata *db.Metadata) http.HandlerFunc {
+func createHistoryHandler(metadata *types.Metadata) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		var err error
@@ -95,7 +94,7 @@ func getHistory(ctx context.Context, user string) (*types.ChatHistory, error) {
 	return ch, nil
 }
 
-func saveHistory(ctx context.Context, history *types.ChatHistory, user string, metadata *db.Metadata) error {
+func saveHistory(ctx context.Context, history *types.ChatHistory, user string, metadata *types.Metadata) error {
 	history.Trim(metadata.HistoryLength)
 	redisContext, cancel := context.WithTimeout(ctx, 3*time.Second)
 	defer cancel()

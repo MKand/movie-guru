@@ -12,17 +12,19 @@
       - [Postgres](#postgres)
   - [Getting Started](#getting-started)
     - [Prerequisites](#prerequisites)
+    - [Clone the Repository](#clone-the-repository)
     - [Environment setup](#environment-setup)
     - [Firebase setup](#firebase-setup)
-    - [Database Setup](#database-setup)
-      - [Run the database service](#run-the-database-service)
-      - [Populate the database (Optional)](#populate-the-database-optional)
     - [Run the Application](#run-the-application)
     - [Clean up](#clean-up)
 
 ## About Movie Guru
 
-**Genkit version**: 0.9.12 for Node.js
+Genkit version: 1.7.0 for Node.js
+
+Gemini Models: Gemini 2.0 Flash amd Flash Lite
+
+Embedding Models: textEmbedding005
 
 [![Movie Guru](https://img.youtube.com/vi/l_KhN3RJ8qA/0.jpg)](https://youtu.be/l_KhN3RJ8qA)
 
@@ -97,11 +99,6 @@ cd movie-guru
 git checkout <current-branch> # Replace with branch name
 ```
 
-### Firebase setup
-
-1. Go to the firebase console. Follow the steps [here](https://firebase.google.com/docs/projects/use-firebase-with-existing-cloud-project#how-to-add-firebase_console).
-1. Create a new firebase web app and copy the firebase config variables into **set_env_vars.sh**. (FIREBASE_GCP_ID is the project ID)
-
 ### Environment setup
 
 1. Authenticate with Google Cloud (unnecessary if running from Cloud Shell)
@@ -111,95 +108,38 @@ git checkout <current-branch> # Replace with branch name
     gcloud config set project <YOUR_PROJECT_ID>
     ```
 
-1. Run setup script.
+2. Inspect the variables in the **set_env_vars.sh** file and replace the values for the variables *PROJECT_ID*, *REGION* (make sure your model is available here), GENKIT_FEEDBACK_REGION (this is optional, and use this only if you have genkit feedback enabled on your project). 
+
+3. Run setup script **if** the environment is not preprovisioned with the required APIs and infrastructure.
 
     ```sh
-    chmod +x setup_local.sh
-    ./setup_local.sh --skip-infra #gHack creates the infra for you
+    chmod +x setup_cloud.sh
+    ./setup_cloud.sh
     ```
 
 This enables the required APIs and creates the necessary service account with roles.
 
-### Database Setup
+### Firebase setup
 
-#### Run the database service
-
-1. Create a shared network for all the app containers we will use
-
-    ```sh
-    docker network create db-shared-network
-    ```
-
-1. Setup local DB
-We'll setup a local *pgvector* db and an *Adminer* instance
-
-    ```sh
-    docker compose -f docker-compose-pgvector.yaml up -d
-    ```
-
-#### Populate the database (Optional)
-
-At this stage, there will be a few tables, with data pre-loaded.
-You can either choose to either reload the movies data into the table again or skip ahead to the [Run the application](#run-the-application) step.
-Skipping ahead will save you approx. 20 minutes of the setup time.
-
-Navigate to *localhost:8082*, to access the db via *Adminer*. Use the main user credentials (user name: main, password: main).
-Make sure you set `System` as `PostgresSQL` and `Server` as `db`, and `Database` as `fake-movies-db`.
-
-1. Populate the movie table
-
-    ```sh
-    export PROJECT_ID=<YOUR_PROJECT_ID>
-    export LOCATION=<YOUR_DESIRED_GCLOUD_REGION> 
-    ```
-
-1. Run the javascript indexer so it can add movies data into the database. The database comes pre-populated with the required data, but you can choose to re-add the data. The execution of this intentionally slowed down to stay below the rate-limits.
-
-    ```sh
-    docker compose -f docker-compose-indexer.yaml up --build -d 
-    ```
-
-    This takes about 10-15 minutes to run, so be patient. The embedding creation process is slowed down intentionally to ensure we stay under the rate limit.
-
-1. Shut down the indexer container.
-
-    ```sh
-    docker compose -f docker-compose-indexer.yaml down
-    ```
-
-1. Verify the number of entries in the DB.
-There should be **652** entries in the movies table.
-
-    ```sql
-    SELECT COUNT(*)
-    FROM "movies";
-    ```
-
-Once all the required data is added, it is time to run the application that consists of the **frontend**, the **webserver**, the **genkit flows** server and the **redis cache**. These will be running locally in containers. The servers communicate with the **postgres DB** also running locally in a container.
+1. Go to the firebase console and open up the project with the same name as the project ID of the GCP project. Follow the steps [here](https://firebase.google.com/docs/projects/use-firebase-with-existing-cloud-project#how-to-add-firebase).
 
 ### Run the Application
 
-1. Make sure the env variables are in the execution context of docker compose.
+1. Start the application services. This can take upto 10 minutes are we are building many docker images for all the application containers (frontend, webserver, genkit flows, databases).
 
     ```sh
-    source set_env_vars.sh
+    chmod +x start_app.sh
+    ./start_app.sh
     ```
 
-2. Start the application services. This can take upto 10 minutes are we are building many docker images for all the application containers (frontend, webserver, genkit flows).
-
-    ```sh
-    docker compose up --build
-    ```
-
-3. Access the Frontend Application Open http://localhost:8080 in your browser.
+1. Access the Frontend Application Open http://localhost:8080 in your browser.
 
 ### Clean up
 
 Run the following commands:
 
 ```sh
-  docker compose down
-  docker compose -f docker-compose-pgvector.yaml down
+  ./stop_app.sh
   docker network rm db-shared-network
   rm pgvector/init_substituted.sql
 ```

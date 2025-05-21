@@ -29,14 +29,14 @@ import (
 )
 
 type DocRetrieverFlowClient struct {
-	RetrieverLength int
-	URL             string
+	URL              string
+	PosterBucketName string
 }
 
-func CreateMovieRetrieverFlowClient(retrieverLength int, url string) *DocRetrieverFlowClient {
+func CreateMovieRetrieverFlowClient(url string, posterBucketName string) *DocRetrieverFlowClient {
 	return &DocRetrieverFlowClient{
-		RetrieverLength: retrieverLength,
-		URL:             url + "/docSearchFlow",
+		URL:              url + "/docSearchFlow",
+		PosterBucketName: posterBucketName,
 	}
 }
 
@@ -48,7 +48,7 @@ func (flowClient *DocRetrieverFlowClient) RetriveDocuments(ctx context.Context, 
 		return nil, err
 	}
 
-	err = utils.AddPosterURLs(rResp)
+	err = utils.AddPosterURLs(rResp, flowClient.PosterBucketName)
 	if err != nil {
 		return nil, err
 	}

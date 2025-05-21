@@ -22,6 +22,7 @@ import (
 
 	"github.com/movie-guru/pkg/db"
 	met "github.com/movie-guru/pkg/metrics"
+	"github.com/movie-guru/pkg/types"
 	web "github.com/movie-guru/pkg/web"
 	wrappers "github.com/movie-guru/pkg/wrappers"
 )
@@ -30,14 +31,6 @@ func main() {
 
 	ctx := context.Background()
 
-	// Load environment variables
-	URL := os.Getenv("FLOWS_URL")
-	metricsEnabled, err := strconv.ParseBool(os.Getenv("ENABLE_METRICS"))
-
-	if err != nil {
-		slog.WarnContext(ctx, "Error getting ENABLE_METRICS, setting to false.", slog.Any("error", err))
-		metricsEnabled = false
-	}
 	// Set up database
 	movieAgentDB, err := db.GetDB()
 	if err != nil {
@@ -50,7 +43,7 @@ func main() {
 	web.TestRedis()
 
 	// Fetch metadata
-	metadata, err := movieAgentDB.GetMetadata(ctx, os.Getenv("APP_VERSION"))
+	metadata, err := getMetadata(ctx)
 	if err != nil {
 		slog.ErrorContext(ctx, "Error getting metadata", slog.Any("error", err))
 		os.Exit(1)
@@ -58,10 +51,10 @@ func main() {
 
 	// Set up dependencies
 	ulh := web.NewUserLoginHandler(metadata.TokenAudience, movieAgentDB)
-	deps := getDependencies(ctx, metadata, movieAgentDB, URL)
+	deps := getDependencies(ctx, metadata, movieAgentDB)
 
 	// Start telemetry if metrics are enabled
-	if metricsEnabled {
+	if metadata.EnableMetrics {
 		if shutdown, err := met.SetupOpenTelemetry(ctx); err != nil {
 			slog.ErrorContext(ctx, "Error setting up OpenTelemetry", slog.Any("error", err))
 			os.Exit(1)
@@ -77,21 +70,21 @@ func main() {
 	}
 }
 
-func getDependencies(ctx context.Context, metadata *db.Metadata, db *db.MovieDB, url string) *web.Dependencies {
+func getDependencies(ctx context.Context, metadata *types.Metadata, db *db.MovieDB) *web.Dependencies {
 
-	userProfileFlowClient, err := wrappers.CreateUserProfileFlowClient(db, url)
+	userProfileFlowClient, err := wrappers.CreateUserProfileFlowClient(db, metadata.FlowsURL)
 	if err != nil {
 		slog.ErrorContext(ctx, "error setting up userProfileFlowClient client")
 	}
 
-	movieRetrieverFlowClient := wrappers.CreateMovieRetrieverFlowClient(metadata.RetrieverLength, url)
+	movieRetrieverFlowClient := wrappers.CreateMovieRetrieverFlowClient(metadata.FlowsURL, metadata.PosterBucketName)
 
-	responseQualityFlowClient, err := wrappers.CreateResponseQualityFlowClient(url)
+	responseQualityFlowClient, err := wrappers.CreateResponseQualityFlowClient(metadata.FlowsURL)
 	if err != nil {
 		slog.ErrorContext(ctx, "error setting up responseQualityFlowClient client")
 	}
 
-	chatFlowClient, err := wrappers.CreateChatFlowClient(url)
+	chatFlowClient, _ := wrappers.CreateChatFlowClient(metadata.FlowsURL, metadata.PosterBucketName)
 
 	deps := &web.Dependencies{
 		UserProfileFlowClient:     userProfileFlowClient,
@@ -101,4 +94,97 @@ func getDependencies(ctx context.Context, metadata *db.Metadata, db *db.MovieDB,
 		DB:                        db,
 	}
 	return deps
+}
+
+func getMetadata(ctx context.Context) (*types.Metadata, error) {
+	metadata := &types.Metadata{
+		UseAuth:              false,
+		EnableMetrics:        false,
+		StrictCors:           false,
+		MaxUserMessageLength: 500,
+		HistoryLength:        10,
+		PosterBucketName:     "generated_posters",
+	}
+
+	posterBucketName := os.Getenv("POSTER_BUCKET_NAME")
+	if posterBucketName != "" {
+		metadata.PosterBucketName = posterBucketName
+	}
+	// appVersion := os.Getenv("APP_VERSION")
+	flowsURL := os.Getenv("FLOWS_URL")
+	if flowsURL == "" {
+		slog.ErrorContext(ctx, "No FlowsURL found in environment variables")
+		os.Exit(1)
+	}
+	metadata.FlowsURL = flowsURL
+
+	feedbackURL := os.Getenv("FEEDBACK_URL")
+	if feedbackURL == "" {
+		metadata.FeedbackURL = "NONE"
+		slog.WarnContext(ctx, "No FeedbackURL found in environment variables. No feedback will be sent to Genkit.")
+	} else {
+		metadata.FeedbackURL = feedbackURL
+	}
+
+	enableMetrics, err := strconv.ParseBool(os.Getenv("ENABLE_METRICS"))
+	if err == nil && enableMetrics {
+		metadata.EnableMetrics = true
+	}
+
+	useAuth, err := strconv.ParseBool(os.Getenv("USE_AUTH"))
+	if err == nil && useAuth {
+		metadata.UseAuth = true
+		tokenAudience := os.Getenv("TOKEN_AUDIENCE")
+		if tokenAudience == "" {
+			slog.ErrorContext(ctx, "No TokenAudience found in environment variables")
+			os.Exit(1)
+		}
+		metadata.TokenAudience = tokenAudience
+
+		corsOrigins := os.Getenv("CORS_ORIGINS")
+		strictCors, err := strconv.ParseBool(os.Getenv("STRICT_CORS"))
+		if err != nil && strictCors {
+			metadata.StrictCors = true
+		}
+		if corsOrigins == "" && metadata.StrictCors {
+			slog.ErrorContext(ctx, "No CORS_ORIGINS found in environment variables")
+			os.Exit(1)
+		}
+		metadata.CorsOrigins = corsOrigins
+
+		maxUserMessageLength := os.Getenv("MAX_USER_MESSAGE_LENGTH")
+		if maxUserMessageLength != "" {
+			metadata.MaxUserMessageLength, err = strconv.Atoi(maxUserMessageLength)
+			if err != nil {
+				slog.ErrorContext(ctx, "Error parsing MAX_USER_MESSAGE_LENGTH", slog.Any("error", err))
+				os.Exit(1)
+			}
+		}
+
+		historyLength := os.Getenv("HISTORY_LENGTH")
+		if historyLength != "" {
+			metadata.HistoryLength, err = strconv.Atoi(historyLength)
+			if err != nil {
+				slog.ErrorContext(ctx, "Error parsing HISTORY_LENGTH", slog.Any("error", err))
+				os.Exit(1)
+			}
+		}
+	}
+
+	slog.InfoContext(ctx, "Metadata",
+		slog.String("FlowsURL", metadata.FlowsURL),
+		slog.String("PosterBucketName", metadata.PosterBucketName),
+		slog.String("FeedbackURL", metadata.FeedbackURL),
+		slog.Bool("EnableMetrics", metadata.EnableMetrics),
+		slog.Int("MaxUserMessageLength", metadata.MaxUserMessageLength),
+		slog.Int("HistoryLength", metadata.HistoryLength),
+	)
+
+	slog.InfoContext(ctx, "Auth Metadata",
+		slog.Bool("UseAuth", metadata.UseAuth),
+		slog.String("TokenAudience", metadata.TokenAudience),
+		slog.String("CorsOrigins", metadata.CorsOrigins),
+		slog.Bool("StrictCors", metadata.StrictCors),
+	)
+	return metadata, nil
 }

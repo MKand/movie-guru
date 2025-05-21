@@ -28,7 +28,8 @@ import (
 )
 
 type ChatFlowClient struct {
-	URL string
+	URL              string
+	PosterBucketName string
 }
 
 type ChatFlowOutput struct {
@@ -41,9 +42,10 @@ type ChatFlowOutput struct {
 	QuotaIssue           bool                   `json:"quotaIssue,omitempty"`
 }
 
-func CreateChatFlowClient(URL string) (*ChatFlowClient, error) {
+func CreateChatFlowClient(URL string, posterBucketName string) (*ChatFlowClient, error) {
 	return &ChatFlowClient{
-		URL: URL + "/chatFlow",
+		URL:              URL + "/chatFlow",
+		PosterBucketName: posterBucketName,
 	}, nil
 }
 
@@ -54,7 +56,7 @@ func (flowClient *ChatFlowClient) Run(history []*types.SimpleMessage, preference
 		return nil, err
 	}
 
-	err = utils.AddPosterURLs(resp.ContextDocuments)
+	err = utils.AddPosterURLs(resp.ContextDocuments, flowClient.PosterBucketName)
 	if err != nil {
 		return nil, err
 	}
