@@ -110,6 +110,7 @@ git checkout schnecle-genkit-monitoring-dogfood
 1. Navigate to the Firebase Console. 
 1. Using the same project you are using in Cloud Shell, set up a new web app in the Firebase Console. Follow the steps [here](https://firebase.google.com/docs/projects/use-firebase-with-existing-cloud-project#how-to-add-firebase_console).
 1. Create a new firebase web app and copy the firebase config variables into **set_env_vars.sh**.
+1. Update your project to Blaze (pay-as-you-go) plan.
 
 ### Environment setup
 
