@@ -57,7 +57,7 @@ ai.defineSchema('MovieFlowInputSchema', MovieFlowInputSchema);
 // MovieFlowOutput schema
 export const MovieFlowOutputSchema = z.strictObject({
   response: z.string().default(""),
-  relevantMovies: z.array(RelevantMovieSchema).optional().default([]), // Changed to 'relevantMovies' for clarity
+  relevantMovies: z.array(RelevantMovieSchema).optional().default([]),
   justification: z.string().default("No justification provided")
 });
 

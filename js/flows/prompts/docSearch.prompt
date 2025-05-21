@@ -4,6 +4,7 @@ config:
   temperature: 0.5
   topK: 32
   topP: 0.80
+  maxOutputTokens: 512
   safetySettings:
     - category: HARM_CATEGORY_HARASSMENT
       threshold: BLOCK_MEDIUM_AND_ABOVE
@@ -65,12 +66,18 @@ Determine the appropriate search category for the query: KEYWORD, VECTOR, or MIX
     Examples of transformed KEYWORD queries:
     * IMPORTANT: Remove all special characters (e.g.: @, #, $,%,', etc.) from the names or titles before using ILIKE, leaving only letters, numbers, and spaces. Pay special care that you remove apostrophes from titles.
 
- -   Input: "movie with rating greater than 4"
+    -   Input: "movie with rating greater than 4"
+        Output:
+                searchCategory: KEYWORD
+                KeywordQuery: "rating > 4"
+                VectorQuery: ""
+                justification: "The query can be fully expressed using comparisons on the 'rating'
+    -   Input: "movie with shorter than 1 hour"
         Output:
             searchCategory: KEYWORD
-            KeywordQuery: "rating > 4"
+            KeywordQuery: "runtime_mins < 60"
             VectorQuery: ""
-            justification: "The query can be fully expressed using comparisons on the 'rating'
+            justification: "The query can be fully expressed using comparisons on the 'runtime_mins' and converting duration in hour to minutes.     
     -   Input: "great movie that is short"
         Output:
             searchCategory: KEYWORD

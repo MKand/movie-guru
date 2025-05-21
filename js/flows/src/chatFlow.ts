@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ChatFlowInputSchema, ChatFlowOutput, ChatOutputSchema } from './chatFlowTypes';
+import { ChatFlowInputSchema, ChatFlowOutput, ChatFlowOutputSchema } from './chatFlowTypes';
 import { MovieContext, MovieFlowInputSchema, RelevantMovie, MovieFlowOutputSchema } from './movieFlowTypes';
 
 import { ai } from './genkitConfig';
@@ -21,7 +21,7 @@ import { GenerationBlockedError } from 'genkit';
 import {  SafetyTransformPrompt, SafetyPromptOutputSchema, SafetyIssueFlow } from './safetyFlow';
 import { QueryTransformFlow } from './queryTransformFlow';
 import { QueryTransformFlowOutputSchema } from './queryTransformTypes';
-import { MovieDocFlow } from './docRetriever';
+import { DocSearchFlow } from './docRetriever';
 import { MovieFlow } from './movieFlow';
 
 // This flow orchestrates multiple other flows.
@@ -29,10 +29,10 @@ export const ChatFlow = ai.defineFlow(
     {
         name: "chatFlow",
         inputSchema: ChatFlowInputSchema,
-        outputSchema: ChatOutputSchema,
+        outputSchema: ChatFlowOutputSchema,
     },
     async(input) => {
-        const chatResponse: ChatFlowOutput = ChatOutputSchema.parse({});
+        const chatResponse: ChatFlowOutput = ChatFlowOutputSchema.parse({});
         
         try {
             // Initial safety check
@@ -42,9 +42,9 @@ export const ChatFlow = ai.defineFlow(
                 const defaultSafetyOutput = safetyRawOutput ??  SafetyPromptOutputSchema.parse({});
                 const safetyOutput = SafetyPromptOutputSchema.parse(defaultSafetyOutput);
             
-            if(safetyOutput.safetyIssue == true || safetyOutput.wrongQuery == true){
-                chatResponse.modelOutputMetadata.safetyIssue = safetyOutput.safetyIssue;
-                chatResponse.wrongQuery = safetyOutput.wrongQuery
+            if(safetyOutput.safetyIssue == true || safetyOutput.badQuery == true){
+                chatResponse.safetyIssue = safetyOutput.safetyIssue;
+                chatResponse.badQuery = safetyOutput.badQuery
                 return chatResponse;
             }
             
@@ -60,7 +60,7 @@ export const ChatFlow = ai.defineFlow(
             // Search if required
             var movieContexts: MovieContext[] = []
             if(qtOutput.followupAction == "SEARCH_REQUIRED" || qtOutput.searchQuery != ""){
-                movieContexts = await MovieDocFlow( {query: qtOutput.searchQuery})
+                movieContexts = await DocSearchFlow( {query: qtOutput.searchQuery})
             }
             
             // Final RAG
@@ -77,7 +77,7 @@ export const ChatFlow = ai.defineFlow(
             chatResponse.answer = movieQAOutput.response;
             chatResponse.relevantMovies = movieQAOutput.relevantMovies;
             chatResponse.contextDocuments = parseContexts(movieQAOutput.relevantMovies, movieContexts);
-            chatResponse.modelOutputMetadata.justification = movieQAOutput.justification;
+            chatResponse.justification = movieQAOutput.justification;
 
             return chatResponse
         }
@@ -85,12 +85,12 @@ export const ChatFlow = ai.defineFlow(
             if (error instanceof GenerationBlockedError){
         
                 console.error("ChatFlow: GenerationBlockedError generating response:", error.message);
-                chatResponse.modelOutputMetadata.safetyIssue = true;
+                chatResponse.safetyIssue = true;
                 return chatResponse;
             }
             else if(error instanceof Error && (error.message.includes('429') || error.message.includes('RESOURCE_EXHAUSTED'))){
                 console.error("ChatFlow: There is a quota issue:", error.message);
-                chatResponse.modelOutputMetadata.quotaIssue = true;
+                chatResponse.quotaIssue = true;
                 return chatResponse;
             }
             else {

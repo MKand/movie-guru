@@ -31,14 +31,24 @@ type ChatFlowClient struct {
 	URL string
 }
 
+type ChatFlowOutput struct {
+	Answer               string                 `json:"answer"`
+	RelevantMoviesTitles []*types.RelevantMovie `json:"relevantMovies"`
+	ContextDocuments     []*types.MovieContext  `json:"contextDocuments"`
+	Justification        string                 `json:"justification"`
+	BadQuery             bool                   `json:"badQuery,omitempty" `
+	SafetyIssue          bool                   `json:"safetyIssue,omitempty"`
+	QuotaIssue           bool                   `json:"quotaIssue,omitempty"`
+}
+
 func CreateChatFlowClient(URL string) (*ChatFlowClient, error) {
 	return &ChatFlowClient{
 		URL: URL + "/chatFlow",
 	}, nil
 }
 
-func (flowClient *ChatFlowClient) Run(history []*types.SimpleMessage, preferences *types.UserProfile) (*types.ExtendedMovieFlowOutput, error) {
-	chatInput := types.QueryTransformFlowInput{Profile: preferences, History: history, UserMessage: history[len(history)-1].Content}
+func (flowClient *ChatFlowClient) Run(history []*types.SimpleMessage, preferences *types.UserProfile) (*types.ChatWrapperOutput, error) {
+	chatInput := types.ChatFlowInput{Profile: preferences, History: history, UserMessage: history[len(history)-1].Content}
 	resp, err := flowClient.runFlow(&chatInput)
 	if err != nil {
 		return nil, err
@@ -52,7 +62,7 @@ func (flowClient *ChatFlowClient) Run(history []*types.SimpleMessage, preference
 	return resp, nil
 }
 
-func (flowClient *ChatFlowClient) runFlow(input *types.QueryTransformFlowInput) (*types.ExtendedMovieFlowOutput, error) {
+func (flowClient *ChatFlowClient) runFlow(input *types.ChatFlowInput) (*types.ChatWrapperOutput, error) {
 	// Marshal the input struct to JSON
 	dataInput := DataInput{
 		Data: input,
@@ -93,18 +103,34 @@ func (flowClient *ChatFlowClient) runFlow(input *types.QueryTransformFlowInput) 
 
 	slog.InfoContext(ctx, fmt.Sprintf("trace id: %s, span id: %s", traceId, spanId))
 
-	var result struct {
-		Result *types.ExtendedMovieFlowOutput `json:"result"`
+	var flowOutput struct {
+		Result *ChatFlowOutput `json:"result"`
 	}
 
-	err = json.Unmarshal(b, &result)
+	wrapperOutput := types.ChatWrapperOutput{
+		ModelOutputMetadata: &types.ModelOutputMetadata{
+			SafetyIssue:   false,
+			Justification: "None Provided",
+			BadQuery:      false,
+		},
+	}
+
+	err = json.Unmarshal(b, &flowOutput)
 	if err != nil {
 		slog.Log(context.Background(), slog.LevelError, "Error unmarshaling JSON response", "error", err)
 		return nil, err
 	}
 
-	result.Result.TraceId = traceId
-	result.Result.SpanId = spanId
+	wrapperOutput.Answer = flowOutput.Result.Answer
+	wrapperOutput.RelevantMoviesTitles = flowOutput.Result.RelevantMoviesTitles
+	wrapperOutput.ContextDocuments = flowOutput.Result.ContextDocuments
+	wrapperOutput.ModelOutputMetadata.Justification = flowOutput.Result.Justification
+	wrapperOutput.ModelOutputMetadata.BadQuery = flowOutput.Result.BadQuery
+	wrapperOutput.ModelOutputMetadata.SafetyIssue = flowOutput.Result.SafetyIssue
+	wrapperOutput.ModelOutputMetadata.QuotaIssue = flowOutput.Result.QuotaIssue
+	wrapperOutput.TraceId = traceId
+	wrapperOutput.SpanId = spanId
 
-	return result.Result, nil
+	return &wrapperOutput, nil
+
 }

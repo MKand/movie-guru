@@ -4,6 +4,7 @@ config:
   temperature: 0.3
   topK: 32
   topP: 0.85
+  maxOutputTokens: 60
   safetySettings:
     - category: HARM_CATEGORY_HARASSMENT
       threshold: BLOCK_MEDIUM_AND_ABOVE

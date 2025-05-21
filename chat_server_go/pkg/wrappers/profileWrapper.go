@@ -33,19 +33,28 @@ type UserProfileFlowClient struct {
 	URL     string
 }
 
+type UserProfileFlowOutput struct {
+	ProfileChangeRecommendations []*types.ProfileChangeRecommendation `json:"profileChangeRecommendations"`
+	Justification                string                               `json:"justification"`
+	BadQuery                     bool                                 `json:"badQuery,omitempty" `
+	SafetyIssue                  bool                                 `json:"safetyIssue,omitempty"`
+	QuotaIssue                   bool                                 `json:"quotaIssue,omitempty"`
+}
+
 func CreateUserProfileFlowClient(db *db.MovieDB, URL string) (*UserProfileFlowClient, error) {
 	return &UserProfileFlowClient{
 		MovieDB: db,
-		URL:     URL + "/userProfileFlow",
+		URL:     URL + "/userPreferenceFlow",
 	}, nil
 }
 
-func (flowClient *UserProfileFlowClient) Run(ctx context.Context, history *types.ChatHistory, user string, userProfile *types.UserProfile) (*types.UserProfileOutput, error) {
-	userProfileOutput := &types.UserProfileOutput{
+func (flowClient *UserProfileFlowClient) Run(ctx context.Context, history *types.ChatHistory, user string, userProfile *types.UserProfile) (*types.UserProfileWrapperOutput, error) {
+	userProfileOutput := &types.UserProfileWrapperOutput{
 		UserProfile: userProfile,
 		ModelOutputMetadata: &types.ModelOutputMetadata{
 			SafetyIssue:   false,
 			Justification: "",
+			BadQuery:      false,
 		},
 	}
 
@@ -63,9 +72,9 @@ func (flowClient *UserProfileFlowClient) Run(ctx context.Context, history *types
 	if err != nil {
 		return nil, err
 	}
-	userProfileOutput.ModelOutputMetadata.Justification = resp.ModelOutputMetadata.Justification
-	userProfileOutput.ModelOutputMetadata.SafetyIssue = resp.ModelOutputMetadata.SafetyIssue
-	userProfileOutput.ModelOutputMetadata.QuotaIssue = resp.ModelOutputMetadata.QuotaIssue
+	userProfileOutput.ModelOutputMetadata.Justification = resp.Justification
+	userProfileOutput.ModelOutputMetadata.SafetyIssue = resp.SafetyIssue
+	userProfileOutput.ModelOutputMetadata.QuotaIssue = resp.QuotaIssue
 
 	if len(resp.ProfileChangeRecommendations) > 0 {
 		updatedProfile, err := utils.ProcessProfileChanges(userProfile, resp.ProfileChangeRecommendations)
@@ -82,7 +91,7 @@ func (flowClient *UserProfileFlowClient) Run(ctx context.Context, history *types
 	return userProfileOutput, nil
 }
 
-func (flowClient *UserProfileFlowClient) runFlow(input *types.UserProfileFlowInput) (*types.UserProfileFlowOutput, error) {
+func (flowClient *UserProfileFlowClient) runFlow(input *types.UserProfileFlowInput) (*UserProfileFlowOutput, error) {
 	// Marshal the input struct to JSON
 	dataInput := DataInput{
 		Data: input,
@@ -113,7 +122,7 @@ func (flowClient *UserProfileFlowClient) runFlow(input *types.UserProfileFlowInp
 		return nil, fmt.Errorf("genkit server returned error: %s (%d)", http.StatusText(resp.StatusCode), resp.StatusCode)
 	}
 	var result struct {
-		Result *types.UserProfileFlowOutput `json:"result"`
+		Result *UserProfileFlowOutput `json:"result"`
 	}
 	defer resp.Body.Close()
 

@@ -28,85 +28,6 @@ import (
 	metric "go.opentelemetry.io/otel/metric"
 )
 
-func chat(ctx context.Context, deps *Dependencies, metadata *db.Metadata, h *types.ChatHistory, user string, userMessage string, meters *m.ChatMeters) *types.AgentResponse {
-	h.AddUserMessage(userMessage)
-
-	userProfile, err := deps.DB.GetCurrentProfile(ctx, user)
-	if err != nil {
-		slog.ErrorContext(ctx, "Unable to get profile info for user", err.Error(), err)
-	}
-
-	simpleHistory, err := types.ParseRecentHistory(h.GetHistory(), metadata.HistoryLength)
-	if err != nil {
-		return types.NewErrorAgentResponse(fmt.Sprintf("Error getting user history: %w", err))
-	}
-
-	var wg sync.WaitGroup
-
-	userProfileChan := make(chan *types.UserProfileOutput, 1)
-	errChanProfile := make(chan error, 1)
-
-	// Launch the goroutines
-	// Independant goroutine with seperate context
-	go func() {
-		qualityContext := context.Background()
-		qualityResp, err := deps.ResponseQualityFlowClient.Run(qualityContext, simpleHistory, user)
-		if qualityResp != nil {
-			updateChatQualityMeters(qualityContext, meters, qualityResp)
-		}
-		if err != nil {
-			slog.ErrorContext(qualityContext, "Error updating quality meters", err.Error(), err)
-		}
-	}()
-
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		pResp, err := deps.UserProfileFlowClient.Run(ctx, h, user, userProfile)
-		if err != nil {
-			errChanProfile <- err
-			close(errChanProfile)
-			return
-		}
-		userProfileChan <- pResp
-		close(userProfileChan)
-	}()
-
-	// This is in the main thread, not async
-	qResp, err := deps.QueryTransformFlowClient.Run(simpleHistory, userProfile)
-	if agentResp, shouldReturn := processFlowOutput(qResp.ModelOutputMetadata, err, h, "QTFlow"); shouldReturn {
-		return agentResp
-	}
-
-	movieContext := []*types.MovieContext{}
-	if qResp.Intent == types.USERINTENT(types.REQUEST) || qResp.Intent == types.USERINTENT(types.RESPONSE) {
-		movieContext, err = deps.MovieRetrieverFlowClient.RetriveDocuments(ctx, qResp.TransformedQuery)
-		if agentResp, shouldReturn := processFlowOutput(nil, err, h, "MovieRetFlow"); shouldReturn {
-			return agentResp
-		}
-	}
-
-	mAgentResp, err := deps.MovieFlowClient.Run(movieContext, simpleHistory, userProfile)
-	if agentResp, shouldReturn := processFlowOutput(nil, err, h, "MovieQAFlow"); shouldReturn {
-		return agentResp
-	}
-
-	h.AddAgentMessage(mAgentResp.Answer)
-
-	// Wait for goroutines to complete
-	wg.Wait()
-
-	select {
-	case userProfileOutput := <-userProfileChan:
-		mAgentResp.Preferences = userProfileOutput.UserProfile
-		// Finished processing
-	case err := <-errChanProfile:
-		slog.ErrorContext(ctx, "UserProfileFlowClient failed", err.Error(), err)
-	}
-
-	return mAgentResp
-}
-
 func chatSingleFlow(ctx context.Context, deps *Dependencies, metadata *db.Metadata, h *types.ChatHistory, user string, userMessage string, meters *m.ChatMeters) *types.AgentResponse {
 	h.AddUserMessage(userMessage)
 
@@ -122,7 +43,7 @@ func chatSingleFlow(ctx context.Context, deps *Dependencies, metadata *db.Metada
 
 	var wg sync.WaitGroup
 
-	userProfileChan := make(chan *types.UserProfileOutput, 1)
+	userProfileChan := make(chan *types.UserProfileWrapperOutput, 1)
 	errChanProfile := make(chan error, 1)
 
 	// Launch the goroutines
@@ -170,7 +91,7 @@ func chatSingleFlow(ctx context.Context, deps *Dependencies, metadata *db.Metada
 	agentResp.TraceId = chatResp.TraceId
 	agentResp.SpanId = chatResp.SpanId
 	// If the user made a bad query, update it
-	if chatResp.WrongQuery {
+	if chatResp.BadQuery {
 		agentResp.Result = types.BAD_QUERY
 		agentResp.Answer = "I cannot answer that question. Please ask me about movies or movie related information."
 	}
