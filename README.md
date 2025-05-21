@@ -87,7 +87,7 @@ There are 2 important tables:
 - Tools:
   - [Google Cloud CLI](https://cloud.google.com/sdk/docs/install)
   - Docker and Docker Compose
-- Required APIs enabled (will be performed in `setup_local.sh`).
+- Required APIs enabled (will be performed in `setup_cloud.sh`).
 
 ### Clone the Repository
 
@@ -99,8 +99,9 @@ git checkout <current-branch> # Replace with branch name
 
 ### Firebase setup
 
-1. Go to the firebase console. Follow the steps [here](https://firebase.google.com/docs/projects/use-firebase-with-existing-cloud-project#how-to-add-firebase_console).
-1. Create a new firebase web app and copy the firebase config variables into **set_env_vars.sh**. (FIREBASE_GCP_ID is the project ID)
+1. Go to the Firebase console. Follow the steps [here](https://firebase.google.com/docs/projects/use-firebase-with-existing-cloud-project#how-to-add-firebase_console).
+1. Create a new Firebase web app and copy the Firebase config variables into **set_env_vars.sh**.
+1. If it's not already, update your Firebase project to pay-as-you-go Blaze billing plan.
 
 ### Environment setup
 
@@ -114,8 +115,8 @@ git checkout <current-branch> # Replace with branch name
 1. Run setup script.
 
     ```sh
-    chmod +x setup_local.sh
-    ./setup_local.sh --skip-infra #gHack creates the infra for you
+    chmod +x setup_cloud.sh
+    ./setup_cloud.sh
     ```
 
 This enables the required APIs and creates the necessary service account with roles.
