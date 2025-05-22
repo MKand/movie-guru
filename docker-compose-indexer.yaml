@@ -2,23 +2,16 @@ services:
   indexer-js:
     build: ./js/indexer
     environment:
-      - POSTGRES_HOST=$POSTGRES_HOST
       - PROJECT_ID=$PROJECT_ID
-      - POSTGRES_DB_USER_PASSWORD=$POSTGRES_DB_MAIN_USER_PASSWORD
+      - POSTGRES_HOST=localhost
       - POSTGRES_DB_USER=main
+      - POSTGRES_DB_USER_PASSWORD=main
       - TABLE_NAME=movies
       - POSTGRES_DB_NAME=fake-movies-db
-      - APP_VERSION=v1
       - GOOGLE_APPLICATION_CREDENTIALS=/key.json
-      - LOCATION=us-central1
-      - LOCAL=true
+      - LOCATION=$REGION
     volumes:
       - ./.key.json:/key.json
       - ./dataset/:/dataset
-    networks:
-      - db-shared-network
-networks:
-  db-shared-network:
-    external: true
  
   
