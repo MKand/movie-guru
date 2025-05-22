@@ -56,6 +56,9 @@ done
 if [[ "$APP_NAME" == "genkit-monitoring" ]]; then
     echo -e "\e[96mUsing custom Docker Compose file: docker-compose.ghack.genkitmonitoring.yaml\e[0m"
     DOCKER_COMPOSE_FILE_OPT=("-f" "docker-compose.ghack.genkitmonitoring.yaml")
+elif [[ "$APP_NAME" == "sre" ]]; then
+    echo -e "\e[96mUsing custom Docker Compose file: docker-compose.ghack.practical-sre.yaml\e[0m"
+    DOCKER_COMPOSE_FILE_OPT=("-f" "docker-compose.ghack.practical-sre.yaml")
 elif [[ -n "$APP_NAME" ]]; then
     echo -e "\e[93mWarning: App name '$APP_NAME' provided, but no specific docker-compose file is configured for it. Using default.\e[0m"
 fi
