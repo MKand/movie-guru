@@ -41,8 +41,6 @@ spec:
           value: "http://flows-service.movieguru.svc.cluster.local:3400"
         - name: LOCATION
           value: {{ .Values.Config.geminiApiLocation }}
-        - name: APP_VERSION
-          value: "static"
         - name: ENABLE_METRICS
           value: "true"
         - name: OTEL_EXPORTER_OTLP_INSECURE

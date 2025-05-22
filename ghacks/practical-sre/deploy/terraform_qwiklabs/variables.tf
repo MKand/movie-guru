@@ -8,6 +8,10 @@ variable "repo_prefix" {
   description = "Docker/Artifact registry prefix"
   default     = "us-central1-docker.pkg.dev/o11y-movie-guru/movie-guru"
 }
+variable "image_tag" {
+  description = "TAG of the movie guru docker images"
+  default     = "sre-v2"
+}
 
 variable "gcp_region" {
   type        = string
@@ -27,21 +31,21 @@ variable "locust_py_file" {
   type = string
 
   description = "URL of the locustfile"
-  default     = "https://raw.githubusercontent.com/MKand/movie-guru/refs/heads/reworking-sre/locust/locustfile.py"
+  default     = "https://raw.githubusercontent.com/MKand/movie-guru/refs/heads/main/locust/locustfile.py"
 }
 
 variable "sql_file" {
   type = string
 
   description = "URL of the sql file"
-  default     = "https://raw.githubusercontent.com/MKand/movie-guru/refs/heads/reworking-sre/pgvector/init.sql"
+  default     = "https://raw.githubusercontent.com/MKand/movie-guru/refs/heads/main/pgvector/init.sql"
 }
 
 variable "otel_file" {
   type = string
 
   description = "URL of the otel config"
-  default     = "https://raw.githubusercontent.com/MKand/movie-guru/refs/heads/reworking-sre/metrics/otel-collector-config.yaml"
+  default     = "https://raw.githubusercontent.com/MKand/movie-guru/refs/heads/main/metrics/otel-collector-config.yaml"
 }
 
 variable "helm_chart" {
@@ -55,5 +59,5 @@ variable "branch_name" {
   type = string
 
   description = "value of the branch for cloud build trigger"
-  default     = "reworking-sre"
+  default     = "main"
 }

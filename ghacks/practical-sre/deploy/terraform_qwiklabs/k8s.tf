@@ -64,12 +64,16 @@ resource "helm_release" "movie_guru" {
   name      = "movie-guru"
   chart     = var.helm_chart
   namespace = "movieguru"
-  version   = "0.2.0"
+  version   = "0.3.0"
   wait      = false
 
   set {
     name  = "Config.Image.Repository"
     value = var.repo_prefix
+  }
+  set {
+    name  = "Config.Image.Tag"
+    value = var.image_tag
   }
   set {
     name  = "Config.serverAddress"
@@ -171,5 +175,24 @@ data "kubernetes_service" "locust" {
     namespace = "locust"
   }
   depends_on = [helm_release.locust]
+}
+
+data "http" "otel_file" {
+  url = var.otel_file
+}
+
+resource "kubernetes_config_map" "otel_config" {
+  metadata {
+    name      = "otel-config"
+    namespace = "otel"
+  }
+
+  data = {
+    "otel-collector-config.py" = (
+      data.http.otel_file.response_body
+    )
+  }
+
+  depends_on = [kubernetes_namespace.otel]
 }
 

@@ -62,6 +62,7 @@ resource "google_cloudbuild_trigger" "github-trigger" {
 
   included_files = ["/ghacks/practical-sre/**", "/code/frontend/**", "/code/genkitFlows/**", "/code/mock-user/**"]
 
+  ignored_files = ["/ghacks/practical-sre/deploy", "setup", "utils/nginx", "utils/metrics", "docker-compose*", "Readme.md" ]
   lifecycle {
     ignore_changes = []
   }

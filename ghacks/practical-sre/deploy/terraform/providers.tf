@@ -18,17 +18,5 @@ terraform {
       source  = "hashicorp/google"
       version = "~> 6.18"
     }
-    google-beta = {
-      source  = "hashicorp/google-beta"
-      version = "~> 6.18"
-    }
-        kubernetes = {
-      source  = "hashicorp/kubernetes"
-      version = "~> 2.0"  # Use the latest version
-    }
-    helm = {
-      source  = "hashicorp/helm"
-      version = "~> 2.0"
-    }
   }
   }
