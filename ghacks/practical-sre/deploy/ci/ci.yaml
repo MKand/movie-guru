@@ -90,7 +90,7 @@ steps:
 - name: 'gcr.io/cloud-builders/docker'
   id: "build-server-image"
   waitFor: ['-']
-  dir: './"ghacks/practical-sre/webserver"'
+  dir: './ghacks/practical-sre/webserver'
   entrypoint: "sh"
   args:
     - -xe 
