@@ -11,14 +11,12 @@
     - [Data](#data)
       - [Postgres](#postgres)
   - [Getting Started](#getting-started)
-    - [Prerequisites](#prerequisites)
-    - [Environment setup](#environment-setup)
-    - [Firebase setup](#firebase-setup)
-    - [Database Setup](#database-setup)
-      - [Run the database service](#run-the-database-service)
+    - [Simple Local Setup](#simple-local-setup)
+      - [Prerequisites](#prerequisites)
+      - [Instructions](#instructions)
+    - [Simple local setup with firebase authentication](#simple-local-setup-with-firebase-authentication)
+    - [Cloud setup with firebase authentication](#cloud-setup-with-firebase-authentication)
       - [Populate the database (Optional)](#populate-the-database-optional)
-    - [Run the Application](#run-the-application)
-    - [Clean up](#clean-up)
 
 ## About Movie Guru
 
@@ -85,7 +83,9 @@ There are 2 important tables:
 
 ## Getting Started
 
-### Prerequisites
+### Simple Local Setup
+
+#### Prerequisites
 
 - A Google Cloud project with owner permissions.
 - Tools:
@@ -93,7 +93,7 @@ There are 2 important tables:
   - Docker and Docker Compose
 - Required APIs enabled (will be performed in `setup_local.sh`).
 
-### Environment setup
+#### Instructions
 
 1. **Clone the Repository**
 
@@ -110,107 +110,119 @@ There are 2 important tables:
     gcloud config set project <YOUR_PROJECT_ID>
     ```
 
-1. Set the require environment variables
+1. Run the interactive environment setup script where you will be prompted to enter values like **PROJECT_ID** and **REGION** (which region do you want to consume the models from)
 
     ```sh
-    export PROJECT_ID=<YOUR_PROJECT_ID>
-    export REGION=<YOUR_DESIRED_GCLOUD_REGION> # defaults to us-central1 if this is not set
+    chmod +x ./startup/configure_env_simple.sh
+    ./startup/configure_env_simple.sh
     ```
 
-1. Run setup script.
+1. Make sure the required APIs are enabled and create a service account. You will need owner level access to the project.
 
-    ```sh
-    chmod +x setup_local.sh
-    ./setup_local.sh
-    ```
+  ```sh
+  chmod +x ./startup/setup_cloud_simple.sh
+  ./startup/setup_cloud_simple.sh
+  ```
 
 This enables the required APIs and creates the necessary service account with roles.
 
-### Firebase setup
+1. Start the app.
 
-1. Go to the firebase console. Follow the steps [here](https://firebase.google.com/docs/projects/use-firebase-with-existing-cloud-project#how-to-add-firebase_console).
-1. Create a new firebase web app and copy the firebase config variables into **set_env_vars.sh**.
+  ```sh
+  chmod +x ./startup/launch_app.sh
+  ./startup/launch_app.sh
+ ```
 
-### Database Setup
+1. Access the Frontend Application Open <http://localhost:8080> in your browser.
 
-#### Run the database service
+1. To stop the app, press **Ctrl+C** in the terminal. Then run
+  
+  ```sh
+  ./startup/launch_app.sh --stop
+ ```
 
-1. Create a shared network for all the app containers we will use
+### Simple local setup with firebase authentication
+
+This uses firebase authentication for the frontend of the application.
+
+1. **Clone the Repository**
+
+   ```sh
+   git clone https://github.com/MKand/movie-guru.git
+   cd movie-guru
+   git checkout main
+   ```
+
+2. Authenticate with Google Cloud
 
     ```sh
-    docker network create db-shared-network
+    gcloud auth login
+    gcloud config set project <YOUR_PROJECT_ID>
     ```
 
-1. Setup local DB
-We'll setup a local *pgvector* db and an *Adminer* instance
+3. Setup a firebase web app.
+
+   1. Go to the firebase console. Follow the steps [here](https://firebase.google.com/docs/projects/use-firebase-with-existing-cloud-project#how-to-add-firebase_console).
+   2. Create a new firebase web app and note down the values of the **APP ID**, **API KEY** and **AUTH DOMAIN**. You'll need them in the next step.
+
+4. Run the interactive environment setup script where you will be prompted to enter values like **PROJECT_ID** and **REGION** (which region do you want to consume the models from) and the firebase web app's config values that you noted in the previous step.
 
     ```sh
-    docker compose -f docker-compose-pgvector.yaml up -d
+    chmod +x ./startup/configure_env.sh
+    ./startup/configure_env.sh
     ```
+
+5. Make sure the required APIs are enabled and create a service account. You will need owner level access to the project.
+
+  ```sh
+  chmod +x ./startup/setup_cloud_simple.sh
+  ./startup/setup_cloud_simple.sh
+  ```
+
+This enables the required APIs and creates the necessary service account with roles.
+
+1. Start the app.
+
+  ```sh
+  chmod +x ./startup/launch_app.sh
+  ./startup/launch_app.sh
+ ```
+
+1. Access the Frontend Application Open <http://localhost:8080> in your browser. Use **0000** as the invite code.
+
+1. To stop the app, press **Ctrl+C** in the terminal. Then run
+  
+  ```sh
+  ./startup/launch_app.sh --stop
+ ```
+
+### Cloud setup with firebase authentication
 
 #### Populate the database (Optional)
 
-At this stage, there will be a few tables, with data pre-loaded.
-You can either choose to either reload the movies data into the table again or skip ahead to the [Run the application](#run-the-application) step.
-Skipping ahead will save you approx. 20 minutes of the setup time.
+To update the data in the database, you can run the indexer.
 
-Navigate to *localhost:8082*, to access the db via *Adminer*. Use the main user credentials (user name: main, password: main).
-Make sure you set `System` as `PostgresSQL` and `Server` as `db`, and `Database` as `fake-movies-db`.
+1. Start the local application by following the steps outlined here: [Run the application](#simple-local-setup) step. (The indexer requires the database to be running which this step does for you).
 
-1. Populate the movie table
+2. Run the javascript indexer so it can add movies data into the database. The database comes pre-populated with the required data, but you can choose to re-add the data. The execution of this intentionally slowed down to stay below the rate-limits.
 
     ```sh
-    export PROJECT_ID=<YOUR_PROJECT_ID>
-    export LOCATION=<YOUR_DESIRED_GCLOUD_REGION> 
-    ```
-
-1. Run the javascript indexer so it can add movies data into the database. The database comes pre-populated with the required data, but you can choose to re-add the data. The execution of this intentionally slowed down to stay below the rate-limits.
-
-    ```sh
-    docker compose -f docker-compose-indexer.yaml up --build -d 
+    docker compose -f docker-compose.indexer.yaml up --build -d 
     ```
 
     This takes about 10-15 minutes to run, so be patient. The embedding creation process is slowed down intentionally to ensure we stay under the rate limit.
 
-1. Shut down the indexer container.
+3. Shut down the indexer container.
 
     ```sh
     docker compose -f docker-compose-indexer.yaml down
     ```
 
-1. Verify the number of entries in the DB.
+4. Verify the number of entries in the DB by using **Adminer** that is running at <http://localhost:8082>. Use the **minimal** user credentials (user name: minimal-user, password: minimal). Make sure you set System as PostgresSQL and Server as **db**, and Database as **fake-movies-db**.
+
 There should be **652** entries in the movies table.
 
-    ```sql
-    SELECT COUNT(*)
-    FROM "movies";
-    ```
-
-Once all the required data is added, it is time to run the application that consists of the **frontend**, the **webserver**, the **genkit flows** server and the **redis cache**. These will be running locally in containers. The servers communicate with the **postgres DB** also running locally in a container.
-
-### Run the Application
-
-1. Make sure the env variables are in the execution context of docker compose.
-
-    ```sh
-    source set_env_vars.sh
-    ```
-
-2. Start the application services. This can take upto 10 minutes are we are building many docker images for all the application containers (frontend, webserver, genkit flows).
-
-    ```sh
-    docker compose up --build
-    ```
-
-3. Access the Frontend Application Open <http://localhost:8080> in your browser.
-
-### Clean up
-
-Run the following commands:
-
-```sh
-  docker compose down
-  docker compose -f docker-compose-pgvector.yaml down
-  docker network rm db-shared-network
-  rm pgvector/init_substituted.sql
-```
+  ```sql
+  SELECT COUNT(*)
+  FROM "movies";
+  ```

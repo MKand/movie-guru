@@ -6,6 +6,13 @@ if [[ $OSTYPE != "linux-gnu" ]]; then
     exit 1
 fi
 
+# get value from .env file
+if [ -f ".env" ]; then
+    echo -e "\e[95mLoading environment variables from .env file...\e[0m"
+    source .env
+else
+    echo -e "\e[93m.env file not found. Please run configure_env_simple.sh first.\e[0m"
+fi
 # Check if PROJECT_ID is set
 if [[ -z "$PROJECT_ID" ]]; then
     echo -e "\e[91mERROR: Please set the PROJECT_ID environment variable (e.g., export PROJECT_ID=<YOUR_PROJECT_ID>).\e[0m"
@@ -74,8 +81,3 @@ if [[ "$SKIP_INFRA" == false ]]; then
         --role="roles/cloudtrace.agent"
     echo -e "\e[95mService account $SERVICE_ACCOUNT_NAME has been created and configured successfully.\e[0m"
 fi
-
-
-echo -e "\e[95mCreating service account local key as .key.json\e[0m"
-gcloud iam service-accounts keys create ./key.json \
-    --iam-account=$SERVICE_ACCOUNT_EMAIL

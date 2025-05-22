@@ -154,26 +154,6 @@ echo ""
 echo "General Settings:"
 prompt_for_value "PROJECT_ID" "1. Google Cloud Project ID" "" "mandatory"
 prompt_for_value "REGION" "2. Google Cloud Region. defaults to us-central1" "us-central1"
-prompt_for_value "POSTER_BUCKET_NAME" "3. Poster Bucket Name" "generated_posters"
-prompt_for_value "FLOWS_URL" "4. Flows URL" "http://flows:3400" 
-prompt_for_boolean "ENABLE_METRICS" "5. Enable Metrics (OpenTelemetry)?" "false"
-
-prompt_for_value "MAX_USER_MESSAGE_LENGTH" "6. Max User Message Length (characters). Defaults to 500" "500"
-prompt_for_value "HISTORY_LENGTH" "7. Chat History Length (number of messages). Defaults to 10." "10"
-
-# Genkit Settings
-echo ""
-echo "Genkit Settings: Are you collecting feedback and acceptance metrics from Genkit?"
-prompt_for_boolean "COLLECT_GENKIT_FEEDBACK" "8. Collect Genkit Feedback?" "false"
-
-if [ "${COLLECT_GENKIT_FEEDBACK}" == "true" ]; then
-    echo ""
-    echo "--- You are collecting feedback from Genkit. Additional settings required: ---"
-    prompt_for_value "GENKIT_FEEDBACK_REGION" "  8a. REGION where feedback server is located" "" "mandatory"
-    export GENKIT_FEEDBACK_URL=https://${GENKIT_FEEDBACK_REGION}-${PROJECT_ID}.cloudfunctions.net/ext-firebase-ai-user-engagement-collectEngagement
-else
-    echo "  Authentication is DISABLED. Skipping related settings."
-fi
 
 # Authentication Settings
 echo ""
@@ -186,7 +166,7 @@ if [ "${USE_AUTH}" == "true" ]; then
     prompt_for_value "TOKEN_AUDIENCE" "  9a. Token Audience" ${PROJECT_ID} ""
     prompt_for_value "FIREBASE_APP_ID" "  9b. Firebase App ID" "" "mandatory"
     prompt_for_value "FIREBASE_API_KEY" "  9c. Firebase API Key" "" "mandatory"
-    prompt_for_value "FIREBASE_AUTH_DOMAIN" "  9d. Firebase Auth Domain" "" "mandatory" 
+    prompt_for_value "FIREBASE_AUTH_DOMAIN" "  9d. Firebase Auth Domain" "${PROJECT_ID}.firebaseapp.com" "" 
 
 else
     echo "  Authentication is DISABLED. Skipping related settings."
@@ -203,6 +183,30 @@ if [ "${STRICT_CORS}" == "true" ]; then
 else
     echo "  Strict CORS is DISABLED. Skipping related settings."
 fi
+
+# Genkit Settings
+echo ""
+echo "Genkit Settings: Are you collecting feedback and acceptance metrics from Genkit?"
+prompt_for_boolean "COLLECT_GENKIT_FEEDBACK" "8. Collect Genkit Feedback?" "false"
+
+if [ "${COLLECT_GENKIT_FEEDBACK}" == "true" ]; then
+    echo ""
+    echo "--- You are collecting feedback from Genkit. Additional settings required: ---"
+    prompt_for_value "GENKIT_FEEDBACK_REGION" "  8a. REGION where feedback server is located" "" "mandatory"
+    export GENKIT_FEEDBACK_URL=https://${GENKIT_FEEDBACK_REGION}-${PROJECT_ID}.cloudfunctions.net/ext-firebase-ai-user-engagement-collectEngagement
+else
+    echo "  Authentication is DISABLED. Skipping related settings."
+fi
+
+# Additional Settings
+
+prompt_for_value "POSTER_BUCKET_NAME" "3. Poster Bucket Name" "generated_posters"
+prompt_for_value "FLOWS_URL" "4. Flows URL" "http://flows:3400" 
+prompt_for_boolean "ENABLE_METRICS" "5. Enable Metrics (OpenTelemetry)?" "false"
+
+prompt_for_value "MAX_USER_MESSAGE_LENGTH" "6. Max User Message Length (characters). Defaults to 500" "500"
+prompt_for_value "HISTORY_LENGTH" "7. Chat History Length (number of messages). Defaults to 10." "10"
+
 
 echo ""
 echo "--- Configuration Summary ---"

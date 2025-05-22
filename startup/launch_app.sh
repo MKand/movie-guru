@@ -7,6 +7,8 @@ usage() {
     echo "  --app <app_name>  Specify an application profile. Currently supports 'genkit-monitoring'."
     echo "                    If 'genkit-monitoring' is specified, 'docker-compose.ghack.genkitmonitoring.yaml' will be used."
     echo "  --stop            Stop and remove containers (runs 'docker compose down')."
+    echo "  --silent          Run the app in silent mode."
+
     echo "  -h, --help        Display this help message."
     exit 1
 }
@@ -17,6 +19,7 @@ source .env
 APP_NAME="default"
 STOP_ACTION=false
 DOCKER_COMPOSE_FILE_OPT=()
+SILENT=false
 
 # Parse command-line arguments
 while [[ $# -gt 0 ]]; do
@@ -33,6 +36,10 @@ while [[ $# -gt 0 ]]; do
         ;;
         --stop)
         STOP_ACTION=true
+        shift # past argument
+        ;;
+        --silent)
+        SILENT=true
         shift # past argument
         ;;
         -h|--help)
@@ -88,6 +95,10 @@ else
     fi
 
     echo -e "\e[95mStarting application variant: ${APP_NAME} with docker compose...\e[0m"
-    docker compose "${DOCKER_COMPOSE_FILE_OPT[@]}" up --build
+    if [[ "$SILENT" == "true" ]]; then
+        docker compose "${DOCKER_COMPOSE_FILE_OPT[@]}" up --build -d
+    else
+        docker compose "${DOCKER_COMPOSE_FILE_OPT[@]}" up --build
+    fi
     exit $?
 fi
