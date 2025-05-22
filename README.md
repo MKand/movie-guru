@@ -11,12 +11,11 @@
     - [Data](#data)
       - [Postgres](#postgres)
   - [Getting Started](#getting-started)
+    - [Prerequisites](#prerequisites)
     - [Simple Local Setup](#simple-local-setup)
-      - [Prerequisites](#prerequisites)
-      - [Instructions](#instructions)
     - [Simple local setup with Firebase Authentication](#simple-local-setup-with-firebase-authentication)
     - [Cloud setup with Firebase Authentication](#cloud-setup-with-firebase-authentication)
-      - [Populate the database (Optional)](#populate-the-database-optional)
+  - [Re-Populate the database (Optional)](#re-populate-the-database-optional)
 
 ## About Movie Guru
 
@@ -85,9 +84,7 @@ There are 2 important tables:
 
 ## Getting Started
 
-### Simple Local Setup
-
-#### Prerequisites
+### Prerequisites
 
 - A Google Cloud project with owner permissions.
 - Tools:
@@ -95,7 +92,7 @@ There are 2 important tables:
   - Docker and Docker Compose
 - Required APIs enabled (will be performed in `setup_local.sh`).
 
-#### Instructions
+### Simple Local Setup
 
 1. **Clone the Repository**
 
@@ -105,37 +102,37 @@ There are 2 important tables:
    git checkout main
    ```
 
-1. Authenticate with Google Cloud
+2. Authenticate with Google Cloud
 
     ```sh
     gcloud auth login
     gcloud config set project <YOUR_PROJECT_ID>
     ```
 
-1. Run the interactive environment setup script where you will be prompted to enter values like **PROJECT_ID** and **REGION** (which region do you want to consume the models from)
+3. Run the interactive environment setup script where you will be prompted to enter values like **PROJECT_ID** and **REGION** (which region do you want to consume the models from)
 
     ```sh
-    chmod +x ./startup/configure_env_simple.sh && ./startup/configure_env_simple.sh
+    chmod +x ./setup/configure_env_simple.sh && ./setup/configure_env_simple.sh
     ```
 
-1. Make sure the required APIs are enabled and create a service account. You will need owner level access to the project. This enables the required APIs and creates the necessary service account with roles.
+4. Make sure the required APIs are enabled and create a service account. You will need owner level access to the project. This enables the required APIs and creates the necessary service account with roles.
 
     ```sh
-    chmod +x ./startup/setup_cloud_simple.sh && ./startup/setup_cloud_simple.sh
+    chmod +x ./setup/setup_cloud_simple.sh && ./setup/setup_cloud_simple.sh
     ```
 
-1. Start the app.
+5. Start the app.
 
     ```sh
-      chmod +x ./startup/launch_app.sh && ./startup/launch_app.sh
+      chmod +x ./setup/launch_app.sh && ./setup/launch_app.sh
     ```
 
-1. Access the Frontend Application Open <http://localhost:8080> in your browser.
+6. Access the Frontend Application Open <http://localhost:8080> in your browser.
 
-1. To stop the app, press **Ctrl+C** in the terminal. Then run
+7. To stop the app, press **Ctrl+C** in the terminal. Then run
   
     ```sh
-      ./startup/launch_app.sh --stop
+      ./setup/launch_app.sh --stop
     ```
 
 ### Simple local setup with Firebase Authentication
@@ -165,19 +162,19 @@ This uses firebase authentication for the frontend of the application.
 4. Run the interactive environment setup script where you will be prompted to enter values like **PROJECT_ID** and **REGION** (which region do you want to consume the models from) and the firebase web app's config values that you noted in the previous step.
 
     ```sh
-    chmod +x ./startup/configure_env.sh && ./startup/configure_env.sh
+    chmod +x ./setup/configure_env.sh && ./setup/configure_env.sh
     ```
 
 5. Make sure the required APIs are enabled and create a service account. You will need owner level access to the project. This enables the required APIs and creates the necessary service account with roles.
 
     ```sh
-    chmod +x ./startup/setup_cloud_simple.sh && ./startup/setup_cloud_simple.sh
+    chmod +x ./setup/setup_cloud_simple.sh && ./setup/setup_cloud_simple.sh
     ```
 
 6. Start the app.
 
     ```sh
-    chmod +x ./startup/launch_app.sh && ./startup/launch_app.sh
+    chmod +x ./setup/launch_app.sh && ./setup/launch_app.sh
     ```
 
 7. Access the Frontend Application Open <http://localhost:8080> in your browser. Use **0000** as the invite code.
@@ -185,14 +182,14 @@ This uses firebase authentication for the frontend of the application.
 8. To stop the app, press **Ctrl+C** in the terminal. Then run
   
     ```sh
-    ./startup/launch_app.sh --stop
+    ./setup/launch_app.sh --stop
     ```
 
 ### Cloud setup with Firebase Authentication
 
 WIP
 
-#### Populate the database (Optional)
+## Re-Populate the database (Optional)
 
 To update the data in the database, you can run the indexer.
 
