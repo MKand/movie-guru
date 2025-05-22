@@ -115,22 +115,19 @@ There are 2 important tables:
 1. Run the interactive environment setup script where you will be prompted to enter values like **PROJECT_ID** and **REGION** (which region do you want to consume the models from)
 
     ```sh
-    chmod +x ./startup/configure_env_simple.sh
-    ./startup/configure_env_simple.sh
+    chmod +x ./startup/configure_env_simple.sh && ./startup/configure_env_simple.sh
     ```
 
 1. Make sure the required APIs are enabled and create a service account. You will need owner level access to the project. This enables the required APIs and creates the necessary service account with roles.
 
     ```sh
-    chmod +x ./startup/setup_cloud_simple.sh
-    ./startup/setup_cloud_simple.sh
+    chmod +x ./startup/setup_cloud_simple.sh && ./startup/setup_cloud_simple.sh
     ```
 
 1. Start the app.
 
     ```sh
-      chmod +x ./startup/launch_app.sh
-      ./startup/launch_app.sh
+      chmod +x ./startup/launch_app.sh && ./startup/launch_app.sh
     ```
 
 1. Access the Frontend Application Open <http://localhost:8080> in your browser.
@@ -168,24 +165,19 @@ This uses firebase authentication for the frontend of the application.
 4. Run the interactive environment setup script where you will be prompted to enter values like **PROJECT_ID** and **REGION** (which region do you want to consume the models from) and the firebase web app's config values that you noted in the previous step.
 
     ```sh
-    chmod +x ./startup/configure_env.sh
-    ./startup/configure_env.sh
+    chmod +x ./startup/configure_env.sh && ./startup/configure_env.sh
     ```
 
 5. Make sure the required APIs are enabled and create a service account. You will need owner level access to the project. This enables the required APIs and creates the necessary service account with roles.
 
-
     ```sh
-    chmod +x ./startup/setup_cloud_simple.sh
-    ./startup/setup_cloud_simple.sh
+    chmod +x ./startup/setup_cloud_simple.sh && ./startup/setup_cloud_simple.sh
     ```
-
 
 6. Start the app.
 
     ```sh
-    chmod +x ./startup/launch_app.sh
-    ./startup/launch_app.sh
+    chmod +x ./startup/launch_app.sh && ./startup/launch_app.sh
     ```
 
 7. Access the Frontend Application Open <http://localhost:8080> in your browser. Use **0000** as the invite code.
