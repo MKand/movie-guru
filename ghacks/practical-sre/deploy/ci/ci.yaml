@@ -1,0 +1,161 @@
+# Copyright 2022 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+timeout: 7200s # 2hr
+tags:
+  - ci
+
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  id: "build-db-image"
+  dir: './pgvector'
+  entrypoint: "sh"
+  args:
+    - -xe 
+    - -c
+    - |
+      docker build \
+         -t "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/db:sre-v3" \
+         --cache-from "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/db:sre-v3" \
+         -f Dockerfile \
+         .
+- name: 'gcr.io/cloud-builders/docker'
+  id: "push-db-image"
+  waitFor: [build-db-image]
+  entrypoint: "sh"
+  args:
+    - -xe 
+    - -c
+    - |
+      docker push '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/db:sre-v3'
+- name: 'gcr.io/cloud-builders/docker'
+  id: "build-db-init-image"
+  dir: './pgvector'
+  entrypoint: "sh"
+  args:
+    - -xe 
+    - -c
+    - |
+      docker build \
+         -t "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/db-init:sre-v3" \
+         --cache-from "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/db-init:sre-v3" \
+         -f Dockerfile.init \
+         .
+- name: 'gcr.io/cloud-builders/docker'
+  id: "push-db-init-image"
+  waitFor: [build-db-init-image]
+  entrypoint: "sh"
+  args:
+    - -xe 
+    - -c
+    - |
+      docker push '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/db-init:sre-v3'
+
+
+- name: "gcr.io/cloud-builders/docker"
+  id: "build-frontend"
+  waitFor: ['-']
+  dir: './frontend'
+  entrypoint: "bash"
+  args:
+    - "-c"
+    - |
+      docker build \
+        -t "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/frontend:sre-v3" \
+        --cache-from "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/frontend:sre-v3" \
+        .
+
+- name: 'gcr.io/cloud-builders/docker'
+  id: "push-frontend-image"
+  waitFor: [build-frontend]
+  entrypoint: "sh"
+  args:
+    - -xe 
+    - -c
+    - |
+      docker push '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/frontend:sre-v3'
+
+- name: 'gcr.io/cloud-builders/docker'
+  id: "build-server-image"
+  waitFor: ['-']
+  dir: './chat_server_go'
+  entrypoint: "sh"
+  args:
+    - -xe 
+    - -c
+    - |
+      docker build \
+         -t "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/chatserver:sre-v3" \
+         --cache-from "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/chatserver:sre-v3" \
+         .
+- name: 'gcr.io/cloud-builders/docker'
+  id: "push-server-image"
+  waitFor: [build-server-image]
+  entrypoint: "sh"
+  args:
+    - -xe 
+    - -c
+    - |
+      docker push '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/chatserver:sre-v3'
+
+- name: 'gcr.io/cloud-builders/docker'
+  id: "build-flows-image"
+  waitFor: ['-']
+  dir: './js/flows'
+  entrypoint: "sh"
+  args:
+    - -xe 
+    - -c
+    - |
+      docker build \
+         -t "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/flows:sre-v3" \
+         --cache-from "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/flows:sre-v3" \
+         .
+- name: 'gcr.io/cloud-builders/docker'
+  id: "push-flows-image"
+  waitFor: [build-flows-image]
+  entrypoint: "sh"
+  args:
+    - -xe 
+    - -c
+    - |
+      docker push '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/flows:sre-v3'
+- name: 'gcr.io/cloud-builders/docker'
+  id: "build-mock-image"
+  waitFor: ['-']
+  dir: './js/mock-user'
+  entrypoint: "sh"
+  args:
+    - -xe 
+    - -c
+    - |
+      docker build \
+         -t "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/mockuser:sre-v3" \
+         --cache-from "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/mockuser:sre-v3" \
+         .
+- name: 'gcr.io/cloud-builders/docker'
+  id: "push-mock-image"
+  waitFor: [build-mock-image]
+  entrypoint: "sh"
+  args:
+    - -xe 
+    - -c
+    - |
+      docker push '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/mockuser:sre-v3'
+
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+  substitution_option: ALLOW_LOOSE
+  dynamic_substitutions: true

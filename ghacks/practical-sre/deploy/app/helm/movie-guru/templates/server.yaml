@@ -1,0 +1,92 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: server
+  namespace: movieguru
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: server
+  template:
+    metadata:
+      labels:
+        app: server
+    spec:
+      containers:
+      - name: server
+        image: "{{ .Values.Config.Image.Repository }}/chatserver:sre-v2"
+        command: ["/app/webserver"]
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+        env:
+        - name: POSTGRES_HOST
+          value: "db-service.movieguru.svc.cluster.local"
+        - name: PROJECT_ID
+          value: {{ .Values.Config.projectID }}
+        - name: POSTGRES_DB_USER_PASSWORD
+          value: "minimal"
+        - name: POSTGRES_DB_USER
+          value: "minimal-user"
+        - name: POSTGRES_DB_NAME
+          value: "fake-movies-db"
+        - name: TABLE_NAME
+          value: "movies"
+        - name: REDIS_PORT
+          value: "6379"
+        - name: REDIS_HOST
+          value: "cache-service.movieguru.svc.cluster.local"
+        - name: FLOWS_URL
+          value: "http://flows-service.movieguru.svc.cluster.local:3400"
+        - name: LOCATION
+          value: {{ .Values.Config.geminiApiLocation }}
+        - name: APP_VERSION
+          value: "static"
+        - name: ENABLE_METRICS
+          value: "true"
+        - name: OTEL_EXPORTER_OTLP_INSECURE
+          value: "true"
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: http://otel-collector.otel.svc.cluster.local:4318
+        - name: FEEDBACK_URL
+          value: https://${GENKIT_FEEDBACK_REGION}-${PROJECT_ID}.cloudfunctions.net/ext-firebase-ai-user-engagement-collectEngagement
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: server-service
+  namespace: movieguru
+spec:
+  selector:
+    app: server 
+  ports:
+  - protocol: TCP
+    port: 80 
+    targetPort: 8080
+  type: ClusterIP
+---
+
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: server-route
+  namespace: movieguru
+spec:
+  parentRefs:
+    - name: movieguru-gateway
+      namespace: movieguru
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: "/server"
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: "/"
+      backendRefs:
+        - name: server-service
+          port: 80

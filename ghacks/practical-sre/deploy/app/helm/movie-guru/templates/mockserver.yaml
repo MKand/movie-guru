@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mockserver
+  namespace: movieguru
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mockserver
+  template:
+    metadata:
+      labels:
+        app: mockserver
+    spec:
+      containers:
+      - name: mockserver
+        image: "{{ .Values.Config.Image.Repository }}/chatserver:sre-v2"
+        command: ["/app/mockserver"]
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+        env:
+        - name: OTEL_EXPORTER_OTLP_INSECURE
+          value: "true"
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: http://otel-collector.otel.svc.cluster.local:4318
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mockserver-service
+  namespace: movieguru
+spec:
+  selector:
+    app: mockserver 
+  ports:
+  - protocol: TCP
+    port: 80 
+    targetPort: 8080
+  type: LoadBalancer
+  loadBalancerIP: {{ .Values.Config.mockserverIP }}

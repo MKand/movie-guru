@@ -1,0 +1,5 @@
+Config: 
+  Image:
+    Repository: us-central1-docker.pkg.dev/o11y-movie-guru/movie-guru  
+  geminiApiLocation: us-central1
+
