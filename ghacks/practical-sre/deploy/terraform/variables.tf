@@ -34,5 +34,5 @@ variable "helm_chart" {
 
 variable "branch_name" {
   description = "value of the branch for cloud build trigger"
-  default     = "restructuring-repo"
+  default     = "main"
 }

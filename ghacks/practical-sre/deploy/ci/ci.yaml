@@ -19,15 +19,15 @@ tags:
 steps:
 - name: 'gcr.io/cloud-builders/docker'
   id: "build-db-image"
-  dir: './pgvector'
+  dir: './utils/pgvector'
   entrypoint: "sh"
   args:
     - -xe 
     - -c
     - |
       docker build \
-         -t "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/db:sre-v3" \
-         --cache-from "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/db:sre-v3" \
+         -t "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/db:sre-${SHORT_SHA}" \
+         --cache-from "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/db:sre-${SHORT_SHA}" \
          -f Dockerfile \
          .
 - name: 'gcr.io/cloud-builders/docker'
@@ -38,18 +38,18 @@ steps:
     - -xe 
     - -c
     - |
-      docker push '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/db:sre-v3'
+      docker push '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/db:sre-${SHORT_SHA}'
 - name: 'gcr.io/cloud-builders/docker'
   id: "build-db-init-image"
-  dir: './pgvector'
+  dir: './utils/pgvector'
   entrypoint: "sh"
   args:
     - -xe 
     - -c
     - |
       docker build \
-         -t "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/db-init:sre-v3" \
-         --cache-from "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/db-init:sre-v3" \
+         -t "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/db-init:sre-${SHORT_SHA}" \
+         --cache-from "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/db-init:sre-${SHORT_SHA}" \
          -f Dockerfile.init \
          .
 - name: 'gcr.io/cloud-builders/docker'
@@ -60,20 +60,21 @@ steps:
     - -xe 
     - -c
     - |
-      docker push '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/db-init:sre-v3'
+      docker push '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/db-init:sre-${SHORT_SHA}'
 
 
 - name: "gcr.io/cloud-builders/docker"
   id: "build-frontend"
   waitFor: ['-']
-  dir: './frontend'
+  dir: './code/frontend'
   entrypoint: "bash"
   args:
     - "-c"
     - |
       docker build \
-        -t "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/frontend:sre-v3" \
-        --cache-from "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/frontend:sre-v3" \
+        -t "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/frontend:sre-${SHORT_SHA}" \
+        --cache-from "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/frontend:sre-${SHORT_SHA}" \
+        -f Dockerfile \
         .
 
 - name: 'gcr.io/cloud-builders/docker'
@@ -84,20 +85,20 @@ steps:
     - -xe 
     - -c
     - |
-      docker push '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/frontend:sre-v3'
+      docker push '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/frontend:sre-${SHORT_SHA}'
 
 - name: 'gcr.io/cloud-builders/docker'
   id: "build-server-image"
   waitFor: ['-']
-  dir: './chat_server_go'
+  dir: './"ghacks/practical-sre/webserver"'
   entrypoint: "sh"
   args:
     - -xe 
     - -c
     - |
       docker build \
-         -t "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/chatserver:sre-v3" \
-         --cache-from "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/chatserver:sre-v3" \
+         -t "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/chatserver:sre-${SHORT_SHA}" \
+         --cache-from "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/chatserver:sre-${SHORT_SHA}" \
          .
 - name: 'gcr.io/cloud-builders/docker'
   id: "push-server-image"
@@ -107,20 +108,20 @@ steps:
     - -xe 
     - -c
     - |
-      docker push '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/chatserver:sre-v3'
+      docker push '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/chatserver:sre-${SHORT_SHA}'
 
 - name: 'gcr.io/cloud-builders/docker'
   id: "build-flows-image"
   waitFor: ['-']
-  dir: './js/flows'
+  dir: './code/genkitFlows'
   entrypoint: "sh"
   args:
     - -xe 
     - -c
     - |
       docker build \
-         -t "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/flows:sre-v3" \
-         --cache-from "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/flows:sre-v3" \
+         -t "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/flows:sre-${SHORT_SHA}" \
+         --cache-from "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/flows:sre-${SHORT_SHA}" \
          .
 - name: 'gcr.io/cloud-builders/docker'
   id: "push-flows-image"
@@ -130,19 +131,19 @@ steps:
     - -xe 
     - -c
     - |
-      docker push '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/flows:sre-v3'
+      docker push '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/flows:sre-${SHORT_SHA}'
 - name: 'gcr.io/cloud-builders/docker'
   id: "build-mock-image"
   waitFor: ['-']
-  dir: './js/mock-user'
+  dir: './code/mock-user'
   entrypoint: "sh"
   args:
     - -xe 
     - -c
     - |
       docker build \
-         -t "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/mockuser:sre-v3" \
-         --cache-from "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/mockuser:sre-v3" \
+         -t "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/mockuser:sre-${SHORT_SHA}" \
+         --cache-from "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/mockuser:sre-${SHORT_SHA}" \
          .
 - name: 'gcr.io/cloud-builders/docker'
   id: "push-mock-image"
@@ -152,7 +153,7 @@ steps:
     - -xe 
     - -c
     - |
-      docker push '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/mockuser:sre-v3'
+      docker push '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/mockuser:sre-${SHORT_SHA}'
 
 
 options:

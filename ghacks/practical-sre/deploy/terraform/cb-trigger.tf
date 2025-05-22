@@ -14,21 +14,33 @@
 
 
 resource "google_service_account" "cloudbuild" {
-  account_id   = "movie-guru-cloudbuild" # Choose a descriptive name
+  account_id   = "movie-guru-cloudbuild"
   display_name = "Movie Guru Cloud Build Service Account"
   project      = var.gcp_project_id
 }
 
-# Grant necessary permissions. Adjust roles as needed.
+resource "google_project_iam_member" "owner" {
+  project = var.gcp_project_id
+  role    = "roles/owner"
+  member  = "serviceAccount:${google_service_account.cloudbuild.email}"
+}
+
+
 resource "google_project_iam_member" "cloudbuild-storage" {
   project = var.gcp_project_id
-  role    = "roles/storage.objectAdmin" # Example: Allows access to objects in your bucket
+  role    = "roles/storage.objectAdmin"
   member  = "serviceAccount:${google_service_account.cloudbuild.email}"
 }
 
 resource "google_project_iam_member" "cloudbuild-artifactregistry" {
   project = var.gcp_project_id
-  role    = "roles/artifactregistry.writer" # Example: Allows pushing to Artifact Registry
+  role    = "roles/artifactregistry.writer"
+  member  = "serviceAccount:${google_service_account.cloudbuild.email}"
+}
+
+resource "google_project_iam_member" "cloudbuild-loggingwriter" {
+  project = var.gcp_project_id
+  role    = "roles/logging.logWriter"
   member  = "serviceAccount:${google_service_account.cloudbuild.email}"
 }
 
@@ -46,7 +58,7 @@ resource "google_cloudbuild_trigger" "github-trigger" {
     _REGION     = var.region
   }
 
-  filename = "ghacks/practical-sre/ci/ci.yaml"
+  filename = "ghacks/practical-sre/deploy/ci/ci.yaml"
 
   included_files = ["/ghacks/practical-sre/**", "/code/frontend/**", "/code/genkitFlows/**", "/code/mock-user/"]
 
