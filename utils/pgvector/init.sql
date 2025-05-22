@@ -1,4 +1,4 @@
-m-- Create the 'main' user with a password
+-- Create the 'main' user with a password
 CREATE USER "main" WITH PASSWORD 'main' SUPERUSER; 
 
 -- Create the 'minimal-user' with a password

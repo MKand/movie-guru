@@ -30,8 +30,8 @@ services:
   flows:
     build: ./code/genkitFlows
     environment:
-      - PROJECT_ID=$PROJECT_ID
-      - LOCATION=$REGION
+      - PROJECT_ID=${PROJECT_ID}
+      - LOCATION=${REGION}
       - POSTGRES_HOST=db
       - POSTGRES_DB_USER=minimal-user
       - POSTGRES_DB_USER_PASSWORD=minimal
@@ -47,17 +47,23 @@ services:
     restart: always
     command: /app/webserver
     environment:
-      - PROJECT_ID=$PROJECT_ID      
-      - LOCATION=$REGION
-      - FEEDBACK_URL=$GENKIT_FEEDBACK_URL
+      - PROJECT_ID=${PROJECT_ID}
+      - LOCATION=${REGION}
+      - POSTER_BUCKET_NAME=${POSTER_BUCKET_NAME}
+      - FEEDBACK_URL=${GENKIT_FEEDBACK_URL}
+      - ENABLE_METRICS=${ENABLE_METRICS}
+      - FLOWS_URL=${FLOWS_URL}
+      - USE_AUTH=${USE_AUTH}
+      - TOKEN_AUDIENCE=${TOKEN_AUDIENCE}
+      - STRICT_CORS=${STRICT_CORS}
+      - CORS_ORIGINS=${CORS_ORIGINS}
+      - MAX_USER_MESSAGE_LENGTH=${MAX_USER_MESSAGE_LENGTH}
+      - HISTORY_LENGTH=${HISTORY_LENGTH}
       - POSTGRES_HOST=db
       - POSTGRES_DB_USER_PASSWORD=minimal
       - POSTGRES_DB_USER=minimal-user
       - POSTGRES_DB_NAME=fake-movies-db
       - TABLE_NAME=movies
-      - USE_AUTH=false
-      - STRICT_CORS=false
-      - FLOWS_URL=http://flows:3400
       - REDIS_HOST=cache
       - REDIS_PORT=6379
     depends_on:
@@ -68,6 +74,9 @@ services:
       context: ./code/frontend
       dockerfile: Dockerfile.dev
     environment:
-      - VITE_GCP_PROJECT_ID=$PROJECT_ID
-      - VITE_USE_AUTH=false
+      - VITE_GCP_PROJECT_ID=${PROJECT_ID}
+      - VITE_USE_AUTH=${USE_AUTH}
+      - VITE_FIREBASE_API_KEY=${FIREBASE_API_KEY}
+      - VITE_FIREBASE_AUTH_DOMAIN=${FIREBASE_AUTH_DOMAIN}
+      - VITE_FIREBASE_APP_ID=${FIREBASE_APP_ID}
       - VITE_CHAT_SERVER_URL=http://localhost:8080/api

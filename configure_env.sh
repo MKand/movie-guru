@@ -136,6 +136,13 @@ TOKEN_AUDIENCE=""
 CORS_ORIGINS=""
 MAX_USER_MESSAGE_LENGTH=500
 HISTORY_LENGTH=10
+FIREBASE_API_KEY=""
+FIREBASE_APP_ID=""
+FIREBASE_AUTH_DOMAIN=""
+GENKIT_FEEDBACK_URL=""
+FIREBASE_API_KEY=""
+FIREBASE_APP_ID=""
+FIREBASE_AUTH_DOMAIN=""
 
 echo "--- Movie Guru Webserver Environment Configuration ---"
 echo "This script will guide you through setting necessary environment variables."
@@ -177,6 +184,10 @@ if [ "${USE_AUTH}" == "true" ]; then
     echo ""
     echo "--- Authentication is ENABLED. Additional settings required: ---"
     prompt_for_value "TOKEN_AUDIENCE" "  9a. Token Audience" ${PROJECT_ID} ""
+    prompt_for_value "FIREBASE_APP_ID" "  9b. Firebase App ID" "" "mandatory"
+    prompt_for_value "FIREBASE_API_KEY" "  9c. Firebase API Key" "" "mandatory"
+    prompt_for_value "FIREBASE_AUTH_DOMAIN" "  9d. Firebase Auth Domain" "" "mandatory" 
+
 else
     echo "  Authentication is DISABLED. Skipping related settings."
 fi
@@ -198,7 +209,7 @@ echo "--- Configuration Summary ---"
 echo "The following environment variables have been configured in this script's session:"
 echo "POSTER_BUCKET_NAME='${POSTER_BUCKET_NAME}'"
 echo "FLOWS_URL='${FLOWS_URL}'"
-echo "FEEDBACK_URL='${FEEDBACK_URL}'"
+echo "GENKIT_FEEDBACK_URL='${GENKIT_FEEDBACK_URL}'"
 echo "ENABLE_METRICS='${ENABLE_METRICS}'"
 echo "USE_AUTH='${USE_AUTH}'"
 
@@ -229,7 +240,7 @@ echo ""
 echo "You can also save these settings to a .env file for use with tools like Docker Compose or some auto-loaders:"
 echo "POSTER_BUCKET_NAME='${POSTER_BUCKET_NAME}'"
 echo "FLOWS_URL='${FLOWS_URL}'"
-echo "FEEDBACK_URL='${FEEDBACK_URL}'"
+echo "GENKIT_FEEDBACK_URL='${GENKIT_FEEDBACK_URL}'"
 echo "ENABLE_METRICS='${ENABLE_METRICS}'"
 echo "USE_AUTH='${USE_AUTH}'"
 if [ "${USE_AUTH}" == "true" ]; then
@@ -242,18 +253,20 @@ fi
 
 # Actual .env file creation
 cat <<EOF > .env
-export PROJECT_ID='${PROJECT_ID}'
-export REGION='${REGION}'
-export POSTER_BUCKET_NAME='${POSTER_BUCKET_NAME}'
-export FLOWS_URL='${FLOWS_URL}'
-export FEEDBACK_URL='${FEEDBACK_URL}'
-export ENABLE_METRICS='${ENABLE_METRICS}'
-export USE_AUTH='${USE_AUTH}'
-export TOKEN_AUDIENCE='${TOKEN_AUDIENCE}'
-export CORS_ORIGINS='${CORS_ORIGINS}'
-export STRICT_CORS='${STRICT_CORS}'
-export MAX_USER_MESSAGE_LENGTH='${MAX_USER_MESSAGE_LENGTH}'
-export HISTORY_LENGTH='${HISTORY_LENGTH}'
-export GENKIT_FEEDBACK_URL='${GENKIT_FEEDBACK_URL}'
+PROJECT_ID='${PROJECT_ID}'
+REGION='${REGION}'
+POSTER_BUCKET_NAME='${POSTER_BUCKET_NAME}'
+FLOWS_URL='${FLOWS_URL}'
+ENABLE_METRICS='${ENABLE_METRICS}'
+USE_AUTH='${USE_AUTH}'
+TOKEN_AUDIENCE='${TOKEN_AUDIENCE}'
+CORS_ORIGINS='${CORS_ORIGINS}'
+STRICT_CORS='${STRICT_CORS}'
+MAX_USER_MESSAGE_LENGTH='${MAX_USER_MESSAGE_LENGTH}'
+HISTORY_LENGTH='${HISTORY_LENGTH}'
+GENKIT_FEEDBACK_URL='${GENKIT_FEEDBACK_URL}'
+FIREBASE_API_KEY='${FIREBASE_API_KEY}'
+FIREBASE_APP_ID='${FIREBASE_APP_ID}'
+FIREBASE_AUTH_DOMAIN='${FIREBASE_AUTH_DOMAIN}'
 EOF
 echo "A .env file has been generated/updated with these settings."
