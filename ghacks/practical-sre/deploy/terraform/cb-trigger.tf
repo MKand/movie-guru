@@ -60,7 +60,7 @@ resource "google_cloudbuild_trigger" "github-trigger" {
 
   filename = "ghacks/practical-sre/deploy/ci/ci.yaml"
 
-  included_files = ["/ghacks/practical-sre/**", "/code/frontend/**", "/code/genkitFlows/**", "/code/mock-user/"]
+  included_files = ["/ghacks/practical-sre/**", "/code/frontend/**", "/code/genkitFlows/**", "/code/mock-user/**"]
 
   lifecycle {
     ignore_changes = []

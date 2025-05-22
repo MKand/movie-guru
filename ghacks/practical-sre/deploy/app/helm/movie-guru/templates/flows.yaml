@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: flows
-        image: "{{ .Values.Config.Image.Repository }}/flows:sre-v2"
+        image: "{{ .Values.Config.Image.Repository }}/flows:sre-{{ .Values.Config.Image.Tag }}"
         imagePullPolicy: Always
         ports:
         - containerPort: 3400
