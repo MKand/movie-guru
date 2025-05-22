@@ -7,15 +7,15 @@
       - [Components](#components)
     - [Deployment](#deployment)
       - [Docker Containers](#docker-containers)
-    - [Genkit Flows and Prompts](#genkit-flows-and-prompts)
+    - [Genkit Flows](#genkit-flows)
     - [Data](#data)
       - [Postgres](#postgres)
   - [Getting Started](#getting-started)
     - [Simple Local Setup](#simple-local-setup)
       - [Prerequisites](#prerequisites)
       - [Instructions](#instructions)
-    - [Simple local setup with firebase authentication](#simple-local-setup-with-firebase-authentication)
-    - [Cloud setup with firebase authentication](#cloud-setup-with-firebase-authentication)
+    - [Simple local setup with Firebase Authentication](#simple-local-setup-with-firebase-authentication)
+    - [Cloud setup with Firebase Authentication](#cloud-setup-with-firebase-authentication)
       - [Populate the database (Optional)](#populate-the-database-optional)
 
 ## About Movie Guru
@@ -26,10 +26,10 @@
 
 **Embedding Models**: textEmbedding005
 
-[![Movie Guru](https://img.youtube.com/vi/l_KhN3RJ8qA/0.jpg)](https://youtu.be/l_KhN3RJ8qA)
+[![Watch the Movie Guru Demo](https://img.youtube.com/vi/l_KhN3RJ8qA/0.jpg)](https://youtu.be/l_KhN3RJ8qA "Movie Guru Demo")
 
- This version is a *minimal version* of the frontend and backend that doesn't have complex login logic like the version in **cloud-movieguru**. It is meant to be run fully locally while using VertexAI APIs.
- If you want to run this demo entirely in the cloud use the **cloud-movieguru** branch.
+> This version is a *minimal version* of the frontend and backend that doesn't have complex login logic like the version in the **cloud-movieguru** branch. It is meant to be run fully locally while using Vertex AI APIs.
+> If you want to run this demo entirely in the cloud, please use the **cloud-movieguru** branch.
 
 ## Description
 
@@ -58,21 +58,21 @@ The repo is intended for educational/hobbyists use only.
 - **Cache:** Redis for caching chat history and sessions.
 - **Database:** Postgres with `pgvector`.
 
-### Genkit Flows and Prompts
+### Genkit Flows
 
-1. **Safety Prompt:** Checks each user statement to validate whether or not it is safe to proceed with.
-1. **Query Transform Prompt:** Maps vague user queries to specific database queries.
-1. **Movie Prompt:** Combines user data and relevant documents to provide responses.
-1. **Movie Doc Flow:** Retrieves relevant documents from the vector database. Perform a keyword based, vector based, or mixed search based on the type of query.
-1. **Chat Flow:** Combines all the aforementioned prompts flows into a single flow that is used by the chat server.
-1. **User Profile Flow:** Additional flow that extracts user preferences from conversations.
-1. **Indexer Flow:** Parses movie data and adds it to the vector database.
+1. **Safety Flow:** Checks each user statement to validate whether or not it is safe to proceed with.
+2. **Query Transform Flow:** Maps vague user queries to specific database queries.
+3. **Movie QA Flow:** Combines user data and relevant documents to provide responses.
+4. **Movie Doc Flow:** Retrieves relevant documents from the vector database. Performs a keyword-based, vector-based, or mixed search based on the type of query.
+5. **Chat Flow:** Combines all the aforementioned prompts and flows into a single flow that is used by the chat server.
+6. **User Preferences Flow:** Additional flow that extracts user preferences from conversations.
+7. **Indexer Flow:** Parses movie data and adds it to the vector database.
 
 ### Data
 
-- The data about the movies is stored in a pgVector database. There are around 600 movies, with a plot, list of actors, director, rating, genre, and poster link. The posters are stored in a cloud storage bucket.
-- The user's profile data (their likes and dislikes) are stored in the CloudSQL database.
-- The user's conversation history is stored in a local redis cache. Only the most recent 10 messages are stored. This number is configurable. The session info for the webserver is also stored in memory store.
+- Movie data is stored in a PostgreSQL database with the `pgvector` extension. This includes details for approximately 600 fictional movies (plot, actors, director, rating, genre, poster link). Posters are stored in a Cloud Storage bucket.
+- User profile data (likes and dislikes) is stored in the PostgreSQL database.
+- User conversation history (most recent 10 messages, configurable) and webserver session info are stored in a local Redis cache.
 
 #### Postgres
 
@@ -80,6 +80,8 @@ There are 2 important tables:
 
 - *movies*: This contains the information about the AI Generated movies and their embeddings. The data for the table is found in dataset/movies_with_posters.csv. If you choose to host your own posters, replace the links in this file.
 - *user_preferences*: This contains the user's long term preferences profile information.
+- **movies**: Contains information about the AI-generated movies and their embeddings. Initial data is sourced from `dataset/movies_with_posters.csv`. If hosting your own posters, update the links in this file.
+- **user_preferences**: Stores users' long-term preference profiles.
 
 ## Getting Started
 
@@ -117,31 +119,29 @@ There are 2 important tables:
     ./startup/configure_env_simple.sh
     ```
 
-1. Make sure the required APIs are enabled and create a service account. You will need owner level access to the project.
+1. Make sure the required APIs are enabled and create a service account. You will need owner level access to the project. This enables the required APIs and creates the necessary service account with roles.
 
-  ```sh
-  chmod +x ./startup/setup_cloud_simple.sh
-  ./startup/setup_cloud_simple.sh
-  ```
-
-This enables the required APIs and creates the necessary service account with roles.
+    ```sh
+    chmod +x ./startup/setup_cloud_simple.sh
+    ./startup/setup_cloud_simple.sh
+    ```
 
 1. Start the app.
 
-  ```sh
-  chmod +x ./startup/launch_app.sh
-  ./startup/launch_app.sh
- ```
+    ```sh
+      chmod +x ./startup/launch_app.sh
+      ./startup/launch_app.sh
+    ```
 
 1. Access the Frontend Application Open <http://localhost:8080> in your browser.
 
 1. To stop the app, press **Ctrl+C** in the terminal. Then run
   
-  ```sh
-  ./startup/launch_app.sh --stop
- ```
+    ```sh
+      ./startup/launch_app.sh --stop
+    ```
 
-### Simple local setup with firebase authentication
+### Simple local setup with Firebase Authentication
 
 This uses firebase authentication for the frontend of the application.
 
@@ -172,31 +172,33 @@ This uses firebase authentication for the frontend of the application.
     ./startup/configure_env.sh
     ```
 
-5. Make sure the required APIs are enabled and create a service account. You will need owner level access to the project.
+5. Make sure the required APIs are enabled and create a service account. You will need owner level access to the project. This enables the required APIs and creates the necessary service account with roles.
 
-  ```sh
-  chmod +x ./startup/setup_cloud_simple.sh
-  ./startup/setup_cloud_simple.sh
-  ```
 
-This enables the required APIs and creates the necessary service account with roles.
+    ```sh
+    chmod +x ./startup/setup_cloud_simple.sh
+    ./startup/setup_cloud_simple.sh
+    ```
 
-1. Start the app.
 
-  ```sh
-  chmod +x ./startup/launch_app.sh
-  ./startup/launch_app.sh
- ```
+6. Start the app.
 
-1. Access the Frontend Application Open <http://localhost:8080> in your browser. Use **0000** as the invite code.
+    ```sh
+    chmod +x ./startup/launch_app.sh
+    ./startup/launch_app.sh
+    ```
 
-1. To stop the app, press **Ctrl+C** in the terminal. Then run
+7. Access the Frontend Application Open <http://localhost:8080> in your browser. Use **0000** as the invite code.
+
+8. To stop the app, press **Ctrl+C** in the terminal. Then run
   
-  ```sh
-  ./startup/launch_app.sh --stop
- ```
+    ```sh
+    ./startup/launch_app.sh --stop
+    ```
 
-### Cloud setup with firebase authentication
+### Cloud setup with Firebase Authentication
+
+WIP
 
 #### Populate the database (Optional)
 
@@ -226,3 +228,5 @@ There should be **652** entries in the movies table.
   SELECT COUNT(*)
   FROM "movies";
   ```
+
+This ensures that all the movies are updated in the db.
