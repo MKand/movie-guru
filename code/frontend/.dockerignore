@@ -1,0 +1,4 @@
+**/.firebase/**
+**/.vite/** 
+**/.dist/**
+**/node_modules/**
