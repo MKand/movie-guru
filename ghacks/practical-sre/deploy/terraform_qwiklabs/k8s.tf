@@ -94,7 +94,7 @@ resource "helm_release" "movie_guru" {
     name  = "Config.projectID"
     value = var.gcp_project_id
   }
-  depends_on = [kubernetes_namespace.movieguru]
+  depends_on = [kubernetes_namespace.movieguru, kubernetes_config_map.otel_config, kubernetes_namespace.otel]
 }
 
 resource "kubernetes_namespace" "locust" {
