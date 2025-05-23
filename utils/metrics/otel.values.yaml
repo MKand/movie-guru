@@ -59,7 +59,7 @@ config:
       spike_limit_percentage: 20
 
   exporters:
-      googlemanagedprometheus:
+    googlemanagedprometheus:
 
   service:
     pipelines:
@@ -69,4 +69,4 @@ config:
         exporters: [googlemanagedprometheus]
     telemetry:
         logs:
-          level: info # or trace
+          level: info

@@ -76,10 +76,12 @@ resource "helm_release" "otel"{
   chart     = "opentelemetry-collector"
   namespace = "otel"
   create_namespace = true
+
   set{
     name = "image.repository"
-    value = "otel/opentelemetry-collector-k8s"
+    value = "otel/opentelemetry-collector-contrib"
   }
+
   set{
     name = "mode"
     value = "deployment"
@@ -103,6 +105,10 @@ resource "helm_release" "movie_guru" {
     value = var.repo_prefix
   }
   set {
+    name  = "Config.Image.Tag"
+    value = var.image_tag
+  }
+  set {
     name  = "Config.serverAddress"
     value = "http://movieguru.endpoints.${var.gcp_project_id}.cloud.goog/server"
   }
@@ -122,9 +128,6 @@ resource "helm_release" "movie_guru" {
     value = var.gcp_project_id
   }
 }
-
-
-
 
 resource "kubernetes_config_map" "loadtest_locustfile" {
   metadata {

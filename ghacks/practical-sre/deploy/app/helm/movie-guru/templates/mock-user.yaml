@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: mock-user
-        image: "{{ .Values.Config.Image.Repository  }}/mockuser:sre-{{ .Values.Config.Image.Tag }}"
+        image: "{{ .Values.Config.Image.Repository  }}/mockuser:{{ .Values.Config.Image.Tag }}"
         imagePullPolicy: Always
         ports:
         - containerPort: 3400

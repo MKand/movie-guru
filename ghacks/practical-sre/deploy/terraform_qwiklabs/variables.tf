@@ -10,7 +10,7 @@ variable "repo_prefix" {
 }
 variable "image_tag" {
   description = "TAG of the movie guru docker images"
-  default     = "sre-v2"
+  default     = "sre-2506b80"
 }
 
 variable "gcp_region" {
@@ -45,7 +45,7 @@ variable "otel_file" {
   type = string
 
   description = "URL of the otel config"
-  default     = "https://raw.githubusercontent.com/MKand/movie-guru/refs/heads/main/utils/metrics/otel-collector-config.yaml"
+  default     = "https://raw.githubusercontent.com/MKand/movie-guru/refs/heads/main/utils/metrics/otel.values.yaml"
 }
 
 variable "helm_chart" {

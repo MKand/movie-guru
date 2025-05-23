@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: db
-        image: "{{ .Values.Config.Image.Repository }}/db:sre-{{ .Values.Config.Image.Tag }}"
+        image: "{{ .Values.Config.Image.Repository }}/db:{{ .Values.Config.Image.Tag }}"
         ports:
         - containerPort: 5432
         env:
