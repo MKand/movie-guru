@@ -59,16 +59,15 @@ data "http" "sql_file" {
   url = var.sql_file
 }
 
-data "http" "otel_file" {
-  url = var.otel_file
-}
-
 resource "kubernetes_namespace" "locust" {
   metadata {
     name = "locust"
   }
 }
 
+data "http" "otel_file" {
+  url = var.otel_file
+}
 
 resource "helm_release" "otel"{
   name      = "otel"
