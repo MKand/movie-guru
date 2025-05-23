@@ -10,7 +10,7 @@ variable "repo_prefix" {
 }
 variable "image_tag" {
   description = "TAG of the movie guru docker images"
-  default     = "sre-2328f70"
+  default     = "sre-4151d03"
 }
 
 variable "gcp_region" {
