@@ -46,9 +46,9 @@ spec:
         - name: OTEL_EXPORTER_OTLP_INSECURE
           value: "true"
         - name: OTEL_EXPORTER_OTLP_ENDPOINT
-          value: http://otel-collector.otel.svc.cluster.local:4318
+          value: http://otel-opentelemetry-collector.otel.svc.cluster.local:4318
         - name: FEEDBACK_URL
-          value: https://${GENKIT_FEEDBACK_REGION}-${PROJECT_ID}.cloudfunctions.net/ext-firebase-ai-user-engagement-collectEngagement
+          value: ""
 ---
 apiVersion: v1
 kind: Service

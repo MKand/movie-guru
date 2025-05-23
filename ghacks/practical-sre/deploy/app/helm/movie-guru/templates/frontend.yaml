@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: movieguru
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - name: frontend
+        image: "{{ .Values.Config.Image.Repository }}/frontend:{{ .Values.Config.Image.Tag }}"
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 4000
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+  namespace: movieguru
+spec:
+  selector:
+    app: frontend 
+  ports:
+  - protocol: TCP
+    port: 4000 
+    targetPort: 4000
+  type: ClusterIP
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: frontend-route
+  namespace: movieguru
+spec:
+  parentRefs:
+    - name: movieguru-gateway
+      namespace: movieguru
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: "/"
+      backendRefs:
+        - name: frontend
+          port: 4000
