@@ -31,21 +31,21 @@ variable "locust_py_file" {
   type = string
 
   description = "URL of the locustfile"
-  default     = "https://raw.githubusercontent.com/MKand/movie-guru/refs/heads/main/locust/locustfile.py"
+  default     = "https://raw.githubusercontent.com/MKand/movie-guru/refs/heads/main/ghacks/practical-sre/locust/locustfile.py"
 }
 
 variable "sql_file" {
   type = string
 
   description = "URL of the sql file"
-  default     = "https://raw.githubusercontent.com/MKand/movie-guru/refs/heads/main/pgvector/init.sql"
+  default     = "https://raw.githubusercontent.com/MKand/movie-guru/refs/heads/main/utils/pgvector/init.sql"
 }
 
 variable "otel_file" {
   type = string
 
   description = "URL of the otel config"
-  default     = "https://raw.githubusercontent.com/MKand/movie-guru/refs/heads/main/metrics/otel-collector-config.yaml"
+  default     = "https://raw.githubusercontent.com/MKand/movie-guru/refs/heads/main/utils/metrics/otel-collector-config.yaml"
 }
 
 variable "helm_chart" {

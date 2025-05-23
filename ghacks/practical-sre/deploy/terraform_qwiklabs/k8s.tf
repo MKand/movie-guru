@@ -51,7 +51,6 @@ resource "google_endpoints_service" "openapi_service" {
   })
 }
 
-
 data "http" "locust_py_file" {
   url = var.locust_py_file
 }
@@ -60,20 +59,48 @@ data "http" "sql_file" {
   url = var.sql_file
 }
 
+data "http" "otel_file" {
+  url = var.otel_file
+}
+
+resource "kubernetes_namespace" "locust" {
+  metadata {
+    name = "locust"
+  }
+}
+
+
+resource "helm_release" "otel"{
+  name      = "otel"
+  repository = "https://open-telemetry.github.io/opentelemetry-helm-charts"
+  chart     = "opentelemetry-collector"
+  namespace = "otel"
+  create_namespace = true
+  set{
+    name = "image.repository"
+    value = "otel/opentelemetry-collector-k8s"
+  }
+  set{
+    name = "mode"
+    value = "deployment"
+  }
+
+    values = [
+    data.http.otel_file.response_body
+  ]
+}
+
 resource "helm_release" "movie_guru" {
   name      = "movie-guru"
   chart     = var.helm_chart
   namespace = "movieguru"
   version   = "0.3.0"
   wait      = false
+  create_namespace = true
 
   set {
     name  = "Config.Image.Repository"
     value = var.repo_prefix
-  }
-  set {
-    name  = "Config.Image.Tag"
-    value = var.image_tag
   }
   set {
     name  = "Config.serverAddress"
@@ -94,26 +121,9 @@ resource "helm_release" "movie_guru" {
     name  = "Config.projectID"
     value = var.gcp_project_id
   }
-  depends_on = [kubernetes_namespace.movieguru, kubernetes_config_map.otel_config, kubernetes_namespace.otel]
 }
 
-resource "kubernetes_namespace" "locust" {
-  metadata {
-    name = "locust"
-  }
-}
 
-resource "kubernetes_namespace" "otel" {
-  metadata {
-    name = "otel"
-  }
-}
-
-resource "kubernetes_namespace" "movieguru" {
-  metadata {
-    name = "movieguru"
-  }
-}
 
 
 resource "kubernetes_config_map" "loadtest_locustfile" {
@@ -136,6 +146,7 @@ resource "helm_release" "locust" {
   chart     = "oci://ghcr.io/deliveryhero/helm-charts/locust"
   namespace = "locust"
   version   = "0.31.6"
+  create_namespace = false
 
   set {
     name  = "loadtest.name"
@@ -176,23 +187,3 @@ data "kubernetes_service" "locust" {
   }
   depends_on = [helm_release.locust]
 }
-
-data "http" "otel_file" {
-  url = var.otel_file
-}
-
-resource "kubernetes_config_map" "otel_config" {
-  metadata {
-    name      = "otel-config"
-    namespace = "otel"
-  }
-
-  data = {
-    "otel-collector-config.py" = (
-      data.http.otel_file.response_body
-    )
-  }
-
-  depends_on = [kubernetes_namespace.otel]
-}
-

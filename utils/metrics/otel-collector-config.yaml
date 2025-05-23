@@ -1,71 +1,72 @@
-receivers:
-  otlp:
-    protocols:
-      http:
-        endpoint: "0.0.0.0:4318"
-  prometheus:
-    config:
-      scrape_configs:
-      - job_name: 'movie-guru-server'
-        kubernetes_sd_configs:
-        - role: pod
-        relabel_configs:
-        - source_labels: [__meta_kubernetes_pod_label_app_kubernetes_io_name]
-          action: keep
-          regex: prom-example
-        - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
-          action: replace
-          target_label: __metrics_path__
-          regex: (.+)
-        - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
-          action: replace
-          regex: (.+):(?:\d+);(\d+)
-          replacement: $$1:$$2
-          target_label: __address__
-        - action: labelmap
-          regex: __meta_kubernetes_pod_label_(.+)
+config:
+  receivers:
+    otlp:
+      protocols:
+        http:
+          endpoint: "0.0.0.0:4318"
+    prometheus:
+      config:
+        scrape_configs:
+        - job_name: 'movie-guru-server'
+          kubernetes_sd_configs:
+          - role: pod
+          relabel_configs:
+          - source_labels: [__meta_kubernetes_pod_label_app_kubernetes_io_name]
+            action: keep
+            regex: prom-example
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+            action: replace
+            target_label: __metrics_path__
+            regex: (.+)
+          - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+            action: replace
+            regex: (.+):(?:\d+);(\d+)
+            replacement: $$1:$$2
+            target_label: __address__
+          - action: labelmap
+            regex: __meta_kubernetes_pod_label_(.+)
 
-processors:
-  resourcedetection:
-    detectors: [gcp]
-    timeout: 10s
+  processors:
+    resourcedetection:
+      detectors: [gcp]
+      timeout: 10s
 
-  transform:
-    metric_statements:
-    - context: datapoint
-      statements:
-      - set(attributes["exported_location"], attributes["location"])
-      - delete_key(attributes, "location")
-      - set(attributes["exported_cluster"], attributes["cluster"])
-      - delete_key(attributes, "cluster")
-      - set(attributes["exported_namespace"], attributes["namespace"])
-      - delete_key(attributes, "namespace")
-      - set(attributes["exported_job"], attributes["job"])
-      - delete_key(attributes, "job")
-      - set(attributes["exported_instance"], attributes["instance"])
-      - delete_key(attributes, "instance")
-      - set(attributes["exported_project_id"], attributes["project_id"])
-      - delete_key(attributes, "project_id")
+    transform:
+      metric_statements:
+      - context: datapoint
+        statements:
+        - set(attributes["exported_location"], attributes["location"])
+        - delete_key(attributes, "location")
+        - set(attributes["exported_cluster"], attributes["cluster"])
+        - delete_key(attributes, "cluster")
+        - set(attributes["exported_namespace"], attributes["namespace"])
+        - delete_key(attributes, "namespace")
+        - set(attributes["exported_job"], attributes["job"])
+        - delete_key(attributes, "job")
+        - set(attributes["exported_instance"], attributes["instance"])
+        - delete_key(attributes, "instance")
+        - set(attributes["exported_project_id"], attributes["project_id"])
+        - delete_key(attributes, "project_id")
 
-  batch:
-    send_batch_max_size: 200
-    send_batch_size: 200
-    timeout: 5s
+    batch:
+      send_batch_max_size: 200
+      send_batch_size: 200
+      timeout: 5s
 
-  memory_limiter:
-    check_interval: 1s
-    limit_percentage: 65
-    spike_limit_percentage: 20
+    memory_limiter:
+      check_interval: 1s
+      limit_percentage: 65
+      spike_limit_percentage: 20
 
-exporters:
-    googlemanagedprometheus:
+  exporters:
+      googlemanagedprometheus:
 
-service:
-  pipelines:
-    metrics:
-      receivers: ["otlp"]
-      processors: [batch, memory_limiter, resourcedetection, transform]
-      exporters: [googlemanagedprometheus]
-  telemetry:
-      logs:
-        level: info # or trace
+  service:
+    pipelines:
+      metrics:
+        receivers: ["otlp"]
+        processors: [batch, memory_limiter, resourcedetection, transform]
+        exporters: [googlemanagedprometheus]
+    telemetry:
+        logs:
+          level: info # or trace
