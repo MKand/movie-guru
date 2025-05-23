@@ -19,6 +19,12 @@ spec:
         imagePullPolicy: Always
         ports:
         - containerPort: 4000
+        env:
+          - name: VITE_USE_AUTH
+            value: "false"
+          - name: VITE_CHAT_SERVER_URL
+            value: {{ .Values.Config.serverAddress }}
+
 
 ---
 apiVersion: v1
@@ -50,5 +56,5 @@ spec:
             type: PathPrefix
             value: "/"
       backendRefs:
-        - name: frontend
+        - name: frontend-service
           port: 4000

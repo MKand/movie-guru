@@ -72,11 +72,9 @@ steps:
     - "-c"
     - |
       docker build \
-        --build-arg VITE_USE_AUTH=false \
-        --build-arg VITE_CHAT_SERVER_URL="http://server-service.movieguru.svc.cluster.local:80" \
         -t "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/frontend:sre-${SHORT_SHA}" \
         --cache-from "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/frontend:sre-${SHORT_SHA}" \
-        -f Dockerfile \
+        -f Dockerfile.dev \
         .
 
 - name: 'gcr.io/cloud-builders/docker'
