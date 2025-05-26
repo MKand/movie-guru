@@ -108,20 +108,14 @@ resource "helm_release" "movie_guru" {
     value = var.image_tag
   }
   set {
-    name  = "Config.serverAddress"
-    value = "http://movieguru.endpoints.${var.gcp_project_id}.cloud.goog"
+    name  = "Config.gatewayAddress"
+    value = "movieguru.endpoints.${var.gcp_project_id}.cloud.goog"
   }
 
   set {
     name  = "Config.mockserverIP"
     value = google_compute_global_address.mockserver-address.address
   }
-
-  set {
-    name  = "Gateway.IP"
-    value = google_compute_global_address.movieguru-address.address
-  }
-
   set {
     name  = "Config.projectID"
     value = var.gcp_project_id

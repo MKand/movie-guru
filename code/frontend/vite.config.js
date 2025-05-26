@@ -26,7 +26,8 @@ export default defineConfig({
   ],
   server: {
     port: 4001,
-    host: '0.0.0.0'
+    host: '0.0.0.0',
+    allowedHosts: [ import.meta.VITE_ALLOWED_HOST, 'localhost' ]
   },
   resolve: {
     alias: {
