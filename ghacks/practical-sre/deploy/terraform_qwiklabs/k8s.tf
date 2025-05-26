@@ -109,7 +109,7 @@ resource "helm_release" "movie_guru" {
   }
   set {
     name  = "Config.serverAddress"
-    value = "http://movieguru.endpoints.${var.gcp_project_id}.cloud.goog/server"
+    value = "http://movieguru.endpoints.${var.gcp_project_id}.cloud.goog"
   }
 
   set {

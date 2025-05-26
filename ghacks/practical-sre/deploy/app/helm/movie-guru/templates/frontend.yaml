@@ -23,8 +23,7 @@ spec:
           - name: VITE_USE_AUTH
             value: "false"
           - name: VITE_CHAT_SERVER_URL
-            value: {{ .Values.Config.serverAddress }}
-
+            value: "{{ .Values.Config.serverAddress }}/server"
 
 ---
 apiVersion: v1
