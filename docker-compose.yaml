@@ -80,3 +80,4 @@ services:
       - VITE_FIREBASE_AUTH_DOMAIN=${FIREBASE_AUTH_DOMAIN}
       - VITE_FIREBASE_APP_ID=${FIREBASE_APP_ID}
       - VITE_CHAT_SERVER_URL=http://localhost:8080/api
+      - VITE_ALLOWED_HOST=movieguru.endpoints.o11y-movie-guru.cloud.goog
