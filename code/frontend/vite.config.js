@@ -27,7 +27,7 @@ export default defineConfig({
   server: {
     port: 4001,
     host: '0.0.0.0',
-    allowedHosts: [ process.env.VITE_ALLOWED_HOST, // Use process.env for robustness
+    allowedHosts: [ process.env.VITE_ALLOWED_HOST,
 , 'localhost' ]
   },
   resolve: {
