@@ -10,7 +10,7 @@ variable "repo_prefix" {
 }
 variable "image_tag" {
   description = "TAG of the movie guru docker images"
-  default     = "sre-4151d03"
+  default     = "sre-e72ca10"
 }
 
 variable "gcp_region" {
@@ -24,6 +24,12 @@ variable "gcp_zone" {
   type        = string
   description = "Zone to create resources in."
   default     = "us-central1-c"
+}
+
+variable "vertexAI_model_location" {
+  type        = string
+  description = "Region from which the vertexAI models are called."
+  default     = "us-central1"
 }
 
 

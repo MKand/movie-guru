@@ -120,6 +120,11 @@ resource "helm_release" "movie_guru" {
     name  = "Config.projectID"
     value = var.gcp_project_id
   }
+
+  set {
+    name  = "Config.geminiApiLocation"
+    value = var.vertexAI_model_location
+  }
 }
 
 resource "kubernetes_config_map" "loadtest_locustfile" {
