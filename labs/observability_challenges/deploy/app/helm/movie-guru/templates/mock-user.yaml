@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mock-user
+  namespace: movieguru
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mock-user
+  template:
+    metadata:
+      labels:
+        app: mock-user
+    spec:
+      containers:
+      - name: mock-user
+        image: "{{ .Values.Config.Image.Repository  }}/mockuser:{{ .Values.Config.Image.Tag }}"
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3400
+        env:
+        - name: PROJECT_ID
+          value: {{ .Values.Config.projectID }}
+        - name: LOCATION
+          value: {{ .Values.Config.geminiApiLocation }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mockuser-service
+  namespace: movieguru
+spec:
+  selector:
+    app: mock-user
+  ports:
+  - protocol: TCP
+    port: 80  
+    targetPort: 3400
+  type: ClusterIP
