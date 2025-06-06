@@ -58,7 +58,7 @@ variable "helm_chart" {
   type = string
 
   description = "URL of the movie guru helm chart"
-  default     = "oci://us-central1-docker.pkg.dev/o11y-movie-guru/movie-guru/movie-guru"
+  default     = "oci://us-central1-docker.pkg.dev/o11y-movie-guru/movie-guru/movie-guru-sre"
 }
 
 variable "branch_name" {

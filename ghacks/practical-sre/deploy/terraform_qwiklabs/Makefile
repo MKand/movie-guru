@@ -11,11 +11,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-TARGET=ghacks-setup-sre.zip
-OBJS=*.tf runtime.yaml
+TARGET=practical-sre.zip
+OBJS=*.tf runtime.yaml 
 
 $(TARGET): $(OBJS)
-	zip -r $(TARGET) $(OBJS)
+	zip -r $(TARGET) $(OBJS) -x backend.tf
 
 clean:
 	rm -f $(TARGET)

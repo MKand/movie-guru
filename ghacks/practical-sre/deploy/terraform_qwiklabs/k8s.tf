@@ -92,10 +92,10 @@ resource "helm_release" "otel"{
 }
 
 resource "helm_release" "movie_guru" {
-  name      = "movie-guru"
+  name      = "movie-guru-sre"
   chart     = var.helm_chart
   namespace = "movieguru"
-  version   = "0.3.0"
+  version   = "3.0.0"
   wait      = false
   create_namespace = true
 
@@ -120,7 +120,6 @@ resource "helm_release" "movie_guru" {
     name  = "Config.projectID"
     value = var.gcp_project_id
   }
-
   set {
     name  = "Config.geminiApiLocation"
     value = var.vertexAI_model_location

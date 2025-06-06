@@ -10,7 +10,7 @@ resource "google_firebase_web_app" "movieguru-web" {
 
   deletion_policy = "DELETE"
 
-  depends_on = [google_project_service.enable_apis]
+  depends_on = [google_project_service.enable_apis, google_firebase_project.firebase_project]
 
   provider = google-beta
 }
