@@ -1,4 +1,4 @@
-apiVersion: v2
+sreapiVersion: v2
 name: movie-guru-sre
 description: A Helm chart for Kubernetes
 

@@ -23,7 +23,7 @@ gcloud auth print-access-token | helm registry login -u oauth2accesstoken \
 Navigate to the Helm chart's parent directory and package the chart. The chart is assumed to be in a directory named movie-guru-observability-challenge, and its Chart.yaml should define the chart name (e.g., movie-guru) and version (e.g., 1.0.0).
 
 ```sh
-   cd ./labs/observability-challenges/deploy/app/helm && helm package movie-guru-observability-challenge
+   cd ./labs/observability-challenges/deploy/app/helm && helm package movie-guru
 ```
 
 This command will create a [chart-name]-[chart-version].tgz file (e.g., movie-guru-observability-lab-1.0.0.tgz) in the helm directory.
@@ -33,7 +33,7 @@ This command will create a [chart-name]-[chart-version].tgz file (e.g., movie-gu
 Push the packaged Helm chart to your Google Artifact Registry. The chart will be pushed to an OCI repository named movie-guru-observability-challenge.
 
 ```sh
-helm push movie-guru-1.0.0.tgz oci://${REGION}-docker.pkg.dev/${PROJECT_ID}/movie-guru-observability-challenge
+helm pushmovie-guru-observability-lab-1.0.0.tgz oci://${REGION}-docker.pkg.dev/${PROJECT_ID}/movie-guru-observability-challenge
 ```
 
 Note: Ensure the filename movie-guru-observability-lab-1.0.0.tgz matches the output of the helm package command.
