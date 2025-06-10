@@ -33,6 +33,12 @@
         Select troubleshooting options. Enable cloud assist -> start chatting
 
     4. You realise that there is something wrong with the name of the image.
+    5. You rollback to the previous version
+
+        ```sh
+        helm rollback movie-guru-sre 1
+        ```
+        
 
 
 

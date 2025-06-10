@@ -59,46 +59,6 @@ resource "google_monitoring_dashboard" "chat_dashboard" {
             "id" : ""
           }
         },
-        {
-          "xPos" : 24,
-          "yPos" : 0,
-          "width" : 24,
-          "height" : 16,
-          "widget" : {
-            "xyChart" : {
-              "dataSets" : [
-                {
-                  "timeSeriesQuery" : {
-                    "prometheusQuery" : "label_replace((sum(rate(movieguru_chat_quotaissue_counter_total[$${__interval}])) / sum(rate(movieguru_chat_calls_total[$${__interval}]))) * 100, \"legend\", \"Quota Violation %\", \"\", \"\")",
-                    "unitOverride" : "%",
-                    "outputFullDuration" : false
-                  },
-                  "plotType" : "LINE",
-                  "legendTemplate" : "",
-                  "targetAxis" : "Y1",
-                  "dimensions" : [],
-                  "measures" : [],
-                  "breakdowns" : []
-                }
-              ],
-              "thresholds" : [{
-                "value" : 99,
-                "targetAxis" : "Y1"
-              }],
-              "yAxis" : {
-                "label" : "",
-                "scale" : "LINEAR"
-              },
-              "chartOptions" : {
-                "mode" : "COLOR",
-                "showLegend" : false,
-                "displayHorizontal" : false
-              }
-            },
-            "title" : "Chat Quota Violation Rate",
-            "id" : ""
-          }
-        },
 
         {
           "xPos" : 0,
@@ -189,86 +149,6 @@ resource "google_monitoring_dashboard" "chat_dashboard" {
             "id" : ""
           }
         },
-        {
-          "xPos" : 24,
-          "yPos" : 16,
-          "width" : 24,
-          "height" : 16,
-          "widget" : {
-            "xyChart" : {
-              "dataSets" : [
-                {
-                  "timeSeriesQuery" : {
-                    "prometheusQuery" : "label_replace((sum(rate(movieguru_chat_safetyissue_counter_total[$${__interval}])) / sum(rate(movieguru_chat_calls_total[$${__interval}]))) * 100, \"legend\", \"Safety Issue %\", \"\", \"\")",
-                    "unitOverride" : "%",
-                    "outputFullDuration" : false
-                  },
-                  "plotType" : "LINE",
-                  "legendTemplate" : "",
-                  "targetAxis" : "Y1",
-                  "dimensions" : [],
-                  "measures" : [],
-                  "breakdowns" : []
-                }
-              ],
-              "thresholds" : [{
-                "value" : 5,
-                "targetAxis" : "Y1"
-              }],
-              "yAxis" : {
-                "label" : "",
-                "scale" : "LINEAR"
-              },
-              "chartOptions" : {
-                "mode" : "COLOR",
-                "showLegend" : false,
-                "displayHorizontal" : false
-              }
-            },
-            "title" : "Chat Safety Issue Rate",
-            "id" : ""
-          }
-        },
-        {
-          "xPos" : 0,
-          "yPos" : 32,
-          "width" : 24,
-          "height" : 16,
-          "widget" : {
-            "xyChart" : {
-              "dataSets" : [
-                {
-                  "timeSeriesQuery" : {
-                    "prometheusQuery" : "label_replace((sum(rate(movieguru_chat_wrongQuery_counter_total[$${__interval}])) / sum(rate(movieguru_chat_calls_total[$${__interval}]))) * 100, \"legend\", \"Bad Query %\", \"\", \"\")",
-                    "unitOverride" : "%",
-                    "outputFullDuration" : false
-                  },
-                  "plotType" : "LINE",
-                  "legendTemplate" : "",
-                  "targetAxis" : "Y1",
-                  "dimensions" : [],
-                  "measures" : [],
-                  "breakdowns" : []
-                }
-              ],
-              "thresholds" : [{
-                "value" : 5,
-                "targetAxis" : "Y1"
-              }],
-              "yAxis" : {
-                "label" : "",
-                "scale" : "LINEAR"
-              },
-              "chartOptions" : {
-                "mode" : "COLOR",
-                "showLegend" : false,
-                "displayHorizontal" : false
-              }
-            },
-            "title" : "Chat Bad Query Rate",
-            "id" : ""
-          }
-        }
       ]
     },
     "dashboardFilters" : [],

@@ -56,8 +56,7 @@ variable "otel_file" {
 
 variable "helm_chart" {
   type = string
-
-  description = "URL of the movie guru helm chart"
+  description = "URL of the movie guru helm char without version"
   default     = "oci://us-central1-docker.pkg.dev/o11y-movie-guru/movie-guru/movie-guru-observability-lab"
 }
 
