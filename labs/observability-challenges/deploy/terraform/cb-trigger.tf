@@ -58,7 +58,7 @@ resource "google_cloudbuild_trigger" "github-trigger" {
     _REGION     = var.region
   }
 
-  filename = "ghacks/practical-sre/deploy/ci/ci.yaml"
+  filename = "labs/observability-challenges/deploy/ci/ci.yaml"
 
   included_files = ["/labs/observability_challenges/**", "/code/frontend/**", "/code/genkitFlows/**", "/code/mock-user/**"]
 

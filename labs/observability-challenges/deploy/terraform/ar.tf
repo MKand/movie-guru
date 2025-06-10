@@ -12,20 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-resource "google_artifact_registry_repository" "repo" {
-  location      = var.region
-  repository_id = "movie-guru-${var.app_name}"
-  description   = "docker repository for app movie-guru ${var.app_name}"
-  format        = "DOCKER"
-  project       = var.gcp_project_id
-  docker_config {
-    immutable_tags = false
-  }
-
-  depends_on = [google_project_service.enable_apis]
-
-}
-
 
 data "google_iam_policy" "reader" {
   binding {
@@ -37,6 +23,6 @@ data "google_iam_policy" "reader" {
 }
 
 resource "google_artifact_registry_repository_iam_policy" "policy" {
-  repository  = google_artifact_registry_repository.repo.name
+  repository  = "projects/o11y-movie-guru/locations/us-central1/repositories/movie-guru"
   policy_data = data.google_iam_policy.reader.policy_data
 }

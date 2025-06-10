@@ -33,7 +33,7 @@ This command will create a [chart-name]-[chart-version].tgz file (e.g., movie-gu
 Push the packaged Helm chart to your Google Artifact Registry. The chart will be pushed to an OCI repository named movie-guru-sre.
 
 ```sh
-helm push movie-guru-sre-3.0.0.tgz oci://${REGION}-docker.pkg.dev/${PROJECT_ID}/movie-guru
+helm push movie-guru-sre-3.0.0.tgz oci://${REGION}-docker.pkg.dev/${PROJECT_ID}/movie-guru/movie-guru-sre
 ```
 
 Note: Ensure the filename movie-guru-sre-3.0.0.tgz matches the output of the helm package command.

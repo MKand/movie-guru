@@ -96,7 +96,7 @@ steps:
 - name: 'gcr.io/cloud-builders/docker'
   id: "build-server-image"
   waitFor: ['-']
-  dir: './ghacks/practical-sre/webserver'
+  dir: './labs/observability-challenges/webserver'
   entrypoint: "sh"
   args:
     - -xe 
@@ -153,7 +153,7 @@ steps:
     - |
       docker build \
          -t "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/mockuser:obslab-${SHORT_SHA}" \
-         --cache-from "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/mockuser:obslab-v1" \
+         -t "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/mockuser:obslab-v1" \
          --cache-from "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/mockuser:obslab-${SHORT_SHA}" \
          .
 - name: 'gcr.io/cloud-builders/docker'

@@ -33,7 +33,8 @@ This command will create a [chart-name]-[chart-version].tgz file (e.g., movie-gu
 Push the packaged Helm chart to your Google Artifact Registry. The chart will be pushed to an OCI repository named movie-guru-observability-challenge.
 
 ```sh
-helm pushmovie-guru-observability-lab-1.0.0.tgz oci://${REGION}-docker.pkg.dev/${PROJECT_ID}/movie-guru-observability-challenge
+helm push movie-guru-observability-lab-1.0.0.tgz oci://${REGION}-docker.pkg.dev/${PROJECT_ID}/movie-guru
+
 ```
 
 Note: Ensure the filename movie-guru-observability-lab-1.0.0.tgz matches the output of the helm package command.

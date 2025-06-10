@@ -61,6 +61,12 @@ variable "helm_chart" {
   default     = "oci://us-central1-docker.pkg.dev/o11y-movie-guru/movie-guru/movie-guru-observability-lab"
 }
 
+variable "helm_chart_version" {
+  type = string
+  description = "version of the movie guru helm chart. Defaults to 1.0.0"
+  default     = "1.0.0"
+}
+
 variable "branch_name" {
   type = string
 

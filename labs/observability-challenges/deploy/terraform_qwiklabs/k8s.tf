@@ -95,7 +95,7 @@ resource "helm_release" "movie_guru" {
   name      = "movie-guru"
   chart     = var.helm_chart
   namespace = "movieguru"
-  version   = "1.0.0"
+  version   = var.helm_chart_version
   wait      = false
   create_namespace = true
 

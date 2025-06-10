@@ -1,7 +1,7 @@
 Config: 
   Image:
     Repository: us-central1-docker.pkg.dev/o11y-movie-guru/movie-guru
-    Tag: sre-v2
+    Tag: obs-v1
     
   geminiApiLocation: us-central1
 
