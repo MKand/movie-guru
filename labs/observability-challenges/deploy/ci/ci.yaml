@@ -141,7 +141,7 @@ steps:
     - -c
     - |
       docker push '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/flows:obslab-${SHORT_SHA}' && \
-      docker push '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/flows:obslab-v1}'
+      docker push '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/movie-guru/flows:obslab-v1'
 - name: 'gcr.io/cloud-builders/docker'
   id: "build-mock-image"
   waitFor: ['-']
