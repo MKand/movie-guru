@@ -17,8 +17,10 @@ package web
 import (
 	"encoding/json"
 	"net/http"
-	"time"
 	"log/slog"
+	"runtime"
+	"context"
+	"time"
 
 	metrics "github.com/movie-guru/pkg/metrics"
 )
@@ -31,27 +33,38 @@ func createHealthCheckHandler(deps *Dependencies, meters *metrics.HCMeters) http
 			defer func() {
 				meters.HCLatency.Record(ctx, int64(time.Since(startTime).Milliseconds()))
 			}()
-			// creating large array and adding a value so it actually gets allocated.
-			largeArray := createLargeArray(ctx)
-			largeArray[1000] = 100
 			meters.HCCounter.Add(r.Context(), 1)
+
+			// creating large slice and adding a value so it actually gets allocated.
+			largeSlice := createLargeSlice(ctx)
+			largeSlice[1000] = 100
 			json.NewEncoder(w).Encode("OK")
 			return
 		}
 	}
 }
 
-func createLargeArray(ctx context.Context) *int[]{
-	  try {
-            // Attempt to create an array with a very large size.
-            int size = 200 * 1000 * 1000; 
-            int[] largeArray = new int[size];
-			return largeArray
-            largeArray[size - 1] = 1;
+// createLargeSlice attempts to allocate a very large slice of integers.
+// It will likely cause the program to crash with an out-of-memory error.
+func createLargeSlice(ctx context.Context) []int {
+	defer func() {
+		if r := recover(); r != nil {
+			slog.ErrorContext(ctx, "Recovered from a panic during memory allocation", "error", r)
+			// It's good practice to explicitly free memory if possible,
+			// though in an OOM situation, the GC has more work to do.
+			runtime.GC()
+		}
+	}()
 
-        } catch (OutOfMemoryError e) {
-            slog.ErrorContext(ctx, "OutOfMemoryError caught! Failed to allocate the large array.");
-        } catch (NegativeArraySizeException e) {
-            slog.ErrorContext(ctx, "NegativeArraySizeException caught! The requested size is too large and wrapped around to a negative number.");
-        }
-    }
+	// Attempt to create a slice with a very large size.
+	// 200 million integers will require approximately 1.6 GB of memory
+	// on a 64-bit system (200,000,000 * 8 bytes/int).
+	const size = 200 * 1000 * 1000
+	slog.InfoContext(ctx, "Attempting to allocate a large slice", "size", size)
+
+	// In Go, slices are created with `make`. This allocation
+	// will likely fail if sufficient memory is not available.
+	largeSlice := make([]int, size)
+
+	return largeSlice
+}

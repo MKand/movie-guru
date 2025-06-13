@@ -19,7 +19,6 @@ import (
 	"log/slog"
 	"os"
 	"strconv"
-	"time"
 	"github.com/movie-guru/pkg/db"
 	met "github.com/movie-guru/pkg/metrics"
 	"github.com/movie-guru/pkg/types"
