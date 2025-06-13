@@ -21,3 +21,5 @@ dist
 *.tfstate.*
 
 pgvector/init_substituted.sql
+
+**.zip

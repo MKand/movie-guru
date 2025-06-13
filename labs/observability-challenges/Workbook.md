@@ -16,19 +16,19 @@
     ```
 
     ```sh
-        helm upgrade movie-guru-sre oci://us-central1-docker.pkg.dev/o11y-movie-guru/movie-guru/movie-guru-sre \
+        helm upgrade movie-guru oci://us-central1-docker.pkg.dev/o11y-movie-guru/movie-guru/movie-guru-observability-lab \
         --install \
         --namespace movieguru \
-        --version "3.0.0" \
+        --version "1.0.0" \
         --create-namespace \
         --set Config.Image.Repository=us-central1-a-docker.pkg.dev/o11y-movie-guru/movie-guru \
-        --set Config.Image.Tag="sre-e72ca10" \
+        --set Config.Image.Tag="obs-v1" \
         --set Config.gatewayAddress="movieguru.endpoints.${gcp_project_id}.cloud.goog" \
         --set Config.projectID=${gcp_project_id} \
         --set Config.geminiApiLocation=us-central1
     ```
 
-    3. They use GKE playbooks to understand the image pull backoff error and fix the helm deploy command.
+    3. Use GKE playbooks to understand the image pull backoff error and fix the helm deploy command.
         Go to cluster/AppErrors -> Select error
         Select troubleshooting options. Enable cloud assist -> start chatting
 
@@ -36,12 +36,9 @@
     5. You rollback to the previous version
 
         ```sh
-        helm rollback movie-guru-sre 1
+        helm rollback movie-guru 1
         ```
-        
 
-
-
-3. App is running smoothly. 
-4. Structrued logging.
-5. Logs analytics.
+3. Structrued logging.
+4. Logs analytics.
+5. 
