@@ -21,7 +21,7 @@
         --namespace movieguru \
         --create-namespace \
         --set Config.Image.Repository=us-central1-a-docker.pkg.dev/o11y-movie-guru/movie-guru \
-        --set Config.Image.Tag="obs-v1" \
+        --set Config.Image.Tag="obslab-v1" \
         --set Config.gatewayAddress="movieguru.endpoints.${gcp_project_id}.cloud.goog" \
         --set Config.projectID=${gcp_project_id} \
         --set Config.geminiApiLocation=us-central1

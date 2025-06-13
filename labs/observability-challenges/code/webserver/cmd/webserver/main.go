@@ -19,7 +19,7 @@ import (
 	"log/slog"
 	"os"
 	"strconv"
-
+	"time"
 	"github.com/movie-guru/pkg/db"
 	met "github.com/movie-guru/pkg/metrics"
 	"github.com/movie-guru/pkg/types"
@@ -206,15 +206,6 @@ func getLargeArray(){
 
 		largeSlice = append(largeSlice, chunk)
 		totalAllocatedMB += chunkSizeMB
-
-		// Print memory usage periodically
-		if i%5 == 0 { // Print every 5 chunks (500 MB)
-			var m runtime.MemStats
-			runtime.ReadMemStats(&m)
-			fmt.Printf("Iteration %d: Allocated ~%d MB (HeapSys: %v MB, HeapAlloc: %v MB)\n",
-				i, totalAllocatedMB, m.HeapSys/(1024*1024), m.HeapAlloc/(1024*1024))
-		}
-
 		time.Sleep(10 * time.Millisecond)
 	}
 }

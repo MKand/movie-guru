@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: movieguru
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - name: frontend
+        image: "{{ .Values.Config.Image.Repository }}/frontend:{{ .Values.Config.Image.Tag }}"
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 4001
+        env:
+          - name: VITE_USE_AUTH
+            value: "false"
+          - name: VITE_CHAT_SERVER_URL
+            value: "http://{{ .Values.Config.gatewayAddress }}/server"
+          - name: VITE_ALLOWED_HOST
+            value: {{ .Values.Config.gatewayAddress }}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+  namespace: movieguru
+spec:
+  selector:
+    app: frontend 
+  ports:
+  - protocol: TCP
+    port: 4000 
+    targetPort: 4001
+  type: ClusterIP
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: frontend-route
+  namespace: movieguru
+spec:
+  parentRefs:
+    - name: movieguru-gateway
+      namespace: movieguru
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: "/"
+      backendRefs:
+        - name: frontend-service
+          port: 4000
