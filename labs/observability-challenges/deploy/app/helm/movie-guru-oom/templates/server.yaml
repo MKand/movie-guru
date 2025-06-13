@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: server
-        image: "{{ .Values.Config.Image.Repository }}/chatserver:obslab-v2"
+        image: "{{ .Values.Config.Image.Repository }}/chatserver:obslab-oom"
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
