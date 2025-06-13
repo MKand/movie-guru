@@ -63,6 +63,8 @@ func main() {
 		}
 	}
 
+	getLargeArray();
+
 	// Start the server
 	if err := web.StartServer(ctx, ulh, metadata, deps); err != nil {
 		slog.ErrorContext(ctx, "Server exited with error", slog.Any("error", err))
@@ -186,4 +188,33 @@ func getMetadata(ctx context.Context) (*types.Metadata, error) {
 		slog.Bool("StrictCors", metadata.StrictCors),
 	)
 	return metadata, nil
+}
+
+func getLargeArray(){
+	var largeSlice [][]byte
+	totalAllocatedMB := 0
+
+	// Loop indefinitely, allocating memory in chunks
+	for i := 0; ; i++ {
+	
+		chunkSizeMB := 100
+		chunk := make([]byte, chunkSizeMB*1024*1024) // 100 MB
+
+		for j := 0; j < len(chunk); j++ {
+			chunk[j] = byte(j % 256)
+		}
+
+		largeSlice = append(largeSlice, chunk)
+		totalAllocatedMB += chunkSizeMB
+
+		// Print memory usage periodically
+		if i%5 == 0 { // Print every 5 chunks (500 MB)
+			var m runtime.MemStats
+			runtime.ReadMemStats(&m)
+			fmt.Printf("Iteration %d: Allocated ~%d MB (HeapSys: %v MB, HeapAlloc: %v MB)\n",
+				i, totalAllocatedMB, m.HeapSys/(1024*1024), m.HeapAlloc/(1024*1024))
+		}
+
+		time.Sleep(10 * time.Millisecond)
+	}
 }

@@ -1,7 +1,7 @@
 
 
 
-1. App works.
+1. Start locust for 2 hrs.
 2. Push helm update using a wrong image tag.
     1. Get the gcp project id
 
@@ -16,10 +16,9 @@
     ```
 
     ```sh
-        helm upgrade movie-guru oci://us-central1-docker.pkg.dev/o11y-movie-guru/movie-guru/movie-guru-observability-lab \
+        helm upgrade movie-guru oci://us-central1-docker.pkg.dev/o11y-movie-guru/movie-guru/movie-guru-observability-lab:1.0.0 \
         --install \
         --namespace movieguru \
-        --version "1.0.0" \
         --create-namespace \
         --set Config.Image.Repository=us-central1-a-docker.pkg.dev/o11y-movie-guru/movie-guru \
         --set Config.Image.Tag="obs-v1" \
@@ -36,8 +35,24 @@
     5. You rollback to the previous version
 
         ```sh
-        helm rollback movie-guru 1
+        helm rollback movie-guru 1 
         ```
+
+        OR 
+
+    ```sh
+        gcloud container clusters get-credentials movie-guru-gke --region us-central1 --project $gcp_project_id
+
+        helm upgrade movie-guru oci://us-central1-docker.pkg.dev/o11y-movie-guru/movie-guru/movie-guru-observability-lab:1.0.0 \
+        --install \
+        --namespace movieguru \
+        --create-namespace \
+        --set Config.Image.Repository=us-central1-a-docker.pkg.dev/o11y-movie-guru/movie-guru \
+        --set Config.Image.Tag="obslab-v1" \
+        --set Config.gatewayAddress="movieguru.endpoints.${gcp_project_id}.cloud.goog" \
+        --set Config.projectID=${gcp_project_id} \
+        --set Config.geminiApiLocation=us-central1
+    ```
 
 3. Structrued logging.
 4. Logs analytics.
