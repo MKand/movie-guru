@@ -31,7 +31,14 @@ import { GenerationBlockedError } from 'genkit';
  * To use a variant -- ai.prompt('safety', {variant: 'v2'})
  */
 
-export const SafetyTransformPrompt = ai.prompt('safety');
+// get env variable safety_type_conservative which defaults to false
+const safety_type_conservative = process.env.SAFETY_CONSERVATIVE || "false"
+export var SafetyTransformPrompt = ai.prompt('safety');
+
+if (safety_type_conservative == "true"){
+  SafetyTransformPrompt = ai.prompt('safety', {variant : 'conservative'});
+
+}
 
 export const SafetyPromptInputSchema = z.object({
     userMessage: z.string(),
@@ -63,8 +70,8 @@ export const SafetyIssueFlow = ai.defineFlow(
             return output;
             } catch (error) {
             if (error instanceof GenerationBlockedError){
-                
                 console.error("QTFlow: GenerationBlockedError generating response:", error.message);
+                defaultOutput.safetyIssue = true
                 return defaultOutput;
             }
             else if(error instanceof Error && (error.message.includes('429') || error.message.includes('RESOURCE_EXHAUSTED'))){
