@@ -18,6 +18,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"time"
+	"log/slog"
 
 	metrics "github.com/movie-guru/pkg/metrics"
 )
@@ -31,8 +32,8 @@ func createHealthCheckHandler(deps *Dependencies, meters *metrics.HCMeters) http
 				meters.HCLatency.Record(ctx, int64(time.Since(startTime).Milliseconds()))
 			}()
 			// creating large array and adding a value so it actually gets allocated.
-			largeArray := createLargeArray()
-			largeArray[100] = 10
+			largeArray := createLargeArray(ctx)
+			largeArray[1000] = 100
 			meters.HCCounter.Add(r.Context(), 1)
 			json.NewEncoder(w).Encode("OK")
 			return
@@ -40,28 +41,17 @@ func createHealthCheckHandler(deps *Dependencies, meters *metrics.HCMeters) http
 	}
 }
 
-func createLargeArray() *int[]{
+func createLargeArray(ctx context.Context) *int[]{
 	  try {
             // Attempt to create an array with a very large size.
-            // Integer.MAX_VALUE is the maximum positive value for an int,
-            // which is the theoretical max size for an array dimension in Java.
-            // In practice, you'll run out of memory far before this.
-            // Let's try a smaller, but still very large, number.
-            // For example, 200 million integers.
-            int size = 200 * 1000 * 1000; // 200 million integers
-            System.out.println("Attempting to allocate an int array of size: " + size);
+            int size = 200 * 1000 * 1000; 
             int[] largeArray = new int[size];
-            System.out.println("Successfully allocated int array of size: " + size);
 			return largeArray
-            // To prove it's allocated, you could try to access an element (optional)
-            // largeArray[size - 1] = 1;
-            // System.out.println("Accessed last element: " + largeArray[size-1]);
+            largeArray[size - 1] = 1;
 
         } catch (OutOfMemoryError e) {
-            System.err.println("OutOfMemoryError caught! Failed to allocate the large array.");
-            e.printStackTrace();
+            slog.ErrorContext(ctx, "OutOfMemoryError caught! Failed to allocate the large array.");
         } catch (NegativeArraySizeException e) {
-            System.err.println("NegativeArraySizeException caught! The requested size is too large and wrapped around to a negative number.");
-            e.printStackTrace();
+            slog.ErrorContext(ctx, "NegativeArraySizeException caught! The requested size is too large and wrapped around to a negative number.");
         }
     }
