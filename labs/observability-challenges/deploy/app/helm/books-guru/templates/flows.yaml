@@ -39,7 +39,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: flows-service
-  namespace: movieguru
+  namespace: booksguru
 spec:
   selector:
     app: flows 

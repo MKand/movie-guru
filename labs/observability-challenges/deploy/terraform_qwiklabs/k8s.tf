@@ -134,10 +134,6 @@ resource "helm_release" "books_guru" {
     value = var.image_tag
   }
   set {
-    name  = "Config.mockserverIP"
-    value = google_compute_global_address.mockserver-address.address
-  }
-  set {
     name  = "Config.projectID"
     value = var.gcp_project_id
   }
