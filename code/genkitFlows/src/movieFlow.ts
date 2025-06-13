@@ -34,7 +34,12 @@ import { GenerationBlockedError } from 'genkit';
  * 
  * ATTENTION: Variant v2 is currently being tested with Gemini 2.5 PRO, if it is not performing well, please revert to the default variant.
  */
-export const makeMovieRecommendation = ai.prompt('movie');
+
+const use_pro_prompt = process.env.MOVIEFLOW_PRO_PROMPT || "false"
+export var makeMovieRecommendation = ai.prompt('movie');
+if (use_pro_prompt == "true"){
+  makeMovieRecommendation = ai.prompt('movie', {variant : 'promodel'});
+}
 
 export const MovieFlow = ai.defineFlow(
   {

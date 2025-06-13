@@ -26,6 +26,8 @@ spec:
           value: {{ .Values.Config.projectID }}
         - name: SAFETY_CONSERVATIVE
           value: "true"
+        - name: MOVIEFLOW_PRO_PROMPT
+          value: "true"
         - name: POSTGRES_DB_USER_PASSWORD
           value: "minimal"
         - name: POSTGRES_DB_USER
