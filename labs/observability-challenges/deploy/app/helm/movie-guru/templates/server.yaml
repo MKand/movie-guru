@@ -16,7 +16,6 @@ spec:
       containers:
       - name: server
         image: "{{ .Values.Config.Image.Repository }}/chatserver:{{ .Values.Config.Image.Tag }}"
-        command: ["/app/webserver"]
         imagePullPolicy: Always
         ports:
         - containerPort: 8080

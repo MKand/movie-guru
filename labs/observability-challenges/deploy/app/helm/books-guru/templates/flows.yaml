@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: flows
-  namespace: movieguru
+  namespace: booksguru
 spec:
   replicas: 1
   selector:
@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: flows
-        image: "{{ .Values.Config.Image.Repository }}/flows:obslab-v1"
+        image: "{{ .Values.Config.Image.Repository }}/flows:{{ .Values.Config.Image.Tag }}"
         imagePullPolicy: Always
         ports:
         - containerPort: 3400

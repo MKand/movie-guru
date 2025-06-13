@@ -16,12 +16,11 @@
     ```
 
     ```sh
-        helm upgrade movie-guru oci://us-central1-docker.pkg.dev/o11y-movie-guru/movie-guru/movie-guru-observability-lab:1.0.0 \
+        helm upgrade movie-guru oci://us-central1-docker.pkg.dev/o11y-movie-guru/movie-guru/movie-guru-observability-lab:2.0.0 \
         --install \
         --namespace movieguru \
         --create-namespace \
-        --set Config.Image.Repository=us-central1-a-docker.pkg.dev/o11y-movie-guru/movie-guru \
-        --set Config.Image.Tag="obslab-v1" \
+        --set Config.Image.Repository=us-central1-docker.pkg.dev/o11y-movie-guru/movie-guru \
         --set Config.gatewayAddress="movieguru.endpoints.${gcp_project_id}.cloud.goog" \
         --set Config.projectID=${gcp_project_id} \
         --set Config.geminiApiLocation=us-central1
@@ -47,7 +46,7 @@
         --install \
         --namespace movieguru \
         --create-namespace \
-        --set Config.Image.Repository=us-central1-a-docker.pkg.dev/o11y-movie-guru/movie-guru \
+        --set Config.Image.Repository=us-central1-docker.pkg.dev/o11y-movie-guru/movie-guru \
         --set Config.Image.Tag="obslab-v1" \
         --set Config.gatewayAddress="movieguru.endpoints.${gcp_project_id}.cloud.goog" \
         --set Config.projectID=${gcp_project_id} \

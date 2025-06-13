@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: "{{ .Values.Config.Image.Repository }}/frontend:{{ .Values.Config.Image.Tag }}"
+        image: "{{ .Values.Config.Image.Repository }}/frontend:obslab-v1"
         imagePullPolicy: Always
         ports:
         - containerPort: 4001

@@ -15,7 +15,7 @@ TARGET=obervability-challenge-lab.zip
 OBJS=*.tf runtime.yaml 
 
 $(TARGET): $(OBJS)
-	zip -r $(TARGET) $(OBJS) -x backend.tf
+	zip -r $(TARGET) $(OBJS) .default.auto.tfvars -x backend.tf 
 
 clean:
 	rm -f $(TARGET)

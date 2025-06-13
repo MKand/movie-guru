@@ -24,12 +24,6 @@ resource "google_compute_global_address" "movieguru-address" {
   project      = var.gcp_project_id
 }
 
-resource "google_compute_global_address" "mockserver-address" {
-  name         = "mockerserver-address"
-  address_type = "EXTERNAL"
-  project      = var.gcp_project_id
-}
-
 resource "google_endpoints_service" "openapi_service" {
   service_name = "movieguru.endpoints.${var.gcp_project_id}.cloud.goog"
   project      = var.gcp_project_id
@@ -112,6 +106,33 @@ resource "helm_release" "movie_guru" {
     value = "movieguru.endpoints.${var.gcp_project_id}.cloud.goog"
   }
 
+  set {
+    name  = "Config.projectID"
+    value = var.gcp_project_id
+  }
+
+  set {
+    name  = "Config.geminiApiLocation"
+    value = var.vertexAI_model_location
+  }
+}
+
+resource "helm_release" "books_guru" {
+  name      = "books-guru"
+  chart     = "oci://us-central1-docker.pkg.dev/o11y-movie-guru/movie-guru/books-guru-observability-lab"
+  namespace = "booksguru"
+  version   = "1.0.0"
+  wait      = false
+  create_namespace = true
+
+  set {
+    name  = "Config.Image.Repository"
+    value = var.repo_prefix
+  }
+  set {
+    name  = "Config.Image.Tag"
+    value = var.image_tag
+  }
   set {
     name  = "Config.mockserverIP"
     value = google_compute_global_address.mockserver-address.address
