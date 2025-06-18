@@ -108,3 +108,4 @@ It's crucial to monitor how users interact with your application, as their input
 
         - What does the trace tell you about latency? Is there an especially slow step? (examine a few traces if needed)
 
+## Handling runtime issues (10 minutes)
