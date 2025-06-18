@@ -89,7 +89,7 @@ resource "helm_release" "movie_guru" {
   chart            = var.helm_chart
   namespace        = "movieguru"
   version          = var.helm_chart_version
-  wait             = false
+  wait             = true
   create_namespace = true
 
   set = [
@@ -109,34 +109,6 @@ resource "helm_release" "movie_guru" {
       name  = "Config.projectID"
       value = var.gcp_project_id
     },
-    {
-      name  = "Config.geminiApiLocation"
-      value = var.vertexAI_model_location
-  }]
-}
-
-resource "helm_release" "books_guru" {
-  name             = "books-guru"
-  chart            = "oci://us-central1-docker.pkg.dev/o11y-movie-guru/movie-guru/books-guru-observability-lab"
-  namespace        = "booksguru"
-  version          = "1.0.0"
-  wait             = false
-  create_namespace = true
-
-  set = [
-    {
-      name  = "Config.Image.Repository"
-      value = var.repo_prefix
-    },
-    {
-      name  = "Config.Image.Tag"
-      value = var.image_tag
-    },
-    {
-      name  = "Config.projectID"
-      value = var.gcp_project_id
-    },
-
     {
       name  = "Config.geminiApiLocation"
       value = var.vertexAI_model_location
@@ -164,7 +136,7 @@ resource "helm_release" "locust" {
   namespace        = "locust"
   version          = "0.31.6"
   create_namespace = false
-  wait=false
+  wait=true
   set = [
     {
       name  = "loadtest.name"

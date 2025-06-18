@@ -75,6 +75,7 @@ func chatSingleFlow(ctx context.Context, deps *Dependencies, metadata *types.Met
 	agentResp := types.NewAgentResponse()
 	chatResp, err := deps.ChatFlowClient.Run(simpleHistory, userProfile)
 	if agentResp, shouldReturn := processFlowOutput(chatResp.ModelOutputMetadata, err, h, "chatFlow"); shouldReturn {
+		updateSuccessChatMeters(ctx, agentResp, meters)
 		return agentResp
 	}
 
