@@ -155,6 +155,7 @@ func updateChatQualityMeters(ctx context.Context, meters *m.ChatMeters, respQual
 func updateSuccessChatMeters(ctx context.Context, agentResp *types.AgentResponse, meters *m.ChatMeters) {
 	if agentResp.Result == types.UNSAFE {
 		meters.CSafetyIssueCounter.Add(ctx, 1)
+		slog.Error("Flows returned error: User gave UNSAFE input")
 	}
 	if agentResp.Result == types.SUCCESS {
 		meters.CSuccessCounter.Add(ctx, 1)

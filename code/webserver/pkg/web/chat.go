@@ -74,6 +74,7 @@ func chatSingleFlow(ctx context.Context, deps *Dependencies, metadata *types.Met
 	// This is in the main thread, not async
 	agentResp := types.NewAgentResponse()
 	chatResp, err := deps.ChatFlowClient.Run(simpleHistory, userProfile)
+
 	if agentResp, shouldReturn := processFlowOutput(chatResp.ModelOutputMetadata, err, h, "chatFlow"); shouldReturn {
 		updateSuccessChatMeters(ctx, agentResp, meters)
 		return agentResp
@@ -106,7 +107,6 @@ func chatSingleFlow(ctx context.Context, deps *Dependencies, metadata *types.Met
 		slog.ErrorContext(ctx, "UserProfileFlowClient failed", err.Error(), err)
 	}
 
-	updateSuccessChatMeters(ctx, agentResp, meters)
 	return agentResp
 }
 
@@ -154,6 +154,7 @@ func updateChatQualityMeters(ctx context.Context, meters *m.ChatMeters, respQual
 
 func updateSuccessChatMeters(ctx context.Context, agentResp *types.AgentResponse, meters *m.ChatMeters) {
 	if agentResp.Result == types.UNSAFE {
+		slog.Error("Error from Flows Server: User provided Unsafe input")
 		meters.CSafetyIssueCounter.Add(ctx, 1)
 	}
 	if agentResp.Result == types.SUCCESS {
@@ -163,6 +164,7 @@ func updateSuccessChatMeters(ctx context.Context, agentResp *types.AgentResponse
 		meters.CQuotaLimitCounter.Add(ctx, 1)
 	}
 	if agentResp.Result == types.BAD_QUERY {
+		slog.Error("Error from Flows Server: User provided Out of Scope input")
 		meters.CWrongQueryCounter.Add(ctx, 1)
 	}
 }
