@@ -53,12 +53,6 @@ data "http" "sql_file" {
   url = var.sql_file
 }
 
-resource "kubernetes_namespace" "locust" {
-  metadata {
-    name = "locust"
-  }
-}
-
 data "http" "otel_file" {
   url = var.otel_file
 }
@@ -94,8 +88,8 @@ resource "helm_release" "movie_guru" {
 
   set = [
     {
-    name  = "Config.Image.Repository"
-    value = var.repo_prefix
+      name  = "Config.Image.Repository"
+      value = var.repo_prefix
     },
     {
       name  = "Config.Image.Tag"
@@ -109,6 +103,10 @@ resource "helm_release" "movie_guru" {
       name  = "Config.projectID"
       value = var.gcp_project_id
     },
+        {
+      name  = "Config.projectID"
+      value = var.gcp_project_id
+    },
     {
       name  = "Config.geminiApiLocation"
       value = var.vertexAI_model_location
@@ -117,8 +115,7 @@ resource "helm_release" "movie_guru" {
 
 resource "kubernetes_config_map" "loadtest_locustfile" {
   metadata {
-    name      = "loadtest-locustfile"
-    namespace = "locust"
+    name = "loadtest-locustfile"
   }
   data = {
     "locustfile.py" = (
@@ -126,17 +123,17 @@ resource "kubernetes_config_map" "loadtest_locustfile" {
     )
   }
 
-  depends_on = [kubernetes_namespace.locust]
 }
-
 
 resource "helm_release" "locust" {
   name             = "locust"
   chart            = "oci://ghcr.io/deliveryhero/helm-charts/locust"
-  namespace        = "locust"
+  namespace        = "default"
   version          = "0.31.6"
-  create_namespace = false
-  wait=true
+  create_namespace = true
+  depends_on       = [kubernetes_config_map.loadtest_locustfile]
+  wait             = true
+  atomic           = true
   set = [
     {
       name  = "loadtest.name"
@@ -154,7 +151,6 @@ resource "helm_release" "locust" {
       name  = "loadtest.locust_host"
       value = "http://movieguru.endpoints.${var.gcp_project_id}.cloud.goog/server"
     },
-
     {
       name  = "service.type"
       value = "LoadBalancer"
@@ -162,15 +158,14 @@ resource "helm_release" "locust" {
     {
       name  = "worker.replicas"
       value = "3"
-    },
+    }
   ]
-  depends_on = [kubernetes_config_map.loadtest_locustfile]
 }
 
 data "kubernetes_service" "locust" {
   metadata {
     name      = "locust"
-    namespace = "locust"
+    namespace = "default"
   }
   depends_on = [helm_release.locust]
 }

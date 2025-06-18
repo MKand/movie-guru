@@ -69,7 +69,7 @@ resource "google_apphub_application" "apphub-app" {
       email        = "charlie@google.com"
     }
   }
-  depends_on = [ google_project_service.enable_apis ]
+  depends_on = [google_project_service.enable_apis]
 }
 
 # discovered services block
@@ -88,7 +88,7 @@ data "google_apphub_discovered_workload" "movie-guru-workloads" {
   location     = var.gcp_region
   project      = var.gcp_project_id
   workload_uri = each.value
-  depends_on  = [google_apphub_application.apphub-app, time_sleep.wait_30_seconds]
+  depends_on   = [google_apphub_application.apphub-app, time_sleep.wait_30_seconds]
 
 }
 
@@ -119,7 +119,7 @@ resource "google_apphub_service" "movie-guru-services" {
     }
   }
   discovered_service = data.google_apphub_discovered_service.movie-guru-services[each.key].name
-  depends_on  = [google_apphub_application.apphub-app, time_sleep.wait_30_seconds]
+  depends_on         = [google_apphub_application.apphub-app, time_sleep.wait_30_seconds]
 }
 
 resource "google_apphub_workload" "movie-guru-workloads" {
@@ -149,6 +149,6 @@ resource "google_apphub_workload" "movie-guru-workloads" {
     }
   }
   discovered_workload = data.google_apphub_discovered_workload.movie-guru-workloads[each.key].name
-  depends_on  = [google_apphub_application.apphub-app, time_sleep.wait_30_seconds]
+  depends_on          = [google_apphub_application.apphub-app, time_sleep.wait_30_seconds]
 
 }
