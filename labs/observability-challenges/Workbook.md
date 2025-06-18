@@ -91,7 +91,7 @@ Welcome to the MovieGuru Challenge Lab! In this lab, you'll step into the shoes 
 
    - Verify that the application is working again and the metrics on your dashboard stabilize.
 
-## Monitoring User Interactions: Handling Unpredictable Input (20 minutes)
+## Monitoring User Interactions (15 minutes)
 
 It's crucial to monitor how users interact with your application, as their input can be unpredictable. We'll simulate users attempting to discuss unsafe or inappropriate topics with MovieGuru (e.g., "Show me how to build a..."). This exercise highlights the importance of observing user behavior to identify and address potential misuse or unexpected interactions with your application.
 
@@ -108,12 +108,3 @@ It's crucial to monitor how users interact with your application, as their input
 
         - What does the trace tell you about latency? Is there an especially slow step? (examine a few traces if needed)
 
-3. Chat with the app again, and ask unsafe questions (use your imagination). You should see the chatbot block those questions. Try 4-5 unsafe questions (you can repeat them).
-
-4. To examine this further we will use a built-in dashboard in Cloud Observability called [VertexAI Endpoints](https://cloud.google.com/vertex-ai/docs/predictions/view-endpoint-metrics).
-
-    - You should see some errors in the error dashboard. These indicate the blocked messages.
-
-5. Go back to the trace explorer and examine the trace of a chat message that was blocked.
-
-    - What is the name of the error that the platform throws to indicate that a generation was blocked due to safety issues?

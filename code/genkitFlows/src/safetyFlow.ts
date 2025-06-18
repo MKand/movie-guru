@@ -31,14 +31,7 @@ import { GenerationBlockedError } from 'genkit';
  * To use a variant -- ai.prompt('safety', {variant: 'v2'})
  */
 
-const safety_type_conservative = process.env.SAFETY_CONSERVATIVE || "false"
 export var SafetyTransformPrompt = ai.prompt('safety');
-console.log("safety_type_conservative: ", safety_type_conservative);
-
-if (safety_type_conservative == "true"){
-  SafetyTransformPrompt = ai.prompt('safety', {variant : 'conservative'});
-  console.log("safety_type_conservative: using conservtive variant");
-}
 
 export const SafetyPromptInputSchema = z.object({
     userMessage: z.string(),
