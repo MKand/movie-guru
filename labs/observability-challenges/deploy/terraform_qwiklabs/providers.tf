@@ -22,6 +22,14 @@ terraform {
       source  = "hashicorp/google-beta"
       version = "~> 6.18"
     }
+    helm = {
+      source  = "hashicorp/helm"
+      version = "3.0.1"
+    }
+    time = {
+      source  = "hashicorp/time"
+      version = "0.13.1"
+    }
   }
 }
 

@@ -9,7 +9,7 @@ provider "kubernetes" {
 }
 
 provider "helm" {
-  kubernetes {
+  kubernetes = {
     host                   = "https://${google_container_cluster.primary.endpoint}"
     token                  = data.google_client_config.default.access_token
     client_certificate     = base64decode(google_container_cluster.primary.master_auth.0.client_certificate)
@@ -63,85 +63,84 @@ data "http" "otel_file" {
   url = var.otel_file
 }
 
-resource "helm_release" "otel"{
-  name      = "otel"
-  repository = "https://open-telemetry.github.io/opentelemetry-helm-charts"
-  chart     = "opentelemetry-collector"
-  namespace = "otel"
+resource "helm_release" "otel" {
+  name             = "otel"
+  repository       = "https://open-telemetry.github.io/opentelemetry-helm-charts"
+  chart            = "opentelemetry-collector"
+  namespace        = "otel"
   create_namespace = true
 
-  set{
-    name = "image.repository"
+  set = [{
+    name  = "image.repository"
     value = "otel/opentelemetry-collector-contrib"
-  }
+    },
+    {
+      name  = "mode"
+      value = "deployment"
+  }]
 
-  set{
-    name = "mode"
-    value = "deployment"
-  }
-
-    values = [
+  values = [
     data.http.otel_file.response_body
   ]
 }
 
 resource "helm_release" "movie_guru" {
-  name      = "movie-guru"
-  chart     = var.helm_chart
-  namespace = "movieguru"
-  version   = var.helm_chart_version
-  wait      = false
+  name             = "movie-guru"
+  chart            = var.helm_chart
+  namespace        = "movieguru"
+  version          = var.helm_chart_version
+  wait             = false
   create_namespace = true
 
-  set {
+  set = [
+    {
     name  = "Config.Image.Repository"
     value = var.repo_prefix
-  }
-  set {
-    name  = "Config.Image.Tag"
-    value = var.image_tag
-  }
-  set {
-    name  = "Config.gatewayAddress"
-    value = "movieguru.endpoints.${var.gcp_project_id}.cloud.goog"
-  }
-
-  set {
-    name  = "Config.projectID"
-    value = var.gcp_project_id
-  }
-
-  set {
-    name  = "Config.geminiApiLocation"
-    value = var.vertexAI_model_location
-  }
+    },
+    {
+      name  = "Config.Image.Tag"
+      value = var.image_tag
+    },
+    {
+      name  = "Config.gatewayAddress"
+      value = "movieguru.endpoints.${var.gcp_project_id}.cloud.goog"
+    },
+    {
+      name  = "Config.projectID"
+      value = var.gcp_project_id
+    },
+    {
+      name  = "Config.geminiApiLocation"
+      value = var.vertexAI_model_location
+  }]
 }
 
 resource "helm_release" "books_guru" {
-  name      = "books-guru"
-  chart     = "oci://us-central1-docker.pkg.dev/o11y-movie-guru/movie-guru/books-guru-observability-lab"
-  namespace = "booksguru"
-  version   = "1.0.0"
-  wait      = false
+  name             = "books-guru"
+  chart            = "oci://us-central1-docker.pkg.dev/o11y-movie-guru/movie-guru/books-guru-observability-lab"
+  namespace        = "booksguru"
+  version          = "1.0.0"
+  wait             = false
   create_namespace = true
 
-  set {
-    name  = "Config.Image.Repository"
-    value = var.repo_prefix
-  }
-  set {
-    name  = "Config.Image.Tag"
-    value = var.image_tag
-  }
-  set {
-    name  = "Config.projectID"
-    value = var.gcp_project_id
-  }
+  set = [
+    {
+      name  = "Config.Image.Repository"
+      value = var.repo_prefix
+    },
+    {
+      name  = "Config.Image.Tag"
+      value = var.image_tag
+    },
+    {
+      name  = "Config.projectID"
+      value = var.gcp_project_id
+    },
 
-  set {
-    name  = "Config.geminiApiLocation"
-    value = var.vertexAI_model_location
-  }
+    {
+      name  = "Config.geminiApiLocation"
+      value = var.vertexAI_model_location
+  }]
 }
 
 resource "kubernetes_config_map" "loadtest_locustfile" {
@@ -160,41 +159,39 @@ resource "kubernetes_config_map" "loadtest_locustfile" {
 
 
 resource "helm_release" "locust" {
-  name      = "locust"
-  chart     = "oci://ghcr.io/deliveryhero/helm-charts/locust"
-  namespace = "locust"
-  version   = "0.31.6"
+  name             = "locust"
+  chart            = "oci://ghcr.io/deliveryhero/helm-charts/locust"
+  namespace        = "locust"
+  version          = "0.31.6"
   create_namespace = false
+  wait=false
+  set = [
+    {
+      name  = "loadtest.name"
+      value = "movieguru-loadtest"
+    },
+    {
+      name  = "loadtest.locust_locustfile_configmap"
+      value = "loadtest-locustfile"
+    },
+    {
+      name  = "loadtest.locust_locustfile"
+      value = "locustfile.py"
+    },
+    {
+      name  = "loadtest.locust_host"
+      value = "http://movieguru.endpoints.${var.gcp_project_id}.cloud.goog/server"
+    },
 
-  set {
-    name  = "loadtest.name"
-    value = "movieguru-loadtest"
-  }
-
-  set {
-    name  = "loadtest.locust_locustfile_configmap"
-    value = "loadtest-locustfile"
-  }
-
-  set {
-    name  = "loadtest.locust_locustfile"
-    value = "locustfile.py"
-  }
-  set {
-    name  = "loadtest.locust_host"
-    value = "http://movieguru.endpoints.${var.gcp_project_id}.cloud.goog/server"
-  }
-
-  set {
-    name  = "service.type"
-    value = "LoadBalancer"
-  }
-
-  set {
-    name  = "worker.replicas"
-    value = "3"
-  }
-
+    {
+      name  = "service.type"
+      value = "LoadBalancer"
+    },
+    {
+      name  = "worker.replicas"
+      value = "3"
+    },
+  ]
   depends_on = [kubernetes_config_map.loadtest_locustfile]
 }
 

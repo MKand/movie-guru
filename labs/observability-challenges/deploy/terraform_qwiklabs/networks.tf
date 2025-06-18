@@ -10,4 +10,7 @@ module "gcp-network" {
       subnet_region = var.gcp_region
     },
   ]
+  bgp_best_path_selection_mode = "STANDARD"
+
+
 }
