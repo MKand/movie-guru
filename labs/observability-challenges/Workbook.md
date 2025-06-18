@@ -31,7 +31,12 @@ Welcome to the MovieGuru Challenge Lab! In this lab, you'll step into the shoes 
         - Observe the chat success rate and latency dashboards. The application produces OpenTelemetry (OTEL) metrics, which GKE exports to Google Cloud Managed Service for Prometheus; the only setup required was installing an exporter on GKE.
         - Assess the application's performance: Is the success rate acceptable? Is the chat latency within expected limits?
 
-5. TODO: Cloud Hub error generation
+5. Go to CloudHub:
+
+    - Look for Cloudhub in the search bar of the console. 
+    - Create an application called **movieguru**, productionapp, business critical.
+    - Attach project.
+    - Register services and workloads. (db, flows, frontend, chatserver, cache)
 
 ## Your First Day on the Job: Troubleshooting MovieGuru (15 minutes)
 
@@ -54,24 +59,30 @@ Welcome to the MovieGuru Challenge Lab! In this lab, you'll step into the shoes 
     - Deploy the new version using Helm:  
 
     ```sh
-        helm upgrade movie-guru oci://us-central1-docker.pkg.dev/o11y-movie-guru/movie-guru/movie-guru-observability-lab:2.1.0 \
+    helm upgrade movie-guru oci://us-central1-docker.pkg.dev/o11y-movie-guru/movie-guru/movie-guru-observability-lab:2.1.0 \
         --install \
         --namespace movieguru \
-        --create-namespace \ 
-        --set Config.Image.Repository=us-central1-docker.pkg.dev/o11y-movie-guru/movie-guru \  
+        --create-namespace \
+        --set Config.Image.Repository=us-central1-docker.pkg.dev/o11y-movie-guru/movie-guru \
         --set Config.gatewayAddress="movieguru.endpoints.${GCP_PROJECT_ID}.cloud.goog" \
         --set Config.projectID=${GCP_PROJECT_ID} \
         --set Config.geminiApiLocation=us-central1
     ```
 
 3. Observe the Impact:  
-   - Try accessing the MovieGuru application again. You should find that it's broken.  
+   - Try accessing the MovieGuru application again (go to the frontend URL). You should find that it's broken.  
    - Go back to your **chatdashboard** in Google Cloud Observability. You should see the chat success rate dropping rapidly.  
    - Check for the alert notification in **Cloud Hub \> Health and Troubleshooting**.  
 
-4. Rollback to Restore Service:
+4. Investigate the Issue:
 
-    As an SRE, your immediate priority is to minimize user disruption. Therefore, first, rollback to the last known good version to restore service. Then, investigate and fix the underlying issue.
+   - Begin by looking for eventtypes from GKE, by enabling **GKE** from the **annotations** dropdown menu in the **Health and Troubleshooting** page.
+   - Utilize the **Investigations** feature in Google Cloud to help diagnose the problem. Refer to these [instructions](https://cloud.google.com/gemini/docs/cloud-assist/investigations#example_of_using_investigations) for guidance.
+   - You _may_ be prompted to enable **Cloud Assist** related APIs. Please accept and enable them.
+
+5. Rollback to Restore Service:
+
+    As an SRE, your immediate priority is to minimize user disruption. Therefore, first, rollback to the last known good version to restore service. And then you would fix the underlying issue (we will not be fixing the issue in this lab).
     - To quickly restore service, rollback to the previous stable version:  
 
     ```sh
@@ -80,24 +91,21 @@ Welcome to the MovieGuru Challenge Lab! In this lab, you'll step into the shoes 
 
    - Verify that the application is working again and the metrics on your dashboard stabilize.
 
-5. Investigate the Issue:
-
-   - Begin by finding relevant error logs.
-   - Utilize the **Investigations** feature in Google Cloud to help diagnose the problem. Refer to these [instructions](https://cloud.google.com/gemini/docs/cloud-assist/investigations#example_of_using_investigations) for guidance.
-   - You will be prompted to enable **Cloud Assist** related APIs. Please accept and enable them.
-
 ## Monitoring User Interactions: Handling Unpredictable Input (20 minutes)
 
 It's crucial to monitor how users interact with your application, as their input can be unpredictable. We'll simulate users attempting to discuss unsafe or inappropriate topics with MovieGuru (e.g., "Show me how to build a..."). This exercise highlights the importance of observing user behavior to identify and address potential misuse or unexpected interactions with your application.
 
-1. Stop the locust load generator by clicking on **stop test**. We do this so we can identigy the traces we create.
+1. Stop the locust load generator by clicking on **stop test**. We do this so we can identify the traces we create.
 
 2. Start chatting with the app. We'll examine traces to understand the messages exchanged with the Large Language Models (LLMs). Although the application appears simple, a single user message can trigger multiple LLM calls behind the scenes. Traces help us visualize this complexity. Each user conversation is captured as a trace, detailing every LLM call, including the prompts, user input, and the application's output
 
     - Go to Google Cloud Trace and find a recent trace of type **ChatFlow**.
     - You will see that there are multiple steps involved before answering a user's chat message.
 
-        - Try to examine the trace and it's spans to identify the prompt used for each step, the input data and the LLMs output by examing the _logs and events_ associated with each model call within a span.
+        - Try to examine the trace and it's spans to identify the prompt used for each step, the input data and the LLMs output by examing the **Logs and Events** associated with each model call within a span. (You can find this information within each span's log by looking under **jsonPayload>metadata>content**).
+
+        ![Span content](images/span_content.png)
+
         - What does the trace tell you about latency? Is there an especially slow step? (examine a few traces if needed)
 
 3. Chat with the app again, and ask unsafe questions (use your imagination). You should see the chatbot block those questions. Try 4-5 unsafe questions (you can repeat them).
