@@ -14,6 +14,7 @@ Welcome to the MovieGuru Challenge Lab! In this lab, you'll step into the shoes 
 
     - Open the Locust load testing tool using its provided URL (e.g., http://<some_ip>).
     - Navigate to "Advanced settings" and configure Locust to generate load for 2 hours.
+    ![Locust](images/locust.png)
 
 3. Understand the Architecture:
 
@@ -27,8 +28,7 @@ Welcome to the MovieGuru Challenge Lab! In this lab, you'll step into the shoes 
 
    - Visit the application's metrics dashboard in Google Cloud Observability:
         - Navigate to Monitoring > Dashboards > Custom Dashboards > chatdashboard.
-        - Observe the chat success rate and latency dashboards. The application produces
-        - OpenTelemetry (OTEL) metrics, which GKE exports to Google Cloud Managed Service for Prometheus; the only setup required was installing an exporter on GKE.
+        - Observe the chat success rate and latency dashboards. The application produces OpenTelemetry (OTEL) metrics, which GKE exports to Google Cloud Managed Service for Prometheus; the only setup required was installing an exporter on GKE.
         - Assess the application's performance: Is the success rate acceptable? Is the chat latency within expected limits?
 
 5. TODO: Cloud Hub error generation
