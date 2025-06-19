@@ -76,7 +76,7 @@ func chatSingleFlow(ctx context.Context, deps *Dependencies, metadata *types.Met
 	chatResp, err := deps.ChatFlowClient.Run(simpleHistory, userProfile)
 
 	if agentResp, shouldReturn := processFlowOutput(chatResp.ModelOutputMetadata, err, h, "chatFlow"); shouldReturn {
-		updateSuccessChatMeters(ctx, agentResp, meters)
+		updateFailureChatMeters(ctx, agentResp, meters)
 		return agentResp
 	}
 
@@ -106,7 +106,8 @@ func chatSingleFlow(ctx context.Context, deps *Dependencies, metadata *types.Met
 	case err := <-errChanProfile:
 		slog.ErrorContext(ctx, "UserProfileFlowClient failed", err.Error(), err)
 	}
-
+	meters.CSuccessCounter.Add(ctx, 1)
+	slog.Debug("Added success counter")
 	return agentResp
 }
 
@@ -152,13 +153,10 @@ func updateChatQualityMeters(ctx context.Context, meters *m.ChatMeters, respQual
 	}
 }
 
-func updateSuccessChatMeters(ctx context.Context, agentResp *types.AgentResponse, meters *m.ChatMeters) {
+func updateFailureChatMeters(ctx context.Context, agentResp *types.AgentResponse, meters *m.ChatMeters) {
 	if agentResp.Result == types.UNSAFE {
 		slog.Error("Error from Flows Server: User provided Unsafe input")
 		meters.CSafetyIssueCounter.Add(ctx, 1)
-	}
-	if agentResp.Result == types.SUCCESS {
-		meters.CSuccessCounter.Add(ctx, 1)
 	}
 	if agentResp.Result == types.QUOTALIMIT {
 		meters.CQuotaLimitCounter.Add(ctx, 1)

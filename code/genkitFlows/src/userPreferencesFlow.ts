@@ -37,7 +37,6 @@ import { GenerationBlockedError } from 'genkit';
  */
 
 export const extractUserPreferencesV1 = ai.prompt('userPreference');
-export const extractUserPreferencesExperimental = ai.prompt('userPreference', {variant: 'experimental'});
 
 export const UserPreferenceFlow = ai.defineFlow(
   {

@@ -107,6 +107,7 @@ func chatSingleFlow(ctx context.Context, deps *Dependencies, metadata *types.Met
 	}
 
 	meters.CSuccessCounter.Add(ctx, 1)
+	slog.DebugContext(ctx, "Adding success counter")
 	return agentResp
 }
 
