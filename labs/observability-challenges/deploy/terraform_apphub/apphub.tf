@@ -50,7 +50,7 @@ resource "google_apphub_service" "movie-guru-services" {
   for_each       = { for service in local.services : service => service }
   location       = "global"
   project        = var.gcp_project_id
-  application_id = google_apphub_application.apphub-app.application_id
+  application_id = "movie-guru-bot"
   service_id     = element(split("/", each.value), length(split("/", each.value)) - 1)
   attributes {
     environment {
@@ -80,7 +80,7 @@ resource "google_apphub_workload" "movie-guru-workloads" {
   for_each       = { for workload in local.workloads : workload => workload }
   location       = "global"
   project        = var.gcp_project_id
-  application_id = google_apphub_application.apphub-app.application_id
+  application_id = "movie-guru-bot"
   workload_id    = element(split("/", each.value), length(split("/", each.value)) - 1)
   attributes {
     environment {
