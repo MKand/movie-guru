@@ -33,12 +33,39 @@ Welcome to the MovieGuru Challenge Lab! In this lab, you'll step into the shoes 
 
 5. Go to CloudHub:
 
-    - Look for Cloudhub in the search bar of the console. 
-    - Create an application called **movieguru**, productionapp, business critical.
-    - Attach project.
-    - Register services and workloads. (db, flows, frontend, chatserver, cache)
+    - Look for Cloudhub in the search bar of the console.
 
-## Your First Day on the Job: Troubleshooting MovieGuru (15 minutes)
+## Your First Day on the Job: Setting things up
+
+Welcome to your first day! As you start to get familiar with our projects and how we manage our growing landscape of applications and services, one tool you'll find incredibly useful is **App Hub**.
+
+Think of App Hub as a centralized catalog or inventory for all our applications and the services they're built upon, no matter where or how they're deployed within Google Cloud.
+
+So, why is it so important, especially for someone new like yourself?
+
+- Discoverability & Visibility: Imagine trying to understand a complex system with dozens of microservices, databases, and infrastructure components spread across different projects. App Hub gives us a single place to see what applications exist, who owns them, what services they use (like GKE clusters, Cloud SQL instances, Pub/Sub topics), and even links to their documentation or source code repositories. This will massively speed up your learning process.
+- Organization & Governance: It helps us impose order on potential chaos! We can define clear ownership, track business criticality, and ensure that applications adhere to certain standards. This is crucial for managing dependencies, understanding the impact of changes, and ensuring compliance.
+- Operational Efficiency: When something goes wrong, or when you need to understand how a particular feature is implemented, App Hub can be your first port of call to identify the relevant components and stakeholders. It helps streamline troubleshooting and operational tasks.
+- Collaboration: It provides a shared understanding of our application portfolio across different teams. You can see how your work might connect with or impact other services.
+
+1. Go to AppHub
+
+    - You should see an application called **movie-guru-bot** is created. You will notice the metadata associated with the application on the console.
+    - If you click on the application, it shows the _services and workloads_ associated with with this application. This list will be empty.
+    - We will populate this list. Since this is a multi-component application, we shall use terraform to create the services instead of creating it manually.
+    - Open the **cloud shell console** and run the following commands.
+
+    ```sh
+    git clone https://github.com/MKand/movie-guru.git  && git checkout obs_lab
+    cd movie-guru/labs/observability-challenges/deploy/terraform_apphub
+    terraform init
+    terraform apply -auto-approve
+    ```
+
+    - Enter the value of the **GCP_PROJECT_ID** when prompted. The command will take about 1-2 minutes to complete.
+    - You should see new _services and workloads_ associated with **movie-guru-bot**.
+
+## Your Second Day on the Job: Troubleshooting MovieGuru (15 minutes)
 
 1. Configure Proactive Monitoring
 
