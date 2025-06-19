@@ -25,8 +25,6 @@ locals {
 }
 
 resource "time_sleep" "wait_30_seconds" {
-  depends_on = [helm_release.movie_guru]
-
   create_duration = "30s"
 }
 
@@ -36,7 +34,6 @@ data "google_apphub_discovered_service" "movie-guru-services" {
   location    = var.gcp_region
   project     = var.gcp_project_id
   service_uri = each.value
-  depends_on  = [google_apphub_application.apphub-app, time_sleep.wait_30_seconds]
 
 }
 
@@ -46,7 +43,6 @@ data "google_apphub_discovered_workload" "movie-guru-workloads" {
   location     = var.gcp_region
   project      = var.gcp_project_id
   workload_uri = each.value
-  depends_on   = [google_apphub_application.apphub-app, time_sleep.wait_30_seconds]
 
 }
 
