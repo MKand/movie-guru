@@ -18,13 +18,9 @@ terraform {
       source  = "hashicorp/google"
       version = "~> 6.18"
     }
-    google-beta = {
-      source  = "hashicorp/google-beta"
-      version = "~> 6.18"
-    }
-    helm = {
-      source  = "hashicorp/helm"
-      version = "3.0.1"
+    time = {
+      source  = "hashicorp/time"
+      version = "0.13.1"
     }
   }
 }
@@ -33,5 +29,4 @@ terraform {
 provider "google" {
   project = var.gcp_project_id
   region  = var.gcp_region
-  zone    = var.gcp_zone
 }
