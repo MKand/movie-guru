@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 TARGET=ghacks-setup-sre.zip
-OBJS=*.tf runtime.yaml
+OBJS = $(filter-out backend.tf,$(wildcard *.tf)) runtime.yaml
 
 $(TARGET): $(OBJS)
 	zip -r $(TARGET) $(OBJS)

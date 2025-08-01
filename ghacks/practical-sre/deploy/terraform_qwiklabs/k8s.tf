@@ -9,7 +9,7 @@ provider "kubernetes" {
 }
 
 provider "helm" {
-  kubernetes {
+  kubernetes = {
     host                   = "https://${google_container_cluster.primary.endpoint}"
     token                  = data.google_client_config.default.access_token
     client_certificate     = base64decode(google_container_cluster.primary.master_auth.0.client_certificate)
@@ -76,15 +76,15 @@ resource "helm_release" "otel"{
   namespace = "otel"
   create_namespace = true
 
-  set{
+  set = [{
     name = "image.repository"
     value = "otel/opentelemetry-collector-contrib"
-  }
-
-  set{
+  },
+  {
     name = "mode"
     value = "deployment"
   }
+  ]
 
     values = [
     data.http.otel_file.response_body
@@ -99,32 +99,33 @@ resource "helm_release" "movie_guru" {
   wait      = false
   create_namespace = true
 
-  set {
+  set = [{
     name  = "Config.Image.Repository"
     value = var.repo_prefix
-  }
-  set {
+  },
+  {
     name  = "Config.Image.Tag"
     value = var.image_tag
-  }
-  set {
+  },
+{
     name  = "Config.gatewayAddress"
     value = "movieguru.endpoints.${var.gcp_project_id}.cloud.goog"
-  }
+  },
 
-  set {
+ {
     name  = "Config.mockserverIP"
     value = google_compute_global_address.mockserver-address.address
-  }
-  set {
+  },
+{
     name  = "Config.projectID"
     value = var.gcp_project_id
-  }
-
-  set {
+  },
+  {
     name  = "Config.geminiApiLocation"
     value = var.vertexAI_model_location
   }
+  ]
+
 }
 
 resource "kubernetes_config_map" "loadtest_locustfile" {
@@ -149,34 +150,32 @@ resource "helm_release" "locust" {
   version   = "0.31.6"
   create_namespace = false
 
-  set {
+  set = [
+  {
     name  = "loadtest.name"
     value = "movieguru-loadtest"
-  }
-
-  set {
+  },
+  {
     name  = "loadtest.locust_locustfile_configmap"
     value = "loadtest-locustfile"
-  }
-
-  set {
+  },
+  {
     name  = "loadtest.locust_locustfile"
     value = "locustfile.py"
-  }
-  set {
+  },
+  {
     name  = "loadtest.locust_host"
     value = "http://movieguru.endpoints.${var.gcp_project_id}.cloud.goog/server"
-  }
-
-  set {
+  },
+ {
     name  = "service.type"
     value = "LoadBalancer"
-  }
-
-  set {
+  },
+  {
     name  = "worker.replicas"
     value = "3"
   }
+  ]
 
   depends_on = [kubernetes_config_map.loadtest_locustfile]
 }
