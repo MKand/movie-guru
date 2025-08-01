@@ -28,7 +28,7 @@ services:
       - server
       - frontend
   flows:
-    build: ./ghacks/genkit-monitoring/flows
+    build: ./code/genkitFlows
     environment:
       - PROJECT_ID=${PROJECT_ID}
       - LOCATION=${REGION}

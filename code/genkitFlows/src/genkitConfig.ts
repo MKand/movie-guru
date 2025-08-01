@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-import { gemini20Flash, vertexAI } from '@genkit-ai/vertexai';
+import {  vertexAI } from '@genkit-ai/vertexai';
 import { enableFirebaseTelemetry } from '@genkit-ai/firebase';
 import { genkitEval, GenkitMetric } from "@genkit-ai/evaluator";
 
 import { initializeApp } from 'firebase-admin/app';
 import { HarmCategory, HarmBlockThreshold } from '@google-cloud/vertexai';
-import { parseBooleanfromField } from '.';
 import { genkit } from 'genkit';
 
-
-const gemini20: boolean = parseBooleanfromField(process.env.USEGEMINIFLASH2) 
+const model = process.env.MODEL_NAME || 'gemini-2.0-flash';
+ 
 const LOCATION = process.env.LOCATION || 'us-central1';
 const PROJECT_ID = process.env.PROJECT_ID;
 
@@ -48,13 +47,11 @@ export const safetySettings = [
 ];
 
 
-console.log("Using default model:", gemini20Flash.name, ", unless overriden by dotPrompt")
+console.log("Using the default model:", model, ", unless overriden by dotPrompt")
 export const ai = genkit({
+    model: vertexAI.model(model, {
+    temperature: 0.5
+  }),
   plugins: [vertexAI({ location: LOCATION, projectId: PROJECT_ID }),
-    genkitEval({
-      judge: gemini20Flash,
-      metrics: [GenkitMetric.MALICIOUSNESS, GenkitMetric.FAITHFULNESS],
-    }),
   ],
-  model: gemini20Flash, // set default model
 });

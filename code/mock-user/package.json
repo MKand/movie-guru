@@ -18,10 +18,9 @@
     "typescript": "^5.7.3"
   },
   "dependencies": {
-    "@genkit-ai/vertexai": "^1.7.0",
     "@genkit-ai/express": "^1.7.0",
-    "genkit": "^1.7.0",
-    "@genkit-ai/firebase": "^1.7.0"
-
+    "@genkit-ai/firebase": "^1.7.0",
+    "@genkit-ai/vertexai": "^1.15.5",
+    "genkit": "^1.7.0"
   }
 }

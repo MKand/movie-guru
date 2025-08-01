@@ -22,6 +22,7 @@ import { genkit } from 'genkit';
 
 const LOCATION = process.env.LOCATION|| 'us-central1';
 const PROJECT_ID = process.env.PROJECT_ID;
+const model = process.env.MODEL_NAME || 'gemini-2.0-flash';
 
 
 initializeApp({
@@ -30,8 +31,10 @@ initializeApp({
 
 enableFirebaseTelemetry();
 
-
 export const ai = genkit({
-    plugins: [vertexAI({location: LOCATION, projectId: PROJECT_ID})],
-    model: gemini20Flash, 
-  });
+    model: vertexAI.model(model, {
+    temperature: 0.5
+  }),
+  plugins: [vertexAI({ location: LOCATION, projectId: PROJECT_ID }),
+  ],
+});
