@@ -15,263 +15,178 @@
 resource "google_monitoring_dashboard" "chat_dashboard" {
   project = var.gcp_project_id
   dashboard_json = jsonencode({
-    "displayName" : "MovieGuru-ChatMetrics-Dashboard",
+    "displayName" : "MovieGuru-Chat-Dashboard",
     "mosaicLayout" : {
       "columns" : 48,
       "tiles" : [
         {
-          "xPos" : 0,
-          "yPos" : 0,
           "width" : 24,
           "height" : 16,
           "widget" : {
+            "title" : "Chat Success Rate",
             "xyChart" : {
               "dataSets" : [
                 {
                   "timeSeriesQuery" : {
                     "prometheusQuery" : "label_replace((sum(rate(movieguru_chat_calls_success_total[$${__interval}])) / sum(rate(movieguru_chat_calls_total[$${__interval}]))) * 100, \"legend\", \"Success Rate\", \"\", \"\")",
-                    "unitOverride" : "%",
-                    "outputFullDuration" : false
+                    "unitOverride" : "%"
                   },
-                  "plotType" : "LINE",
-                  "legendTemplate" : "",
-                  "targetAxis" : "Y1",
-                  "dimensions" : [],
-                  "measures" : [],
-                  "breakdowns" : []
+                  "plotType" : "LINE"
                 }
               ],
-              "thresholds" : [{
-                "value" : 95,
-                "targetAxis" : "Y1"
-              }],
               "yAxis" : {
-                "label" : "Percentage Successful",
                 "scale" : "LINEAR"
               },
               "chartOptions" : {
-                "mode" : "COLOR",
-                "showLegend" : false,
-                "displayHorizontal" : false
+                "mode" : "COLOR"
               }
-            },
-            "title" : "Chat Success Rate",
-            "id" : ""
+            }
           }
         },
         {
           "xPos" : 24,
-          "yPos" : 0,
           "width" : 24,
           "height" : 16,
           "widget" : {
+            "title" : "User Engagement Rate",
             "xyChart" : {
               "dataSets" : [
                 {
                   "timeSeriesQuery" : {
-                    "prometheusQuery" : "label_replace((sum(rate(movieguru_chat_quotaissue_counter_total[$${__interval}])) / sum(rate(movieguru_chat_calls_total[$${__interval}]))) * 100, \"legend\", \"Quota Violation %\", \"\", \"\")",
-                    "unitOverride" : "%",
-                    "outputFullDuration" : false
+                    "prometheusQuery" : "label_replace((sum(rate(movieguru_chat_outcome_counter_total{Outcome=~\"Engaged\"}[$${__interval}])) / sum(rate(movieguru_chat_outcome_counter_total[$${__interval}]))) * 100, \"legend\", \"Engagement Rate\", \"\", \"\")",
+                    "unitOverride" : "%"
                   },
-                  "plotType" : "LINE",
-                  "legendTemplate" : "",
-                  "targetAxis" : "Y1",
-                  "dimensions" : [],
-                  "measures" : [],
-                  "breakdowns" : []
+                  "plotType" : "LINE"
                 }
               ],
-              "thresholds" : [{
-                "value" : 99,
-                "targetAxis" : "Y1"
-              }],
               "yAxis" : {
-                "label" : "",
                 "scale" : "LINEAR"
               },
               "chartOptions" : {
-                "mode" : "COLOR",
-                "showLegend" : false,
-                "displayHorizontal" : false
+                "mode" : "COLOR"
               }
-            },
-            "title" : "Chat Quota Violation Rate",
-            "id" : ""
+            }
           }
         },
-
         {
-          "xPos" : 0,
           "yPos" : 16,
           "width" : 24,
           "height" : 16,
           "widget" : {
+            "title" : "User Sentiment Rate",
             "xyChart" : {
               "dataSets" : [
                 {
                   "timeSeriesQuery" : {
-                    "prometheusQuery" : "label_replace(histogram_quantile(0.1, sum(rate(movieguru_chat_latency_bucket[$${__interval}])) by (le)), \"legend\", \"10 Percentile\", \"\", \"\")",
-                    "unitOverride" : "ms",
-                    "outputFullDuration" : false
+                    "prometheusQuery" : "label_replace((sum(rate(movieguru_chat_sentiment_counter_total{Sentiment=\"Positive\"}[$${__interval}])) / sum(rate(movieguru_chat_sentiment_counter_total[$${__interval}]))) * 100, \"legend\", \"Positive Sentiment\", \"\", \"\")",
+                    "unitOverride" : "%"
                   },
-                  "plotType" : "LINE",
-                  "legendTemplate" : "",
-                  "targetAxis" : "Y1",
-                  "dimensions" : [],
-                  "measures" : [],
-                  "breakdowns" : []
+                  "plotType" : "LINE"
                 },
                 {
                   "timeSeriesQuery" : {
-                    "prometheusQuery" : "label_replace(histogram_quantile(0.5, sum(rate(movieguru_chat_latency_bucket[$${__interval}])) by (le)), \"legend\", \"50 Percentile\", \"\", \"\")",
-                    "unitOverride" : "ms",
-                    "outputFullDuration" : false
+                    "prometheusQuery" : "label_replace((sum(rate(movieguru_chat_sentiment_counter_total{Sentiment=\"Negative\"}[$${__interval}])) / sum(rate(movieguru_chat_sentiment_counter_total[$${__interval}]))) * 100, \"legend\", \"Negative Sentiment\", \"\", \"\")", 
+                    "unitOverride" : "%"
                   },
-                  "plotType" : "LINE",
-                  "legendTemplate" : "",
-                  "targetAxis" : "Y1",
-                  "dimensions" : [],
-                  "measures" : [],
-                  "breakdowns" : []
+                  "plotType" : "LINE"
                 },
                 {
                   "timeSeriesQuery" : {
-                    "prometheusQuery" : "label_replace(histogram_quantile(0.9, sum(rate(movieguru_chat_latency_bucket[$${__interval}])) by (le)), \"legend\", \"90 Percentile\", \"\", \"\")",
-                    "unitOverride" : "ms",
-                    "outputFullDuration" : false
+                    "prometheusQuery" : "label_replace((sum(rate(movieguru_chat_sentiment_counter_total{Sentiment=\"Neutral\"}[$${__interval}])) / sum(rate(movieguru_chat_sentiment_counter_total[$${__interval}]))) * 100, \"legend\", \"Neutral Sentiment\", \"\", \"\")",
+                    "unitOverride" : "%"
                   },
-                  "plotType" : "LINE",
-                  "legendTemplate" : "",
-                  "targetAxis" : "Y1",
-                  "dimensions" : [],
-                  "measures" : [],
-                  "breakdowns" : []
-                },
-                {
-                  "timeSeriesQuery" : {
-                    "prometheusQuery" : "label_replace(histogram_quantile(0.95, sum(rate(movieguru_chat_latency_bucket[$${__interval}])) by (le)), \"legend\", \"95 Percentile\", \"\", \"\")",
-                    "unitOverride" : "ms",
-                    "outputFullDuration" : false
-                  },
-                  "plotType" : "LINE",
-                  "legendTemplate" : "",
-                  "targetAxis" : "Y1",
-                  "dimensions" : [],
-                  "measures" : [],
-                  "breakdowns" : []
-                },
-                {
-                  "timeSeriesQuery" : {
-                    "prometheusQuery" : "label_replace(histogram_quantile(0.99, sum(rate(movieguru_chat_latency_bucket[$${__interval}])) by (le)), \"legend\", \"99 Percentile\", \"\", \"\")",
-                    "unitOverride" : "ms",
-                    "outputFullDuration" : false
-                  },
-                  "plotType" : "LINE",
-                  "legendTemplate" : "",
-                  "targetAxis" : "Y1",
-                  "dimensions" : [],
-                  "measures" : [],
-                  "breakdowns" : []
+                  "plotType" : "LINE"
                 }
               ],
-              "thresholds" : [],
               "yAxis" : {
-                "label" : "",
                 "scale" : "LINEAR"
               },
               "chartOptions" : {
-                "mode" : "COLOR",
-                "showLegend" : false,
-                "displayHorizontal" : false
+                "mode" : "COLOR"
               }
-            },
+            }
+          }
+        },
+        {
+          "xPos" : 24,
+          "yPos" : 16,
+          "width" : 24,
+          "height" : 16,
+          "widget" : {
             "title" : "Chat Latency",
-            "id" : ""
-          }
-        },
-        {
-          "xPos" : 24,
-          "yPos" : 16,
-          "width" : 24,
-          "height" : 16,
-          "widget" : {
             "xyChart" : {
               "dataSets" : [
                 {
                   "timeSeriesQuery" : {
-                    "prometheusQuery" : "label_replace((sum(rate(movieguru_chat_safetyissue_counter_total[$${__interval}])) / sum(rate(movieguru_chat_calls_total[$${__interval}]))) * 100, \"legend\", \"Safety Issue %\", \"\", \"\")",
-                    "unitOverride" : "%",
-                    "outputFullDuration" : false
+                    "prometheusQuery" : "label_replace(histogram_quantile(0.1, sum(rate(movieguru_chat_latency_bucket[$${__interval}])) by (le)), \"legend\", \"0.1 Quantile\", \"\", \"\")",
+                    "unitOverride" : "ms"
                   },
-                  "plotType" : "LINE",
-                  "legendTemplate" : "",
-                  "targetAxis" : "Y1",
-                  "dimensions" : [],
-                  "measures" : [],
-                  "breakdowns" : []
+                  "plotType" : "LINE"
+                },
+                {
+                  "timeSeriesQuery" : {
+                    "prometheusQuery" : "label_replace(histogram_quantile(0.5, sum(rate(movieguru_chat_latency_bucket[$${__interval}])) by (le)), \"legend\", \"0.5 Quantile\", \"\", \"\")",
+                    "unitOverride" : "ms"
+                  },
+                  "plotType" : "LINE"
+                },
+                {
+                  "timeSeriesQuery" : {
+                    "prometheusQuery" : "label_replace(histogram_quantile(0.9, sum(rate(movieguru_chat_latency_bucket[$${__interval}])) by (le)), \"legend\", \"0.9 Quantile\", \"\", \"\")",
+                    "unitOverride" : "ms"
+                  },
+                  "plotType" : "LINE"
+                },
+                {
+                  "timeSeriesQuery" : {
+                    "prometheusQuery" : "label_replace(histogram_quantile(0.95, sum(rate(movieguru_chat_latency_bucket[$${__interval}])) by (le)), \"legend\", \"0.95 Quantile\", \"\", \"\")",
+                    "unitOverride" : "ms"
+                  },
+                  "plotType" : "LINE"
+                },
+                {
+                  "timeSeriesQuery" : {
+                    "prometheusQuery" : "label_replace(histogram_quantile(0.99, sum(rate(movieguru_chat_latency_bucket[$${__interval}])) by (le)), \"legend\", \"0.99 Quantile\", \"\", \"\")",
+                    "unitOverride" : "ms"
+                  },
+                  "plotType" : "LINE"
                 }
               ],
-              "thresholds" : [{
-                "value" : 5,
-                "targetAxis" : "Y1"
-              }],
               "yAxis" : {
-                "label" : "",
                 "scale" : "LINEAR"
               },
               "chartOptions" : {
-                "mode" : "COLOR",
-                "showLegend" : false,
-                "displayHorizontal" : false
+                "mode" : "COLOR"
               }
-            },
-            "title" : "Chat Safety Issue Rate",
-            "id" : ""
+            }
           }
         },
         {
-          "xPos" : 0,
           "yPos" : 32,
           "width" : 24,
           "height" : 16,
           "widget" : {
+            "title" : "Chat Safety Issue Rate",
             "xyChart" : {
               "dataSets" : [
                 {
                   "timeSeriesQuery" : {
-                    "prometheusQuery" : "label_replace((sum(rate(movieguru_chat_wrongQuery_counter_total[$${__interval}])) / sum(rate(movieguru_chat_calls_total[$${__interval}]))) * 100, \"legend\", \"Bad Query %\", \"\", \"\")",
-                    "unitOverride" : "%",
-                    "outputFullDuration" : false
+                    "prometheusQuery" : "label_replace( (sum(rate(movieguru_chat_safetyissue_counter_total[$${__interval}])) / sum(rate(movieguru_chat_calls_total[$${__interval}]))) * 100, \"legend\", \"Safety Issue Rate\", \"\", \"\")",
+                    "unitOverride" : "%"
                   },
-                  "plotType" : "LINE",
-                  "legendTemplate" : "",
-                  "targetAxis" : "Y1",
-                  "dimensions" : [],
-                  "measures" : [],
-                  "breakdowns" : []
+                  "plotType" : "LINE"
                 }
               ],
-              "thresholds" : [{
-                "value" : 5,
-                "targetAxis" : "Y1"
-              }],
               "yAxis" : {
-                "label" : "",
                 "scale" : "LINEAR"
               },
               "chartOptions" : {
-                "mode" : "COLOR",
-                "showLegend" : false,
-                "displayHorizontal" : false
+                "mode" : "COLOR"
               }
-            },
-            "title" : "Chat Bad Query Rate",
-            "id" : ""
+            }
           }
         }
       ]
-    },
-    "dashboardFilters" : [],
-    "labels" : {}
+    }
   })
 }

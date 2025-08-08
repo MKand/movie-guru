@@ -15,7 +15,7 @@ resource "google_monitoring_dashboard" "preferences_dashboard" {
               "dataSets": [
                 {
                   "timeSeriesQuery": {
-                    "prometheusQuery": "histogram_quantile(0.1, sum(rate(movieguru_prefGet_latency_milliseconds_bucket[$${__interval}])) by (le))\n",
+                    "prometheusQuery": "label_replace(histogram_quantile(0.1, sum(rate(movieguru_prefGet_latency_milliseconds_bucket[$${__interval}])) by (le)), \"legend\", \"0.1 Quantile\", \"\", \"\")\n",
                     "unitOverride": "s",
                     "outputFullDuration": false
                   },
@@ -28,7 +28,7 @@ resource "google_monitoring_dashboard" "preferences_dashboard" {
                 },
                 {
                   "timeSeriesQuery": {
-                    "prometheusQuery": "histogram_quantile(0.5, sum(rate(movieguru_prefGet_latency_milliseconds_bucket[$${__interval}])) by (le))\n",
+                    "prometheusQuery": "label_replace(histogram_quantile(0.5, sum(rate(movieguru_prefGet_latency_milliseconds_bucket[$${__interval}])) by (le)), \"legend\", \"0.5 Quantile\", \"\", \"\")\n",
                     "unitOverride": "s",
                     "outputFullDuration": false
                   },
@@ -41,7 +41,7 @@ resource "google_monitoring_dashboard" "preferences_dashboard" {
                 },
                 {
                   "timeSeriesQuery": {
-                    "prometheusQuery": "histogram_quantile(0.9, sum(rate(movieguru_prefGet_latency_milliseconds_bucket[$${__interval}])) by (le))\n",
+                    "prometheusQuery": "label_replace(histogram_quantile(0.9, sum(rate(movieguru_prefGet_latency_milliseconds_bucket[$${__interval}])) by (le)), \"legend\", \"0.9 Quantile\", \"\", \"\")\n",
                     "unitOverride": "s",
                     "outputFullDuration": false
                   },
@@ -54,7 +54,7 @@ resource "google_monitoring_dashboard" "preferences_dashboard" {
                 },
                 {
                   "timeSeriesQuery": {
-                    "prometheusQuery": "histogram_quantile(0.95, sum(rate(movieguru_prefGet_latency_milliseconds_bucket[$${__interval}])) by (le))\n",
+                    "prometheusQuery": "label_replace(histogram_quantile(0.95, sum(rate(movieguru_prefGet_latency_milliseconds_bucket[$${__interval}])) by (le)), \"legend\", \"0.95 Quantile\", \"\", \"\")\n",
                     "unitOverride": "s",
                     "outputFullDuration": false
                   },
@@ -67,7 +67,7 @@ resource "google_monitoring_dashboard" "preferences_dashboard" {
                 },
                 {
                   "timeSeriesQuery": {
-                    "prometheusQuery": "histogram_quantile(0.99, sum(rate(movieguru_prefGet_latency_milliseconds_bucket[$${__interval}])) by (le))\n",
+                    "prometheusQuery": "label_replace(histogram_quantile(0.99, sum(rate(movieguru_prefGet_latency_milliseconds_bucket[$${__interval}])) by (le)), \"legend\", \"0.99 Quantile\", \"\", \"\")\n",
                     "unitOverride": "s",
                     "outputFullDuration": false
                   },
@@ -102,7 +102,7 @@ resource "google_monitoring_dashboard" "preferences_dashboard" {
               "dataSets": [
                 {
                   "timeSeriesQuery": {
-                    "prometheusQuery": "histogram_quantile(0.1, sum(rate(movieguru_prefUpdate_latency_milliseconds_bucket[$${__interval}])) by (le))\n",
+                    "prometheusQuery": "label_replace(histogram_quantile(0.1, sum(rate(movieguru_prefUpdate_latency_milliseconds_bucket[$${__interval}])) by (le))\n, \"legend\", \"0.1 Quantile\", \"\", \"\")\n",
                     "unitOverride": "ms",
                     "outputFullDuration": false
                   },
@@ -115,7 +115,7 @@ resource "google_monitoring_dashboard" "preferences_dashboard" {
                 },
                 {
                   "timeSeriesQuery": {
-                    "prometheusQuery": "histogram_quantile(0.5, sum(rate(movieguru_prefUpdate_latency_milliseconds_bucket[$${__interval}])) by (le))\n",
+                    "prometheusQuery": "label_replace(histogram_quantile(0.5, sum(rate(movieguru_prefUpdate_latency_milliseconds_bucket[$${__interval}])) by (le))\n, \"legend\", \"0.5 Quantile\", \"\", \"\")\n",
                     "unitOverride": "ms",
                     "outputFullDuration": false
                   },
@@ -128,7 +128,7 @@ resource "google_monitoring_dashboard" "preferences_dashboard" {
                 },
                 {
                   "timeSeriesQuery": {
-                    "prometheusQuery": "histogram_quantile(0.9, sum(rate(movieguru_prefUpdate_latency_milliseconds_bucket[$${__interval}])) by (le))\n",
+                    "prometheusQuery": "label_replace(histogram_quantile(0.9, sum(rate(movieguru_prefUpdate_latency_milliseconds_bucket[$${__interval}])) by (le))\n, \"legend\", \"0.9 Quantile\", \"\", \"\")\n",
                     "unitOverride": "ms",
                     "outputFullDuration": false
                   },
@@ -141,7 +141,7 @@ resource "google_monitoring_dashboard" "preferences_dashboard" {
                 },
                 {
                   "timeSeriesQuery": {
-                    "prometheusQuery": "histogram_quantile(0.95, sum(rate(movieguru_prefUpdate_latency_milliseconds_bucket[$${__interval}])) by (le))\n",
+                    "prometheusQuery": "label_replace(histogram_quantile(0.95, sum(rate(movieguru_prefUpdate_latency_milliseconds_bucket[$${__interval}])) by (le))\n, \"legend\", \"0.95 Quantile\", \"\", \"\")\n",
                     "unitOverride": "ms",
                     "outputFullDuration": false
                   },
@@ -154,7 +154,7 @@ resource "google_monitoring_dashboard" "preferences_dashboard" {
                 },
                 {
                   "timeSeriesQuery": {
-                    "prometheusQuery": "histogram_quantile(0.99, sum(rate(movieguru_prefUpdate_latency_milliseconds_bucket[$${__interval}])) by (le))\n",
+                    "prometheusQuery": "label_replace(histogram_quantile(0.99, sum(rate(movieguru_prefUpdate_latency_milliseconds_bucket[$${__interval}])) by (le))\n, \"legend\", \"0.99 Quantile\", \"\", \"\")\n",
                     "unitOverride": "ms",
                     "outputFullDuration": false
                   },
@@ -190,7 +190,7 @@ resource "google_monitoring_dashboard" "preferences_dashboard" {
               "dataSets": [
                 {
                   "timeSeriesQuery": {
-                    "prometheusQuery": "(sum(rate(movieguru_prefGet_success_total[$${__interval}])) / sum(rate(movieguru_prefGet_attempts_total[$${__interval}]))) *100",
+                    "prometheusQuery": "label_replace((sum(rate(movieguru_prefGet_success_total[$${__interval}])) / sum(rate(movieguru_prefGet_attempts_total[$${__interval}]))) *100, \"legend\", \"Success Rate\", \"\", \"\")",
                     "unitOverride": "",
                     "outputFullDuration": false
                   },
@@ -227,7 +227,7 @@ resource "google_monitoring_dashboard" "preferences_dashboard" {
               "dataSets": [
                 {
                   "timeSeriesQuery": {
-                    "prometheusQuery": "(sum(rate(movieguru_prefUpdate_success_total[$${__interval}])) / sum(rate(movieguru_prefUpdate_attempts_total[$${__interval}]))) *100",
+                    "prometheusQuery": "label_replace((sum(rate(movieguru_prefUpdate_success_total[$${__interval}])) / sum(rate(movieguru_prefUpdate_attempts_total[$${__interval}]))) *100, \"legend\", \"Success Rate\", \"\", \"\")",
                     "unitOverride": "",
                     "outputFullDuration": false
                   },

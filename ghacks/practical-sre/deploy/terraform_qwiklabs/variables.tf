@@ -39,6 +39,6 @@ variable "otel_file" {
   type = string
 
   description = "URL of the otel config"
-  default     = "https://raw.githubusercontent.com/MKand/movie-guru/refs/heads/main/ghacks/practical-sre/otel-cr/otel-config.yaml"
+  default     = "https://raw.githubusercontent.com/MKand/movie-guru/refs/heads/main/utils/metrics/otel.values.yaml"
 }
 
