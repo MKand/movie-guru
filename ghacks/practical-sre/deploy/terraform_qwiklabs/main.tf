@@ -25,6 +25,7 @@ resource "google_project_service" "enable_apis" {
     "container.googleapis.com",
     "secretmanager.googleapis.com",
     "apphub.googleapis.com",
+    "run.googleapis.com"
   ])
 
   service = each.key

@@ -1,4 +1,4 @@
-services:
+fservices:
   db:
     image: pgvector/pgvector:pg17
     ports:
