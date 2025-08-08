@@ -13,33 +13,15 @@ resource "google_storage_bucket" "locust" {
 }
 
 
-resource "google_service_account" "service_account" {
-  account_id   = "cloudrun-sa"
-  display_name = "Cloud Run OTel Sample Service Account"
-  project      = var.gcp_project_id
-}
-
-resource "google_storage_bucket_iam_member" "bucket_reader_otel" {
-  bucket = google_storage_bucket.otel.name
-  role   = "roles/storage.admin"
-  member = "serviceAccount:${google_service_account.service_account.email}"
-}
-resource "google_storage_bucket_iam_member" "bucket_reader_locust" {
-  bucket = google_storage_bucket.locust.name
-  role   = "roles/storage.admin"
-  member = "serviceAccount:${google_service_account.service_account.email}"
-}
-
-
 data "http" "otel-config" {
-  url = "https://raw.githubusercontent.com/MKand/movie-guru/refs/heads/main/utils/metrics/otel.values.yaml"
+  url = var.otel_file
   request_headers = {
     Accept = "application/json"
   }
 }
 
 data "http" "locust-config" {
-  url = "https://raw.githubusercontent.com/MKand/movie-guru/refs/heads/main/ghacks/practical-sre/locust/locustfile.py"
+  url =  var.locust_py_file
   request_headers = {
     Accept = "application/json"
   }
@@ -48,15 +30,13 @@ data "http" "locust-config" {
 resource "google_storage_bucket_object" "otel" {
   name   = "otel.values.yaml"
   bucket = google_storage_bucket.otel.name
-  source = "otel-config.yaml"
-  # content = data.http.otel-config.body
+  content = data.http.otel-config.response_body
 }
 
 resource "google_storage_bucket_object" "locust" {
   name   = "locust.py"
   bucket = google_storage_bucket.locust.name
-  source = "locust.py"
-  # content = data.http.locust-config.body
+  content = data.http.locust-config.response_body
 }
 
 
@@ -79,7 +59,7 @@ resource "google_cloud_run_v2_service" "app" {
     containers {
       # The main application container
       name  = "app"
-      image = "us-central1-docker.pkg.dev/o11y-movie-guru/movie-guru/chatserver:sre-5e670f8"
+      image = "${var.repo_prefix}/chatserver:${var.image_tag}"
       ports {
         container_port = 8080
       }
@@ -91,7 +71,7 @@ resource "google_cloud_run_v2_service" "app" {
       }
       env {
         name  = "OTEL_EXPORTER_OTLP_ENDPOINT"
-        value = "http://localhost:4317"
+        value = "http://localhost:4318"
       }
       env {
         name  = "PROJECT_ID"

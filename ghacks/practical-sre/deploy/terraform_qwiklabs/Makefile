@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-TARGET=ghacks-setup-sre.zip
+TARGET=ghacks-setup-sre-v3.zip
 OBJS = $(filter-out backend.tf,$(wildcard *.tf)) runtime.yaml
 
 $(TARGET): $(OBJS)

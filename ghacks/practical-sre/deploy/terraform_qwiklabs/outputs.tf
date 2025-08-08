@@ -1,3 +1,3 @@
-output "movie-guru-url" {
-  value = google_cloud_run_v2_service.default.name
+output "lopcust-url" {
+  value = google_cloud_run_v2_service.locust.urls[0]
 }
