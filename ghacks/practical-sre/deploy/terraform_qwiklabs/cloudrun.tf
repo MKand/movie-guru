@@ -103,6 +103,7 @@ resource "google_cloud_run_v2_service" "app" {
     }
   }
   deletion_protection = false
+  depends_on = [ google_project_service.enable_apis ]
 }
 
 resource "google_cloud_run_service_iam_binding" "default" {
@@ -147,6 +148,8 @@ resource "google_cloud_run_v2_service" "locust" {
     }
   }
   deletion_protection = false
+  depends_on = [ google_project_service.enable_apis ]
+
 }
 
 

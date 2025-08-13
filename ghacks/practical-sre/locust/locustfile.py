@@ -22,7 +22,6 @@ class ChatUser(HttpUser):
     def get_history(self):
         self.client.get(f"/history") 
 
-
     @task(3)
     def preferences(self):
         self.client.post(f"/preferences") 
