@@ -13,34 +13,23 @@
 // limitations under the License.
 
 import { ai } from './genkitConfig';
-import { GenerationBlockedError, z } from 'genkit';
+import { z } from 'genkit';
 import {userPreferenceAgent} from './userPreferenceAgent'
 
 // Define a prompt that represents a specialist agent
-const chatAgent = ai.definePrompt(
+const chatAgent = ai.chat(
   {
-    name: 'chatAgent',
     input: {
-        schema: z.object({
+      schema: z.object({
       userProfile: z.any().describe('A list of user preferences with likes and dislikes categorized by actor, director, genre, or a catch all category called other.'),
       movieContext: z.array(z.any()).describe('A list of movies that have been retrieved from the database and are relevant to the user\'s query.'),
       userMessage: z.string().describe('The original message sent my the user'),
     })},
-    output:
-    {
-        schema: z.string(),
-    },
-    prompt: 'say hi and try your best to respond',
+    system: 'say hi and try your best to respond',
     tools: [userPreferenceAgent],
-    config:{
-        temperature: 0.5,
-
-    }
-
   },
 );
 
-const chat = ai.chat(chatAgent);
 
 export const chatFlow = ai.defineFlow(
     {
@@ -49,12 +38,7 @@ export const chatFlow = ai.defineFlow(
         outputSchema: z.string(),
     },
     async (message) => {
-        const response = await chat.send(message);
-        return response.text;
+        const { text } = await chatAgent.send(message);
+        return text
     }
 );
-
-
-
-
-

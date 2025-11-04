@@ -18,11 +18,7 @@
 import { startFlowServer } from '@genkit-ai/express';
 import { chatFlow } from './chatFlow'
 import './userPreferencesTypes';
-import {userPreferenceLookupTool,  userPreferenceUpdateTool } from './userPreferenceAgent'
 
-export function parseBooleanfromField(field: string|null|undefined): boolean{
-  return field != null ? JSON.parse(field): false;
-}
 
 startFlowServer({
   flows: [chatFlow]

@@ -28,4 +28,5 @@ Respond with the following:
 
 *Optional Message 0 from agent: {{agentMessage}}
 * user message: {{query}}
+* user name; {{userName}}
 `
