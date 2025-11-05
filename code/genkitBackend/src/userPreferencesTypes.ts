@@ -31,9 +31,9 @@ export const PreferenceItemSchema = z.object({
 
 export type PreferenceItem = z.infer<typeof PreferenceItemSchema>
 
-
 // UserProfileFlowInput schema
 export const UserPreferenceInputSchema = z.object({
+  userName: z.string(),
   query: z.string(),
   agentMessage: z.string(),
 });
@@ -41,8 +41,8 @@ export const UserPreferenceInputSchema = z.object({
 ai.defineSchema('UserPreferenceInputSchema', UserPreferenceInputSchema);
 
 export const UserPreferenceOutputSchema = z.strictObject({
-  profileItems: z.array(PreferenceItemSchema).optional().default([]),
   justification: z.string().default("No justification provided"),
+  updatedPreferences: z.boolean().default(false).describe('whether the user preferences were updated by calling the update tool'),
 });
 
 export const UserPreferenceFlowSchema = z.strictObject({

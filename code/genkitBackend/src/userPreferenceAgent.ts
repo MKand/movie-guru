@@ -1,8 +1,9 @@
-import {ai} from './genkitConfig'
+import { ai } from './genkitConfig';
 import { z } from 'genkit';
-import { PreferenceItemSchema, UserPreferenceInputSchema, UserPreferenceOutputSchema } from './userPreferencesTypes';
+import { PreferenceItemSchema, PreferenceItem, UserPreferenceInputSchema, UserPreferenceOutputSchema } from './userPreferencesTypes';
 import { UserPreferencesDB } from './db';
-import { userPreferencePrompt } from './prompts';
+import { userPreferencePromptText } from './prompts';
+import {  vertexAI } from '@genkit-ai/vertexai';
 
 const userPreferencesDB = new UserPreferencesDB();
 userPreferencesDB.init();
@@ -11,37 +12,64 @@ export const userPreferenceLookupTool = ai.defineTool(
   {
     name: 'userPreferenceLookupTool',
     description: "use this tool to look up the user's preferences",
-    inputSchema: z.string().describe('the name of the user'),
+    inputSchema: z.object({ userName: z.string().describe('the name of the user') }),
     outputSchema: z.array(PreferenceItemSchema).describe('the profile items for that user'),
   },
   async (input) => {
-    return await userPreferencesDB.get(input);
+    console.log(`Looking up preferences for user: ${input.userName} at time ${new Date().toISOString()}`);
+    return await userPreferencesDB.get(input.userName);
   },
 );
 
 export const userPreferenceUpdateTool = ai.defineTool(
   {
     name: 'userPreferenceUpdateTool',
-    description: "use this tool to update the user's preferences",
-    inputSchema: z.object({userId: z.string(), profile: z.array(PreferenceItemSchema)}),
-    outputSchema: z.void(),
+    description: "use this tool to update the user's preferences with new items",
+    inputSchema: z.object({ userId: z.string(), changes: z.array(PreferenceItemSchema) }),
+    outputSchema: z.boolean(),
   },
   async (input) => {
-    await userPreferencesDB.update(input.userId, input.profile);
+    console.log(`Updating preferences for user: ${input.userId} with changes: ${JSON.stringify(input.changes)} at time ${new Date().toISOString()}`);
+    const existingProfile = await userPreferencesDB.get(input.userId);
+    const profileMap = new Map<string, PreferenceItem>();
+    for (const item of existingProfile) {
+      profileMap.set(item.item, item);
+    }
+    for (const item of input.changes) {
+      profileMap.set(item.item, item);
+    }
+    const newProfile = Array.from(profileMap.values());
+    await userPreferencesDB.update(input.userId, newProfile);
+    return true;
   },
 );
 
-export const userPreferenceAgent = ai.definePrompt(
+const userPreferencePrompt = ai.definePrompt(
   {
-    name: 'userPreferenceAgent',
+    name: 'userPreferencePrompt',
     tools: [userPreferenceLookupTool, userPreferenceUpdateTool],
     input: {
-      schema: UserPreferenceInputSchema
+      schema: UserPreferenceInputSchema,
     },
     output: {
-      schema: UserPreferenceOutputSchema
+      schema: UserPreferenceOutputSchema,
     },
-    prompt: userPreferencePrompt,
 
+  },
+  userPreferencePromptText
+);
+
+export const UserPreferenceFlow = ai.defineFlow(
+  {
+    name: 'userPreferenceFlow',
+    inputSchema: UserPreferenceInputSchema,
+    outputSchema: UserPreferenceOutputSchema,
+  },
+  async (input) => {
+    const defaultOutput = UserPreferenceOutputSchema.parse({})
+    const response = await userPreferencePrompt(input);
+    const safeOutput = response.output?? defaultOutput
+    const output = UserPreferenceOutputSchema.parse(safeOutput);
+    return output;
   }
-)
+);

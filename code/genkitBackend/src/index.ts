@@ -18,8 +18,8 @@
 import { startFlowServer } from '@genkit-ai/express';
 import { chatFlow } from './chatFlow'
 import './userPreferencesTypes';
-
+import { UserPreferenceFlow } from './userPreferenceAgent';
 
 startFlowServer({
-  flows: [chatFlow]
+  flows: [chatFlow, UserPreferenceFlow]
 })

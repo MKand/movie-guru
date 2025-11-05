@@ -13,32 +13,31 @@
 // limitations under the License.
 
 import { ai } from './genkitConfig';
-import { z } from 'genkit';
-import {userPreferenceAgent} from './userPreferenceAgent'
+import { MessageSchema, PartSchema, z } from 'genkit';
 
-// Define a prompt that represents a specialist agent
-const chatAgent = ai.chat(
-  {
-    input: {
-      schema: z.object({
-      userProfile: z.any().describe('A list of user preferences with likes and dislikes categorized by actor, director, genre, or a catch all category called other.'),
-      movieContext: z.array(z.any()).describe('A list of movies that have been retrieved from the database and are relevant to the user\'s query.'),
-      userMessage: z.string().describe('The original message sent my the user'),
-    })},
-    system: 'say hi and try your best to respond',
-    tools: [userPreferenceAgent],
-  },
-);
+export const SimpleChatbotRequestSchema = z.object({
+  userMessage: z.string(),
+
+});
+export type SimpleChatbotRequest = z.infer<typeof SimpleChatbotRequestSchema>;
+
+
+const chatPrompt = ai.prompt('chatAgent')
 
 
 export const chatFlow = ai.defineFlow(
     {
         name: 'chatFlow',
-        inputSchema: z.string(),
+        inputSchema: SimpleChatbotRequestSchema,
         outputSchema: z.string(),
     },
-    async (message) => {
-        const { text } = await chatAgent.send(message);
-        return text
+    async (input) => {
+        const response = await chatPrompt(
+         {
+          userMessage: input.userMessage,
+         }, 
+        );        
+        return response.message?.content[0].text|| "No response"
     }
 );
+
