@@ -24,6 +24,8 @@
     "@genkit-ai/vertexai": "^1.22.0",
     "genkit": "^1.22.0",
     "pgvector": "^0.2.0",
-    "postgres": "^3.4.5"
+    "postgres": "^3.4.5",
+    "sqlite3": "^5.1.7"
+
   }
 }

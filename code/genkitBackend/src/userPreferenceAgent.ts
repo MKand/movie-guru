@@ -1,9 +1,8 @@
 import { ai } from './genkitConfig';
 import { z } from 'genkit';
 import { PreferenceItemSchema, PreferenceItem, UserPreferenceInputSchema, UserPreferenceOutputSchema } from './userPreferencesTypes';
-import { UserPreferencesDB } from './db';
+import { UserPreferencesDB } from './preferenceDb';
 import { userPreferencePromptText } from './prompts';
-import {  vertexAI } from '@genkit-ai/vertexai';
 
 const userPreferencesDB = new UserPreferencesDB();
 userPreferencesDB.init();

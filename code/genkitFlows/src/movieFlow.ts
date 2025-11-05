@@ -41,7 +41,6 @@ export const MovieFlow = ai.defineFlow(
     name: 'movieQAFlow',
     inputSchema: MovieFlowInputSchema,
     outputSchema: MovieFlowOutputSchema,
-    
 
   },
   async (input) => {

@@ -13,31 +13,62 @@
 // limitations under the License.
 
 import { ai } from './genkitConfig';
-import { MessageSchema, PartSchema, z } from 'genkit';
+import { z } from 'genkit';
+import { UserPreferenceFlow } from './userPreferenceAgent';
 
-export const SimpleChatbotRequestSchema = z.object({
+export const MovieAgentRequestSchema = z.object({
+  userName: z.string(),
   userMessage: z.string(),
-
 });
-export type SimpleChatbotRequest = z.infer<typeof SimpleChatbotRequestSchema>;
 
+const chatAgentPromptText = `
+{{ role "system" }}
+You are a friendly movie expert.
+You have access to a tool to manage user preferences, called 'userPreferenceFlow'.
+Before responding to the user, analyze their message for any strong, new movie preferences (likes or dislikes).
+If you find any, you MUST call the 'userPreferenceFlow' tool to update the user's profile.
+Pass the user's name as 'userName' and their message as 'query' to the tool. You can leave 'agentMessage' empty.
 
-const chatPrompt = ai.prompt('chatAgent')
+After you have handled the preferences, respond to the user's movie-related query.
+{{ role "user" }}
+The user's name is {{userName}}.
+Their message is: {{userMessage}}
+`;
 
+const chatPrompt = ai.definePrompt(
+  {
+    name: 'chatAgentWithTools',
+    tools: [UserPreferenceFlow],
+    input: {
+      schema: z.object({
+        userName: z.string(),
+        userMessage: z.string(),
+      }),
+    },
+  },
+  `
+      {{ role "system" }}
+      You are a friendly movie expert.
+      You have access to a tool to manage user preferences, called 'userPreferenceFlow'.
+      Before responding to the user, analyze their message for any strong, new movie preferences (likes or dislikes).
+      If you find any, you MUST call the 'userPreferenceFlow' tool to update the user's profile.
+      Pass the user's name as 'userName' and their message as 'query' to the tool. You can leave 'agentMessage' empty.
+
+      After you have handled the preferences, respond to the user's movie-related query.
+      {{ role "user" }}
+      The user's name is {{userName}}.
+      Their message is: {{userMessage}}
+  `
+);
 
 export const chatFlow = ai.defineFlow(
     {
         name: 'chatFlow',
-        inputSchema: SimpleChatbotRequestSchema,
+        inputSchema: MovieAgentRequestSchema,
         outputSchema: z.string(),
     },
     async (input) => {
-        const response = await chatPrompt(
-         {
-          userMessage: input.userMessage,
-         }, 
-        );        
-        return response.message?.content[0].text|| "No response"
+        const response = await chatPrompt(input);
+        return response.output() || "No response";
     }
 );
-

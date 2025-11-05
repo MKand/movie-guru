@@ -30,11 +30,13 @@ import { ChatFlow } from './chatFlow';
 
 import { SafetyIssueFlow } from './safetyFlow';
 
+import { UserPreferenceUpdateFlow } from './userPreferenceLookupFlow';
+
 export function parseBooleanfromField(field: string|null|undefined): boolean{
   return field != null ? JSON.parse(field): false;
 }
 
 
 startFlowServer({
-    flows: [UserPreferenceFlow, QueryTransformFlow, MovieFlow, DocSearchFlow, JudgeFlow, ChatFlow, SafetyIssueFlow],
+    flows: [UserPreferenceFlow, QueryTransformFlow, MovieFlow, DocSearchFlow, JudgeFlow, ChatFlow, SafetyIssueFlow, UserPreferenceUpdateFlow],
   });
