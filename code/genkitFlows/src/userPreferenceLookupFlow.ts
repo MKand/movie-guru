@@ -2,6 +2,7 @@ import { ai } from './genkitConfig';
 import { z } from 'genkit';
 import { ProfileChangeRecommendationSchema, ProfileChangeRecommendation } from './userPreferencesTypes';
 import { UserPreferencesDB } from './preferenceDb';
+import {  vertexAI } from '@genkit-ai/vertexai';
 
 const userPreferencesDB = new UserPreferencesDB();
 userPreferencesDB.init();
@@ -72,10 +73,8 @@ export const userPreferenceUpdatePrompt = ai.definePrompt(
     output: {
         schema: UserProfileOutputSchema,
         format: "json"
-    }
-    // Don't specify output schema here - it prevents tool calling
-    // The flow will parse the text response into the schema
-
+    },
+    model: 'vertexai/gemini-2.5-flash'
   },
   `
     {{ role "system" }}
