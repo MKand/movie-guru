@@ -36,12 +36,15 @@ export const userPreferenceUpdateTool = ai.defineTool(
   {
     name: 'userPreferenceUpdateTool',
     description: "use this tool to update the user's preferences with new items",
-    inputSchema: z.object({ userId: z.string(), changes: z.array(ProfileChangeRecommendationSchema) }),
+    // Accept either `userId` or `userName` to be robust against prompt/template differences.
+    inputSchema: z.object({ userId: z.string().optional(), userName: z.string().optional(), changes: z.array(ProfileChangeRecommendationSchema) }),
     outputSchema: z.boolean(),
   },
   async (input) => {
-    console.log(`Updating preferences for user: ${input.userId} with changes: ${JSON.stringify(input.changes)} at time ${new Date().toISOString()}`);
-    const existingProfile = await userPreferencesDB.get(input.userId);
+    const id = (input as any).userId ?? (input as any).userName;
+    console.log(`Updating preferences for user: ${id} with changes: ${JSON.stringify(input.changes)} at time ${new Date().toISOString()}`);
+    if (!id) throw new Error('userPreferenceUpdateTool: missing userId/userName in input');
+    const existingProfile = await userPreferencesDB.get(id);
     const profileMap = new Map<string, ProfileChangeRecommendation>();
     for (const item of existingProfile) {
       profileMap.set(item.item, item);
@@ -50,13 +53,13 @@ export const userPreferenceUpdateTool = ai.defineTool(
       profileMap.set(item.item, item);
     }
     const newProfile = Array.from(profileMap.values());
-    await userPreferencesDB.update(input.userId, newProfile);
+    await userPreferencesDB.update(id, newProfile);
     return true;
   },
 );
 
 
-const userPreferenceUpdatePrompt = ai.definePrompt(
+export const userPreferenceUpdatePrompt = ai.definePrompt(
   {
     name: 'userPreferenceUpdatePrompt',
     tools: [userPreferenceLookupTool, userPreferenceUpdateTool],
