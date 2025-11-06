@@ -20,4 +20,6 @@ dist
 *.tfstate
 *.tfstate.*
 
+Agents.md
+GENKIT.md
 pgvector/init_substituted.sql

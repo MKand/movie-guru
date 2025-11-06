@@ -22,7 +22,7 @@ import { initializeApp } from 'firebase-admin/app';
 import { HarmCategory, HarmBlockThreshold } from '@google-cloud/vertexai';
 import { genkit } from 'genkit';
 
-const model = process.env.MODEL_NAME || 'gemini-2.0-flash';
+const model = process.env.MODEL_NAME || 'gemini-2.5-flash';
  
 const LOCATION = process.env.LOCATION || 'us-central1';
 const PROJECT_ID = process.env.PROJECT_ID;
