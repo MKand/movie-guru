@@ -14,10 +14,13 @@ export const UserProfileInputSchema = z.object({
 ai.defineSchema('UserProfileInputSchema', UserProfileInputSchema);
 
 
-export const UserProfileOutputSchema = z.strictObject({
+export const UserProfileOutputSchema = z.object({
   justification: z.string().default("No justification provided"),
-  updatedPreferences: z.boolean().default(false).describe('whether the user preferences were updated by calling the update tool'),
+  updatedPreferences: z.boolean().default(false)
 });
+
+ai.defineSchema('UserProfileOutputSchema', UserProfileOutputSchema);
+
 
 export const userPreferenceLookupTool = ai.defineTool(
   {
@@ -36,15 +39,14 @@ export const userPreferenceUpdateTool = ai.defineTool(
   {
     name: 'userPreferenceUpdateTool',
     description: "use this tool to update the user's preferences with new items",
-    // Accept either `userId` or `userName` to be robust against prompt/template differences.
-    inputSchema: z.object({ userId: z.string().optional(), userName: z.string().optional(), changes: z.array(ProfileChangeRecommendationSchema) }),
+    // Accept userName` to be robust against prompt/template differences.
+    inputSchema: z.object({ userName: z.string().describe('the name of the user'), changes: z.array(ProfileChangeRecommendationSchema) }),
     outputSchema: z.boolean(),
   },
   async (input) => {
-    const id = (input as any).userId ?? (input as any).userName;
-    console.log(`Updating preferences for user: ${id} with changes: ${JSON.stringify(input.changes)} at time ${new Date().toISOString()}`);
-    if (!id) throw new Error('userPreferenceUpdateTool: missing userId/userName in input');
-    const existingProfile = await userPreferencesDB.get(id);
+    
+    console.log(`Updating preferences for user: ${input.userName} with changes: ${JSON.stringify(input.changes)} at time ${new Date().toISOString()}`);
+    const existingProfile = await userPreferencesDB.get(input.userName);
     const profileMap = new Map<string, ProfileChangeRecommendation>();
     for (const item of existingProfile) {
       profileMap.set(item.item, item);
@@ -53,7 +55,7 @@ export const userPreferenceUpdateTool = ai.defineTool(
       profileMap.set(item.item, item);
     }
     const newProfile = Array.from(profileMap.values());
-    await userPreferencesDB.update(id, newProfile);
+    await userPreferencesDB.update(input.userName, newProfile);
     return true;
   },
 );
@@ -63,12 +65,16 @@ export const userPreferenceUpdatePrompt = ai.definePrompt(
   {
     name: 'userPreferenceUpdatePrompt',
     tools: [userPreferenceLookupTool, userPreferenceUpdateTool],
+    maxTurns: 8,
     input: {
       schema: UserProfileInputSchema
     },
     output: {
-      schema: UserProfileOutputSchema
-    },
+        schema: UserProfileOutputSchema,
+        format: "json"
+    }
+    // Don't specify output schema here - it prevents tool calling
+    // The flow will parse the text response into the schema
 
   },
   `
@@ -76,17 +82,19 @@ export const userPreferenceUpdatePrompt = ai.definePrompt(
 
     You are an agent that manages user movie preferences. Your ONLY job is to call tools to manage preferences.
 
-    1.  Call "userPreferenceLookupTool" to get the user's current preferences.
-    2.  Analyze the user's message for new, strong, long-term preferences.
-    3.  If you find a new preference that is not in the existing list, you MUST call "userPreferenceUpdateTool" with ONLY the new preferences.
-    4.  Your final output MUST be a justification of what you did, and whether you called the update tool. You MUST NOT say that you have updated the preferences if you have not called the tool.
-
-    Do not describe the changes in your final response, perform them with the tool.
+    1.  Analyze the user's message for new, strong, long-term preferences.
+    2.  If the user expresses any strong preferences, use the "userPreferenceLookupTool" to get the user's current preferences.
+    3.  If you find a new preference that is not in the current preferences list, you MUST call "userPreferenceUpdateTool" with ONLY the new preferences.
+    4.  After calling the tools, respond with the following:
+         "justification": "what you did and why",
+         "updatedPreferences": true or false (whether you called the "userPreferenceUpdateTool" tool)
+       
+    Do not describe the changes in your text response, perform them with the tool calls first.
 
     {{ role "user" }}
-
-    * user message: {{query}}
-    * user name: {{userName}}
+    here is the input
+    * userMessage: {{query}}
+    * userName: {{userName}}
     `
 );
 
@@ -99,7 +107,9 @@ export const UserPreferenceUpdateFlow = ai.defineFlow(
   async (input) => {
     const defaultOutput = UserProfileOutputSchema.parse({})
     const response = await userPreferenceUpdatePrompt(input);
-    const safeOutput = response.output?? defaultOutput
+
+    // Parse the text response as JSON
+    const safeOutput = response.output ?? defaultOutput;
     const output = UserProfileOutputSchema.parse(safeOutput);
     return output;
   }
