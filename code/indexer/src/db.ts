@@ -14,41 +14,64 @@
  * limitations under the License.
  */
 
-import postgres from 'postgres';
+import Database from 'better-sqlite3';
+import * as sqliteVec from 'sqlite-vec';
 
-let sql: postgres.Sql<{}> | null = null; // Initialize sql as null
+let db: Database.Database | null = null;
 
-export async function openDB(): Promise<postgres.Sql<{}> | null> {
-  if (sql) {
-    return sql; // Return existing connection if already opened
-  }
-
-  const POSTGRES_DB_USER_PASSWORD = process.env.POSTGRES_DB_USER_PASSWORD;
-  const POSTGRES_HOST = process.env.POSTGRES_HOST;
-  const POSTGRES_DB_NAME = process.env.POSTGRES_DB_NAME;
-  const POSTGRES_DB_USER = process.env.POSTGRES_DB_USER;
-
-  if (!POSTGRES_DB_USER_PASSWORD || !POSTGRES_HOST || !POSTGRES_DB_NAME || !POSTGRES_DB_USER) {
-    console.error('Missing environment variables for database connection');
-    return null;
+export async function openDB(): Promise<Database.Database> {
+  if (db) {
+    return db;
   }
 
   try {
-    sql = postgres({
-      host: POSTGRES_HOST,
-      user: POSTGRES_DB_USER,
-      password: POSTGRES_DB_USER_PASSWORD,
-      port: 5432,
-      database: POSTGRES_DB_NAME,
-      max: 5,
-      idle_timeout: 30000,
-    });
-
-    await sql`SELECT NOW()`;
-    console.log('DB opened successfully');
-    return sql;
+    // Open SQLite database (use a file path or ':memory:' for in-memory)
+    const dbPath = process.env.SQLITE_DB_PATH || './movies.db';
+    db = new Database(dbPath);
+    
+    // Load sqlite-vec extension
+    sqliteVec.load(db);
+    
+    console.log('SQLite database opened successfully at', dbPath);
+    
+    // Create movies table if it doesn't exist
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS movies (
+        tconst TEXT PRIMARY KEY,
+        title TEXT NOT NULL,
+        runtime_mins INTEGER,
+        genres TEXT,
+        rating REAL,
+        released INTEGER,
+        actors TEXT,
+        director TEXT,
+        plot TEXT,
+        poster TEXT,
+        content TEXT
+      )
+    `);
+    
+    // Create vec0 virtual table for vector search (768 dimensions for text-embedding-005)
+    db.exec(`
+      CREATE VIRTUAL TABLE IF NOT EXISTS vec_movies USING vec0(
+        tconst TEXT PRIMARY KEY,
+        embedding FLOAT[768]
+      )
+    `);
+    
+    console.log('Tables created/verified successfully');
+    
+    return db;
   } catch (err) {
-    console.error(err);
+    console.error('Error opening SQLite database:', err);
     throw err;
+  }
+}
+
+export function closeDB(): void {
+  if (db) {
+    db.close();
+    db = null;
+    console.log('SQLite database closed');
   }
 }

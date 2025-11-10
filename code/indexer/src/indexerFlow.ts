@@ -15,7 +15,6 @@
  */
 
 import { textEmbedding005 } from '@genkit-ai/vertexai';
-import { toSql } from 'pgvector';
 import { z } from 'genkit';
 import { MovieContextSchema, MovieContext } from './types';
 import { openDB } from './db';
@@ -44,22 +43,47 @@ export const IndexerFlow = ai.defineFlow(
         content: contentString,
       });
       await sleep(1000);
+      
       try {
-        await db`
-          INSERT INTO movies (embedding, title, runtime_mins, genres, rating, released, actors, director, plot, poster, tconst, content)
-          VALUES (${toSql(embedding[0].embedding)}, ${doc.title}, ${doc.runtimeMinutes}, ${doc.genres}, ${doc.rating}, ${doc.released}, ${doc.actors}, ${doc.director}, ${doc.plot}, ${doc.poster}, ${doc.tconst}, ${contentString})
-          ON CONFLICT (tconst) DO UPDATE
-          SET embedding = EXCLUDED.embedding
-        `;
+        // Insert or replace movie metadata
+        const insertMovie = db.prepare(`
+          INSERT OR REPLACE INTO movies (tconst, title, runtime_mins, genres, rating, released, actors, director, plot, poster, content)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `);
+        
+        insertMovie.run(
+          doc.tconst,
+          doc.title,
+          doc.runtimeMinutes,
+          JSON.stringify(doc.genres),
+          doc.rating,
+          doc.released,
+          JSON.stringify(doc.actors),
+          doc.director,
+          doc.plot,
+          doc.poster,
+          contentString
+        );
+        
+        // Insert or replace vector embedding
+        const insertVector = db.prepare(`
+          INSERT OR REPLACE INTO vec_movies (tconst, embedding)
+          VALUES (?, ?)
+        `);
+        
+        // Convert embedding array to Float32Array for sqlite-vec
+        const embeddingBuffer = new Float32Array(embedding[0].embedding);
+        insertVector.run(doc.tconst, embeddingBuffer);
+        
         console.log("processed ", doc.title)
         return contentString;
       } catch (error) {
         console.error('Error inserting or updating movie:', error);
-        throw error; // Re-throw the error to be handled by the outer try...catch
+        throw error;
       }
     } catch (error) {
       console.error('Error indexing movie:', error);
-      return 'Error indexing movie'; // Return an error message
+      return 'Error indexing movie';
     }
   }
 );
